@@ -12,6 +12,9 @@ Mizugo是個以Go語言實作的遊戲伺服器框架
 | internal/...     | 內部組件程式碼                             |
 | testdata         | 測試資料                                   |
 
+# TODO
+實體-組件機制
+
 # 名詞定義
 * Server: 本地伺服器
 * ClientListener: 玩家客戶端接聽器, 接受玩家客戶端連接, 最後產生玩家客戶端
