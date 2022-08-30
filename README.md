@@ -2,14 +2,15 @@
 Mizugo是個以Go語言實作的遊戲伺服器框架
 
 # 目錄說明
-| 目錄            | 說明               |
-|:----------------|:-------------------|
-| doc             | 說明文件           |
-| cmd/...         | 各種工具命令程式碼 |
-| external/...    | 外部組件程式碼     |
-| external/mizugo | mizugo程式碼       |
-| internal/...    | 內部組件程式碼     |
-| testdata        | 測試資料           |
+| 目錄             | 說明                                       |
+|:-----------------|:-------------------------------------------|
+| doc              | 說明文件                                   |
+| cmd/...          | 各種工具命令程式碼                         |
+| external/...     | 外部組件程式碼; 例如redis, mysql, net...等 |
+| external/mizugo  | mizugo核心程式碼                           |
+| external/mizumod | mizugo組件程式碼                           |
+| internal/...     | 內部組件程式碼                             |
+| testdata         | 測試資料                                   |
 
 # 名詞定義
 * Server: 本地伺服器
