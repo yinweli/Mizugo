@@ -89,6 +89,8 @@ linters-settings:
       - encoding/*
       - github.com/pkg/*
       - golang.org/x/sync/singleflight
+  staticcheck:
+    checks: ["all", "-SA1019"]
 
 linters:
   disable-all: true

@@ -1,5 +1,5 @@
 version: '3'
-  
+
 tasks:
   # 進行代碼檢查
   lint:

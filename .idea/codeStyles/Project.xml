@@ -18,7 +18,7 @@
       <option name="WRAP_FUNC_RESULT_NEWLINE_BEFORE_RPAREN" value="false" />
     </GoCodeStyleSettings>
     <codeStyleSettings language="go">
-      <option name="RIGHT_MARGIN" value="300" />
+      <option name="RIGHT_MARGIN" value="200" />
       <option name="CALL_PARAMETERS_LPAREN_ON_NEXT_LINE" value="false" />
       <option name="CALL_PARAMETERS_RPAREN_ON_NEXT_LINE" value="false" />
       <indentOptions>
