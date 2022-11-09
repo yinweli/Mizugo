@@ -31,12 +31,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
             * 就不必每次都要把全部函式都時做出來, 很煩
     * 組件封包(packet)處理
         * 封包送到實體時執行
-        * 註冊封包函式
-        * 移除封包函式
+        * 新增封包函式
+        * 刪除封包函式
     * 組件訊息(message)處理
         * 訊息送到實體時執行
-        * 註冊訊息處理
-        * 移除訊息處理
+        * 新增訊息處理
+        * 刪除訊息處理
     * 內部處理通道
         * 當觸發各種事件時(event, packet, message), 通過統一的處理通道以及單一的goroutine來執行, 避免race condition
     * 執行緒鎖

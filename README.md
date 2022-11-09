@@ -16,14 +16,11 @@
 
 # 目錄說明
 
-| 目錄            | 說明                                       |
-|:----------------|:-------------------------------------------|
-| doc             | 說明文件                                   |
-| cmd             | 各種工具命令程式碼                         |
-| external        | 外部組件程式碼; 例如redis, mysql, net...等 |
-| external/mizugo | mizugo核心程式碼                           |
-| external/mizuco | mizugo組件程式碼                           |
-| internal        | 內部組件程式碼                             |
-| testdata        | 測試資料                                   |
+| 目錄     | 說明               |
+|:---------|:-------------------|
+| doc      | 說明文件           |
+| cmd      | 各種工具命令程式碼 |
+| mizugo   | mizugo核心程式碼   |
+| testdata | 測試資料           |
 
 [go]: https://go.dev/dl/
