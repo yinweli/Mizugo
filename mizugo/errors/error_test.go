@@ -1,4 +1,4 @@
-package helpers
+package errors
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"Mizugo/testdata"
+	"github.com/yinweli/Mizugo/testdata"
 )
 
 func TestError(t *testing.T) {
@@ -51,7 +51,8 @@ func (this *SuiteError) TestUnwrapErrorID() {
 }
 
 func (this *SuiteError) TestWrapError() {
-	target := wrapError{errorID: 1, err: fmt.Errorf("test")}
+	target := wrapError{errorID: 1, err: fmt.Errorf("error")}
+
 	assert.Equal(this.T(), target.errorID, target.ErrorID())
 	assert.Equal(this.T(), target.err, target.Unwrap())
 	assert.Equal(this.T(), fmt.Sprintf("[%d] %s", target.errorID, target.err.Error()), target.Error())

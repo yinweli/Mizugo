@@ -1,4 +1,4 @@
-module Mizugo
+module github.com/yinweli/Mizugo
 
 go 1.19
 
