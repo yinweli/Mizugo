@@ -4,7 +4,7 @@ import (
     "fmt"
     `sync/atomic`
 
-    `github.com/yinweli/Mizugo/mizugo/event`
+    `github.com/yinweli/Mizugo/mizugo/events`
 )
 
 // NewEntity 建立實體資料
@@ -13,17 +13,17 @@ func NewEntity(entityID EntityID, name string) *Entity {
         entityID: entityID,
         name:     name,
         moduler:  NewModuler(),
-        event:    event.NewEvent(eventBufferSize),
+        event:    events.NewEvent(eventSize),
     }
 }
 
 // Entity 實體資料
 type Entity struct {
-    entityID EntityID     // 實體編號
-    name     string       // 實體名稱
-    startup  atomic.Bool  // 啟動旗標
-    moduler  *Moduler     // 模組管理器
-    event    *event.Event // 事件管理器
+    entityID EntityID      // 實體編號
+    name     string        // 實體名稱
+    enable   atomic.Bool   // 啟用旗標
+    moduler  *Moduler      // 模組管理器
+    event    *events.Event // 事件管理器
 }
 
 // EntityID 實體編號
@@ -47,13 +47,9 @@ func (this *Entity) AddModule(module IModule) error {
 
     module.Host(this)
 
-    if this.startup.Load() {
-        this.event.Add(&eventAwake{
-            module: module,
-        })
-        this.event.Add(&eventStart{
-            module: module,
-        })
+    if this.enable.Load() {
+        this.event.Execute(events.Awake, module)
+        this.event.Execute(events.Start, module)
     } // if
 
     return nil
@@ -62,9 +58,7 @@ func (this *Entity) AddModule(module IModule) error {
 // DelModule 刪除模組
 func (this *Entity) DelModule(moduleID ModuleID) IModule {
     if module := this.moduler.Del(moduleID); module != nil {
-        this.event.Add(&eventDispose{
-            module: module,
-        })
+        this.event.Execute(events.Dispose, module)
         return module
     } // if
 
@@ -81,33 +75,29 @@ func (this *Entity) GetModule(moduleID ModuleID) IModule {
 // TODO: 通知訊息事件
 // TODO: 註冊訊息處理
 
-// begin 啟動實體
-func (this *Entity) begin() {
-    if this.startup.CompareAndSwap(false, true) {
-        this.event.Begin(this.proc)
+// initialize 初始化處理 TODO: 單元測試
+func (this *Entity) initialize() {
+    if this.enable.CompareAndSwap(false, true) {
+        this.event.Initialize(eventInterval, this.processEvent)
         module := this.moduler.All()
 
         for _, itor := range module {
-            this.event.Add(&eventAwake{
-                module: itor,
-            })
+            this.event.Execute(events.Awake, itor)
         } // for
 
         for _, itor := range module {
-            this.event.Add(&eventStart{
-                module: itor,
-            })
+            this.event.Execute(events.Start, itor)
         } // for
     } // if
 }
 
-// end 結束實體
-func (this *Entity) end() {
-    this.startup.Store(false)
-    this.event.End()
+// finalize 結束處理 TODO: 單元測試
+func (this *Entity) finalize() {
+    this.enable.Store(false)
+    this.event.Finalize()
 }
 
-// proc 事件處理
-func (this *Entity) proc(event any) {
-
+// processEvent 事件處理 TODO: 單元測試
+func (this *Entity) processEvent(data events.Data) {
+    // TODO: 事件處理
 }

@@ -30,7 +30,7 @@ func (this *Entityr) Add(entity *Entity) error {
     } // if
 
     this.datas[entityID] = entity
-    entity.begin()
+    entity.initialize()
     return nil
 }
 
@@ -41,6 +41,7 @@ func (this *Entityr) Del(entityID EntityID) *Entity {
 
     if entity, ok := this.datas[entityID]; ok {
         delete(this.datas, entityID)
+        entity.finalize()
         return entity
     } // if
 
