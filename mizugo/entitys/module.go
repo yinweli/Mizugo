@@ -18,6 +18,14 @@ type Module struct {
 // ModuleID 模組編號
 type ModuleID int64
 
+// ModuleInterface 模組介面
+type ModuleInterface interface {
+    ModuleID() ModuleID  // 取得模組編號
+    Name() string        // 取得模組名稱
+    Entity() *Entity     // 取得實體物件
+    Host(entity *Entity) // 設定宿主實體
+}
+
 // ModuleAwake 模組awake介面
 type ModuleAwake interface {
     Awake()

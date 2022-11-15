@@ -9,26 +9,18 @@ import (
 // NewModuler 建立模組管理器
 func NewModuler() *Moduler {
     return &Moduler{
-        data: map[ModuleID]IModule{},
+        data: map[ModuleID]ModuleInterface{},
     }
 }
 
 // Moduler 模組管理器
 type Moduler struct {
-    data map[ModuleID]IModule // 模組列表
-    lock sync.Mutex           // 執行緒鎖
-}
-
-// IModule 模組介面
-type IModule interface {
-    ModuleID() ModuleID  // 取得模組編號
-    Name() string        // 取得模組名稱
-    Entity() *Entity     // 取得實體物件
-    Host(entity *Entity) // 設定宿主實體
+    data map[ModuleID]ModuleInterface // 模組列表
+    lock sync.Mutex                   // 執行緒鎖
 }
 
 // Add 新增模組
-func (this *Moduler) Add(module IModule) error {
+func (this *Moduler) Add(module ModuleInterface) error {
     this.lock.Lock()
     defer this.lock.Unlock()
     moduleID := module.ModuleID()
@@ -42,7 +34,7 @@ func (this *Moduler) Add(module IModule) error {
 }
 
 // Del 刪除模組
-func (this *Moduler) Del(moduleID ModuleID) IModule {
+func (this *Moduler) Del(moduleID ModuleID) ModuleInterface {
     this.lock.Lock()
     defer this.lock.Unlock()
 
@@ -55,7 +47,7 @@ func (this *Moduler) Del(moduleID ModuleID) IModule {
 }
 
 // Get 取得模組
-func (this *Moduler) Get(moduleID ModuleID) IModule {
+func (this *Moduler) Get(moduleID ModuleID) ModuleInterface {
     this.lock.Lock()
     defer this.lock.Unlock()
 
@@ -63,8 +55,8 @@ func (this *Moduler) Get(moduleID ModuleID) IModule {
 }
 
 // All 取得模組列表
-func (this *Moduler) All() []IModule {
-    result := []IModule{}
+func (this *Moduler) All() []ModuleInterface {
+    result := []ModuleInterface{}
 
     for _, itor := range this.data {
         result = append(result, itor)
