@@ -9,14 +9,14 @@ import (
 // NewEntityr 建立實體管理器
 func NewEntityr() *Entityr {
     return &Entityr{
-        datas: map[EntityID]*Entity{},
+        data: map[EntityID]*Entity{},
     }
 }
 
 // Entityr 實體管理器
 type Entityr struct {
-    datas map[EntityID]*Entity // 實體列表
-    lock  sync.Mutex           // 執行緒鎖
+    data map[EntityID]*Entity // 實體列表
+    lock sync.Mutex           // 執行緒鎖
 }
 
 // Add 新增實體
@@ -25,11 +25,11 @@ func (this *Entityr) Add(entity *Entity) error {
     defer this.lock.Unlock()
     entityID := entity.EntityID()
 
-    if _, ok := this.datas[entityID]; ok {
+    if _, ok := this.data[entityID]; ok {
         return fmt.Errorf("entityr add: duplicate entityID")
     } // if
 
-    this.datas[entityID] = entity
+    this.data[entityID] = entity
     entity.initialize()
     return nil
 }
@@ -39,8 +39,8 @@ func (this *Entityr) Del(entityID EntityID) *Entity {
     this.lock.Lock()
     defer this.lock.Unlock()
 
-    if entity, ok := this.datas[entityID]; ok {
-        delete(this.datas, entityID)
+    if entity, ok := this.data[entityID]; ok {
+        delete(this.data, entityID)
         entity.finalize()
         return entity
     } // if
@@ -53,14 +53,14 @@ func (this *Entityr) Get(entityID EntityID) *Entity {
     this.lock.Lock()
     defer this.lock.Unlock()
 
-    return this.datas[entityID]
+    return this.data[entityID]
 }
 
 // All 取得實體列表
 func (this *Entityr) All() []*Entity {
     result := []*Entity{}
 
-    for _, itor := range this.datas {
+    for _, itor := range this.data {
         result = append(result, itor)
     } // for
 

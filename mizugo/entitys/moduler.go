@@ -9,14 +9,14 @@ import (
 // NewModuler 建立模組管理器
 func NewModuler() *Moduler {
     return &Moduler{
-        datas: map[ModuleID]IModule{},
+        data: map[ModuleID]IModule{},
     }
 }
 
 // Moduler 模組管理器
 type Moduler struct {
-    datas map[ModuleID]IModule // 模組列表
-    lock  sync.Mutex           // 執行緒鎖
+    data map[ModuleID]IModule // 模組列表
+    lock sync.Mutex           // 執行緒鎖
 }
 
 // IModule 模組介面
@@ -33,11 +33,11 @@ func (this *Moduler) Add(module IModule) error {
     defer this.lock.Unlock()
     moduleID := module.ModuleID()
 
-    if _, ok := this.datas[moduleID]; ok {
+    if _, ok := this.data[moduleID]; ok {
         return fmt.Errorf("moduler add: duplicate moduleID")
     } // if
 
-    this.datas[moduleID] = module
+    this.data[moduleID] = module
     return nil
 }
 
@@ -46,8 +46,8 @@ func (this *Moduler) Del(moduleID ModuleID) IModule {
     this.lock.Lock()
     defer this.lock.Unlock()
 
-    if module, ok := this.datas[moduleID]; ok {
-        delete(this.datas, moduleID)
+    if module, ok := this.data[moduleID]; ok {
+        delete(this.data, moduleID)
         return module
     } // if
 
@@ -59,14 +59,14 @@ func (this *Moduler) Get(moduleID ModuleID) IModule {
     this.lock.Lock()
     defer this.lock.Unlock()
 
-    return this.datas[moduleID]
+    return this.data[moduleID]
 }
 
 // All 取得模組列表
 func (this *Moduler) All() []IModule {
     result := []IModule{}
 
-    for _, itor := range this.datas {
+    for _, itor := range this.data {
         result = append(result, itor)
     } // for
 
