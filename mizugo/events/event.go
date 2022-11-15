@@ -97,11 +97,12 @@ func (this *Event) InvokeDispose(param any) {
 // 如果事件管理器結束時, 所有已建立的執行緒都會跟著結束
 func (this *Event) InvokeUpdate(param any, interval time.Duration) {
 	go func() {
-		timeout := time.After(interval)
+		tick := time.NewTicker(interval)
+		defer tick.Stop()
 
 		for {
 			select {
-			case <-timeout:
+			case <-tick.C:
 				this.event <- &Update{
 					Param: param,
 				}

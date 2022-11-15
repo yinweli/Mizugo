@@ -32,7 +32,7 @@ func (this *SuiteEvent) TestEvent() {
 	awake := atomic.Bool{}
 	start := atomic.Bool{}
 	dispose := atomic.Bool{}
-	update := atomic.Bool{}
+	update := atomic.Int64{}
 	target := NewEvent(func(event any) {
 		if e, ok := event.(*Awake); ok {
 			if e.Param.(string) == "awake" {
@@ -54,7 +54,7 @@ func (this *SuiteEvent) TestEvent() {
 
 		if e, ok := event.(*Update); ok {
 			if e.Param.(string) == "update" {
-				update.Store(true)
+				update.Add(1)
 			} // if
 		} // if
 	})
@@ -70,5 +70,5 @@ func (this *SuiteEvent) TestEvent() {
 	assert.True(this.T(), awake.Load())
 	assert.True(this.T(), start.Load())
 	assert.True(this.T(), dispose.Load())
-	assert.True(this.T(), update.Load())
+	assert.Greater(this.T(), update.Load(), int64(1))
 }
