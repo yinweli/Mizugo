@@ -13,7 +13,7 @@ func NewEntity(entityID EntityID, name string) *Entity {
         entityID: entityID,
         name:     name,
         moduler:  NewModuler(),
-        event:    events.NewEvent(eventSize),
+        event:    events.NewEvent(processEvent),
     }
 }
 
@@ -48,8 +48,9 @@ func (this *Entity) AddModule(module IModule) error {
     module.Host(this)
 
     if this.enable.Load() {
-        this.event.Execute(events.Awake, module)
-        this.event.Execute(events.Start, module)
+        this.event.InvokeAwake(module)
+        this.event.InvokeStart(module)
+        this.event.InvokeUpdate(module, updateInterval)
     } // if
 
     return nil
@@ -58,7 +59,7 @@ func (this *Entity) AddModule(module IModule) error {
 // DelModule 刪除模組
 func (this *Entity) DelModule(moduleID ModuleID) IModule {
     if module := this.moduler.Del(moduleID); module != nil {
-        this.event.Execute(events.Dispose, module)
+        this.event.InvokeDispose(module)
         return module
     } // if
 
@@ -70,23 +71,22 @@ func (this *Entity) GetModule(moduleID ModuleID) IModule {
     return this.moduler.Get(moduleID)
 }
 
-// TODO: 通知封包事件
-// TODO: 註冊封包處理
-// TODO: 通知訊息事件
-// TODO: 註冊訊息處理
-
 // initialize 初始化處理 TODO: 單元測試
 func (this *Entity) initialize() {
     if this.enable.CompareAndSwap(false, true) {
-        this.event.Initialize(eventInterval, this.processEvent)
+        this.event.Initialize()
         module := this.moduler.All()
 
         for _, itor := range module {
-            this.event.Execute(events.Awake, itor)
+            this.event.InvokeAwake(itor)
         } // for
 
         for _, itor := range module {
-            this.event.Execute(events.Start, itor)
+            this.event.InvokeStart(itor)
+        } // for
+
+        for _, itor := range module {
+            this.event.InvokeUpdate(itor, updateInterval)
         } // for
     } // if
 }
@@ -98,6 +98,28 @@ func (this *Entity) finalize() {
 }
 
 // processEvent 事件處理 TODO: 單元測試
-func (this *Entity) processEvent(data events.Data) {
-    // TODO: 事件處理
+func processEvent(event any) {
+    if e, ok := event.(*events.Awake); ok {
+        if module, ok := e.Param.(ModuleAwake); ok {
+            module.Awake()
+        } // if
+    } // if
+
+    if e, ok := event.(*events.Start); ok {
+        if module, ok := e.Param.(ModuleStart); ok {
+            module.Start()
+        } // if
+    } // if
+
+    if e, ok := event.(*events.Dispose); ok {
+        if module, ok := e.Param.(ModuleDispose); ok {
+            module.Dispose()
+        } // if
+    } // if
+
+    if e, ok := event.(*events.Update); ok {
+        if module, ok := e.Param.(ModuleUpdate); ok {
+            module.Update()
+        } // if
+    } // if
 }

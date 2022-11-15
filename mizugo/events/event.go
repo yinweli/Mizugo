@@ -5,47 +5,57 @@ import (
     `time`
 )
 
-const (
-    Awake   int = iota // awake事件類型
-    Start              // start事件類型
-    Update             // update事件類型
-    Dispose            // dispose事件類型
-)
+const eventSize = 10 // 事件緩衝區長度
 
 // NewEvent 建立事件管理器
-func NewEvent(size int) *Event {
+func NewEvent(process Process) *Event {
     return &Event{
-        event: make(chan Data, size),
+        event:   make(chan any, eventSize),
+        process: process,
     }
 }
 
 // Event 事件管理器
 type Event struct {
-    enable atomic.Bool // 啟用旗標
-    event  chan Data   // 事件通道
+    enable  atomic.Bool // 啟用旗標
+    event   chan any    // 事件通道
+    process Process     // 事件處理函式
 }
 
-// Data 事件資料
-type Data struct {
-    Type  int // 事件類型
-    Param any // 事件參數
+// Process 事件處理函式類型
+type Process func(event any)
+
+// Awake awake事件
+type Awake struct {
+    Param any // 參數物件
+}
+
+// Start start事件
+type Start struct {
+    Param any // 參數物件
+}
+
+// Dispose dispose事件
+type Dispose struct {
+    Param any // 參數物件
+}
+
+// Update update事件
+type Update struct {
+    Param any // 參數物件
 }
 
 // Initialize 初始化處理
-func (this *Event) Initialize(interval time.Duration, process func(data Data)) {
+func (this *Event) Initialize() {
     go func() {
         this.enable.Store(true)
-        timeout := time.After(interval)
 
         for {
             select {
-            case data := <-this.event:
-                process(data)
-
-            case <-timeout:
-                process(Data{
-                    Type: Update,
-                })
+            case event := <-this.event:
+                if this.process != nil {
+                    this.process(event)
+                } // if
 
             default:
                 if this.enable.Load() == false {
@@ -61,10 +71,46 @@ func (this *Event) Finalize() {
     this.enable.Store(false)
 }
 
-// Execute 執行事件
-func (this *Event) Execute(type_ int, param any) {
-    this.event <- Data{
-        Type:  type_,
+// InvokeAwake 執行awake事件
+func (this *Event) InvokeAwake(param any) {
+    this.event <- &Awake{
         Param: param,
     }
+}
+
+// InvokeStart 執行start事件
+func (this *Event) InvokeStart(param any) {
+    this.event <- &Start{
+        Param: param,
+    }
+}
+
+// InvokeDispose 執行dispose事件
+func (this *Event) InvokeDispose(param any) {
+    this.event <- &Dispose{
+        Param: param,
+    }
+}
+
+// InvokeUpdate 執行update事件
+//   會建立一個執行緒定時新增事件, 因此使用時要注意不能太過份
+//   如果事件管理器結束時, 所有已建立的執行緒都會跟著結束
+func (this *Event) InvokeUpdate(param any, interval time.Duration) {
+    go func() {
+        timeout := time.After(interval)
+
+        for {
+            select {
+            case <-timeout:
+                this.event <- &Update{
+                    Param: param,
+                }
+
+            default:
+                if this.enable.Load() == false {
+                    return
+                } // if
+            } // select
+        } // for
+    }()
 }

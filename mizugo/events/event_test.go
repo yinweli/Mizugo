@@ -28,43 +28,47 @@ func (this *SuiteEvent) TearDownSuite() {
     this.Restore()
 }
 
-func (this *SuiteEvent) TestNewEvent() {
-    assert.NotNil(this.T(), NewEvent(1))
-}
-
 func (this *SuiteEvent) TestEvent() {
-    target := NewEvent(10)
-    interval := time.Millisecond * 100
     awake := atomic.Bool{}
     start := atomic.Bool{}
-    update := atomic.Bool{}
     dispose := atomic.Bool{}
-
-    target.Initialize(interval, func(data Data) {
-        if data.Type == Awake && data.Param == "awake" {
-            awake.Store(true)
+    update := atomic.Bool{}
+    target := NewEvent(func(event any) {
+        if e, ok := event.(*Awake); ok {
+            if e.Param.(string) == "awake" {
+                awake.Store(true)
+            } // if
         } // if
 
-        if data.Type == Start && data.Param == "start" {
-            start.Store(true)
+        if e, ok := event.(*Start); ok {
+            if e.Param.(string) == "start" {
+                start.Store(true)
+            } // if
         } // if
 
-        if data.Type == Update {
-            update.Store(true)
+        if e, ok := event.(*Dispose); ok {
+            if e.Param.(string) == "dispose" {
+                dispose.Store(true)
+            } // if
         } // if
 
-        if data.Type == Dispose && data.Param == "dispose" {
-            dispose.Store(true)
+        if e, ok := event.(*Update); ok {
+            if e.Param.(string) == "update" {
+                update.Store(true)
+            } // if
         } // if
     })
-    target.Execute(Awake, "awake")
-    target.Execute(Start, "start")
-    target.Execute(Dispose, "dispose")
-    time.Sleep(interval * 2)
+    target.Initialize()
+    target.InvokeAwake("awake")
+    target.InvokeStart("start")
+    target.InvokeDispose("dispose")
+    target.InvokeUpdate("update", time.Millisecond*100)
+    time.Sleep(time.Millisecond * 200)
     target.Finalize()
-    time.Sleep(interval)
+    time.Sleep(time.Millisecond * 100)
+
     assert.True(this.T(), awake.Load())
     assert.True(this.T(), start.Load())
-    assert.True(this.T(), update.Load())
     assert.True(this.T(), dispose.Load())
+    assert.True(this.T(), update.Load())
 }

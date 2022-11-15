@@ -7,13 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Planning]
 
 ### 實體
-核心組件, 包含實體編號, 名稱, 模組管理器, 事件管理器, 接收管理器, 傳送管理器, 標籤管理器
-封包管理器分為單緒或是多緒, 如果是客戶端實體就用單緒, 伺服器實體就用多緒
+核心組件, 包含實體編號, 名稱, 模組管理器, 事件管理器, 接收管理器, 傳送管理器
+接收管理器分為單緒或是多緒, 如果是客戶端實體就用單緒, 伺服器實體就用多緒
 * public 取得實體編號
 * public 取得名稱
 * public 新增模組
 * public 刪除模組
 * public 取得模組
+* public 新增封包
+* public 刪除封包
+* public 執行封包
+* public 傳送封包
+* public 新增標籤
+* public 刪除標籤
 * private 初始化處理
 * private 結束處理
 
@@ -23,11 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 實體管理器(獨立)
 管理實體, 可以新增/刪除/搜尋實體
-搜尋實體用實體編號或是標籤
 * public 新增實體
 * public 刪除實體
 * public 取得實體
-* putlic 取得實體(用標籤)
 
 ### 模組
 模組由核心與擴展組成
@@ -40,6 +44,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 模組編號
 建立模組時的模組編號由外部決定
+
+### 模組事件
+當實體觸發系統事件時, 會把擁有的模組都拿出來執行一次系統事件
+這些系統事件以介面方式觸發, 所以如果沒有實作介面就不會觸發系統事件(也不會錯誤)
+* public awake
+* public start
+* public dispose
+* public update
 
 ### 模組介面
 模組管理器中儲存的不是模組本身, 而是模組介面
@@ -55,20 +67,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * public 刪除模組
 * public 取得模組
 
-### 模組事件
-當實體觸發系統事件時, 會把擁有的模組都拿出來執行一次系統事件
-這些系統事件以介面方式觸發, 所以如果沒有實作介面就不會觸發系統事件(也不會錯誤)
-* public awake
-* public start
-* public dispose
-* public update
-
 ### 事件管理器
 管理事件通道, 執行事件
 依靠一個通道與事件處理函式來運作, 是單執行緒處理
 * public 初始化處理(事件處理函式)
 * public 結束處理
-* public 執行事件
+* public 執行awake事件
+* public 執行start事件
+* public 執行dispose事件
+* public 執行update事件
 
 ### 接收管理器
 管理封包接收, 註冊封包, 執行封包
@@ -78,7 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * public 初始化處理(會話物件)
 * public 結束處理
 * public 新增封包
-* public 移除封包
+* public 刪除封包
 * public 執行封包
 
 ### 傳送管理器
@@ -86,10 +93,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * public 初始化處理(會話物件)
 * public 傳送封包
 
-### 標籤管理器
+### 標籤管理器(獨立)
 依靠標籤來分類, 搜尋實體列表
 * public 新增標籤(標籤, 實體編號)
-* public 移除標籤(標籤, 實體編號)
+* public 刪除標籤(標籤, 實體編號)
 * public 取得列表(標籤) []實體編號
 
 ### 網路管理器(獨立)
@@ -111,7 +118,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    
 ### 網路機制(獨立)
 接聽/連接到遠端, 並產生會話物件來進行封包發送與接收處理
-* 網路統一介面
+* 網路介面
     * 接聽(go)
     * 連接(go)
         * 只能連接一個服務端
@@ -132,7 +139,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * 管線介面
     * 接收處理
     * 傳送處理
-* 管線物件(proto)
+* proto管線
     * 接收處理: 獲取封包 > 移除標頭 > 解密 > 反序列化
     * 傳送處理: 序列化 > 加密 > 填寫標頭(封包長度)
 
@@ -141,6 +148,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 日誌機制
 提供接口讓內部的日誌可以輸出到使用者希望的組件上
+
+### 如何組織網路
+難點可能在設定檔如何安排, 尤其是如果只想用單一設定檔案來描述整個網路與伺服器該怎麼做
+前次的做法是為伺服器定義群名稱, 然後可能會先安排群內互聯(不確定), 然後再安排群與群之間是否有連接關係
+由於mizugo的連接會有連接與接聽方, 因此群與群之間的連接是否也該定義好誰為連接方, 誰為接聽方
 
 ### 資料庫機制
 如何初始化資料庫組件, 操作資料庫

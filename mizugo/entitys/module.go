@@ -18,6 +18,26 @@ type Module struct {
 // ModuleID 模組編號
 type ModuleID int64
 
+// ModuleAwake 模組awake介面
+type ModuleAwake interface {
+    Awake()
+}
+
+// ModuleStart 模組start介面
+type ModuleStart interface {
+    Start()
+}
+
+// ModuleDispose 模組dispose介面
+type ModuleDispose interface {
+    Dispose()
+}
+
+// ModuleUpdate 模組update介面
+type ModuleUpdate interface {
+    Update()
+}
+
 // ModuleID 取得模組編號
 func (this *Module) ModuleID() ModuleID {
     return this.moduleID
