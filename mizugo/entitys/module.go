@@ -20,29 +20,40 @@ type ModuleID int64
 
 // Moduler 模組介面
 type Moduler interface {
-	ModuleID() ModuleID  // 取得模組編號
-	Name() string        // 取得模組名稱
-	Entity() *Entity     // 取得實體物件
-	Host(entity *Entity) // 設定宿主實體
+	// ModuleID 取得模組編號
+	ModuleID() ModuleID
+
+	// Name 取得模組名稱
+	Name() string
+
+	// Entity 取得實體物件
+	Entity() *Entity
+
+	// Host 設定宿主實體
+	Host(entity *Entity)
 }
 
-// ModuleAwake 模組awake介面
-type ModuleAwake interface {
+// Awaker awake介面
+type Awaker interface {
+	// Awake 模組喚醒通知, 模組加入實體後第一個被觸發的通知
 	Awake()
 }
 
-// ModuleStart 模組start介面
-type ModuleStart interface {
+// Starter start介面
+type Starter interface {
+	// Start 模組啟動通知, 模組加入實體後第二個被觸發的通知
 	Start()
 }
 
-// ModuleDispose 模組dispose介面
-type ModuleDispose interface {
+// Disposer dispose介面
+type Disposer interface {
+	// Dispose 模組結束通知, 模組被移出實體後觸發的通知
 	Dispose()
 }
 
-// ModuleUpdate 模組update介面
-type ModuleUpdate interface {
+// Updater update介面
+type Updater interface {
+	// Update 模組定時通知, 模組加入實體後, 定時觸發的通知, 間隔時間定義在updateInterval
 	Update()
 }
 

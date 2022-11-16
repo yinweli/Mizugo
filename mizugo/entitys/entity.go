@@ -100,25 +100,25 @@ func (this *Entity) finalize() {
 // processEvent 事件處理 TODO: 單元測試
 func processEvent(event any) {
 	if e, ok := event.(*events.Awake); ok {
-		if module, ok := e.Param.(ModuleAwake); ok {
+		if module, ok := e.Param.(Awaker); ok {
 			module.Awake()
 		} // if
 	} // if
 
 	if e, ok := event.(*events.Start); ok {
-		if module, ok := e.Param.(ModuleStart); ok {
+		if module, ok := e.Param.(Starter); ok {
 			module.Start()
 		} // if
 	} // if
 
 	if e, ok := event.(*events.Dispose); ok {
-		if module, ok := e.Param.(ModuleDispose); ok {
+		if module, ok := e.Param.(Disposer); ok {
 			module.Dispose()
 		} // if
 	} // if
 
 	if e, ok := event.(*events.Update); ok {
-		if module, ok := e.Param.(ModuleUpdate); ok {
+		if module, ok := e.Param.(Updater); ok {
 			module.Update()
 		} // if
 	} // if
