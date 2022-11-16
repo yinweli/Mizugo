@@ -12,18 +12,18 @@ func NewEntity(entityID EntityID, name string) *Entity {
 	return &Entity{
 		entityID: entityID,
 		name:     name,
-		moduler:  NewModuler(),
-		event:    events.NewEvent(processEvent),
+		modulean: NewModulean(),
+		eventan:  events.NewEventan(processEvent),
 	}
 }
 
 // Entity 實體資料
 type Entity struct {
-	entityID EntityID      // 實體編號
-	name     string        // 實體名稱
-	enable   atomic.Bool   // 啟用旗標
-	moduler  *Moduler      // 模組管理器
-	event    *events.Event // 事件管理器
+	entityID EntityID        // 實體編號
+	name     string          // 實體名稱
+	enable   atomic.Bool     // 啟用旗標
+	modulean *Modulean       // 模組管理器
+	eventan  *events.Eventan // 事件管理器
 }
 
 // EntityID 實體編號
@@ -41,16 +41,16 @@ func (this *Entity) Name() string {
 
 // AddModule 新增模組
 func (this *Entity) AddModule(module ModuleInterface) error {
-	if err := this.moduler.Add(module); err != nil {
+	if err := this.modulean.Add(module); err != nil {
 		return fmt.Errorf("entity add module: %w", err)
 	} // if
 
 	module.Host(this)
 
 	if this.enable.Load() {
-		this.event.InvokeAwake(module)
-		this.event.InvokeStart(module)
-		this.event.InvokeUpdate(module, updateInterval)
+		this.eventan.InvokeAwake(module)
+		this.eventan.InvokeStart(module)
+		this.eventan.InvokeUpdate(module, updateInterval)
 	} // if
 
 	return nil
@@ -58,8 +58,8 @@ func (this *Entity) AddModule(module ModuleInterface) error {
 
 // DelModule 刪除模組
 func (this *Entity) DelModule(moduleID ModuleID) ModuleInterface {
-	if module := this.moduler.Del(moduleID); module != nil {
-		this.event.InvokeDispose(module)
+	if module := this.modulean.Del(moduleID); module != nil {
+		this.eventan.InvokeDispose(module)
 		return module
 	} // if
 
@@ -68,25 +68,25 @@ func (this *Entity) DelModule(moduleID ModuleID) ModuleInterface {
 
 // GetModule 取得模組
 func (this *Entity) GetModule(moduleID ModuleID) ModuleInterface {
-	return this.moduler.Get(moduleID)
+	return this.modulean.Get(moduleID)
 }
 
 // initialize 初始化處理 TODO: 單元測試
 func (this *Entity) initialize() {
 	if this.enable.CompareAndSwap(false, true) {
-		this.event.Initialize()
-		module := this.moduler.All()
+		this.eventan.Initialize()
+		module := this.modulean.All()
 
 		for _, itor := range module {
-			this.event.InvokeAwake(itor)
+			this.eventan.InvokeAwake(itor)
 		} // for
 
 		for _, itor := range module {
-			this.event.InvokeStart(itor)
+			this.eventan.InvokeStart(itor)
 		} // for
 
 		for _, itor := range module {
-			this.event.InvokeUpdate(itor, updateInterval)
+			this.eventan.InvokeUpdate(itor, updateInterval)
 		} // for
 	} // if
 }
@@ -94,7 +94,7 @@ func (this *Entity) initialize() {
 // finalize 結束處理 TODO: 單元測試
 func (this *Entity) finalize() {
 	this.enable.Store(false)
-	this.event.Finalize()
+	this.eventan.Finalize()
 }
 
 // processEvent 事件處理 TODO: 單元測試

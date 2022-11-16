@@ -11,29 +11,29 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestEvent(t *testing.T) {
-	suite.Run(t, new(SuiteEvent))
+func TestEventan(t *testing.T) {
+	suite.Run(t, new(SuiteEventan))
 }
 
-type SuiteEvent struct {
+type SuiteEventan struct {
 	suite.Suite
 	testdata.TestEnv
 }
 
-func (this *SuiteEvent) SetupSuite() {
+func (this *SuiteEventan) SetupSuite() {
 	this.Change("test-event")
 }
 
-func (this *SuiteEvent) TearDownSuite() {
+func (this *SuiteEventan) TearDownSuite() {
 	this.Restore()
 }
 
-func (this *SuiteEvent) TestEvent() {
+func (this *SuiteEventan) TestEventan() {
 	awake := atomic.Bool{}
 	start := atomic.Bool{}
 	dispose := atomic.Bool{}
 	update := atomic.Int64{}
-	target := NewEvent(func(event any) {
+	target := NewEventan(func(event any) {
 		if e, ok := event.(*Awake); ok {
 			if e.Param.(string) == "awake" {
 				awake.Store(true)

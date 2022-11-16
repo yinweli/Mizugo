@@ -9,36 +9,36 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestEntityr(t *testing.T) {
-	suite.Run(t, new(SuiteEntityr))
+func TestEntityan(t *testing.T) {
+	suite.Run(t, new(SuiteEntityan))
 }
 
-type SuiteEntityr struct {
+type SuiteEntityan struct {
 	suite.Suite
 	testdata.TestEnv
 }
 
-func (this *SuiteEntityr) SetupSuite() {
-	this.Change("test-entityr")
+func (this *SuiteEntityan) SetupSuite() {
+	this.Change("test-entityan")
 }
 
-func (this *SuiteEntityr) TearDownSuite() {
+func (this *SuiteEntityan) TearDownSuite() {
 	this.Restore()
 }
 
-func (this *SuiteEntityr) TestNewEntityr() {
-	assert.NotNil(this.T(), NewEntityr())
+func (this *SuiteEntityan) TestNewEntityan() {
+	assert.NotNil(this.T(), NewEntityan())
 }
 
-func (this *SuiteEntityr) TestAdd() {
-	target := NewEntityr()
+func (this *SuiteEntityan) TestAdd() {
+	target := NewEntityan()
 
 	assert.Nil(this.T(), target.Add(NewEntity(EntityID(1), "entity")))
 	assert.NotNil(this.T(), target.Add(NewEntity(EntityID(1), "entity")))
 }
 
-func (this *SuiteEntityr) TestDel() {
-	target := NewEntityr()
+func (this *SuiteEntityan) TestDel() {
+	target := NewEntityan()
 	_ = target.Add(NewEntity(EntityID(1), "entity"))
 
 	entity := target.Del(EntityID(1))
@@ -50,8 +50,8 @@ func (this *SuiteEntityr) TestDel() {
 	assert.Nil(this.T(), entity)
 }
 
-func (this *SuiteEntityr) TestGet() {
-	target := NewEntityr()
+func (this *SuiteEntityan) TestGet() {
+	target := NewEntityan()
 	_ = target.Add(NewEntity(EntityID(1), "entity"))
 
 	entity := target.Get(EntityID(1))
@@ -63,8 +63,8 @@ func (this *SuiteEntityr) TestGet() {
 	assert.Nil(this.T(), entity)
 }
 
-func (this *SuiteEntityr) TestAll() {
-	target := NewEntityr()
+func (this *SuiteEntityan) TestAll() {
+	target := NewEntityan()
 	_ = target.Add(NewEntity(EntityID(1), "entity1"))
 	_ = target.Add(NewEntity(EntityID(2), "entity2"))
 

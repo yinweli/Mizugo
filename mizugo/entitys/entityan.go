@@ -6,21 +6,21 @@ import (
 	"sync"
 )
 
-// NewEntityr 建立實體管理器
-func NewEntityr() *Entityr {
-	return &Entityr{
+// NewEntityan 建立實體管理器
+func NewEntityan() *Entityan {
+	return &Entityan{
 		data: map[EntityID]*Entity{},
 	}
 }
 
-// Entityr 實體管理器
-type Entityr struct {
+// Entityan 實體管理器
+type Entityan struct {
 	data map[EntityID]*Entity // 實體列表
 	lock sync.Mutex           // 執行緒鎖
 }
 
 // Add 新增實體
-func (this *Entityr) Add(entity *Entity) error {
+func (this *Entityan) Add(entity *Entity) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	entityID := entity.EntityID()
@@ -35,7 +35,7 @@ func (this *Entityr) Add(entity *Entity) error {
 }
 
 // Del 刪除實體
-func (this *Entityr) Del(entityID EntityID) *Entity {
+func (this *Entityan) Del(entityID EntityID) *Entity {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -49,7 +49,7 @@ func (this *Entityr) Del(entityID EntityID) *Entity {
 }
 
 // Get 取得實體
-func (this *Entityr) Get(entityID EntityID) *Entity {
+func (this *Entityan) Get(entityID EntityID) *Entity {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -57,7 +57,7 @@ func (this *Entityr) Get(entityID EntityID) *Entity {
 }
 
 // All 取得實體列表
-func (this *Entityr) All() []*Entity {
+func (this *Entityan) All() []*Entity {
 	result := []*Entity{}
 
 	for _, itor := range this.data {

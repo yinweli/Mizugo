@@ -9,36 +9,36 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestModuler(t *testing.T) {
-	suite.Run(t, new(SuiteModuler))
+func TestModulean(t *testing.T) {
+	suite.Run(t, new(SuiteModulean))
 }
 
-type SuiteModuler struct {
+type SuiteModulean struct {
 	suite.Suite
 	testdata.TestEnv
 }
 
-func (this *SuiteModuler) SetupSuite() {
-	this.Change("test-moduler")
+func (this *SuiteModulean) SetupSuite() {
+	this.Change("test-modulean")
 }
 
-func (this *SuiteModuler) TearDownSuite() {
+func (this *SuiteModulean) TearDownSuite() {
 	this.Restore()
 }
 
-func (this *SuiteModuler) TestNewModuler() {
-	assert.NotNil(this.T(), NewModuler())
+func (this *SuiteModulean) TestNewModulean() {
+	assert.NotNil(this.T(), NewModulean())
 }
 
-func (this *SuiteModuler) TestAdd() {
-	target := NewModuler()
+func (this *SuiteModulean) TestAdd() {
+	target := NewModulean()
 
 	assert.Nil(this.T(), target.Add(NewModule(ModuleID(1), "module")))
 	assert.NotNil(this.T(), target.Add(NewModule(ModuleID(1), "module")))
 }
 
-func (this *SuiteModuler) TestDel() {
-	target := NewModuler()
+func (this *SuiteModulean) TestDel() {
+	target := NewModulean()
 	_ = target.Add(NewModule(ModuleID(1), "module"))
 
 	result := target.Del(ModuleID(1))
@@ -50,8 +50,8 @@ func (this *SuiteModuler) TestDel() {
 	assert.Nil(this.T(), result)
 }
 
-func (this *SuiteModuler) TestGet() {
-	target := NewModuler()
+func (this *SuiteModulean) TestGet() {
+	target := NewModulean()
 	_ = target.Add(NewModule(ModuleID(1), "module"))
 
 	module := target.Get(ModuleID(1))
@@ -63,8 +63,8 @@ func (this *SuiteModuler) TestGet() {
 	assert.Nil(this.T(), module)
 }
 
-func (this *SuiteModuler) TestAll() {
-	target := NewModuler()
+func (this *SuiteModulean) TestAll() {
+	target := NewModulean()
 	_ = target.Add(NewModule(ModuleID(1), "module1"))
 	_ = target.Add(NewModule(ModuleID(2), "module2"))
 

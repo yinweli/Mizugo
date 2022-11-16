@@ -7,16 +7,16 @@ import (
 
 const eventSize = 10 // 事件緩衝區長度
 
-// NewEvent 建立事件管理器
-func NewEvent(process Process) *Event {
-	return &Event{
+// NewEventan 建立事件管理器
+func NewEventan(process Process) *Eventan {
+	return &Eventan{
 		event:   make(chan any, eventSize),
 		process: process,
 	}
 }
 
-// Event 事件管理器
-type Event struct {
+// Eventan 事件管理器
+type Eventan struct {
 	enable  atomic.Bool // 啟用旗標
 	event   chan any    // 事件通道
 	process Process     // 事件處理函式
@@ -46,7 +46,7 @@ type Update struct {
 }
 
 // Initialize 初始化處理
-func (this *Event) Initialize() {
+func (this *Eventan) Initialize() {
 	go func() {
 		this.enable.Store(true)
 
@@ -67,26 +67,26 @@ func (this *Event) Initialize() {
 }
 
 // Finalize 結束處理
-func (this *Event) Finalize() {
+func (this *Eventan) Finalize() {
 	this.enable.Store(false)
 }
 
 // InvokeAwake 執行awake事件
-func (this *Event) InvokeAwake(param any) {
+func (this *Eventan) InvokeAwake(param any) {
 	this.event <- &Awake{
 		Param: param,
 	}
 }
 
 // InvokeStart 執行start事件
-func (this *Event) InvokeStart(param any) {
+func (this *Eventan) InvokeStart(param any) {
 	this.event <- &Start{
 		Param: param,
 	}
 }
 
 // InvokeDispose 執行dispose事件
-func (this *Event) InvokeDispose(param any) {
+func (this *Eventan) InvokeDispose(param any) {
 	this.event <- &Dispose{
 		Param: param,
 	}
@@ -95,7 +95,7 @@ func (this *Event) InvokeDispose(param any) {
 // InvokeUpdate 執行update事件
 // 會建立一個執行緒定時新增事件, 因此使用時要注意不能太過份
 // 如果事件管理器結束時, 所有已建立的執行緒都會跟著結束
-func (this *Event) InvokeUpdate(param any, interval time.Duration) {
+func (this *Eventan) InvokeUpdate(param any, interval time.Duration) {
 	go func() {
 		tick := time.NewTicker(interval)
 		defer tick.Stop()
