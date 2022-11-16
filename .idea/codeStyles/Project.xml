@@ -5,6 +5,14 @@
       <option name="ADD_PARENTHESES_FOR_SINGLE_IMPORT" value="true" />
       <option name="REMOVE_REDUNDANT_IMPORT_ALIASES" value="true" />
       <option name="ADD_LEADING_SPACE_TO_COMMENTS" value="true" />
+      <option name="COMMENTS_WITHOUT_LEADING_SPACE">
+        <value>
+          <prefixes>
+            <prefix value="nolint" />
+          </prefixes>
+        </value>
+      </option>
+      <option name="RUN_GO_FMT_ON_REFORMAT" value="false" />
       <option name="MOVE_ALL_IMPORTS_IN_ONE_DECLARATION" value="true" />
       <option name="MOVE_ALL_STDLIB_IMPORTS_IN_ONE_GROUP" value="true" />
       <option name="GROUP_STDLIB_IMPORTS" value="true" />
@@ -21,9 +29,6 @@
       <option name="RIGHT_MARGIN" value="200" />
       <option name="CALL_PARAMETERS_LPAREN_ON_NEXT_LINE" value="false" />
       <option name="CALL_PARAMETERS_RPAREN_ON_NEXT_LINE" value="false" />
-      <indentOptions>
-        <option name="USE_TAB_CHARACTER" value="false" />
-      </indentOptions>
     </codeStyleSettings>
   </code_scheme>
 </component>
