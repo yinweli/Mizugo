@@ -1,6 +1,7 @@
 package events
 
 import (
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -22,7 +23,7 @@ type SuiteEventan struct {
 }
 
 func (this *SuiteEventan) SetupSuite() {
-	this.Change("test-event")
+	this.Change("test-eventan")
 }
 
 func (this *SuiteEventan) TearDownSuite() {
@@ -33,47 +34,64 @@ func (this *SuiteEventan) TearDownTest() {
 	goleak.VerifyNone(this.T())
 }
 
+func (this *SuiteEventan) TestNewEventan() {
+	assert.NotNil(this.T(), NewEventan(1))
+}
+
 func (this *SuiteEventan) TestEventan() {
-	awake := atomic.Bool{}
-	start := atomic.Bool{}
-	dispose := atomic.Bool{}
-	update := atomic.Int64{}
-	target := NewEventan(func(event any) {
-		if e, ok := event.(*Awake); ok {
-			if e.Param.(string) == "awake" {
-				awake.Store(true)
-			} // if
-		} // if
+	target := NewEventan(1)
+	target.Initialize()
+	target.Finalize()
+}
 
-		if e, ok := event.(*Start); ok {
-			if e.Param.(string) == "start" {
-				start.Store(true)
-			} // if
-		} // if
+func (this *SuiteEventan) TestPubOnce() {
+	target := NewEventan(10)
+	target.Initialize()
+	defer target.Finalize()
 
-		if e, ok := event.(*Dispose); ok {
-			if e.Param.(string) == "dispose" {
-				dispose.Store(true)
-			} // if
-		} // if
-
-		if e, ok := event.(*Update); ok {
-			if e.Param.(string) == "update" {
-				update.Add(1)
-			} // if
+	valid := atomic.Bool{}
+	target.Sub("event", func(param any) {
+		if param.(string) == "pubonce" {
+			valid.Store(true)
 		} // if
 	})
-	target.Initialize()
-	target.InvokeAwake("awake")
-	target.InvokeStart("start")
-	target.InvokeDispose("dispose")
-	target.InvokeUpdate("update", time.Millisecond*100)
-	time.Sleep(time.Second)
-	target.Finalize()
-	time.Sleep(time.Millisecond * 100)
+	target.PubOnce("event", "pubonce")
+	time.Sleep(time.Millisecond * 10)
+	assert.True(this.T(), valid.Load())
+}
 
-	assert.True(this.T(), awake.Load())
-	assert.True(this.T(), start.Load())
-	assert.True(this.T(), dispose.Load())
-	assert.Greater(this.T(), update.Load(), int64(1))
+func (this *SuiteEventan) TestPubFixed() {
+	target := NewEventan(10)
+	target.Initialize()
+	defer target.Finalize()
+
+	valid := atomic.Int64{}
+	target.Sub("event", func(param any) {
+		if param.(string) == "pubfixed" {
+			valid.Add(1)
+		} // if
+	})
+	fixed := target.PubFixed("event", "pubfixed", time.Millisecond)
+	defer fixed.Stop()
+	time.Sleep(time.Millisecond * 100)
+	assert.Greater(this.T(), valid.Load(), int64(0))
+}
+
+func BenchmarkEventan(b *testing.B) {
+	b.StopTimer()
+	signal := sync.WaitGroup{}
+	signal.Add(b.N)
+	target := NewEventan(1000)
+	target.Sub("event", func(param any) {
+		signal.Done()
+	})
+	b.StartTimer()
+	target.Initialize()
+
+	for i := 0; i < b.N; i++ {
+		target.PubOnce("event", nil)
+	} // for
+
+	target.Finalize()
+	signal.Wait()
 }

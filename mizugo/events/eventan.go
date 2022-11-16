@@ -5,113 +5,88 @@ import (
 	"time"
 )
 
-const eventSize = 10 // 事件緩衝區長度
-
 // NewEventan 建立事件管理器
-func NewEventan(process Process) *Eventan {
+func NewEventan(bufferSize int) *Eventan {
 	return &Eventan{
-		event:   make(chan any, eventSize),
-		process: process,
+		pubsub: NewPubsub(),
+		event:  make(chan event, bufferSize),
 	}
 }
 
 // Eventan 事件管理器
 type Eventan struct {
-	enable  atomic.Bool // 啟用旗標
-	event   chan any    // 事件通道
-	process Process     // 事件處理函式
+	pubsub *Pubsub     // 訂閱/發布資料
+	event  chan event  // 事件通道
+	finish atomic.Bool // 結束旗標
 }
 
-// Process 事件處理函式類型
-type Process func(event any)
-
-// Awake awake事件
-type Awake struct {
-	Param any // 參數物件
+// event 事件資料
+type event struct {
+	name  string // 事件名稱
+	param any    // 事件參數
 }
 
-// Start start事件
-type Start struct {
-	Param any // 參數物件
-}
-
-// Dispose dispose事件
-type Dispose struct {
-	Param any // 參數物件
-}
-
-// Update update事件
-type Update struct {
-	Param any // 參數物件
-}
-
-// Initialize 初始化處理
+// Initialize 初始化處理, 由於初始化完成後就會開始處理事件, 因此可能需要在初始化之前做完訂閱事件
 func (this *Eventan) Initialize() {
-	this.enable.Store(true)
-
 	go func() {
-		for {
-			select {
-			case event := <-this.event:
-				if this.process != nil {
-					this.process(event)
-				} // if
+		for this.finish.Load() == false {
+			e := <-this.event
+			this.pubsub.Pub(e.name, e.param)
+		} // for
 
-			default:
-				if this.enable.Load() == false {
-					return
-				} // if
-			} // select
+		// 當事件管理器要關閉時, 首先把事件通道關閉, 避免有更多的事件跑進來
+		// 然後把剩餘的事件執行完畢後結束
+
+		close(this.event)
+
+		for e := range this.event {
+			this.pubsub.Pub(e.name, e.param)
 		} // for
 	}()
 }
 
 // Finalize 結束處理
 func (this *Eventan) Finalize() {
-	this.enable.Store(false)
+	if this.finish.CompareAndSwap(false, true) {
+		this.finish.Store(true)
+		this.event <- event{} // 新增一個空事件, 讓結束程序得以開始運作
+	} // if
 }
 
-// InvokeAwake 執行awake事件
-func (this *Eventan) InvokeAwake(param any) {
-	this.event <- &Awake{
-		Param: param,
-	}
+// Sub 訂閱事件, 由於初始化完成後就會開始處理事件, 因此可能需要在初始化之前做完訂閱事件
+func (this *Eventan) Sub(name string, process Process) {
+	this.pubsub.Sub(name, process)
 }
 
-// InvokeStart 執行start事件
-func (this *Eventan) InvokeStart(param any) {
-	this.event <- &Start{
-		Param: param,
-	}
+// PubOnce 發布單次事件
+func (this *Eventan) PubOnce(name string, param any) {
+	if this.finish.Load() == false {
+		this.event <- event{
+			name:  name,
+			param: param,
+		}
+	} // if
 }
 
-// InvokeDispose 執行dispose事件
-func (this *Eventan) InvokeDispose(param any) {
-	this.event <- &Dispose{
-		Param: param,
-	}
-}
+// PubFixed 發布定時事件, 回傳用於停止定時事件的定時控制器
+func (this *Eventan) PubFixed(name string, param any, interval time.Duration) *Fixed {
+	fixed := &Fixed{}
 
-// InvokeUpdate 執行update事件
-// 會建立一個執行緒定時新增事件, 因此使用時要注意不能太過份
-// 如果事件管理器結束時, 所有已建立的執行緒都會跟著結束
-func (this *Eventan) InvokeUpdate(param any, interval time.Duration) {
 	go func() {
-		tick := time.NewTicker(interval)
-		defer tick.Stop()
+		timeout := time.After(interval)
 
 		for {
 			select {
-			case <-tick.C:
-				this.event <- &Update{
-					Param: param,
-				}
+			case <-timeout:
+				this.PubOnce(name, param)
 
 			default:
-				if this.enable.Load() == false {
+				if fixed.State() {
 					return
 				} // if
 			} // select
 		} // for
 	}()
+
+	return fixed
 }

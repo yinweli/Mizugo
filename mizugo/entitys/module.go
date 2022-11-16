@@ -1,5 +1,9 @@
 package entitys
 
+import (
+	"github.com/yinweli/Mizugo/mizugo/events"
+)
+
 // NewModule 建立模組資料
 func NewModule(moduleID ModuleID, name string) *Module {
 	return &Module{
@@ -10,9 +14,10 @@ func NewModule(moduleID ModuleID, name string) *Module {
 
 // Module 模組資料
 type Module struct {
-	moduleID ModuleID // 模組編號
-	name     string   // 模組名稱
-	entity   *Entity  // 實體物件
+	moduleID ModuleID      // 模組編號
+	name     string        // 模組名稱
+	entity   *Entity       // 實體物件
+	fixed    *events.Fixed // 定時事件物件
 }
 
 // ModuleID 模組編號
@@ -31,29 +36,35 @@ type Moduler interface {
 
 	// Host 設定宿主實體
 	Host(entity *Entity)
+
+	// Fixed 設定定時控制器
+	Fixed(fixed *events.Fixed)
+
+	// FixedStop 停止定時控制器
+	FixedStop()
 }
 
 // Awaker awake介面
 type Awaker interface {
-	// Awake 模組喚醒通知, 模組加入實體後第一個被觸發的通知
+	// Awake awake事件, 模組初始化時第一個被執行
 	Awake()
 }
 
 // Starter start介面
 type Starter interface {
-	// Start 模組啟動通知, 模組加入實體後第二個被觸發的通知
+	// Start start事件, 模組初始化時第二個被執行
 	Start()
 }
 
 // Disposer dispose介面
 type Disposer interface {
-	// Dispose 模組結束通知, 模組被移出實體後觸發的通知
+	// Dispose dispose事件, 模組結束時執行
 	Dispose()
 }
 
 // Updater update介面
 type Updater interface {
-	// Update 模組定時通知, 模組加入實體後, 定時觸發的通知, 間隔時間定義在updateInterval
+	// Update update事件, 模組定時事件, 間隔時間定義在updateInterval
 	Update()
 }
 
@@ -75,4 +86,16 @@ func (this *Module) Entity() *Entity {
 // Host 設定宿主實體
 func (this *Module) Host(entity *Entity) {
 	this.entity = entity
+}
+
+// Fixed 設定定時控制器
+func (this *Module) Fixed(fixed *events.Fixed) {
+	this.fixed = fixed
+}
+
+// FixedStop 停止定時控制器
+func (this *Module) FixedStop() {
+	if this.fixed != nil {
+		this.fixed.Stop()
+	} // if
 }
