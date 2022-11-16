@@ -56,6 +56,8 @@ func (this *Modulean) Get(moduleID ModuleID) Moduler {
 
 // All 取得模組列表
 func (this *Modulean) All() []Moduler {
+	this.lock.Lock()
+	defer this.lock.Unlock()
 	result := []Moduler{}
 
 	for _, itor := range this.data {
@@ -66,4 +68,12 @@ func (this *Modulean) All() []Moduler {
 		return result[r].ModuleID() < result[l].ModuleID()
 	})
 	return result
+}
+
+// Count 取得模組數量
+func (this *Modulean) Count() int {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return len(this.data)
 }

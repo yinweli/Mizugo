@@ -39,44 +39,53 @@ func (this *SuiteModulean) TestAdd() {
 	target := NewModulean()
 
 	assert.Nil(this.T(), target.Add(NewModule(ModuleID(1), "module")))
+	assert.NotNil(this.T(), target.Get(ModuleID(1)))
+
 	assert.NotNil(this.T(), target.Add(NewModule(ModuleID(1), "module")))
 }
 
 func (this *SuiteModulean) TestDel() {
 	target := NewModulean()
-	_ = target.Add(NewModule(ModuleID(1), "module"))
 
-	result := target.Del(ModuleID(1))
-	assert.NotNil(this.T(), result)
-	assert.Equal(this.T(), ModuleID(1), result.ModuleID())
-	assert.Equal(this.T(), "module", result.Name())
+	assert.Nil(this.T(), target.Add(NewModule(ModuleID(1), "module")))
+	module := target.Del(ModuleID(1))
+	assert.NotNil(this.T(), module)
+	assert.Equal(this.T(), ModuleID(1), module.ModuleID())
+	assert.Equal(this.T(), "module", module.Name())
+	assert.Nil(this.T(), target.Get(ModuleID(1)))
 
-	result = target.Del(ModuleID(1))
-	assert.Nil(this.T(), result)
+	assert.Nil(this.T(), target.Del(ModuleID(1)))
 }
 
 func (this *SuiteModulean) TestGet() {
 	target := NewModulean()
-	_ = target.Add(NewModule(ModuleID(1), "module"))
 
+	assert.Nil(this.T(), target.Add(NewModule(ModuleID(1), "module")))
 	module := target.Get(ModuleID(1))
 	assert.NotNil(this.T(), module)
 	assert.Equal(this.T(), ModuleID(1), module.ModuleID())
 	assert.Equal(this.T(), "module", module.Name())
 
-	module = target.Get(ModuleID(2))
-	assert.Nil(this.T(), module)
+	assert.Nil(this.T(), target.Get(ModuleID(2)))
 }
 
 func (this *SuiteModulean) TestAll() {
 	target := NewModulean()
-	_ = target.Add(NewModule(ModuleID(1), "module1"))
-	_ = target.Add(NewModule(ModuleID(2), "module2"))
 
+	assert.Nil(this.T(), target.Add(NewModule(ModuleID(1), "module1")))
+	assert.Nil(this.T(), target.Add(NewModule(ModuleID(2), "module2")))
 	module := target.All()
 	assert.Len(this.T(), module, 2)
 	assert.Equal(this.T(), ModuleID(1), module[0].ModuleID())
 	assert.Equal(this.T(), "module1", module[0].Name())
 	assert.Equal(this.T(), ModuleID(2), module[1].ModuleID())
 	assert.Equal(this.T(), "module2", module[1].Name())
+}
+
+func (this *SuiteModulean) TestCount() {
+	target := NewModulean()
+
+	assert.Nil(this.T(), target.Add(NewModule(ModuleID(1), "module1")))
+	assert.Nil(this.T(), target.Add(NewModule(ModuleID(2), "module2")))
+	assert.Equal(this.T(), 2, target.Count())
 }
