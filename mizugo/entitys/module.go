@@ -18,8 +18,8 @@ type Module struct {
 // ModuleID 模組編號
 type ModuleID int64
 
-// ModuleInterface 模組介面
-type ModuleInterface interface {
+// Moduler 模組介面
+type Moduler interface {
 	ModuleID() ModuleID  // 取得模組編號
 	Name() string        // 取得模組名稱
 	Entity() *Entity     // 取得實體物件

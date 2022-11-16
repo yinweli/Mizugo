@@ -40,7 +40,7 @@ func (this *Entity) Name() string {
 }
 
 // AddModule 新增模組
-func (this *Entity) AddModule(module ModuleInterface) error {
+func (this *Entity) AddModule(module Moduler) error {
 	if err := this.modulean.Add(module); err != nil {
 		return fmt.Errorf("entity add module: %w", err)
 	} // if
@@ -57,7 +57,7 @@ func (this *Entity) AddModule(module ModuleInterface) error {
 }
 
 // DelModule 刪除模組
-func (this *Entity) DelModule(moduleID ModuleID) ModuleInterface {
+func (this *Entity) DelModule(moduleID ModuleID) Moduler {
 	if module := this.modulean.Del(moduleID); module != nil {
 		this.eventan.InvokeDispose(module)
 		return module
@@ -67,7 +67,7 @@ func (this *Entity) DelModule(moduleID ModuleID) ModuleInterface {
 }
 
 // GetModule 取得模組
-func (this *Entity) GetModule(moduleID ModuleID) ModuleInterface {
+func (this *Entity) GetModule(moduleID ModuleID) Moduler {
 	return this.modulean.Get(moduleID)
 }
 

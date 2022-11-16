@@ -9,18 +9,18 @@ import (
 // NewModulean 建立模組管理器
 func NewModulean() *Modulean {
 	return &Modulean{
-		data: map[ModuleID]ModuleInterface{},
+		data: map[ModuleID]Moduler{},
 	}
 }
 
 // Modulean 模組管理器
 type Modulean struct {
-	data map[ModuleID]ModuleInterface // 模組列表
-	lock sync.Mutex                   // 執行緒鎖
+	data map[ModuleID]Moduler // 模組列表
+	lock sync.Mutex           // 執行緒鎖
 }
 
 // Add 新增模組
-func (this *Modulean) Add(module ModuleInterface) error {
+func (this *Modulean) Add(module Moduler) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	moduleID := module.ModuleID()
@@ -34,7 +34,7 @@ func (this *Modulean) Add(module ModuleInterface) error {
 }
 
 // Del 刪除模組
-func (this *Modulean) Del(moduleID ModuleID) ModuleInterface {
+func (this *Modulean) Del(moduleID ModuleID) Moduler {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -47,7 +47,7 @@ func (this *Modulean) Del(moduleID ModuleID) ModuleInterface {
 }
 
 // Get 取得模組
-func (this *Modulean) Get(moduleID ModuleID) ModuleInterface {
+func (this *Modulean) Get(moduleID ModuleID) Moduler {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -55,8 +55,8 @@ func (this *Modulean) Get(moduleID ModuleID) ModuleInterface {
 }
 
 // All 取得模組列表
-func (this *Modulean) All() []ModuleInterface {
-	result := []ModuleInterface{}
+func (this *Modulean) All() []Moduler {
+	result := []Moduler{}
 
 	for _, itor := range this.data {
 		result = append(result, itor)
