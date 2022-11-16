@@ -19,6 +19,18 @@ type Entityan struct {
 	lock sync.Mutex           // 執行緒鎖
 }
 
+// Clear 清除實體
+func (this *Entityan) Clear() {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	for _, itor := range this.data {
+		itor.finalize()
+	} // for
+
+	this.data = map[EntityID]*Entity{}
+}
+
 // Add 新增實體
 func (this *Entityan) Add(entity *Entity) error {
 	this.lock.Lock()
@@ -58,6 +70,8 @@ func (this *Entityan) Get(entityID EntityID) *Entity {
 
 // All 取得實體列表
 func (this *Entityan) All() []*Entity {
+	this.lock.Lock()
+	defer this.lock.Unlock()
 	result := []*Entity{}
 
 	for _, itor := range this.data {
@@ -68,4 +82,12 @@ func (this *Entityan) All() []*Entity {
 		return result[r].EntityID() < result[l].EntityID()
 	})
 	return result
+}
+
+// Count 取得實體數量
+func (this *Entityan) Count() int {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return len(this.data)
 }

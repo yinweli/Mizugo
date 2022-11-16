@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/goleak"
 
 	"github.com/yinweli/Mizugo/testdata"
 )
@@ -24,6 +25,10 @@ func (this *SuiteEntity) SetupSuite() {
 
 func (this *SuiteEntity) TearDownSuite() {
 	this.Restore()
+}
+
+func (this *SuiteEntity) TearDownTest() {
+	goleak.VerifyNone(this.T())
 }
 
 func (this *SuiteEntity) TestNewEntity() {

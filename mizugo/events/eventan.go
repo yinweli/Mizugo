@@ -47,9 +47,9 @@ type Update struct {
 
 // Initialize 初始化處理
 func (this *Eventan) Initialize() {
-	go func() {
-		this.enable.Store(true)
+	this.enable.Store(true)
 
+	go func() {
 		for {
 			select {
 			case event := <-this.event:
