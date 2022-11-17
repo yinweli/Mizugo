@@ -10,7 +10,7 @@ type Connector interface {
 	Start(complete Complete)
 
 	// Address 取得位址
-	Address() net.Addr
+	Address() (addr net.Addr, err error)
 }
 
 // Listener 接聽介面
@@ -22,19 +22,19 @@ type Listener interface {
 	Stop()
 
 	// Address 取得位址
-	Address() net.Addr
+	Address() (addr net.Addr, err error)
 }
 
 // Sessioner 會話介面
 type Sessioner interface {
-	// Initialize 初始化處理
-	Initialize(receive Receive, inform Inform)
+	// Start 啟動會話
+	Start(sessionID SessionID, receive Receive, inform Inform)
 
-	// CloseImmed 立即關閉
-	CloseImmed()
+	// StopImmed 立即停止會話
+	StopImmed()
 
-	// CloseWait 等待關閉
-	CloseWait()
+	// StopWait 等待停止會話
+	StopWait()
 
 	// Send 傳送封包
 	Send(packet []byte)

@@ -38,7 +38,7 @@ func (this *Entityan) Add(entity *Entity) error {
 	entityID := entity.EntityID()
 
 	if _, ok := this.data[entityID]; ok {
-		return fmt.Errorf("entityr add: duplicate entityID")
+		return fmt.Errorf("entityan add: duplicate entityID")
 	} // if
 
 	this.data[entityID] = entity

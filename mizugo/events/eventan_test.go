@@ -1,7 +1,6 @@
 package events
 
 import (
-	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -75,23 +74,4 @@ func (this *SuiteEventan) TestPubFixed() {
 	defer fixed.Stop()
 	time.Sleep(time.Millisecond * 100)
 	assert.Greater(this.T(), valid.Load(), int64(0))
-}
-
-func BenchmarkEventan(b *testing.B) {
-	b.StopTimer()
-	signal := sync.WaitGroup{}
-	signal.Add(b.N)
-	target := NewEventan(1000)
-	target.Sub("event", func(param any) {
-		signal.Done()
-	})
-	b.StartTimer()
-	target.Initialize()
-
-	for i := 0; i < b.N; i++ {
-		target.PubOnce("event", nil)
-	} // for
-
-	target.Finalize()
-	signal.Wait()
 }
