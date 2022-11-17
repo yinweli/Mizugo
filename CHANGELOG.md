@@ -140,7 +140,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * 接收處理
     * 傳送處理
 * proto管線
-    * 接收處理: 獲取封包 > 移除標頭 > 解密 > 反序列化
+    * 接收處理: 移除標頭 > 解密 > 反序列化
     * 傳送處理: 序列化 > 加密 > 填寫標頭(封包長度)
 
 ### 加解密機制(獨立)
