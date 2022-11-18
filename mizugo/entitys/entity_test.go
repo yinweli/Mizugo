@@ -125,6 +125,7 @@ func (this *SuiteEntity) TestInitialize() {
 	target.initialize()
 	time.Sleep(updateInterval * 2)
 	target.finalize()
+	time.Sleep(updateInterval * 2)
 
 	assert.True(this.T(), module.awake.Load())
 	assert.True(this.T(), module.start.Load())
