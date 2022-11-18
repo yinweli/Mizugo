@@ -25,10 +25,10 @@ type SuiteTCPConnect struct {
 }
 
 func (this *SuiteTCPConnect) SetupSuite() {
-	this.Change("test-tcpconnect")
+	this.Change("test-tcpConnect")
 	this.ip = "google.com"
 	this.port = 80
-	this.timeout = time.Second * 1
+	this.timeout = time.Second
 }
 
 func (this *SuiteTCPConnect) TearDownSuite() {
@@ -63,7 +63,7 @@ func (this *SuiteTCPConnect) TestStart() {
 	assert.False(this.T(), valid)
 
 	valid = false
-	target = NewTCPConnect(this.ip, 10000, this.timeout)
+	target = NewTCPConnect(this.ip, 3000, this.timeout)
 	target.Start(func(session Sessioner, err error) {
 		valid = session != nil && err == nil
 	})

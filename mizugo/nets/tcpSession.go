@@ -13,7 +13,7 @@ func NewTCPSession(conn net.Conn) *TCPSession {
 
 // TCPSession tcp會話器
 type TCPSession struct {
-	conn      net.Conn  // 連線物件
+	conn      net.Conn  // 連接物件
 	sessionID SessionID // 會話編號
 	receive   Receive   // 接收函式
 	inform    Inform    // 通知函式

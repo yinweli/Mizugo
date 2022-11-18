@@ -23,7 +23,7 @@ type TCPConnect struct {
 	timeout time.Duration // 逾時時間
 }
 
-// Start 啟動連接
+// Start 啟動連接, 若不是使用多執行緒啟動, 則可能被阻塞在這裡直到連接成功
 func (this *TCPConnect) Start(complete Complete) {
 	addr, err := this.Address()
 
@@ -44,7 +44,7 @@ func (this *TCPConnect) Start(complete Complete) {
 
 // Address 取得位址
 func (this *TCPConnect) Address() (addr net.Addr, err error) {
-	addr, err = net.ResolveTCPAddr("", this.ip+":"+strconv.Itoa(this.port))
+	addr, err = net.ResolveTCPAddr("", this.ip+":"+strconv.Itoa(this.port)) // 第一個參數留空, 會自動幫我填寫正確的tcp網路名稱
 
 	if err != nil {
 		return nil, fmt.Errorf("tcp connect address: %w", err)

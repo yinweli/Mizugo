@@ -33,7 +33,7 @@ func (this *Eventan) Initialize() {
 			if e != nil {
 				this.pubsub.Pub(e.name, e.param)
 			} else {
-				return
+				return // 當收到空物件時表示結束事件循環
 			} // if
 		} // for
 	}()

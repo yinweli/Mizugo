@@ -6,7 +6,7 @@ import (
 
 // Connector 連接介面
 type Connector interface {
-	// Start 啟動連接
+	// Start 啟動連接, 若不是使用多執行緒啟動, 則可能被阻塞在這裡直到連接成功
 	Start(complete Complete)
 
 	// Address 取得位址
@@ -15,11 +15,11 @@ type Connector interface {
 
 // Listener 接聽介面
 type Listener interface {
-	// Start 啟動接聽
+	// Start 啟動接聽, 若不是使用多執行緒啟動, 則一定被阻塞在這裡直到停止接聽
 	Start(complete Complete)
 
 	// Stop 停止接聽
-	Stop()
+	Stop() error
 
 	// Address 取得位址
 	Address() (addr net.Addr, err error)
