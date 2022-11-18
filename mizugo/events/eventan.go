@@ -9,14 +9,14 @@ import (
 func NewEventan(bufferSize int) *Eventan {
 	return &Eventan{
 		pubsub: NewPubsub(),
-		event:  make(chan event, bufferSize),
+		event:  make(chan *event, bufferSize),
 	}
 }
 
 // Eventan 事件管理器
 type Eventan struct {
 	pubsub *Pubsub     // 訂閱/發布資料
-	event  chan event  // 事件通道
+	event  chan *event // 事件通道
 	finish atomic.Bool // 結束旗標
 }
 
@@ -29,28 +29,20 @@ type event struct {
 // Initialize 初始化處理, 由於初始化完成後就會開始處理事件, 因此可能需要在初始化之前做完訂閱事件
 func (this *Eventan) Initialize() {
 	go func() {
-		for this.finish.Load() == false {
-			e := <-this.event
-			this.pubsub.Pub(e.name, e.param)
-		} // for
-
-		// 當事件管理器要關閉時, 首先把事件通道關閉, 避免有更多的事件跑進來
-		// 然後把剩餘的事件執行完畢後結束
-
-		close(this.event)
-
 		for e := range this.event {
-			this.pubsub.Pub(e.name, e.param)
+			if e != nil {
+				this.pubsub.Pub(e.name, e.param)
+			} else {
+				return
+			} // if
 		} // for
 	}()
 }
 
 // Finalize 結束處理
 func (this *Eventan) Finalize() {
-	if this.finish.CompareAndSwap(false, true) {
-		this.finish.Store(true)
-		this.event <- event{} // 新增一個空事件, 讓結束程序得以開始運作
-	} // if
+	this.finish.Store(true)
+	this.event <- nil // 新增一個空事件, 讓事件循環可以結束
 }
 
 // Sub 訂閱事件, 由於初始化完成後就會開始處理事件, 因此可能需要在初始化之前做完訂閱事件
@@ -61,7 +53,7 @@ func (this *Eventan) Sub(name string, process Process) {
 // PubOnce 發布單次事件
 func (this *Eventan) PubOnce(name string, param any) {
 	if this.finish.Load() == false {
-		this.event <- event{
+		this.event <- &event{
 			name:  name,
 			param: param,
 		}

@@ -28,7 +28,7 @@ func (this *SuiteTCPConnect) SetupSuite() {
 	this.Change("test-tcpconnect")
 	this.ip = "google.com"
 	this.port = 80
-	this.timeout = time.Second * 5
+	this.timeout = time.Second * 1
 }
 
 func (this *SuiteTCPConnect) TearDownSuite() {
@@ -44,7 +44,30 @@ func (this *SuiteTCPConnect) TestNewTCPConnect() {
 }
 
 func (this *SuiteTCPConnect) TestStart() {
-	// TODO: 單元測試
+	valid := false
+	target := NewTCPConnect(this.ip, this.port, this.timeout)
+	target.Start(func(session Sessioner, err error) {
+		if session != nil && err == nil {
+			valid = true
+			fmt.Printf("remote addr: %s\n", session.RemoteAddr().String())
+			fmt.Printf("local addr: %s\n", session.LocalAddr().String())
+		} // if
+	})
+	assert.True(this.T(), valid)
+
+	valid = false
+	target = NewTCPConnect("!?", this.port, this.timeout)
+	target.Start(func(session Sessioner, err error) {
+		valid = session != nil && err == nil
+	})
+	assert.False(this.T(), valid)
+
+	valid = false
+	target = NewTCPConnect(this.ip, 10000, this.timeout)
+	target.Start(func(session Sessioner, err error) {
+		valid = session != nil && err == nil
+	})
+	assert.False(this.T(), valid)
 }
 
 func (this *SuiteTCPConnect) TestAddress() {
@@ -52,5 +75,5 @@ func (this *SuiteTCPConnect) TestAddress() {
 	addr, err := target.Address()
 	assert.Nil(this.T(), err)
 	assert.NotEmpty(this.T(), addr.String())
-	fmt.Printf("%s:%d >>> %s\n", this.ip, this.port, addr.String())
+	fmt.Printf("%s#%d: %s\n", this.ip, this.port, addr.String())
 }
