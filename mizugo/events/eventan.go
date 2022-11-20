@@ -29,9 +29,9 @@ type event struct {
 // Initialize 初始化處理, 由於初始化完成後就會開始處理事件, 因此可能需要在初始化之前做完訂閱事件
 func (this *Eventan) Initialize() {
 	go func() {
-		for e := range this.event {
-			if e != nil {
-				this.pubsub.Pub(e.name, e.param)
+		for itor := range this.event {
+			if itor != nil {
+				this.pubsub.Pub(itor.name, itor.param)
 			} else {
 				return // 當收到空物件時表示結束事件循環
 			} // if
