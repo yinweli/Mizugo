@@ -2,6 +2,7 @@ package nets
 
 import (
 	"fmt"
+	"net"
 	"testing"
 	"time"
 
@@ -20,14 +21,14 @@ type SuiteTCPConnect struct {
 	suite.Suite
 	testdata.TestEnv
 	ip      string
-	port    int
+	port    string
 	timeout time.Duration
 }
 
 func (this *SuiteTCPConnect) SetupSuite() {
 	this.Change("test-tcpConnect")
 	this.ip = "google.com"
-	this.port = 80
+	this.port = "80"
 	this.timeout = time.Second
 }
 
@@ -63,7 +64,7 @@ func (this *SuiteTCPConnect) TestStart() {
 	assert.False(this.T(), valid)
 
 	valid = false
-	target = NewTCPConnect(this.ip, 3000, this.timeout)
+	target = NewTCPConnect(this.ip, "3000", this.timeout) // 故意連線到不開放的埠號才會引發錯誤
 	target.Start(func(session Sessioner, err error) {
 		valid = session != nil && err == nil
 	})
@@ -72,8 +73,5 @@ func (this *SuiteTCPConnect) TestStart() {
 
 func (this *SuiteTCPConnect) TestAddress() {
 	target := NewTCPConnect(this.ip, this.port, this.timeout)
-	addr, err := target.Address()
-	assert.Nil(this.T(), err)
-	assert.NotEmpty(this.T(), addr.String())
-	fmt.Printf("%s#%d: %s\n", this.ip, this.port, addr.String())
+	assert.Equal(this.T(), net.JoinHostPort(this.ip, this.port), target.Address())
 }

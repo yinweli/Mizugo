@@ -2,6 +2,7 @@ package nets
 
 import (
 	"fmt"
+	"net"
 	"testing"
 	"time"
 
@@ -21,14 +22,14 @@ type SuiteTCPListen struct {
 	suite.Suite
 	testdata.TestEnv
 	ip      string
-	port    int
+	port    string
 	timeout time.Duration
 }
 
 func (this *SuiteTCPListen) SetupSuite() {
 	this.Change("test-tcpListen")
 	this.ip = ""
-	this.port = 3001
+	this.port = "3001"
 	this.timeout = time.Second
 }
 
@@ -76,8 +77,5 @@ func (this *SuiteTCPListen) TestStartStop() {
 
 func (this *SuiteTCPListen) TestAddress() {
 	target := NewTCPListen(this.ip, this.port)
-	addr, err := target.Address()
-	assert.Nil(this.T(), err)
-	assert.NotEmpty(this.T(), addr.String())
-	fmt.Printf("%s#%d: %s\n", this.ip, this.port, addr.String())
+	assert.Equal(this.T(), net.JoinHostPort(this.ip, this.port), target.Address())
 }

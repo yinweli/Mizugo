@@ -6,10 +6,10 @@ import (
 )
 
 // NewEventan 建立事件管理器
-func NewEventan(bufferSize int) *Eventan {
+func NewEventan(channelSize int) *Eventan {
 	return &Eventan{
 		pubsub: NewPubsub(),
-		event:  make(chan *event, bufferSize),
+		event:  make(chan *event, channelSize),
 	}
 }
 
