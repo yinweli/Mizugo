@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Planning]
 
+### 管理器命名
+從 xxxxan 改成 xxxxmgr
+
 ### 實體
 核心組件, 包含實體編號, 名稱, 模組管理器, 事件管理器, 接收管理器, 傳送管理器
 接收管理器分為單緒或是多緒, 如果是客戶端實體就用單緒, 伺服器實體就用多緒

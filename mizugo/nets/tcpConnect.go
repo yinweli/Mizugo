@@ -20,7 +20,7 @@ type TCPConnect struct {
 	timeout time.Duration // 逾時時間
 }
 
-// Start 啟動連接, 若不是使用多執行緒啟動, 則可能被阻塞在這裡直到連接成功
+// Start 啟動連接, 若不是使用多執行緒啟動, 則會被阻塞在這裡直到連接成功
 func (this *TCPConnect) Start(complete Complete) {
 	conn, err := net.DialTimeout("tcp", this.address, this.timeout)
 

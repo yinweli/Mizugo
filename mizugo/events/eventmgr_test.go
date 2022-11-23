@@ -12,39 +12,39 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestEventan(t *testing.T) {
-	suite.Run(t, new(SuiteEventan))
+func TestEventmgr(t *testing.T) {
+	suite.Run(t, new(SuiteEventmgr))
 }
 
-type SuiteEventan struct {
+type SuiteEventmgr struct {
 	suite.Suite
 	testdata.TestEnv
 }
 
-func (this *SuiteEventan) SetupSuite() {
-	this.Change("test-eventan")
+func (this *SuiteEventmgr) SetupSuite() {
+	this.Change("test-eventmgr")
 }
 
-func (this *SuiteEventan) TearDownSuite() {
+func (this *SuiteEventmgr) TearDownSuite() {
 	this.Restore()
 }
 
-func (this *SuiteEventan) TearDownTest() {
+func (this *SuiteEventmgr) TearDownTest() {
 	goleak.VerifyNone(this.T())
 }
 
-func (this *SuiteEventan) TestNewEventan() {
-	assert.NotNil(this.T(), NewEventan(1))
+func (this *SuiteEventmgr) TestNewEventmgr() {
+	assert.NotNil(this.T(), NewEventmgr(1))
 }
 
-func (this *SuiteEventan) TestEventan() {
-	target := NewEventan(1)
+func (this *SuiteEventmgr) TestEventmgr() {
+	target := NewEventmgr(1)
 	target.Initialize()
 	target.Finalize()
 }
 
-func (this *SuiteEventan) TestPubOnce() {
-	target := NewEventan(10)
+func (this *SuiteEventmgr) TestPubOnce() {
+	target := NewEventmgr(10)
 	target.Initialize()
 	defer target.Finalize()
 
@@ -59,8 +59,8 @@ func (this *SuiteEventan) TestPubOnce() {
 	assert.True(this.T(), valid.Load())
 }
 
-func (this *SuiteEventan) TestPubFixed() {
-	target := NewEventan(10)
+func (this *SuiteEventmgr) TestPubFixed() {
+	target := NewEventmgr(10)
 	target.Initialize()
 	defer target.Finalize()
 

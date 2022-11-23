@@ -1,7 +1,6 @@
 package nets
 
 import (
-	"fmt"
 	"net"
 	"testing"
 	"time"
@@ -10,7 +9,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 
-	"github.com/yinweli/Mizugo/mizugo/utils"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -46,33 +44,27 @@ func (this *SuiteTCPListen) TestNewTCPListen() {
 }
 
 func (this *SuiteTCPListen) TestStartStop() {
-	timeout := utils.NewWaitTimeout(this.timeout)
+	sessionl := newTestSession("sessionl", this.timeout)
+	sessionc := newTestSession("sessionc", this.timeout)
 	target := NewTCPListen(this.ip, this.port)
-	go target.Start(func(session Sessioner, err error) {
-		if session != nil && err == nil {
-			timeout.Done()
-			fmt.Printf("remote addr: %s\n", session.RemoteAddr().String())
-			fmt.Printf("local addr: %s\n", session.LocalAddr().String())
-		} // if
-	})
+	go target.Start(sessionl.Complete)
 	client := NewTCPConnect(this.ip, this.port, this.timeout)
-	client.Start(func(session Sessioner, err error) {})
-	assert.True(this.T(), timeout.Wait())
+	go client.Start(sessionc.Complete)
+	assert.True(this.T(), sessionl.Wait())
+	assert.True(this.T(), sessionc.Wait())
 	assert.Nil(this.T(), target.Stop())
 
-	valid := false
+	session := newTestSession("session", this.timeout)
 	target = NewTCPListen("!?", this.port)
-	target.Start(func(session Sessioner, err error) {
-		valid = session != nil && err == nil
-	})
-	assert.False(this.T(), valid)
+	target.Start(session.Complete)
+	assert.True(this.T(), session.Wait())
+	assert.NotNil(this.T(), session.Error())
 
-	valid = false
+	session = newTestSession("session", this.timeout)
 	target = NewTCPListen("192.168.0.1", this.port) // 故意要監聽錯誤位址才會引發錯誤
-	target.Start(func(session Sessioner, err error) {
-		valid = session != nil && err == nil
-	})
-	assert.False(this.T(), valid)
+	target.Start(session.Complete)
+	assert.True(this.T(), session.Wait())
+	assert.NotNil(this.T(), session.Error())
 }
 
 func (this *SuiteTCPListen) TestAddress() {

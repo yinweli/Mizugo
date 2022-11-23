@@ -1,7 +1,6 @@
 package nets
 
 import (
-	"fmt"
 	"net"
 	"testing"
 	"time"
@@ -45,30 +44,24 @@ func (this *SuiteTCPConnect) TestNewTCPConnect() {
 }
 
 func (this *SuiteTCPConnect) TestStart() {
-	valid := false
+	session := newTestSession("session", this.timeout)
 	target := NewTCPConnect(this.ip, this.port, this.timeout)
-	target.Start(func(session Sessioner, err error) {
-		if session != nil && err == nil {
-			valid = true
-			fmt.Printf("remote addr: %s\n", session.RemoteAddr().String())
-			fmt.Printf("local addr: %s\n", session.LocalAddr().String())
-		} // if
-	})
-	assert.True(this.T(), valid)
+	target.Start(session.Complete)
+	assert.True(this.T(), session.Wait())
+	assert.Nil(this.T(), session.Error())
+	assert.NotNil(this.T(), session.Session())
 
-	valid = false
+	session = newTestSession("session", this.timeout)
 	target = NewTCPConnect("!?", this.port, this.timeout)
-	target.Start(func(session Sessioner, err error) {
-		valid = session != nil && err == nil
-	})
-	assert.False(this.T(), valid)
+	target.Start(session.Complete)
+	assert.True(this.T(), session.Wait())
+	assert.NotNil(this.T(), session.Error())
 
-	valid = false
+	session = newTestSession("session", this.timeout)
 	target = NewTCPConnect(this.ip, "3000", this.timeout) // 故意連線到不開放的埠號才會引發錯誤
-	target.Start(func(session Sessioner, err error) {
-		valid = session != nil && err == nil
-	})
-	assert.False(this.T(), valid)
+	target.Start(session.Complete)
+	assert.True(this.T(), session.Wait())
+	assert.NotNil(this.T(), session.Error())
 }
 
 func (this *SuiteTCPConnect) TestAddress() {

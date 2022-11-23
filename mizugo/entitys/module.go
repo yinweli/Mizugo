@@ -12,17 +12,6 @@ func NewModule(moduleID ModuleID, name string) *Module {
 	}
 }
 
-// Module 模組資料
-type Module struct {
-	moduleID ModuleID      // 模組編號
-	name     string        // 模組名稱
-	entity   *Entity       // 實體物件
-	fixed    *events.Fixed // 定時事件物件
-}
-
-// ModuleID 模組編號
-type ModuleID int64
-
 // Moduler 模組介面
 type Moduler interface {
 	// ModuleID 取得模組編號
@@ -34,14 +23,8 @@ type Moduler interface {
 	// Entity 取得實體物件
 	Entity() *Entity
 
-	// Host 設定宿主實體
-	Host(entity *Entity)
-
-	// Fixed 設定定時控制器
-	Fixed(fixed *events.Fixed)
-
-	// FixedStop 停止定時控制器
-	FixedStop()
+	// Internal 取得內部物件
+	Internal() *Internal
 }
 
 // Awaker awake介面
@@ -68,6 +51,16 @@ type Updater interface {
 	Update()
 }
 
+// Module 模組資料
+type Module struct {
+	moduleID ModuleID // 模組編號
+	name     string   // 模組名稱
+	internal Internal // 內部物件
+}
+
+// ModuleID 模組編號
+type ModuleID int64
+
 // ModuleID 取得模組編號
 func (this *Module) ModuleID() ModuleID {
 	return this.moduleID
@@ -80,22 +73,23 @@ func (this *Module) Name() string {
 
 // Entity 取得實體物件
 func (this *Module) Entity() *Entity {
-	return this.entity
+	return this.internal.entity
 }
 
-// Host 設定宿主實體
-func (this *Module) Host(entity *Entity) {
-	this.entity = entity
+// Internal 取得內部物件
+func (this *Module) Internal() *Internal {
+	return &this.internal
 }
 
-// Fixed 設定定時控制器
-func (this *Module) Fixed(fixed *events.Fixed) {
-	this.fixed = fixed
+// Internal 內部資料
+type Internal struct {
+	entity *Entity       // 實體物件
+	update *events.Fixed // update事件定時物件
 }
 
-// FixedStop 停止定時控制器
-func (this *Module) FixedStop() {
-	if this.fixed != nil {
-		this.fixed.Stop()
+// updateStop 停止update事件定時
+func (this *Internal) updateStop() {
+	if this.update != nil {
+		this.update.Stop()
 	} // if
 }
