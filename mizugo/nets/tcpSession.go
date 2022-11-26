@@ -7,6 +7,7 @@ import (
 	"io"
 	"net"
 	"sync"
+	"sync/atomic"
 )
 
 const tcpHeaderSize = 2               // 標頭長度
@@ -15,27 +16,27 @@ const tcpPacketSize = int(^uint16(0)) // 封包長度
 // NewTCPSession 建立tcp會話器
 func NewTCPSession(conn net.Conn) *TCPSession {
 	return &TCPSession{
-		conn: conn,
+		conn:   conn,
+		convey: make(chan []byte, conveySize),
 	}
 }
 
 // TCPSession tcp會話器
 type TCPSession struct {
 	conn      net.Conn       // 連接物件
-	sessionID SessionID      // 會話編號
-	receive   Receive        // 接收函式
-	inform    Inform         // 通知函式
 	convey    chan []byte    // 傳送通道
 	signal    sync.WaitGroup // 通知信號
+	sessionID atomic.Int64   // 會話編號
+	receive   Receive        // 接收函式
+	inform    Inform         // 通知函式
 }
 
 // Start 啟動會話, 當由連接器/監聽器獲得會話器之後, 需要啟動會話才可以傳送或接收封包; 若不是使用多執行緒啟動, 則會被阻塞在這裡直到會話結束
-func (this *TCPSession) Start(sessionID SessionID, receive Receive, inform Inform, channelSize int) {
-	this.sessionID = sessionID
+func (this *TCPSession) Start(sessionID SessionID, receive Receive, inform Inform) {
+	this.signal.Add(2) // 等待接收循環與傳送循環結束
+	this.sessionID.Store(sessionID)
 	this.receive = receive
 	this.inform = inform
-	this.convey = make(chan []byte, channelSize)
-	this.signal.Add(2) // 等待接收循環與傳送循環結束
 
 	go this.recvLoop()
 	go this.sendLoop()
@@ -64,7 +65,7 @@ func (this *TCPSession) Send(packet []byte) {
 
 // SessionID 取得會話編號
 func (this *TCPSession) SessionID() SessionID {
-	return this.sessionID
+	return this.sessionID.Load()
 }
 
 // RemoteAddr 取得遠端位址
