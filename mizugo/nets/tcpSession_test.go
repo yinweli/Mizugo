@@ -47,75 +47,96 @@ func (this *SuiteTCPSession) TestNewTCPSession() {
 }
 
 func (this *SuiteTCPSession) TestStartStop() {
-	sessionl := newTestSession("sessionl", this.timeout)
-	sessionc := newTestSession("sessionc", this.timeout)
+	sessionl := newTestSession("session server", this.timeout)
 	listen := NewTCPListen(this.ip, this.port)
 	go listen.Start(sessionl.Complete)
+
+	time.Sleep(this.timeout)
+
+	sessionc := newTestSession("session client", this.timeout)
 	client := NewTCPConnect(this.ip, this.port, this.timeout)
 	go client.Start(sessionc.Complete)
+
 	assert.True(this.T(), sessionl.Wait())
-	assert.True(this.T(), sessionc.Wait())
 	assert.NotNil(this.T(), sessionl.Session())
-	assert.NotNil(this.T(), sessionc.Session())
 	go sessionl.Session().Start(SessionID(0), sessionl.Receive, sessionl.Inform, this.channelSize)
+
+	assert.True(this.T(), sessionc.Wait())
+	assert.NotNil(this.T(), sessionc.Session())
 	go sessionc.Session().Start(SessionID(1), sessionc.Receive, sessionc.Inform, this.channelSize)
-	time.Sleep(time.Millisecond * 100)
+
+	time.Sleep(this.timeout)
 	sessionl.Session().Stop()
 	sessionc.Session().StopWait()
-	time.Sleep(time.Millisecond * 100)
+	time.Sleep(this.timeout)
 	assert.Nil(this.T(), listen.Stop())
 }
 
 func (this *SuiteTCPSession) TestSend() {
-	sessionl := newTestSession("sessionl", this.timeout)
-	sessionc := newTestSession("sessionc", this.timeout)
+	sessionl := newTestSession("session server", this.timeout)
 	listen := NewTCPListen(this.ip, this.port)
 	go listen.Start(sessionl.Complete)
+
+	time.Sleep(this.timeout)
+
+	sessionc := newTestSession("session client", this.timeout)
 	client := NewTCPConnect(this.ip, this.port, this.timeout)
 	go client.Start(sessionc.Complete)
+
 	assert.True(this.T(), sessionl.Wait())
-	assert.True(this.T(), sessionc.Wait())
 	assert.NotNil(this.T(), sessionl.Session())
-	assert.NotNil(this.T(), sessionc.Session())
 	go sessionl.Session().Start(SessionID(0), sessionl.Receive, sessionl.Inform, this.channelSize)
+
+	assert.True(this.T(), sessionc.Wait())
+	assert.NotNil(this.T(), sessionc.Session())
 	go sessionc.Session().Start(SessionID(1), sessionc.Receive, sessionc.Inform, this.channelSize)
-	time.Sleep(time.Millisecond * 100)
+
+	time.Sleep(this.timeout)
 	sessionl.Session().Send([]byte("send packet"))
-	time.Sleep(time.Millisecond * 100)
+	time.Sleep(this.timeout)
 	assert.Equal(this.T(), "send packet", string(sessionc.Packet()))
-	time.Sleep(time.Millisecond * 100)
+
+	time.Sleep(this.timeout)
 	sessionl.Session().StopWait()
 	sessionc.Session().StopWait()
-	time.Sleep(time.Millisecond * 100)
+	time.Sleep(this.timeout)
 	assert.Nil(this.T(), listen.Stop())
 }
 
 func (this *SuiteTCPSession) TestSessionID() {
-	sessionl := newTestSession("sessionl", this.timeout)
-	sessionc := newTestSession("sessionc", this.timeout)
+	sessionl := newTestSession("session server", this.timeout)
 	listen := NewTCPListen(this.ip, this.port)
 	go listen.Start(sessionl.Complete)
+
+	time.Sleep(this.timeout)
+
+	sessionc := newTestSession("session client", this.timeout)
 	client := NewTCPConnect(this.ip, this.port, this.timeout)
 	go client.Start(sessionc.Complete)
+
 	assert.True(this.T(), sessionl.Wait())
-	assert.True(this.T(), sessionc.Wait())
 	assert.NotNil(this.T(), sessionl.Session())
-	assert.NotNil(this.T(), sessionc.Session())
 	go sessionl.Session().Start(SessionID(0), sessionl.Receive, sessionl.Inform, this.channelSize)
+
+	assert.True(this.T(), sessionc.Wait())
+	assert.NotNil(this.T(), sessionc.Session())
 	go sessionc.Session().Start(SessionID(1), sessionc.Receive, sessionc.Inform, this.channelSize)
-	time.Sleep(time.Millisecond * 100)
+
+	time.Sleep(this.timeout)
 	assert.Equal(this.T(), SessionID(0), sessionl.Session().SessionID())
 	assert.Equal(this.T(), SessionID(1), sessionc.Session().SessionID())
+
+	time.Sleep(this.timeout)
 	sessionl.Session().Stop()
 	sessionc.Session().StopWait()
-	time.Sleep(time.Millisecond * 100)
+	time.Sleep(this.timeout)
 	assert.Nil(this.T(), listen.Stop())
 }
 
 func newTestSession(name string, timeout time.Duration) *testSession {
 	return &testSession{
 		name:    name,
-		timeout: utils.NewWaitTimeout(timeout),
+		timeout: utils.NewWaitTimeout(timeout * 2),
 	}
 }
 
