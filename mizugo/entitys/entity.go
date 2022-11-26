@@ -3,6 +3,7 @@ package entitys
 import (
 	"fmt"
 	"sync/atomic"
+	"time"
 
 	"github.com/yinweli/Mizugo/mizugo/events"
 )
@@ -10,20 +11,20 @@ import (
 // NewEntity 建立實體資料
 func NewEntity(entityID EntityID, name string) *Entity {
 	return &Entity{
-		entityID: entityID,
-		name:     name,
-		modulean: NewModulean(),
-		eventan:  events.NewEventan(processEvent),
+		entityID:  entityID,
+		name:      name,
+		modulemgr: NewModulemgr(),
+		eventmgr:  events.NewEventmgr(eventSize),
 	}
 }
 
 // Entity 實體資料
 type Entity struct {
-	entityID EntityID        // 實體編號
-	name     string          // 實體名稱
-	enable   atomic.Bool     // 啟用旗標
-	modulean *Modulean       // 模組管理器
-	eventan  *events.Eventan // 事件管理器
+	entityID  EntityID         // 實體編號
+	name      string           // 實體名稱
+	enable    atomic.Bool      // 啟用旗標
+	modulemgr *Modulemgr       // 模組管理器
+	eventmgr  *events.Eventmgr // 事件管理器
 }
 
 // EntityID 實體編號
@@ -41,16 +42,16 @@ func (this *Entity) Name() string {
 
 // AddModule 新增模組
 func (this *Entity) AddModule(module Moduler) error {
-	if err := this.modulean.Add(module); err != nil {
+	if err := this.modulemgr.Add(module); err != nil {
 		return fmt.Errorf("entity add module: %w", err)
 	} // if
 
-	module.Host(this)
+	module.Internal().entity = this
 
 	if this.enable.Load() {
-		this.eventan.InvokeAwake(module)
-		this.eventan.InvokeStart(module)
-		this.eventan.InvokeUpdate(module, updateInterval)
+		this.eventmgr.PubOnce(eventAwake, module)
+		this.eventmgr.PubOnce(eventStart, module)
+		module.Internal().update = this.eventmgr.PubFixed(eventUpdate, module, updateInterval)
 	} // if
 
 	return nil
@@ -58,8 +59,9 @@ func (this *Entity) AddModule(module Moduler) error {
 
 // DelModule 刪除模組
 func (this *Entity) DelModule(moduleID ModuleID) Moduler {
-	if module := this.modulean.Del(moduleID); module != nil {
-		this.eventan.InvokeDispose(module)
+	if module := this.modulemgr.Del(moduleID); module != nil {
+		this.eventmgr.PubOnce(eventDispose, module)
+		module.Internal().updateStop()
 		return module
 	} // if
 
@@ -68,58 +70,83 @@ func (this *Entity) DelModule(moduleID ModuleID) Moduler {
 
 // GetModule 取得模組
 func (this *Entity) GetModule(moduleID ModuleID) Moduler {
-	return this.modulean.Get(moduleID)
+	return this.modulemgr.Get(moduleID)
 }
 
-// initialize 初始化處理 TODO: 單元測試
+// SubEvent 訂閱事件, 由於初始化完成後就會開始處理事件, 因此可能需要在初始化之前做完訂閱事件
+func (this *Entity) SubEvent(name string, process events.Process) {
+	this.eventmgr.Sub(name, process)
+}
+
+// PubOnceEvent 發布單次事件
+func (this *Entity) PubOnceEvent(name string, param any) {
+	this.eventmgr.PubOnce(name, param)
+}
+
+// PubFixedEvent 發布定時事件, 回傳用於停止定時事件的控制物件
+func (this *Entity) PubFixedEvent(name string, param any, interval time.Duration) *events.Fixed {
+	return this.eventmgr.PubFixed(name, param, interval)
+}
+
+// initialize 初始化處理
 func (this *Entity) initialize() {
 	if this.enable.CompareAndSwap(false, true) {
-		this.eventan.Initialize()
-		module := this.modulean.All()
+		this.eventmgr.Sub(eventAwake, processAwake)
+		this.eventmgr.Sub(eventStart, processStart)
+		this.eventmgr.Sub(eventDispose, processDispose)
+		this.eventmgr.Sub(eventUpdate, processUpdate)
+		this.eventmgr.Initialize()
+		module := this.modulemgr.All()
 
 		for _, itor := range module {
-			this.eventan.InvokeAwake(itor)
+			this.eventmgr.PubOnce(eventAwake, itor)
 		} // for
 
 		for _, itor := range module {
-			this.eventan.InvokeStart(itor)
+			this.eventmgr.PubOnce(eventStart, itor)
 		} // for
 
 		for _, itor := range module {
-			this.eventan.InvokeUpdate(itor, updateInterval)
+			itor.Internal().update = this.eventmgr.PubFixed(eventUpdate, itor, updateInterval)
 		} // for
 	} // if
 }
 
-// finalize 結束處理 TODO: 單元測試
+// finalize 結束處理
 func (this *Entity) finalize() {
+	for _, itor := range this.modulemgr.All() {
+		this.eventmgr.PubOnce(eventDispose, itor)
+		itor.Internal().updateStop()
+	} // for
+
 	this.enable.Store(false)
-	this.eventan.Finalize()
+	this.eventmgr.Finalize()
 }
 
-// processEvent 事件處理 TODO: 單元測試
-func processEvent(event any) {
-	if e, ok := event.(*events.Awake); ok {
-		if module, ok := e.Param.(ModuleAwake); ok {
-			module.Awake()
-		} // if
+// processAwake 處理awake事件
+func processAwake(param any) {
+	if module, ok := param.(Awaker); ok {
+		module.Awake()
 	} // if
+}
 
-	if e, ok := event.(*events.Start); ok {
-		if module, ok := e.Param.(ModuleStart); ok {
-			module.Start()
-		} // if
+// processStart 處理start事件
+func processStart(param any) {
+	if module, ok := param.(Starter); ok {
+		module.Start()
 	} // if
+}
 
-	if e, ok := event.(*events.Dispose); ok {
-		if module, ok := e.Param.(ModuleDispose); ok {
-			module.Dispose()
-		} // if
+// processDispose 處理dispose事件
+func processDispose(param any) {
+	if module, ok := param.(Disposer); ok {
+		module.Dispose()
 	} // if
+}
 
-	if e, ok := event.(*events.Update); ok {
-		if module, ok := e.Param.(ModuleUpdate); ok {
-			module.Update()
-		} // if
+// processUpdate 處理update事件
+func processUpdate(param any) {
+	if module, ok := param.(Updater); ok {
+		module.Update()
 	} // if
 }

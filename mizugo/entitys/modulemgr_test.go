@@ -10,33 +10,33 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestModulean(t *testing.T) {
-	suite.Run(t, new(SuiteModulean))
+func TestModulemgr(t *testing.T) {
+	suite.Run(t, new(SuiteModulemgr))
 }
 
-type SuiteModulean struct {
+type SuiteModulemgr struct {
 	suite.Suite
 	testdata.TestEnv
 }
 
-func (this *SuiteModulean) SetupSuite() {
-	this.Change("test-modulean")
+func (this *SuiteModulemgr) SetupSuite() {
+	this.Change("test-modulemgr")
 }
 
-func (this *SuiteModulean) TearDownSuite() {
+func (this *SuiteModulemgr) TearDownSuite() {
 	this.Restore()
 }
 
-func (this *SuiteModulean) TearDownTest() {
+func (this *SuiteModulemgr) TearDownTest() {
 	goleak.VerifyNone(this.T())
 }
 
-func (this *SuiteModulean) TestNewModulean() {
-	assert.NotNil(this.T(), NewModulean())
+func (this *SuiteModulemgr) TestNewModulemgr() {
+	assert.NotNil(this.T(), NewModulemgr())
 }
 
-func (this *SuiteModulean) TestAdd() {
-	target := NewModulean()
+func (this *SuiteModulemgr) TestAdd() {
+	target := NewModulemgr()
 
 	assert.Nil(this.T(), target.Add(NewModule(ModuleID(1), "module")))
 	assert.NotNil(this.T(), target.Get(ModuleID(1)))
@@ -44,8 +44,8 @@ func (this *SuiteModulean) TestAdd() {
 	assert.NotNil(this.T(), target.Add(NewModule(ModuleID(1), "module")))
 }
 
-func (this *SuiteModulean) TestDel() {
-	target := NewModulean()
+func (this *SuiteModulemgr) TestDel() {
+	target := NewModulemgr()
 
 	assert.Nil(this.T(), target.Add(NewModule(ModuleID(1), "module")))
 	module := target.Del(ModuleID(1))
@@ -57,8 +57,8 @@ func (this *SuiteModulean) TestDel() {
 	assert.Nil(this.T(), target.Del(ModuleID(1)))
 }
 
-func (this *SuiteModulean) TestGet() {
-	target := NewModulean()
+func (this *SuiteModulemgr) TestGet() {
+	target := NewModulemgr()
 
 	assert.Nil(this.T(), target.Add(NewModule(ModuleID(1), "module")))
 	module := target.Get(ModuleID(1))
@@ -69,8 +69,8 @@ func (this *SuiteModulean) TestGet() {
 	assert.Nil(this.T(), target.Get(ModuleID(2)))
 }
 
-func (this *SuiteModulean) TestAll() {
-	target := NewModulean()
+func (this *SuiteModulemgr) TestAll() {
+	target := NewModulemgr()
 
 	assert.Nil(this.T(), target.Add(NewModule(ModuleID(1), "module1")))
 	assert.Nil(this.T(), target.Add(NewModule(ModuleID(2), "module2")))
@@ -82,8 +82,8 @@ func (this *SuiteModulean) TestAll() {
 	assert.Equal(this.T(), "module2", module[1].Name())
 }
 
-func (this *SuiteModulean) TestCount() {
-	target := NewModulean()
+func (this *SuiteModulemgr) TestCount() {
+	target := NewModulemgr()
 
 	assert.Nil(this.T(), target.Add(NewModule(ModuleID(1), "module1")))
 	assert.Nil(this.T(), target.Add(NewModule(ModuleID(2), "module2")))

@@ -10,33 +10,33 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestEntityan(t *testing.T) {
-	suite.Run(t, new(SuiteEntityan))
+func TestEntitymgr(t *testing.T) {
+	suite.Run(t, new(SuiteEntitymgr))
 }
 
-type SuiteEntityan struct {
+type SuiteEntitymgr struct {
 	suite.Suite
 	testdata.TestEnv
 }
 
-func (this *SuiteEntityan) SetupSuite() {
-	this.Change("test-entityan")
+func (this *SuiteEntitymgr) SetupSuite() {
+	this.Change("test-entitymgr")
 }
 
-func (this *SuiteEntityan) TearDownSuite() {
+func (this *SuiteEntitymgr) TearDownSuite() {
 	this.Restore()
 }
 
-func (this *SuiteEntityan) TearDownTest() {
+func (this *SuiteEntitymgr) TearDownTest() {
 	goleak.VerifyNone(this.T())
 }
 
-func (this *SuiteEntityan) TestNewEntityan() {
-	assert.NotNil(this.T(), NewEntityan())
+func (this *SuiteEntitymgr) TestNewEntitymgr() {
+	assert.NotNil(this.T(), NewEntitymgr())
 }
 
-func (this *SuiteEntityan) TestClear() {
-	target := NewEntityan()
+func (this *SuiteEntitymgr) TestClear() {
+	target := NewEntitymgr()
 	defer target.Clear()
 
 	assert.Nil(this.T(), target.Add(NewEntity(EntityID(1), "entity")))
@@ -45,8 +45,8 @@ func (this *SuiteEntityan) TestClear() {
 	assert.Equal(this.T(), 0, target.Count())
 }
 
-func (this *SuiteEntityan) TestAdd() {
-	target := NewEntityan()
+func (this *SuiteEntitymgr) TestAdd() {
+	target := NewEntitymgr()
 	defer target.Clear()
 
 	assert.Nil(this.T(), target.Add(NewEntity(EntityID(1), "entity")))
@@ -55,8 +55,8 @@ func (this *SuiteEntityan) TestAdd() {
 	assert.NotNil(this.T(), target.Add(NewEntity(EntityID(1), "entity")))
 }
 
-func (this *SuiteEntityan) TestDel() {
-	target := NewEntityan()
+func (this *SuiteEntitymgr) TestDel() {
+	target := NewEntitymgr()
 	defer target.Clear()
 
 	assert.Nil(this.T(), target.Add(NewEntity(EntityID(1), "entity")))
@@ -69,8 +69,8 @@ func (this *SuiteEntityan) TestDel() {
 	assert.Nil(this.T(), target.Del(EntityID(2)))
 }
 
-func (this *SuiteEntityan) TestGet() {
-	target := NewEntityan()
+func (this *SuiteEntitymgr) TestGet() {
+	target := NewEntitymgr()
 	defer target.Clear()
 
 	assert.Nil(this.T(), target.Add(NewEntity(EntityID(1), "entity")))
@@ -82,8 +82,8 @@ func (this *SuiteEntityan) TestGet() {
 	assert.Nil(this.T(), target.Get(EntityID(2)))
 }
 
-func (this *SuiteEntityan) TestAll() {
-	target := NewEntityan()
+func (this *SuiteEntitymgr) TestAll() {
+	target := NewEntitymgr()
 	defer target.Clear()
 
 	assert.Nil(this.T(), target.Add(NewEntity(EntityID(1), "entity1")))
@@ -96,8 +96,8 @@ func (this *SuiteEntityan) TestAll() {
 	assert.Equal(this.T(), "entity2", entity[1].Name())
 }
 
-func (this *SuiteEntityan) TestCount() {
-	target := NewEntityan()
+func (this *SuiteEntitymgr) TestCount() {
+	target := NewEntitymgr()
 	defer target.Clear()
 
 	assert.Nil(this.T(), target.Add(NewEntity(EntityID(1), "entity1")))

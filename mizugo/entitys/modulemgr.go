@@ -6,27 +6,27 @@ import (
 	"sync"
 )
 
-// NewModulean 建立模組管理器
-func NewModulean() *Modulean {
-	return &Modulean{
+// NewModulemgr 建立模組管理器
+func NewModulemgr() *Modulemgr {
+	return &Modulemgr{
 		data: map[ModuleID]Moduler{},
 	}
 }
 
-// Modulean 模組管理器
-type Modulean struct {
+// Modulemgr 模組管理器
+type Modulemgr struct {
 	data map[ModuleID]Moduler // 模組列表
 	lock sync.Mutex           // 執行緒鎖
 }
 
 // Add 新增模組
-func (this *Modulean) Add(module Moduler) error {
+func (this *Modulemgr) Add(module Moduler) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	moduleID := module.ModuleID()
 
 	if _, ok := this.data[moduleID]; ok {
-		return fmt.Errorf("modulean add: duplicate moduleID")
+		return fmt.Errorf("modulemgr add: duplicate moduleID")
 	} // if
 
 	this.data[moduleID] = module
@@ -34,7 +34,7 @@ func (this *Modulean) Add(module Moduler) error {
 }
 
 // Del 刪除模組
-func (this *Modulean) Del(moduleID ModuleID) Moduler {
+func (this *Modulemgr) Del(moduleID ModuleID) Moduler {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -47,7 +47,7 @@ func (this *Modulean) Del(moduleID ModuleID) Moduler {
 }
 
 // Get 取得模組
-func (this *Modulean) Get(moduleID ModuleID) Moduler {
+func (this *Modulemgr) Get(moduleID ModuleID) Moduler {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -55,7 +55,7 @@ func (this *Modulean) Get(moduleID ModuleID) Moduler {
 }
 
 // All 取得模組列表
-func (this *Modulean) All() []Moduler {
+func (this *Modulemgr) All() []Moduler {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	result := []Moduler{}
@@ -71,7 +71,7 @@ func (this *Modulean) All() []Moduler {
 }
 
 // Count 取得模組數量
-func (this *Modulean) Count() int {
+func (this *Modulemgr) Count() int {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
