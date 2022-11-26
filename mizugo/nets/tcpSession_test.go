@@ -2,6 +2,7 @@ package nets
 
 import (
 	"fmt"
+	"sync"
 	"testing"
 	"time"
 
@@ -20,10 +21,9 @@ func TestTCPSession(t *testing.T) {
 type SuiteTCPSession struct {
 	suite.Suite
 	testdata.TestEnv
-	ip          string
-	port        string
-	timeout     time.Duration
-	channelSize int
+	ip      string
+	port    string
+	timeout time.Duration
 }
 
 func (this *SuiteTCPSession) SetupSuite() {
@@ -31,7 +31,6 @@ func (this *SuiteTCPSession) SetupSuite() {
 	this.ip = ""
 	this.port = "3002"
 	this.timeout = time.Second
-	this.channelSize = 10
 }
 
 func (this *SuiteTCPSession) TearDownSuite() {
@@ -47,23 +46,23 @@ func (this *SuiteTCPSession) TestNewTCPSession() {
 }
 
 func (this *SuiteTCPSession) TestStartStop() {
-	sessionl := newTestSession("session server", this.timeout)
+	sessionl := newTestSession(this.timeout, "session server")
 	listen := NewTCPListen(this.ip, this.port)
 	go listen.Start(sessionl.Complete)
 
 	time.Sleep(this.timeout)
 
-	sessionc := newTestSession("session client", this.timeout)
+	sessionc := newTestSession(this.timeout, "session client")
 	client := NewTCPConnect(this.ip, this.port, this.timeout)
 	go client.Start(sessionc.Complete)
 
 	assert.True(this.T(), sessionl.Wait())
 	assert.NotNil(this.T(), sessionl.Session())
-	go sessionl.Session().Start(SessionID(0), sessionl.Receive, sessionl.Inform, this.channelSize)
+	go sessionl.Session().Start(SessionID(0), sessionl.Receive, sessionl.Inform)
 
 	assert.True(this.T(), sessionc.Wait())
 	assert.NotNil(this.T(), sessionc.Session())
-	go sessionc.Session().Start(SessionID(1), sessionc.Receive, sessionc.Inform, this.channelSize)
+	go sessionc.Session().Start(SessionID(1), sessionc.Receive, sessionc.Inform)
 
 	time.Sleep(this.timeout)
 	sessionl.Session().Stop()
@@ -73,23 +72,23 @@ func (this *SuiteTCPSession) TestStartStop() {
 }
 
 func (this *SuiteTCPSession) TestSend() {
-	sessionl := newTestSession("session server", this.timeout)
+	sessionl := newTestSession(this.timeout, "session server")
 	listen := NewTCPListen(this.ip, this.port)
 	go listen.Start(sessionl.Complete)
 
 	time.Sleep(this.timeout)
 
-	sessionc := newTestSession("session client", this.timeout)
+	sessionc := newTestSession(this.timeout, "session client")
 	client := NewTCPConnect(this.ip, this.port, this.timeout)
 	go client.Start(sessionc.Complete)
 
 	assert.True(this.T(), sessionl.Wait())
 	assert.NotNil(this.T(), sessionl.Session())
-	go sessionl.Session().Start(SessionID(0), sessionl.Receive, sessionl.Inform, this.channelSize)
+	go sessionl.Session().Start(SessionID(0), sessionl.Receive, sessionl.Inform)
 
 	assert.True(this.T(), sessionc.Wait())
 	assert.NotNil(this.T(), sessionc.Session())
-	go sessionc.Session().Start(SessionID(1), sessionc.Receive, sessionc.Inform, this.channelSize)
+	go sessionc.Session().Start(SessionID(1), sessionc.Receive, sessionc.Inform)
 
 	time.Sleep(this.timeout)
 	sessionl.Session().Send([]byte("send packet"))
@@ -104,23 +103,23 @@ func (this *SuiteTCPSession) TestSend() {
 }
 
 func (this *SuiteTCPSession) TestSessionID() {
-	sessionl := newTestSession("session server", this.timeout)
+	sessionl := newTestSession(this.timeout, "session server")
 	listen := NewTCPListen(this.ip, this.port)
 	go listen.Start(sessionl.Complete)
 
 	time.Sleep(this.timeout)
 
-	sessionc := newTestSession("session client", this.timeout)
+	sessionc := newTestSession(this.timeout, "session client")
 	client := NewTCPConnect(this.ip, this.port, this.timeout)
 	go client.Start(sessionc.Complete)
 
 	assert.True(this.T(), sessionl.Wait())
 	assert.NotNil(this.T(), sessionl.Session())
-	go sessionl.Session().Start(SessionID(0), sessionl.Receive, sessionl.Inform, this.channelSize)
+	go sessionl.Session().Start(SessionID(0), sessionl.Receive, sessionl.Inform)
 
 	assert.True(this.T(), sessionc.Wait())
 	assert.NotNil(this.T(), sessionc.Session())
-	go sessionc.Session().Start(SessionID(1), sessionc.Receive, sessionc.Inform, this.channelSize)
+	go sessionc.Session().Start(SessionID(1), sessionc.Receive, sessionc.Inform)
 
 	time.Sleep(this.timeout)
 	assert.Equal(this.T(), SessionID(0), sessionl.Session().SessionID())
@@ -133,22 +132,30 @@ func (this *SuiteTCPSession) TestSessionID() {
 	assert.Nil(this.T(), listen.Stop())
 }
 
-func newTestSession(name string, timeout time.Duration) *testSession {
+func newTestSession(timeout time.Duration, name string) *testSession {
 	return &testSession{
+		timeout: utils.NewWaitTimeout(timeout),
 		name:    name,
-		timeout: utils.NewWaitTimeout(timeout * 2),
 	}
 }
 
 type testSession struct {
-	name    string
+	lock    sync.Mutex
 	timeout *utils.WaitTimeout
+	name    string
 	session Sessioner
 	packet  []byte
 	err     error
 }
 
+func (this *testSession) Wait() bool {
+	return this.timeout.Wait()
+}
+
 func (this *testSession) Complete(session Sessioner, err error) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	if err == nil {
 		this.session = session
 		fmt.Printf("%s remote addr: %s\n", this.name, session.RemoteAddr().String())
@@ -162,25 +169,36 @@ func (this *testSession) Complete(session Sessioner, err error) {
 }
 
 func (this *testSession) Receive(packet []byte) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	this.packet = packet
 }
 
 func (this *testSession) Inform(err error) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	this.err = err
 }
 
-func (this *testSession) Wait() bool {
-	return this.timeout.Wait()
-}
-
 func (this *testSession) Session() Sessioner {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	return this.session
 }
 
 func (this *testSession) Packet() []byte {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	return this.packet
 }
 
 func (this *testSession) Error() error {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	return this.err
 }
