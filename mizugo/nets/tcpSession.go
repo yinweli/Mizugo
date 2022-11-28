@@ -93,7 +93,7 @@ func (this *TCPSession) recvLoop() {
 		this.receive(packet)
 	} // for
 
-	this.convey <- nil // 以空封包通知會話結束
+	this.convey <- nil // 以空封包通知會話結束 TODO: 這裡應該要改為[]byte{}來表示空封包
 	this.signal.Done()
 }
 
