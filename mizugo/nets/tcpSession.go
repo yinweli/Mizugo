@@ -12,12 +12,13 @@ import (
 
 const tcpHeaderSize = 2               // 標頭長度
 const tcpPacketSize = int(^uint16(0)) // 封包長度
+const tcpConveySize = 1000            // 傳送通道大小設為1000, 避免因為爆滿而卡住
 
 // NewTCPSession 建立tcp會話器
 func NewTCPSession(conn net.Conn) *TCPSession {
 	return &TCPSession{
 		conn:   conn,
-		convey: make(chan []byte, conveySize),
+		convey: make(chan []byte, tcpConveySize),
 	}
 }
 

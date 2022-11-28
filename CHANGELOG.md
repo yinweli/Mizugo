@@ -92,6 +92,9 @@ https://willh.gitbook.io/build-web-application-with-golang-zhtw/09.0/09.6
 MD5  
 https://blog.csdn.net/skh2015java/article/details/53468434  
 
+### 執行緒池
+使用ants來管理執行緒, 提高效率
+
 ### 日誌機制
 提供接口讓內部的日誌可以輸出到使用者希望的組件上  
 * 日誌介面
@@ -132,8 +135,10 @@ TODO: 資料庫機制還可以再細分
 * 實體-模組機制
 * 事件管理器
 * 網路機制
-* 管線機制
+* 封包機制
+* 處理機制
 * 加解密+MD5
+* 執行緒池
 * unity客戶端
 * 網路驗證測試
     * 測試連線是否成功

@@ -4,8 +4,6 @@ import (
 	"net"
 )
 
-const conveySize = 1000 // 傳送通道大小設為1000, 避免因為爆滿而卡住
-
 // Connector 連接介面
 type Connector interface {
 	// Start 啟動連接, 若不是使用多執行緒啟動, 則可能被阻塞在這裡直到連接完成
@@ -49,6 +47,24 @@ type Sessioner interface {
 
 	// LocalAddr 取得本地位址
 	LocalAddr() net.Addr
+}
+
+// Packer 封包介面
+type Packer interface {
+	// Encode 封包編碼, 用在傳送封包時
+	Encode(packet any) []byte
+
+	// Decode 封包解碼, 用在接收封包時
+	Decode(packet []byte) any
+}
+
+// Processor 處理介面
+type Processor interface {
+	// Receive 接收處理
+	Receive(packet any)
+
+	// Error 錯誤處理
+	Error(err error)
 }
 
 // Complete 完成函式類型
