@@ -19,10 +19,12 @@ func TestEventmgr(t *testing.T) {
 type SuiteEventmgr struct {
 	suite.Suite
 	testdata.TestEnv
+	timeout time.Duration
 }
 
 func (this *SuiteEventmgr) SetupSuite() {
 	this.Change("test-eventmgr")
+	this.timeout = time.Second
 }
 
 func (this *SuiteEventmgr) TearDownSuite() {
@@ -50,12 +52,10 @@ func (this *SuiteEventmgr) TestPubOnce() {
 
 	valid := atomic.Bool{}
 	target.Sub("event", func(param any) {
-		if param.(string) == "pubonce" { // TODO: 重構改valid.Store(param.(string) == "pubonce")
-			valid.Store(true)
-		} // if
+		valid.Store(param.(string) == "pubonce")
 	})
 	target.PubOnce("event", "pubonce")
-	time.Sleep(time.Millisecond * 10) // TODO: 重構改共用的timeout時間, 時間用1秒吧
+	time.Sleep(this.timeout)
 	assert.True(this.T(), valid.Load())
 }
 
@@ -64,14 +64,12 @@ func (this *SuiteEventmgr) TestPubFixed() {
 	target.Initialize()
 	defer target.Finalize()
 
-	valid := atomic.Int64{} // TODO: 重構改atomic.Bool{}
+	valid := atomic.Bool{}
 	target.Sub("event", func(param any) {
-		if param.(string) == "pubfixed" { // TODO: 重構改valid.Store(param.(string) == "pubfixed")
-			valid.Add(1)
-		} // if
+		valid.Store(param.(string) == "pubfixed")
 	})
 	fixed := target.PubFixed("event", "pubfixed", time.Millisecond)
 	defer fixed.Stop()
-	time.Sleep(time.Millisecond * 100) // TODO: 重構改共用的timeout時間, 時間用1秒吧
-	assert.Greater(this.T(), valid.Load(), int64(0)) // TODO: 重構改assert.True(this.T(), valid.Load())
+	time.Sleep(this.timeout)
+	assert.True(this.T(), valid.Load())
 }
