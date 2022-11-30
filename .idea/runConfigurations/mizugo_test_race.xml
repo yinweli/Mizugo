@@ -2,7 +2,7 @@
   <configuration default="false" name="mizugo test race" type="GoTestRunConfiguration" factoryName="Go Test">
     <module name="Mizugo" />
     <working_directory value="$PROJECT_DIR$" />
-    <go_parameters value="-i -race" />
+    <go_parameters value="-race" />
     <kind value="DIRECTORY" />
     <directory value="$PROJECT_DIR$" />
     <filePath value="$PROJECT_DIR$" />
