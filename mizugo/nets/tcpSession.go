@@ -37,13 +37,14 @@ func (this *TCPSession) Start(sessionID SessionID, coder Coder, processor Proces
 	this.sessionID.Store(sessionID)
 	this.coder = coder
 	this.processor = processor
+	this.processor.Start()
 	this.signal.Add(2) // 等待接收循環與傳送循環結束
 
 	go this.recvLoop()
 	go this.sendLoop()
 
 	this.signal.Wait() // 如果接收循環與傳送循環結束, 就會繼續進行結束處理
-	this.processor.Error(nil)
+	this.processor.Finish()
 }
 
 // Stop 停止會話, 不會等待會話內部循環結束

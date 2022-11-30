@@ -60,10 +60,16 @@ type Coder interface {
 
 // Processor 處理介面
 type Processor interface {
+	// Start 啟動處理
+	Start()
+
+	// Finish 結束處理
+	Finish()
+
 	// Receive 接收處理
 	Receive(message any) error
 
-	// Error 錯誤處理, 若收到nil表示會話結束
+	// Error 錯誤處理
 	Error(err error)
 }
 
