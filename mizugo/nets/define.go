@@ -28,7 +28,7 @@ type Listener interface {
 // Sessioner 會話介面
 type Sessioner interface {
 	// Start 啟動會話, 若不是使用多執行緒啟動, 則一定被阻塞在這裡直到停止會話; 當由連接器/監聽器獲得會話器之後, 需要啟動會話才可以傳送或接收封包
-	Start(sessionID SessionID, receive Receive, inform Inform)
+	Start(sessionID SessionID, coder Coder, processor Processor)
 
 	// Stop 停止會話, 不會等待會話內部循環結束
 	Stop()
@@ -37,7 +37,7 @@ type Sessioner interface {
 	StopWait()
 
 	// Send 傳送封包
-	Send(packet []byte)
+	Send(message any)
 
 	// SessionID 取得會話編號
 	SessionID() SessionID
@@ -49,32 +49,26 @@ type Sessioner interface {
 	LocalAddr() net.Addr
 }
 
-// Packer 封包介面
-type Packer interface {
+// Coder 編碼介面
+type Coder interface {
 	// Encode 封包編碼, 用在傳送封包時
-	Encode(packet any) []byte
+	Encode(message any) (packet []byte, err error)
 
 	// Decode 封包解碼, 用在接收封包時
-	Decode(packet []byte) any
+	Decode(packet []byte) (message any, err error)
 }
 
 // Processor 處理介面
 type Processor interface {
 	// Receive 接收處理
-	Receive(packet any)
+	Receive(message any) error
 
-	// Error 錯誤處理
+	// Error 錯誤處理, 若收到nil表示會話結束
 	Error(err error)
 }
 
 // Complete 完成函式類型
 type Complete func(session Sessioner, err error)
-
-// Receive 接收函式類型
-type Receive func(packet []byte)
-
-// Inform 通知函式類型
-type Inform func(err error)
 
 // SessionID 會話編號
 type SessionID = int64

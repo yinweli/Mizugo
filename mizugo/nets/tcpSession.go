@@ -12,55 +12,55 @@ import (
 
 const tcpHeaderSize = 2               // 標頭長度
 const tcpPacketSize = int(^uint16(0)) // 封包長度
-const tcpConveySize = 1000            // 傳送通道大小設為1000, 避免因為爆滿而卡住
+const tcpMessageSize = 1000           // 訊息通道大小設為1000, 避免因為爆滿而卡住
 
 // NewTCPSession 建立tcp會話器
 func NewTCPSession(conn net.Conn) *TCPSession {
 	return &TCPSession{
-		conn:   conn,
-		convey: make(chan []byte, tcpConveySize),
+		conn:    conn,
+		message: make(chan any, tcpMessageSize),
 	}
 }
 
 // TCPSession tcp會話器
 type TCPSession struct {
 	conn      net.Conn       // 連接物件
-	convey    chan []byte    // 傳送通道
-	signal    sync.WaitGroup // 通知信號
+	message   chan any       // 訊息通道
 	sessionID atomic.Int64   // 會話編號
-	receive   Receive        // 接收函式
-	inform    Inform         // 通知函式
+	coder     Coder          // 編碼物件
+	processor Processor      // 處理物件
+	signal    sync.WaitGroup // 通知信號
 }
 
 // Start 啟動會話, 當由連接器/監聽器獲得會話器之後, 需要啟動會話才可以傳送或接收封包; 若不是使用多執行緒啟動, 則會被阻塞在這裡直到會話結束
-func (this *TCPSession) Start(sessionID SessionID, receive Receive, inform Inform) {
-	this.signal.Add(2) // 等待接收循環與傳送循環結束
+func (this *TCPSession) Start(sessionID SessionID, coder Coder, processor Processor) {
 	this.sessionID.Store(sessionID)
-	this.receive = receive
-	this.inform = inform
+	this.coder = coder
+	this.processor = processor
+	this.signal.Add(2) // 等待接收循環與傳送循環結束
 
 	go this.recvLoop()
 	go this.sendLoop()
 
 	this.signal.Wait() // 如果接收循環與傳送循環結束, 就會繼續進行結束處理
-	this.inform(nil)
+	this.processor.Error(nil)
 }
 
 // Stop 停止會話, 不會等待會話內部循環結束
 func (this *TCPSession) Stop() {
-	this.convey <- []byte{} // 以空封包通知會話結束
+	this.message <- nil // 以空訊息通知會話結束
 }
 
 // StopWait 停止會話, 會等待會話內部循環結束
 func (this *TCPSession) StopWait() {
-	this.convey <- []byte{} // 以空封包通知會話結束
+	this.message <- nil // 以空訊息通知會話結束
 	this.signal.Wait()
 }
 
-// Send 傳送封包
-func (this *TCPSession) Send(packet []byte) {
-	if len(packet) > 0 {
-		this.convey <- packet
+// Send 傳送訊息
+func (this *TCPSession) Send(message any) {
+	if message != nil {
+		this.message <- message
 	} // if
 }
 
@@ -87,14 +87,24 @@ func (this *TCPSession) recvLoop() {
 		packet, err := this.recvPacket(reader)
 
 		if err != nil {
-			this.inform(fmt.Errorf("recv loop: %w", err))
+			this.processor.Error(fmt.Errorf("recv loop: %w", err))
 			break
 		} // if
 
-		this.receive(packet)
+		message, err := this.coder.Decode(packet)
+
+		if err != nil {
+			this.processor.Error(fmt.Errorf("recv loop: %w", err))
+			break
+		} // if
+
+		if err := this.processor.Receive(message); err != nil {
+			this.processor.Error(fmt.Errorf("recv loop: %w", err))
+			break
+		} // if
 	} // for
 
-	this.convey <- []byte{} // 以空封包通知會話結束
+	this.message <- nil // 以空訊息通知會話結束
 	this.signal.Done()
 }
 
@@ -124,14 +134,21 @@ func (this *TCPSession) recvPacket(reader io.Reader) (packet []byte, err error) 
 // sendLoop 傳送循環
 func (this *TCPSession) sendLoop() {
 	for {
-		packet := <-this.convey
+		message := <-this.message
 
-		if len(packet) == 0 { // 空封包表示會話結束
+		if message == nil { // 空訊息表示會話結束
+			break
+		} // if
+
+		packet, err := this.coder.Encode(message)
+
+		if err != nil {
+			this.processor.Error(fmt.Errorf("send loop: %w", err))
 			break
 		} // if
 
 		if err := this.sendPacket(this.conn, packet); err != nil {
-			this.inform(fmt.Errorf("send loop: %w", err))
+			this.processor.Error(fmt.Errorf("send loop: %w", err))
 			break
 		} // if
 	} // for
