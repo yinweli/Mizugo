@@ -1,11 +1,12 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="mizugo benchmark eventan" type="GoTestRunConfiguration" factoryName="Go Test">
+  <configuration default="false" name="mizugo test race" type="GoTestRunConfiguration" factoryName="Go Test">
     <module name="Mizugo" />
     <working_directory value="$PROJECT_DIR$" />
+    <go_parameters value="-race" />
     <kind value="DIRECTORY" />
-    <directory value="$PROJECT_DIR$/mizugo/events" />
+    <directory value="$PROJECT_DIR$" />
     <filePath value="$PROJECT_DIR$" />
-    <framework value="gobench" />
+    <framework value="gotest" />
     <method v="2" />
   </configuration>
 </component>

@@ -44,13 +44,13 @@ func (this *SuiteTCPListen) TestNewTCPListen() {
 }
 
 func (this *SuiteTCPListen) TestStartStop() {
-	sessionl := newTestSession(this.timeout, "listen server")
+	sessionl := newTestSession("tcp listen s", this.timeout)
 	target := NewTCPListen(this.ip, this.port)
 	go target.Start(sessionl.Complete)
 
 	time.Sleep(this.timeout)
 
-	sessionc := newTestSession(this.timeout, "listen client")
+	sessionc := newTestSession("tcp listen c", this.timeout)
 	client := NewTCPConnect(this.ip, this.port, this.timeout)
 	go client.Start(sessionc.Complete)
 
@@ -58,17 +58,17 @@ func (this *SuiteTCPListen) TestStartStop() {
 	assert.True(this.T(), sessionc.Wait())
 	assert.Nil(this.T(), target.Stop())
 
-	session := newTestSession(this.timeout, "listen error ip1")
+	session := newTestSession("tcp listen - error ip", this.timeout)
 	target = NewTCPListen("!?", this.port)
 	target.Start(session.Complete)
 	assert.True(this.T(), session.Wait())
-	assert.NotNil(this.T(), session.Error())
+	assert.False(this.T(), session.Valid())
 
-	session = newTestSession(this.timeout, "listen error ip2")
+	session = newTestSession("tcp listen - invalid ip", this.timeout)
 	target = NewTCPListen("192.168.0.1", this.port) // 故意要監聽錯誤位址才會引發錯誤
 	target.Start(session.Complete)
 	assert.True(this.T(), session.Wait())
-	assert.NotNil(this.T(), session.Error())
+	assert.False(this.T(), session.Valid())
 }
 
 func (this *SuiteTCPListen) TestAddress() {
