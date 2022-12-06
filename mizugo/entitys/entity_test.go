@@ -22,7 +22,7 @@ type SuiteEntity struct {
 }
 
 func (this *SuiteEntity) SetupSuite() {
-	this.Change("test-entity")
+	this.Change("test-entitys-entity")
 }
 
 func (this *SuiteEntity) TearDownSuite() {

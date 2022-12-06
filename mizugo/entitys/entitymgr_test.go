@@ -20,7 +20,7 @@ type SuiteEntitymgr struct {
 }
 
 func (this *SuiteEntitymgr) SetupSuite() {
-	this.Change("test-entitymgr")
+	this.Change("test-entitys-entitymgr")
 }
 
 func (this *SuiteEntitymgr) TearDownSuite() {

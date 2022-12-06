@@ -27,7 +27,7 @@ type SuiteTCPSession struct {
 }
 
 func (this *SuiteTCPSession) SetupSuite() {
-	this.Change("test-tcpSession")
+	this.Change("test-nets-tcpSession")
 	this.ip = ""
 	this.port = "3002"
 	this.timeout = time.Second

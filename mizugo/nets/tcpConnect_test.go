@@ -25,7 +25,7 @@ type SuiteTCPConnect struct {
 }
 
 func (this *SuiteTCPConnect) SetupSuite() {
-	this.Change("test-tcpConnect")
+	this.Change("test-nets-tcpConnect")
 	this.ip = "google.com"
 	this.port = "80"
 	this.timeout = time.Second
