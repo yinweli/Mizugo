@@ -22,7 +22,7 @@ type ZapLogger struct {
 	Level      Level  `yaml:"level"`      // 日誌等級
 	MaxSize    int    `yaml:"maxSize"`    // 日誌大小(MB), 當日誌檔案超過此大小時就會建立新檔案, 預設是100MB
 	MaxTime    int    `yaml:"maxTime"`    // 日誌保留時間(日), 當日誌檔案儲存超過此時間時會被刪除, 預設不會刪除檔案
-	MaxBackups int    `yaml:"maxBackups"` // 日誌保留數量, 當日誌檔案數量超過此數量時會移除舊檔案, 預設不會刪除檔案
+	MaxBackups int    `yaml:"maxBackups"` // 日誌保留數量, 當日誌檔案數量超過此數量時會刪除舊檔案, 預設不會刪除檔案
 	Compress   bool   `yaml:"compress"`   // 是否壓縮日誌檔案, 預設不會壓縮
 
 	logger *zap.Logger // zap日誌物件

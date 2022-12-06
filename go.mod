@@ -3,6 +3,7 @@ module github.com/yinweli/Mizugo
 go 1.19
 
 require (
+	github.com/emirpasic/gods v1.18.1
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/otiai10/copy v1.9.0
 	github.com/stretchr/testify v1.8.0
