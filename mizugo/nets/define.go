@@ -4,8 +4,8 @@ import (
 	"net"
 )
 
-// Connector 連接介面
-type Connector interface {
+// Connecter 連接介面
+type Connecter interface {
 	// Start 啟動連接, 若不是使用多執行緒啟動, 則可能被阻塞在這裡直到連接完成
 	Start(complete Complete)
 
