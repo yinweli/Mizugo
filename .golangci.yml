@@ -53,7 +53,7 @@ linters-settings:
       - strconv.ParseInt
       - strconv.ParseUint
   gosimple:
-    checks: ["all", "-S1002"]
+    checks: [ "all", "-S1002" ]
   govet:
     check-shadowing: true
   lll:
@@ -66,8 +66,8 @@ linters-settings:
     require-explanation: false # don't require an explanation for nolint directives
     require-specific: false # don't require nolint directives to be specific about which linter is being skipped
   stylecheck:
-    checks: ["all", "-ST1006"]
-    initialisms: ["ACL", "API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID", "HTML", "HTTP", "HTTPS", "ID", "IP", "QPS", "RAM", "RPC", "SLA", "SMTP", "SQL", "SSH", "TCP", "TLS", "TTL", "UDP", "UI", "GID", "UID", "UUID", "URI", "URL", "UTF8", "VM", "XML", "XMPP", "XSRF", "XSS", "SIP", "RTP", "AMQP", "DB", "TS"]
+    checks: [ "all", "-ST1006" ]
+    initialisms: [ "ACL", "API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID", "HTML", "HTTP", "HTTPS", "ID", "IP", "QPS", "RAM", "RPC", "SLA", "SMTP", "SQL", "SSH", "TCP", "TLS", "TTL", "UDP", "UI", "GID", "UID", "UUID", "URI", "URL", "UTF8", "VM", "XML", "XMPP", "XSRF", "XSS", "SIP", "RTP", "AMQP", "DB", "TS" ]
   whitespace:
     multi-func: true
   wrapcheck:
@@ -90,7 +90,7 @@ linters-settings:
       - github.com/pkg/*
       - golang.org/x/sync/singleflight
   staticcheck:
-    checks: ["all", "-SA1019"]
+    checks: [ "all", "-SA1019" ]
 
 linters:
   disable-all: true
