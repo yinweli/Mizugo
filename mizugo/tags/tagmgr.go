@@ -6,6 +6,13 @@ import (
 	"github.com/emirpasic/gods/sets/hashset"
 )
 
+// NewTagmgr 建立標籤管理器
+func NewTagmgr() *Tagmgr {
+	return &Tagmgr{
+		data: map[string]*hashset.Set{},
+	}
+}
+
 // Tagmgr 標籤管理器
 type Tagmgr struct {
 	data map[string]*hashset.Set // 標籤列表
@@ -63,7 +70,7 @@ func (this *Tagmgr) find(tag string) *hashset.Set {
 	result, ok := this.data[tag]
 
 	if ok == false {
-		result = hashset.New(nil)
+		result = hashset.New()
 		this.data[tag] = result
 	} // if
 
