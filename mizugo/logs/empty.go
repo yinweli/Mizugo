@@ -1,38 +1,51 @@
 package logs
 
 // empty提供空日誌, 以此方式輸出的日誌都會被丟棄, 也不會顯示在控制台上, 這是預設的日誌模式
-// 使用方式:
-//   執行logs.Set(logs.NewEmpty)
+// 初始化日誌: 執行logs.Initialize(nil)或是logs.Initialize(&EmptyLogger{})
 
-// NewEmpty 建立空日誌
-func NewEmpty(_ string, _ Level) Logger {
-	return &Empty{}
+// EmptyLogger 空日誌
+type EmptyLogger struct {
 }
 
-// Empty 空日誌
-type Empty struct {
+// Initialize 初始化處理
+func (this *EmptyLogger) Initialize() {
+	// do nothing...
+}
+
+// Finalize 結束處理
+func (this *EmptyLogger) Finalize() {
+	// do nothing...
+}
+
+// New 建立日誌
+func (this *EmptyLogger) New(label string, level Level) Stream {
+	return &EmptyStream{}
+}
+
+// EmptyStream 空記錄
+type EmptyStream struct {
 }
 
 // Message 記錄訊息
-func (this *Empty) Message(_ string) Logger {
+func (this *EmptyStream) Message(_ string) Stream {
 	return this
 }
 
 // KV 記錄索引與數值
-func (this *Empty) KV(_ string, _ any) Logger {
+func (this *EmptyStream) KV(_ string, _ any) Stream {
 	return this
 }
 
 // Error 記錄錯誤
-func (this *Empty) Error(_ error) Logger {
+func (this *EmptyStream) Error(_ error) Stream {
 	return this
 }
 
 // EndError 以錯誤結束記錄
-func (this *Empty) EndError(err error) error {
+func (this *EmptyStream) EndError(err error) error {
 	return err
 }
 
 // End 結束記錄
-func (this *Empty) End() {
+func (this *EmptyStream) End() {
 }

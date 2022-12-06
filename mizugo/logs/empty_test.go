@@ -1,6 +1,7 @@
 package logs
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -31,33 +32,31 @@ func (this *SuiteEmpty) TearDownTest() {
 	goleak.VerifyNone(this.T())
 }
 
-func (this *SuiteEmpty) TestNewEmpty() {
-	assert.NotNil(this.T(), NewEmpty("", LevelDebug))
+func (this *SuiteEmpty) TestEmptyLogger() {
+	Initialize(&EmptyLogger{})
+	assert.NotNil(this.T(), Debug(""))
+	assert.NotNil(this.T(), Info(""))
+	assert.NotNil(this.T(), Warn(""))
+	assert.NotNil(this.T(), Error(""))
+
+	Initialize(nil)
+	assert.NotNil(this.T(), Debug(""))
+	assert.NotNil(this.T(), Info(""))
+	assert.NotNil(this.T(), Warn(""))
+	assert.NotNil(this.T(), Error(""))
+	Finalize()
 }
 
-func (this *SuiteEmpty) TestEmpty() {
-	target := NewEmpty("", LevelDebug)
-	assert.Equal(this.T(), target, target.Message(""))
-	assert.Equal(this.T(), target, target.KV("", 0))
-	assert.Equal(this.T(), target, target.Error(nil))
-	assert.Nil(this.T(), target.EndError(nil))
+func (this *SuiteEmpty) TestEmptyStream() {
+	Initialize(&EmptyLogger{})
+
+	target := Debug("log")
+	assert.Equal(this.T(), target, target.Message("message"))
+	assert.Equal(this.T(), target, target.KV("key", "value"))
+	assert.Equal(this.T(), target, target.Error(fmt.Errorf("error")))
+	assert.NotNil(this.T(), target.EndError(fmt.Errorf("end error")))
 	target.End()
-}
 
-func (this *SuiteEmpty) TestLog() {
-	target := NewEmpty("", LevelDebug)
-	assert.IsType(this.T(), target, Debug(""))
-	assert.IsType(this.T(), target, Info(""))
-	assert.IsType(this.T(), target, Warn(""))
-	assert.IsType(this.T(), target, Error(""))
-	Set(NewEmpty)
-	assert.IsType(this.T(), target, Debug(""))
-	assert.IsType(this.T(), target, Info(""))
-	assert.IsType(this.T(), target, Warn(""))
-	assert.IsType(this.T(), target, Error(""))
-	Set(nil)
-	assert.IsType(this.T(), target, Debug(""))
-	assert.IsType(this.T(), target, Info(""))
-	assert.IsType(this.T(), target, Warn(""))
-	assert.IsType(this.T(), target, Error(""))
+	Finalize()
+	Initialize(nil)
 }

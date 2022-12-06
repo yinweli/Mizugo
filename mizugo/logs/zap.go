@@ -3,21 +3,17 @@ package logs
 import (
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-// zapf提供輸出日誌到檔案中, 實作採用zap日誌函式庫以及lumberjack函式庫
-// 使用方式:
-//   獲得ZapfInit物件(通過建立結構或是從設定檔案讀取)
-//   執行ZapfInit.Initialize()
-//   執行logs.Set(logs.NewZapf)
+// zap提供輸出日誌到檔案中, 實作採用zap, 日誌輪轉採用lumberjack
+// 初始化日誌: 建立ZapLogger物件或是通過設定檔獲取ZapLogger物件, 執行logs.Initialize(ZapLogger物件)
 
-// ZapfInit zapf日誌初始化資料
-type ZapfInit struct {
+// ZapLogger zap日誌
+type ZapLogger struct {
 	Name       string `yaml:"name"`       // 日誌名稱, 會被用到日誌檔案名稱上
 	Path       string `yaml:"path"`       // 日誌路徑, 指定日誌檔案的位置
 	Json       bool   `yaml:"json"`       // 是否使用json格式日誌, 建議正式環境使用json格式日誌
@@ -28,33 +24,46 @@ type ZapfInit struct {
 	MaxTime    int    `yaml:"maxTime"`    // 日誌保留時間(日), 當日誌檔案儲存超過此時間時會被刪除, 預設不會刪除檔案
 	MaxBackups int    `yaml:"maxBackups"` // 日誌保留數量, 當日誌檔案數量超過此數量時會移除舊檔案, 預設不會刪除檔案
 	Compress   bool   `yaml:"compress"`   // 是否壓縮日誌檔案, 預設不會壓縮
+
+	logger *zap.Logger // zap日誌物件
 }
 
 // Initialize 初始化處理
-func (this *ZapfInit) Initialize() {
+func (this *ZapLogger) Initialize() {
 	core := zapcore.NewCore(
 		this.encoder(),
 		this.writeSyncer(),
-		zap.NewAtomicLevelAt(zapfLevel(this.Level)),
+		zap.NewAtomicLevelAt(zapLevel(this.Level)),
 	)
-	zapfLogger = zap.New(core, zap.AddCallerSkip(1))
+	this.logger = zap.New(core, zap.AddCallerSkip(1))
+}
+
+// Finalize 結束處理
+func (this *ZapLogger) Finalize() {
+	_ = this.logger.Sync()
+}
+
+// New 建立日誌
+func (this *ZapLogger) New(label string, level Level) Stream {
+	return &ZapStream{
+		logger: this.logger.Named(label),
+		level:  zapLevel(level),
+	}
 }
 
 // encoder 取得日誌編碼器
-func (this *ZapfInit) encoder() zapcore.Encoder {
+func (this *ZapLogger) encoder() zapcore.Encoder {
 	encoder := zapcore.EncoderConfig{
-		MessageKey:    "msg",
-		LevelKey:      "level",
-		TimeKey:       "time",
-		NameKey:       "label",
-		CallerKey:     "line",
-		FunctionKey:   "func",
-		StacktraceKey: "stacktrace",
-		LineEnding:    zapcore.DefaultLineEnding,
-		EncodeLevel:   zapcore.CapitalLevelEncoder,
-		EncodeTime: func(time time.Time, encoder zapcore.PrimitiveArrayEncoder) {
-			encoder.AppendString(time.Format("2006-01-02 15:04:05"))
-		},
+		MessageKey:     "msg",
+		LevelKey:       "level",
+		TimeKey:        "time",
+		NameKey:        "label",
+		CallerKey:      "line",
+		FunctionKey:    "func",
+		StacktraceKey:  "stacktrace",
+		LineEnding:     zapcore.DefaultLineEnding,
+		EncodeLevel:    zapcore.CapitalLevelEncoder,
+		EncodeTime:     zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05"),
 		EncodeDuration: zapcore.SecondsDurationEncoder,
 		EncodeCaller:   zapcore.FullCallerEncoder,
 		EncodeName:     zapcore.FullNameEncoder,
@@ -68,7 +77,7 @@ func (this *ZapfInit) encoder() zapcore.Encoder {
 }
 
 // writeSyncer 取得寫入同步器
-func (this *ZapfInit) writeSyncer() zapcore.WriteSyncer {
+func (this *ZapLogger) writeSyncer() zapcore.WriteSyncer {
 	writeSyncer := []zapcore.WriteSyncer{}
 
 	if this.Console {
@@ -88,16 +97,8 @@ func (this *ZapfInit) writeSyncer() zapcore.WriteSyncer {
 	return zapcore.NewMultiWriteSyncer(writeSyncer...)
 }
 
-// NewZapf 建立zapf日誌
-func NewZapf(label string, level Level) Logger {
-	return &Zapf{
-		logger: zapfLogger.Named(label),
-		level:  zapfLevel(level),
-	}
-}
-
-// Zapf zapf日誌
-type Zapf struct {
+// ZapStream zap記錄
+type ZapStream struct {
 	logger  *zap.Logger   // 日誌物件
 	level   zapcore.Level // 日誌等級
 	message string        // 訊息字串
@@ -105,13 +106,13 @@ type Zapf struct {
 }
 
 // Message 記錄訊息
-func (this *Zapf) Message(message string) Logger {
+func (this *ZapStream) Message(message string) Stream {
 	this.message = message
 	return this
 }
 
 // KV 記錄索引與數值
-func (this *Zapf) KV(key string, value any) Logger { //nolint
+func (this *ZapStream) KV(key string, value any) Stream { //nolint
 	switch v := value.(type) {
 	case int8:
 		this.field = append(this.field, zap.Int8(key, v))
@@ -232,26 +233,26 @@ func (this *Zapf) KV(key string, value any) Logger { //nolint
 }
 
 // Error 記錄錯誤
-func (this *Zapf) Error(err error) Logger {
+func (this *ZapStream) Error(err error) Stream {
 	this.field = append(this.field, zap.Error(err))
 	return this
 }
 
 // EndError 以錯誤結束記錄
-func (this *Zapf) EndError(err error) error {
+func (this *ZapStream) EndError(err error) error {
 	this.Error(err).End()
 	return err
 }
 
 // End 結束記錄
-func (this *Zapf) End() {
+func (this *ZapStream) End() {
 	if l := this.logger.Check(this.level, this.message); l != nil {
 		l.Write(this.field...)
 	} // if
 }
 
-// zapfLevel 日誌等級轉換為zap日誌等級
-func zapfLevel(level Level) zapcore.Level {
+// zapLevel 日誌等級轉換為zap日誌等級
+func zapLevel(level Level) zapcore.Level {
 	switch level {
 	case LevelDebug:
 		return zapcore.DebugLevel
@@ -266,8 +267,6 @@ func zapfLevel(level Level) zapcore.Level {
 		return zapcore.ErrorLevel
 
 	default:
-		return zapcore.InfoLevel
+		return zapcore.InvalidLevel
 	} // switch
 }
-
-var zapfLogger *zap.Logger // zap日誌物件
