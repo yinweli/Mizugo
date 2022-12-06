@@ -22,7 +22,7 @@ type SuiteError struct {
 }
 
 func (this *SuiteError) SetupSuite() {
-	this.Change("test-error")
+	this.Change("test-errors-error")
 }
 
 func (this *SuiteError) TearDownSuite() {

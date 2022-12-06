@@ -20,7 +20,7 @@ type SuitePubsub struct {
 }
 
 func (this *SuitePubsub) SetupSuite() {
-	this.Change("test-pubsub")
+	this.Change("test-events-pubsub")
 }
 
 func (this *SuitePubsub) TearDownSuite() {

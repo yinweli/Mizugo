@@ -21,7 +21,7 @@ type SuiteWaitTimeout struct {
 }
 
 func (this *SuiteWaitTimeout) SetupSuite() {
-	this.Change("test-waitTimeout")
+	this.Change("test-utils-waitTimeout")
 }
 
 func (this *SuiteWaitTimeout) TearDownSuite() {

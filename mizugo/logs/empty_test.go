@@ -20,7 +20,7 @@ type SuiteEmpty struct {
 }
 
 func (this *SuiteEmpty) SetupSuite() {
-	this.Change("test-empty-log")
+	this.Change("test-logs-empty")
 }
 
 func (this *SuiteEmpty) TearDownSuite() {
@@ -31,28 +31,33 @@ func (this *SuiteEmpty) TearDownTest() {
 	goleak.VerifyNone(this.T())
 }
 
-func (this *SuiteEmpty) TestLog() {
-	assert.IsType(this.T(), &Empty{}, Debug(""))
-	assert.IsType(this.T(), &Empty{}, Info(""))
-	assert.IsType(this.T(), &Empty{}, Warn(""))
-	assert.IsType(this.T(), &Empty{}, Error(""))
-	Set(NewEmpty)
-	assert.IsType(this.T(), &Empty{}, Debug(""))
-	assert.IsType(this.T(), &Empty{}, Info(""))
-	assert.IsType(this.T(), &Empty{}, Warn(""))
-	assert.IsType(this.T(), &Empty{}, Error(""))
-	Set(nil)
-	assert.IsType(this.T(), &Empty{}, Debug(""))
-	assert.IsType(this.T(), &Empty{}, Info(""))
-	assert.IsType(this.T(), &Empty{}, Warn(""))
-	assert.IsType(this.T(), &Empty{}, Error(""))
+func (this *SuiteEmpty) TestNewEmpty() {
+	assert.NotNil(this.T(), NewEmpty("", LevelDebug))
 }
 
 func (this *SuiteEmpty) TestEmpty() {
-	target := &Empty{}
+	target := NewEmpty("", LevelDebug)
 	assert.Equal(this.T(), target, target.Message(""))
 	assert.Equal(this.T(), target, target.KV("", 0))
 	assert.Equal(this.T(), target, target.Error(nil))
 	assert.Nil(this.T(), target.EndError(nil))
 	target.End()
+}
+
+func (this *SuiteEmpty) TestLog() {
+	target := NewEmpty("", LevelDebug)
+	assert.IsType(this.T(), target, Debug(""))
+	assert.IsType(this.T(), target, Info(""))
+	assert.IsType(this.T(), target, Warn(""))
+	assert.IsType(this.T(), target, Error(""))
+	Set(NewEmpty)
+	assert.IsType(this.T(), target, Debug(""))
+	assert.IsType(this.T(), target, Info(""))
+	assert.IsType(this.T(), target, Warn(""))
+	assert.IsType(this.T(), target, Error(""))
+	Set(nil)
+	assert.IsType(this.T(), target, Debug(""))
+	assert.IsType(this.T(), target, Info(""))
+	assert.IsType(this.T(), target, Warn(""))
+	assert.IsType(this.T(), target, Error(""))
 }

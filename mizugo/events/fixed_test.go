@@ -20,7 +20,7 @@ type SuiteFixed struct {
 }
 
 func (this *SuiteFixed) SetupSuite() {
-	this.Change("test-fixed")
+	this.Change("test-events-fixed")
 }
 
 func (this *SuiteFixed) TearDownSuite() {

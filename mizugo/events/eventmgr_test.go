@@ -23,7 +23,7 @@ type SuiteEventmgr struct {
 }
 
 func (this *SuiteEventmgr) SetupSuite() {
-	this.Change("test-eventmgr")
+	this.Change("test-events-eventmgr")
 	this.timeout = time.Second
 }
 

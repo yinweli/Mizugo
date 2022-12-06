@@ -25,7 +25,7 @@ type SuiteTCPListen struct {
 }
 
 func (this *SuiteTCPListen) SetupSuite() {
-	this.Change("test-tcpListen")
+	this.Change("test-nets-tcpListen")
 	this.ip = ""
 	this.port = "3001"
 	this.timeout = time.Second

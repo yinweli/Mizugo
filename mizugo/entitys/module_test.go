@@ -20,7 +20,7 @@ type SuiteModule struct {
 }
 
 func (this *SuiteModule) SetupSuite() {
-	this.Change("test-module")
+	this.Change("test-entitys-module")
 }
 
 func (this *SuiteModule) TearDownSuite() {
