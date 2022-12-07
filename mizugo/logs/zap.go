@@ -9,9 +9,6 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// zap提供輸出日誌到檔案中, 實作採用zap, 日誌輪轉採用lumberjack
-// 初始化日誌: 建立ZapLogger物件或是通過設定檔獲取ZapLogger物件, 執行logs.Initialize(ZapLogger物件)
-
 // ZapLogger zap日誌
 type ZapLogger struct {
 	Name       string `yaml:"name"`       // 日誌名稱, 會被用到日誌檔案名稱上
@@ -29,13 +26,14 @@ type ZapLogger struct {
 }
 
 // Initialize 初始化處理
-func (this *ZapLogger) Initialize() {
+func (this *ZapLogger) Initialize() error {
 	core := zapcore.NewCore(
 		this.encoder(),
 		this.writeSyncer(),
 		zap.NewAtomicLevelAt(zapLevel(this.Level)),
 	)
 	this.logger = zap.New(core, zap.AddCallerSkip(1))
+	return nil
 }
 
 // Finalize 結束處理

@@ -34,70 +34,62 @@ func (this *SuiteZap) TearDownTest() {
 }
 
 func (this *SuiteZap) TestZapLogger() {
-	Initialize(&ZapLogger{
-		Name:    "zapf-init",
-		Path:    "zapf-init",
+	target := &ZapLogger{
+		Name:    "zapLogger",
+		Path:    "zapLogger",
 		Json:    true,
 		Console: true,
 		File:    true,
 		Level:   LevelDebug,
-	})
-	assert.NotNil(this.T(), Debug(""))
-	assert.NotNil(this.T(), Info(""))
-	assert.NotNil(this.T(), Warn(""))
-	assert.NotNil(this.T(), Error(""))
+	}
+	assert.Nil(this.T(), target.Initialize())
+	assert.NotNil(this.T(), target.New("", LevelDebug))
+	target.Finalize()
 
-	Initialize(&ZapLogger{
-		Name:    "zapf-init",
-		Path:    "zapf-init",
+	target = &ZapLogger{
+		Name:    "zapLogger",
+		Path:    "zapLogger",
 		Json:    false,
 		Console: false,
 		File:    false,
 		Level:   LevelDebug,
-	})
-	assert.NotNil(this.T(), Debug(""))
-	assert.NotNil(this.T(), Info(""))
-	assert.NotNil(this.T(), Warn(""))
-	assert.NotNil(this.T(), Error(""))
-
-	Initialize(nil)
-	assert.NotNil(this.T(), Debug(""))
-	assert.NotNil(this.T(), Info(""))
-	assert.NotNil(this.T(), Warn(""))
-	assert.NotNil(this.T(), Error(""))
-	Finalize()
+	}
+	assert.Nil(this.T(), target.Initialize())
+	assert.NotNil(this.T(), target.New("", LevelDebug))
+	target.Finalize()
 }
 
 func (this *SuiteZap) TestZapStream() {
-	Initialize(&ZapLogger{
-		Name:    "zapf-init",
-		Path:    "zapf-init",
+	logger := &ZapLogger{
+		Name:    "zapStream",
+		Path:    "zapStream",
 		Json:    true,
 		Console: true,
 		Level:   LevelDebug,
-	})
+	}
+	assert.Nil(this.T(), logger.Initialize())
 
-	target := Debug("log")
+	target := logger.New("log", LevelDebug)
 	assert.Equal(this.T(), target, target.Message("message"))
 	assert.Equal(this.T(), target, target.Error(fmt.Errorf("error")))
 	target.End()
 
-	target = Debug("log")
+	target = logger.New("log", LevelDebug)
 	assert.Equal(this.T(), target, target.Message("message"))
 	assert.NotNil(this.T(), target.EndError(fmt.Errorf("end error")))
 
-	Finalize()
-	Initialize(nil)
+	logger.Finalize()
 }
 
 func (this *SuiteZap) TestZapStreamKV() {
-	Initialize(&ZapLogger{
-		Name:    "zapf-init",
-		Path:    "zapf-init",
+	logger := &ZapLogger{
+		Name:    "zapStreamKV",
+		Path:    "zapStreamKV",
 		Json:    true,
 		Console: true,
 		Level:   LevelDebug,
-	})
+	}
+	assert.Nil(this.T(), logger.Initialize())
 
 	key := "key"
 	i8 := int8(0)
@@ -133,7 +125,7 @@ func (this *SuiteZap) TestZapStreamKV() {
 	b := false
 	bs := []bool{b}
 
-	target := Debug("log")
+	target := logger.New("log", LevelDebug)
 	assert.Equal(this.T(), target, target.KV(key, i8))
 	assert.Equal(this.T(), target, target.KV(key, ui8))
 	assert.Equal(this.T(), target, target.KV(key, &i8))
@@ -184,8 +176,7 @@ func (this *SuiteZap) TestZapStreamKV() {
 	assert.Equal(this.T(), target, target.KV(key, bs))
 	target.End()
 
-	Finalize()
-	Initialize(nil)
+	logger.Finalize()
 }
 
 func (this *SuiteZap) TestZapLevel() {

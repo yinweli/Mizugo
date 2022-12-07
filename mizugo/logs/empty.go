@@ -1,15 +1,13 @@
 package logs
 
-// empty提供空日誌, 以此方式輸出的日誌都會被丟棄, 也不會顯示在控制台上, 這是預設的日誌模式
-// 初始化日誌: 執行logs.Initialize(nil)或是logs.Initialize(&EmptyLogger{})
-
 // EmptyLogger 空日誌
 type EmptyLogger struct {
 }
 
 // Initialize 初始化處理
-func (this *EmptyLogger) Initialize() {
+func (this *EmptyLogger) Initialize() error {
 	// do nothing...
+	return nil
 }
 
 // Finalize 結束處理
