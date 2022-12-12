@@ -46,20 +46,20 @@ func (this *SuiteTCPConnect) TestNewTCPConnect() {
 func (this *SuiteTCPConnect) TestConnect() {
 	tester := newSessionTester()
 	target := NewTCPConnect(this.ip, this.port, this.timeout)
-	target.Connect(tester.complete)
+	target.Connect(tester.Complete)
 	assert.True(this.T(), tester.wait())
 	assert.True(this.T(), tester.valid())
 	tester.get().StopWait()
 
 	tester = newSessionTester()
 	target = NewTCPConnect("!?", this.port, this.timeout)
-	target.Connect(tester.complete)
+	target.Connect(tester.Complete)
 	assert.True(this.T(), tester.wait())
 	assert.False(this.T(), tester.valid())
 
 	tester = newSessionTester()
 	target = NewTCPConnect(this.ip, "3000", this.timeout) // 故意連線到不開放的埠號才會引發錯誤
-	target.Connect(tester.complete)
+	target.Connect(tester.Complete)
 	assert.True(this.T(), tester.wait())
 	assert.False(this.T(), tester.valid())
 }

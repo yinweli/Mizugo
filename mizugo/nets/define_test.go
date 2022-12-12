@@ -3,6 +3,7 @@ package nets
 import (
 	"fmt"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/yinweli/Mizugo/mizugo/utils"
@@ -24,6 +25,7 @@ func newSessionTester() *sessionTester {
 // sessionTester 會話測試器
 type sessionTester struct {
 	timeout *utils.WaitTimeout
+	lock    sync.Mutex
 	session Sessioner
 	err     error
 }
@@ -33,14 +35,23 @@ func (this *sessionTester) wait() bool {
 }
 
 func (this *sessionTester) valid() bool {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	return this.session != nil && this.err == nil
 }
 
 func (this *sessionTester) get() Sessioner {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	return this.session
 }
 
-func (this *sessionTester) complete(session Sessioner, err error) {
+func (this *sessionTester) Complete(session Sessioner, err error) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	this.session = session
 	this.err = err
 	this.timeout.Done()
@@ -85,42 +96,53 @@ func newReactorTester(receive bool) *reactorTester {
 
 // reactorTester 反應測試器
 type reactorTester struct {
-	receive      bool
-	flagActive   bool
-	flagInactive bool
-	flagError    bool
-	flagReceive  bool
-	session      Sessioner
-	message      any
+	receive bool
+	lock    sync.Mutex
+	session Sessioner
+	message any
 }
 
 func (this *reactorTester) validSession() bool {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	return this.session != nil
 }
 
 func (this *reactorTester) validMessage(message any) bool {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	return this.message == message
 }
 
-func (this *reactorTester) get() Sessioner {
-	return this.session
+func (this *reactorTester) sessionID() SessionID {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return this.session.SessionID()
 }
 
 func (this *reactorTester) Active(session Sessioner) {
-	this.flagActive = true
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	this.session = session
 }
 
 func (this *reactorTester) Inactive() {
-	this.flagInactive = true
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.session = nil
 }
 
 func (this *reactorTester) Error(err error) {
-	this.flagError = true
 }
 
 func (this *reactorTester) Receive(message any) error {
-	this.flagReceive = true
+	this.lock.Lock()
+	defer this.lock.Unlock()
 
 	if this.receive {
 		this.message = message
@@ -153,7 +175,7 @@ func (this *netmgrTester) valid() bool {
 }
 
 func (this *netmgrTester) sessionID() SessionID {
-	return this.reactor.get().SessionID()
+	return this.reactor.sessionID()
 }
 
 func (this *netmgrTester) Create() (coder Coder, reactor Reactor) {

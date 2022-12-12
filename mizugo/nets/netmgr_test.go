@@ -59,7 +59,7 @@ func (this *SuiteNetmgr) TestAddListen() {
 
 	testerc := newSessionTester()
 	client := NewTCPConnect(this.ip, this.port, this.timeout)
-	go client.Connect(testerc.complete)
+	go client.Connect(testerc.Complete)
 
 	time.Sleep(this.timeout)
 	assert.True(this.T(), testerl.valid())
@@ -75,7 +75,7 @@ func (this *SuiteNetmgr) TestNetmgr() {
 
 	testerc := newSessionTester()
 	client := NewTCPConnect(this.ip, this.port, this.timeout)
-	go client.Connect(testerc.complete)
+	go client.Connect(testerc.Complete)
 
 	time.Sleep(this.timeout)
 	assert.True(this.T(), testerl.valid())
