@@ -131,6 +131,58 @@ TODO: 資料庫機制還可以再細分
 * 要怎麼避免覆蓋掉使用者寫的程式碼
 * 產生出的程式碼仍然要保持易讀性
 
+### Connect
+建立Connect物件              // NewTCPConnect(ip, port string, timeout time.Duration)
+把Connect物件加入網路管理器  // Netmgr.AddConnect(connecter Connecter, create Create, failed Failed)
+等待連線成功
+獲得會話編號
+執行create
+  建立Entity物件             // NewEntity(entityID EntityID, name string)
+  在Entity物件添加模組       // Entity.AddModule(module Moduler)
+  把Entity物件加入實體管理器 // Entitymgr.Add(entity *Entity)
+    執行Entity初始化
+      發布Awake事件
+      發布Start事件
+  回傳Coder, Reactor介面(應該在Entity本身或是模組提供)
+啟動會話
+  執行Reactor.Active
+  ...
+  執行Reactor.Inactive
+
+### Connect
+建立Connect物件              // NewTCPConnect(ip, port string, timeout time.Duration)
+把Connect物件加入網路管理器  // Netmgr.AddConnect(connecter Connecter, create Create, failed Failed)
+等待連線成功
+獲得會話編號
+執行create
+  在實體管理器新增Entity物件 // Entitymgr.Add(name string) *Entity
+  在標籤管理器新增Entity物件 // Tagmgr.Add(value any, tag ...string)
+  在Entity物件添加模組       // Entity.AddModule(module Moduler)
+  執行Entity.Awake
+  執行Entity.Start
+  回傳Coder, Reactor介面(應該在Entity本身或是模組提供)
+啟動會話
+  執行Reactor.Active
+  ...
+  執行Reactor.Inactive
+
+### Step
+* 實體編號自動產生
+* Netmgr.Add....函式的Create, Failed改成Coder, Reactor, Failed
+  Reactor {
+    Error(err error)
+    Coder() Coder
+    Active(session Sessioner) Receiver, Disposer
+      // 在實體管理器新增Entity物件
+      // 在標籤管理器新增Entity物件
+      // 在Entity物件添加模組
+      // 執行Entity.Awake
+      // 執行Entity.Start
+      // 回傳Receiver, Disposer
+  }
+* 在Reactor.Active被呼叫之時建立實體與模組
+* 在Reactor.Inactive被呼叫之時刪除實體與模組
+
 ## [Roadmap]
 * 實體-模組機制
 * 事件管理器
