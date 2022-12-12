@@ -44,33 +44,32 @@ func (this *SuiteTCPListen) TestNewTCPListen() {
 }
 
 func (this *SuiteTCPListen) TestListen() {
-	testerl := newSessionTester()
+	testerl := newCompleteTester()
 	target := NewTCPListen(this.ip, this.port)
-	go target.Listen(testerl.Complete)
+	go target.Listen(testerl)
 
-	testerc := newSessionTester()
+	testerc := newCompleteTester()
 	client := NewTCPConnect(this.ip, this.port, this.timeout)
-	go client.Connect(testerc.Complete)
+	go client.Connect(testerc)
 
-	assert.True(this.T(), testerl.wait())
+	time.Sleep(time.Second)
 	assert.True(this.T(), testerl.valid())
-	assert.True(this.T(), testerc.wait())
 	assert.True(this.T(), testerc.valid())
 	assert.Nil(this.T(), target.Stop())
 	testerl.get().StopWait()
 	testerc.get().StopWait()
 
-	verify := newSessionTester()
+	tester := newCompleteTester()
 	target = NewTCPListen("!?", this.port)
-	target.Listen(verify.Complete)
-	assert.True(this.T(), verify.wait())
-	assert.False(this.T(), verify.valid())
+	target.Listen(tester)
+	time.Sleep(time.Second)
+	assert.False(this.T(), tester.valid())
 
-	verify = newSessionTester()
+	tester = newCompleteTester()
 	target = NewTCPListen("192.168.0.1", this.port) // 故意要監聽錯誤位址才會引發錯誤
-	target.Listen(verify.Complete)
-	assert.True(this.T(), verify.wait())
-	assert.False(this.T(), verify.valid())
+	target.Listen(tester)
+	time.Sleep(time.Second)
+	assert.False(this.T(), tester.valid())
 }
 
 func (this *SuiteTCPListen) TestTCPListen() {

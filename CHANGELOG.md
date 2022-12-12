@@ -183,6 +183,12 @@ TODO: 資料庫機制還可以再細分
 * 在Reactor.Active被呼叫之時建立實體與模組
 * 在Reactor.Inactive被呼叫之時刪除實體與模組
 
+### Do!Step
+* 註解掉Netmgr
+* 改session
+* 改實體
+* 回復Netmgr並且修改
+
 ## [Roadmap]
 * 實體-模組機制
 * 事件管理器

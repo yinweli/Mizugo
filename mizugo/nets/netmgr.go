@@ -1,5 +1,6 @@
 package nets
 
+/*
 import (
 	"fmt"
 	"sync"
@@ -189,3 +190,4 @@ func (this *sessionmgr) count() int {
 
 	return len(this.data)
 }
+*/

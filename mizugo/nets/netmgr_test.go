@@ -1,5 +1,6 @@
 package nets
 
+/*
 import (
 	"testing"
 	"time"
@@ -118,3 +119,4 @@ func (this *SuiteNetmgr) TestSessionmgr() {
 	assert.Nil(this.T(), target.get(2))
 	assert.Nil(this.T(), target.get(3))
 }
+*/

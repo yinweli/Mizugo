@@ -21,11 +21,11 @@ type TCPListen struct {
 }
 
 // Listen 啟動接聽, 若不是使用多執行緒啟動, 則會被阻塞在這裡直到停止接聽
-func (this *TCPListen) Listen(complete Complete) {
+func (this *TCPListen) Listen(completer Completer) {
 	listen, err := net.Listen("tcp", this.address)
 
 	if err != nil {
-		complete(nil, fmt.Errorf("tcp listen: %s: %w", this.address, err))
+		completer.Complete(nil, fmt.Errorf("tcp listen: %s: %w", this.address, err))
 		return
 	} // if
 
@@ -36,13 +36,13 @@ func (this *TCPListen) Listen(complete Complete) {
 
 		if err != nil {
 			if this.closed.Load() == false { // 停止接聽前的錯誤才算是錯誤
-				complete(nil, fmt.Errorf("tcp listen: %s: %w", this.address, err))
+				completer.Complete(nil, fmt.Errorf("tcp listen: %s: %w", this.address, err))
 			} // if
 
 			return
 		} // if
 
-		complete(NewTCPSession(conn), nil)
+		completer.Complete(NewTCPSession(conn), nil)
 	} // for
 }
 

@@ -21,15 +21,15 @@ type TCPConnect struct {
 }
 
 // Connect 啟動連接, 若不是使用多執行緒啟動, 則會被阻塞在這裡直到連接成功
-func (this *TCPConnect) Connect(complete Complete) {
+func (this *TCPConnect) Connect(completer Completer) {
 	conn, err := net.DialTimeout("tcp", this.address, this.timeout)
 
 	if err != nil {
-		complete(nil, fmt.Errorf("tcp connect: %s: %w", this.address, err))
+		completer.Complete(nil, fmt.Errorf("tcp connect: %s: %w", this.address, err))
 		return
 	} // if
 
-	complete(NewTCPSession(conn), nil)
+	completer.Complete(NewTCPSession(conn), nil)
 }
 
 // Address 取得位址
