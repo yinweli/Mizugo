@@ -8,10 +8,11 @@ import (
 	"github.com/yinweli/Mizugo/mizugo/utils"
 )
 
-// 這裡存放用於測試的組件
+// 這裡存放用於單元測試的組件
 
 const testerWaitTime = time.Millisecond * 100
 
+// newSessionTester 建立會話測試器
 func newSessionTester() *sessionTester {
 	time.Sleep(testerWaitTime) // 在這邊等待一下, 讓伺服器有機會完成
 
@@ -20,6 +21,7 @@ func newSessionTester() *sessionTester {
 	}
 }
 
+// sessionTester 會話測試器
 type sessionTester struct {
 	timeout *utils.WaitTimeout
 	session Sessioner
@@ -44,6 +46,7 @@ func (this *sessionTester) complete(session Sessioner, err error) {
 	this.timeout.Done()
 }
 
+// newCoderTester 建立編碼測試器
 func newCoderTester(encode, decode bool) *coderTester {
 	return &coderTester{
 		encode: encode,
@@ -51,6 +54,7 @@ func newCoderTester(encode, decode bool) *coderTester {
 	}
 }
 
+// coderTester 編碼測試器
 type coderTester struct {
 	encode bool
 	decode bool
@@ -72,28 +76,39 @@ func (this *coderTester) Decode(packet []byte) (message any, err error) {
 	return string(packet), nil
 }
 
-func newReactorTester(success bool) *reactorTester {
+// newReactorTester 建立反應測試器
+func newReactorTester(receive bool) *reactorTester {
 	return &reactorTester{
-		success: success,
+		receive: receive,
 	}
 }
 
+// reactorTester 反應測試器
 type reactorTester struct {
-	success      bool
+	receive      bool
 	flagActive   bool
 	flagInactive bool
 	flagError    bool
 	flagReceive  bool
+	session      Sessioner
 	message      any
-	err          error
 }
 
-func (this *reactorTester) valid(message any) bool {
-	return this.message == message && this.err == nil
+func (this *reactorTester) validSession() bool {
+	return this.session != nil
 }
 
-func (this *reactorTester) Active() {
+func (this *reactorTester) validMessage(message any) bool {
+	return this.message == message
+}
+
+func (this *reactorTester) get() Sessioner {
+	return this.session
+}
+
+func (this *reactorTester) Active(session Sessioner) {
 	this.flagActive = true
+	this.session = session
 }
 
 func (this *reactorTester) Inactive() {
@@ -101,60 +116,60 @@ func (this *reactorTester) Inactive() {
 }
 
 func (this *reactorTester) Error(err error) {
-	this.err = err
 	this.flagError = true
 }
 
 func (this *reactorTester) Receive(message any) error {
-	this.message = message
 	this.flagReceive = true
 
-	if this.success {
+	if this.receive {
+		this.message = message
 		return nil
 	} else {
+		this.message = nil
 		return fmt.Errorf("receive failed")
 	} // if
 }
 
+// newNetmgrTester 建立網路管理測試器
 func newNetmgrTester() *netmgrTester {
 	time.Sleep(testerWaitTime) // 在這邊等待一下, 讓伺服器有機會完成
 
 	return &netmgrTester{
 		coder:   newCoderTester(true, true),
 		reactor: newReactorTester(true),
-		timeout: utils.NewWaitTimeout(time.Second),
 	}
 }
 
+// netmgrTester 網路管理測試器
 type netmgrTester struct {
 	coder   *coderTester
 	reactor *reactorTester
-	timeout *utils.WaitTimeout
-	session Sessioner
-}
-
-func (this *netmgrTester) wait() bool {
-	return this.timeout.Wait()
+	success bool
 }
 
 func (this *netmgrTester) valid() bool {
-	return this.session != nil
+	return this.reactor.validSession() && this.success
 }
 
-func (this *netmgrTester) get() Sessioner {
-	return this.session
+func (this *netmgrTester) sessionID() SessionID {
+	return this.reactor.get().SessionID()
 }
 
-func (this *netmgrTester) Prepare(session Sessioner) (coder Coder, reactor Reactor) {
-	this.session = session
-	this.timeout.Done()
+func (this *netmgrTester) session() Sessioner {
+	return this.reactor.get()
+}
+
+func (this *netmgrTester) Create() (coder Coder, reactor Reactor) {
+	this.success = true
 	return this.coder, this.reactor
 }
 
-func (this *netmgrTester) Error(err error) {
-	this.timeout.Done()
+func (this *netmgrTester) Failed(_ error) {
+	this.success = false
 }
 
+// emptySession 空會話
 type emptySession struct {
 }
 

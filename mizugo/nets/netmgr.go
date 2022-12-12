@@ -6,19 +6,17 @@ import (
 )
 
 // NewNetmgr 建立網路管理器
-func NewNetmgr(failure Failure) *Netmgr {
+func NewNetmgr() *Netmgr {
 	return &Netmgr{
-		failure: failure,
-		listen:  newListenmgr(),
-		session: newSessionmgr(),
+		listenmgr:  newListenmgr(),
+		sessionmgr: newSessionmgr(),
 	}
 }
 
 // Netmgr 網路管理器
 type Netmgr struct {
-	failure Failure     // 錯誤處理函式
-	listen  *listenmgr  // 監聽管理器
-	session *sessionmgr // 會話管理器
+	listenmgr  *listenmgr  // 監聽管理器
+	sessionmgr *sessionmgr // 會話管理器
 }
 
 // Status 狀態資料
@@ -27,78 +25,63 @@ type Status struct {
 	session int      // 會話數量
 }
 
-// Failure 錯誤處理函式類型
-type Failure func(err error)
+// Create 建立處理函式類型
+type Create func() (coder Coder, reactor Reactor)
 
-// Prepare 會話處理函式類型
-type Prepare func(session Sessioner) (coder Coder, reactor Reactor)
+// Failed 錯誤處理函式類型
+type Failed func(err error)
 
 // AddConnect 新增連接
-func (this *Netmgr) AddConnect(connecter Connecter, prepare Prepare) {
-	complete := newComplete(connecter.Address(), prepare, this.failure, this.session)
-	go connecter.Connect(complete.complete)
+func (this *Netmgr) AddConnect(connecter Connecter, create Create, failed Failed) {
+	go connecter.Connect(func(session Sessioner, err error) {
+		if err != nil {
+			failed(fmt.Errorf("netmgr connect: %s: %w", connecter.Address(), err))
+			return
+		} // if
+
+		sessionID := this.sessionmgr.add(session)
+		coder, reactor := create()
+		go session.Start(sessionID, coder, reactor)
+	})
 }
 
 // AddListen 新增監聽
-func (this *Netmgr) AddListen(listener Listener, prepare Prepare) {
-	this.listen.add(listener)
+func (this *Netmgr) AddListen(listener Listener, create Create, failed Failed) {
+	this.listenmgr.add(listener)
+	go listener.Listen(func(session Sessioner, err error) {
+		if err != nil {
+			failed(fmt.Errorf("netmgr listen: %s: %w", listener.Address(), err))
+			return
+		} // if
 
-	complete := newComplete(listener.Address(), prepare, this.failure, this.session)
-	go listener.Listen(complete.complete)
+		sessionID := this.sessionmgr.add(session)
+		coder, reactor := create()
+		go session.Start(sessionID, coder, reactor)
+	})
 }
 
 // GetSession 取得會話
 func (this *Netmgr) GetSession(sessionID SessionID) Sessioner {
-	return this.session.get(sessionID)
+	return this.sessionmgr.get(sessionID)
 }
 
 // StopSession 停止會話
 func (this *Netmgr) StopSession(sessionID SessionID) {
-	this.session.del(sessionID)
+	this.sessionmgr.del(sessionID)
 }
 
 // Stop 停止網路
 func (this *Netmgr) Stop() {
-	this.listen.clear()
-	this.session.clear()
+	this.listenmgr.clear()
+	this.sessionmgr.clear()
 }
 
 // Status 取得狀態資料
 func (this *Netmgr) Status() *Status {
 	return &Status{
-		Listen:  this.listen.address(),
-		session: this.session.count(),
+		Listen:  this.listenmgr.address(),
+		session: this.sessionmgr.count(),
 	}
-}
-
-// newListenmgr 建立完成會話資料
-func newComplete(address string, prepare Prepare, failure Failure, session *sessionmgr) *complete {
-	return &complete{
-		address: address,
-		prepare: prepare,
-		failure: failure,
-		session: session,
-	}
-}
-
-// complete 完成會話資料
-type complete struct {
-	address string      // 連接/監聽位址
-	prepare Prepare     // 準備會話函式
-	failure Failure     // 錯誤處理函式
-	session *sessionmgr // 會話管理器
-}
-
-// complete 完成會話
-func (this *complete) complete(session Sessioner, err error) {
-	if err != nil {
-		this.failure(fmt.Errorf("complete: %s: %w", this.address, err))
-		return
-	} // if
-
-	sessionID := this.session.add(session)
-	coder, reactor := this.prepare(session)
-	go session.Start(sessionID, coder, reactor)
 }
 
 // newListenmgr 建立監聽管理器

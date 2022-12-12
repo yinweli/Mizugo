@@ -37,12 +37,12 @@ func (this *TCPSession) Start(sessionID SessionID, coder Coder, reactor Reactor)
 	this.sessionID.Store(sessionID)
 	this.coder = coder
 	this.reactor = reactor
-	this.reactor.Active()
 	this.signal.Add(2) // 等待接收循環與傳送循環結束
 
 	go this.recvLoop()
 	go this.sendLoop()
 
+	this.reactor.Active(this)
 	this.signal.Wait() // 如果接收循環與傳送循環結束, 就會繼續進行結束處理
 	this.reactor.Inactive()
 }

@@ -90,12 +90,12 @@ func (this *SuiteTCPSession) TestSend() {
 	time.Sleep(this.timeout)
 	testerl.get().Send(this.message)
 	time.Sleep(this.timeout)
-	assert.True(this.T(), testerReactorc.valid(this.message))
+	assert.True(this.T(), testerReactorc.validMessage(this.message))
 
 	time.Sleep(this.timeout)
 	testerl.get().Send("!?")
 	time.Sleep(this.timeout)
-	assert.False(this.T(), testerReactorc.valid(this.message))
+	assert.False(this.T(), testerReactorc.validMessage(this.message))
 
 	time.Sleep(this.timeout)
 	testerl.get().StopWait()
@@ -128,7 +128,7 @@ func (this *SuiteTCPSession) TestEncodeFailed() {
 	time.Sleep(this.timeout)
 	testerl.get().Send(this.message)
 	time.Sleep(this.timeout)
-	assert.False(this.T(), testerReactorl.valid(nil))
+	assert.False(this.T(), testerReactorl.validMessage(this.message))
 
 	time.Sleep(this.timeout)
 	testerl.get().StopWait()
@@ -161,7 +161,7 @@ func (this *SuiteTCPSession) TestDecodeFailed() {
 	time.Sleep(this.timeout)
 	testerl.get().Send(this.message)
 	time.Sleep(this.timeout)
-	assert.False(this.T(), testerReactorc.valid(nil))
+	assert.False(this.T(), testerReactorc.validMessage(this.message))
 
 	time.Sleep(this.timeout)
 	testerl.get().StopWait()
@@ -194,7 +194,7 @@ func (this *SuiteTCPSession) TestReceiveFailed() {
 	time.Sleep(this.timeout)
 	testerl.get().Send(this.message)
 	time.Sleep(this.timeout)
-	assert.False(this.T(), testerReactorc.valid(nil))
+	assert.False(this.T(), testerReactorc.validMessage(this.message))
 
 	time.Sleep(this.timeout)
 	testerl.get().StopWait()

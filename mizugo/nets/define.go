@@ -58,10 +58,10 @@ type Coder interface {
 	Decode(packet []byte) (message any, err error)
 }
 
-// Reactor 處理介面
+// Reactor 反應介面
 type Reactor interface {
 	// Active 啟動處理
-	Active()
+	Active(session Sessioner)
 
 	// Inactive 結束處理
 	Inactive()
