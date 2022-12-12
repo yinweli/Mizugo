@@ -156,10 +156,6 @@ func (this *netmgrTester) sessionID() SessionID {
 	return this.reactor.get().SessionID()
 }
 
-func (this *netmgrTester) session() Sessioner {
-	return this.reactor.get()
-}
-
 func (this *netmgrTester) Create() (coder Coder, reactor Reactor) {
 	this.success = true
 	return this.coder, this.reactor
