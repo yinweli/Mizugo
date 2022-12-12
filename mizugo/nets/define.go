@@ -6,8 +6,8 @@ import (
 
 // Connecter 連接介面
 type Connecter interface {
-	// Start 啟動連接, 若不是使用多執行緒啟動, 則可能被阻塞在這裡直到連接完成
-	Start(complete Complete)
+	// Connect 啟動連接, 若不是使用多執行緒啟動, 則可能被阻塞在這裡直到連接完成
+	Connect(complete Complete)
 
 	// Address 取得位址
 	Address() string
@@ -15,8 +15,8 @@ type Connecter interface {
 
 // Listener 接聽介面
 type Listener interface {
-	// Start 啟動接聽, 若不是使用多執行緒啟動, 則一定被阻塞在這裡直到停止接聽
-	Start(complete Complete)
+	// Listen 啟動接聽, 若不是使用多執行緒啟動, 則一定被阻塞在這裡直到停止接聽
+	Listen(complete Complete)
 
 	// Stop 停止接聽
 	Stop() error
@@ -28,7 +28,7 @@ type Listener interface {
 // Sessioner 會話介面
 type Sessioner interface {
 	// Start 啟動會話, 若不是使用多執行緒啟動, 則一定被阻塞在這裡直到停止會話; 當由連接器/監聽器獲得會話器之後, 需要啟動會話才可以傳送或接收封包
-	Start(sessionID SessionID, coder Coder, processor Processor)
+	Start(sessionID SessionID, coder Coder, reactor Reactor)
 
 	// Stop 停止會話, 不會等待會話內部循環結束
 	Stop()
@@ -58,19 +58,19 @@ type Coder interface {
 	Decode(packet []byte) (message any, err error)
 }
 
-// Processor 處理介面
-type Processor interface {
-	// Start 啟動處理
-	Start()
+// Reactor 反應介面
+type Reactor interface {
+	// Active 啟動處理
+	Active(session Sessioner)
 
-	// Finish 結束處理
-	Finish()
-
-	// Receive 接收處理
-	Receive(message any) error
+	// Inactive 結束處理
+	Inactive()
 
 	// Error 錯誤處理
 	Error(err error)
+
+	// Receive 接收處理
+	Receive(message any) error
 }
 
 // Complete 完成函式類型

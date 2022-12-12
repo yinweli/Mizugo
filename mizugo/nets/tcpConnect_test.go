@@ -43,28 +43,28 @@ func (this *SuiteTCPConnect) TestNewTCPConnect() {
 	assert.NotNil(this.T(), NewTCPConnect(this.ip, this.port, this.timeout))
 }
 
-func (this *SuiteTCPConnect) TestStart() {
-	session := newTestSession("tcp connect", this.timeout)
+func (this *SuiteTCPConnect) TestConnect() {
+	tester := newSessionTester()
 	target := NewTCPConnect(this.ip, this.port, this.timeout)
-	target.Start(session.Complete)
-	assert.True(this.T(), session.Wait())
-	assert.True(this.T(), session.Valid())
-	assert.NotNil(this.T(), session.Session())
+	target.Connect(tester.Complete)
+	assert.True(this.T(), tester.wait())
+	assert.True(this.T(), tester.valid())
+	tester.get().StopWait()
 
-	session = newTestSession("tcp connect - error ip", this.timeout)
+	tester = newSessionTester()
 	target = NewTCPConnect("!?", this.port, this.timeout)
-	target.Start(session.Complete)
-	assert.True(this.T(), session.Wait())
-	assert.False(this.T(), session.Valid())
+	target.Connect(tester.Complete)
+	assert.True(this.T(), tester.wait())
+	assert.False(this.T(), tester.valid())
 
-	session = newTestSession("tcp connect - error port", this.timeout)
+	tester = newSessionTester()
 	target = NewTCPConnect(this.ip, "3000", this.timeout) // 故意連線到不開放的埠號才會引發錯誤
-	target.Start(session.Complete)
-	assert.True(this.T(), session.Wait())
-	assert.False(this.T(), session.Valid())
+	target.Connect(tester.Complete)
+	assert.True(this.T(), tester.wait())
+	assert.False(this.T(), tester.valid())
 }
 
-func (this *SuiteTCPConnect) TestAddress() {
+func (this *SuiteTCPConnect) TestTCPConnect() {
 	target := NewTCPConnect(this.ip, this.port, this.timeout)
 	assert.Equal(this.T(), net.JoinHostPort(this.ip, this.port), target.Address())
 }
