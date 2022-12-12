@@ -6,8 +6,8 @@ import (
 
 // Connecter 連接介面
 type Connecter interface {
-	// Start 啟動連接, 若不是使用多執行緒啟動, 則可能被阻塞在這裡直到連接完成
-	Start(complete Complete)
+	// Connect 啟動連接, 若不是使用多執行緒啟動, 則可能被阻塞在這裡直到連接完成
+	Connect(complete Complete)
 
 	// Address 取得位址
 	Address() string
@@ -15,8 +15,8 @@ type Connecter interface {
 
 // Listener 接聽介面
 type Listener interface {
-	// Start 啟動接聽, 若不是使用多執行緒啟動, 則一定被阻塞在這裡直到停止接聽
-	Start(complete Complete)
+	// Listen 啟動接聽, 若不是使用多執行緒啟動, 則一定被阻塞在這裡直到停止接聽
+	Listen(complete Complete)
 
 	// Stop 停止接聽
 	Stop() error

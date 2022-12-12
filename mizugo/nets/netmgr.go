@@ -36,7 +36,7 @@ type Prepare func(session Sessioner) (coder Coder, reactor Reactor)
 // AddConnect 新增連接
 func (this *Netmgr) AddConnect(connecter Connecter, prepare Prepare) {
 	complete := newComplete(connecter.Address(), prepare, this.failure, this.session)
-	go connecter.Start(complete.complete)
+	go connecter.Connect(complete.complete)
 }
 
 // AddListen 新增監聽
@@ -44,7 +44,7 @@ func (this *Netmgr) AddListen(listener Listener, prepare Prepare) {
 	this.listen.add(listener)
 
 	complete := newComplete(listener.Address(), prepare, this.failure, this.session)
-	go listener.Start(complete.complete)
+	go listener.Listen(complete.complete)
 }
 
 // GetSession 取得會話

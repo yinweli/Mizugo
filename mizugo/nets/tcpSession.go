@@ -88,19 +88,19 @@ func (this *TCPSession) recvLoop() {
 		packet, err := this.recvPacket(reader)
 
 		if err != nil {
-			this.reactor.Error(fmt.Errorf("recv loop: %w", err))
+			this.reactor.Error(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 
 		message, err := this.coder.Decode(packet)
 
 		if err != nil {
-			this.reactor.Error(fmt.Errorf("recv loop: %w", err))
+			this.reactor.Error(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 
 		if err := this.reactor.Receive(message); err != nil {
-			this.reactor.Error(fmt.Errorf("recv loop: %w", err))
+			this.reactor.Error(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 	} // for
@@ -114,7 +114,7 @@ func (this *TCPSession) recvPacket(reader io.Reader) (packet []byte, err error) 
 	header := make([]byte, tcpHeaderSize)
 
 	if _, err := io.ReadFull(reader, header); err != nil {
-		return nil, fmt.Errorf("recv packet: %w", err)
+		return nil, fmt.Errorf("tcp session recv packet: %w", err)
 	} // if
 
 	size := binary.LittleEndian.Uint16(header)
@@ -126,7 +126,7 @@ func (this *TCPSession) recvPacket(reader io.Reader) (packet []byte, err error) 
 	packet = make([]byte, size)
 
 	if _, err := io.ReadFull(reader, packet); err != nil {
-		return nil, fmt.Errorf("recv packet: %w", err)
+		return nil, fmt.Errorf("tcp session recv packet: %w", err)
 	} // if
 
 	return packet, nil
@@ -144,12 +144,12 @@ func (this *TCPSession) sendLoop() {
 		packet, err := this.coder.Encode(message)
 
 		if err != nil {
-			this.reactor.Error(fmt.Errorf("send loop: %w", err))
+			this.reactor.Error(fmt.Errorf("tcp session send loop: %w", err))
 			break
 		} // if
 
 		if err := this.sendPacket(this.conn, packet); err != nil {
-			this.reactor.Error(fmt.Errorf("send loop: %w", err))
+			this.reactor.Error(fmt.Errorf("tcp session send loop: %w", err))
 			break
 		} // if
 	} // for
@@ -167,18 +167,18 @@ func (this *TCPSession) sendPacket(writer io.Writer, packet []byte) error {
 	} // if
 
 	if size > tcpPacketSize {
-		return fmt.Errorf("send packet: packet too large")
+		return fmt.Errorf("tcp session send packet: packet too large")
 	} // if
 
 	header := make([]byte, tcpHeaderSize)
 	binary.LittleEndian.PutUint16(header, uint16(size))
 
 	if _, err := writer.Write(header); err != nil {
-		return fmt.Errorf("send packet: %w", err)
+		return fmt.Errorf("tcp session send packet: %w", err)
 	} // if
 
 	if _, err := writer.Write(packet); err != nil {
-		return fmt.Errorf("send packet: %w", err)
+		return fmt.Errorf("tcp session send packet: %w", err)
 	} // if
 
 	return nil
