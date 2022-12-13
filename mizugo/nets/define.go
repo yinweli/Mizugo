@@ -77,15 +77,6 @@ func (this Release) Release() {
 	this()
 }
 
-// Bundler 綁定介面
-type Bundler interface {
-	// Bind 綁定處理
-	Bind(session Sessioner) (releaser Releaser, reactor Reactor)
-
-	// Error 錯誤處理
-	Error(err error)
-}
-
 // Reactor 反應介面
 type Reactor interface {
 	// Encode 封包編碼, 用在傳送封包時
@@ -96,6 +87,15 @@ type Reactor interface {
 
 	// Receive 接收處理
 	Receive(message any) error
+
+	// Error 錯誤處理
+	Error(err error)
+}
+
+// Bundler 綁定介面
+type Bundler interface {
+	// Bind 綁定處理
+	Bind(session Sessioner) (releaser Releaser, reactor Reactor)
 
 	// Error 錯誤處理
 	Error(err error)

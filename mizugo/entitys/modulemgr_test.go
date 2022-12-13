@@ -36,56 +36,47 @@ func (this *SuiteModulemgr) TestNewModulemgr() {
 }
 
 func (this *SuiteModulemgr) TestAdd() {
+	module := newModuleTester(ModuleID(1))
 	target := NewModulemgr()
 
-	assert.Nil(this.T(), target.Add(NewModule(ModuleID(1), "module")))
-	assert.NotNil(this.T(), target.Get(ModuleID(1)))
-
-	assert.NotNil(this.T(), target.Add(NewModule(ModuleID(1), "module")))
+	assert.Nil(this.T(), target.Add(module))
+	assert.NotNil(this.T(), target.Get(module.ModuleID()))
+	assert.NotNil(this.T(), target.Add(module))
 }
 
 func (this *SuiteModulemgr) TestDel() {
+	module := newModuleTester(ModuleID(1))
 	target := NewModulemgr()
 
-	assert.Nil(this.T(), target.Add(NewModule(ModuleID(1), "module")))
-	module := target.Del(ModuleID(1))
-	assert.NotNil(this.T(), module)
-	assert.Equal(this.T(), ModuleID(1), module.ModuleID())
-	assert.Equal(this.T(), "module", module.Name())
-	assert.Nil(this.T(), target.Get(ModuleID(1)))
-
-	assert.Nil(this.T(), target.Del(ModuleID(1)))
+	assert.Nil(this.T(), target.Add(module))
+	assert.Equal(this.T(), module, target.Del(module.ModuleID()))
+	assert.Nil(this.T(), target.Get(module.ModuleID()))
+	assert.Nil(this.T(), target.Del(module.ModuleID()))
 }
 
 func (this *SuiteModulemgr) TestGet() {
+	module := newModuleTester(ModuleID(1))
 	target := NewModulemgr()
 
-	assert.Nil(this.T(), target.Add(NewModule(ModuleID(1), "module")))
-	module := target.Get(ModuleID(1))
-	assert.NotNil(this.T(), module)
-	assert.Equal(this.T(), ModuleID(1), module.ModuleID())
-	assert.Equal(this.T(), "module", module.Name())
-
+	assert.Nil(this.T(), target.Add(module))
+	assert.Equal(this.T(), module, target.Get(module.ModuleID()))
 	assert.Nil(this.T(), target.Get(ModuleID(2)))
 }
 
 func (this *SuiteModulemgr) TestAll() {
+	module1 := newModuleTester(ModuleID(1))
+	module2 := newModuleTester(ModuleID(2))
 	target := NewModulemgr()
 
-	assert.Nil(this.T(), target.Add(NewModule(ModuleID(1), "module1")))
-	assert.Nil(this.T(), target.Add(NewModule(ModuleID(2), "module2")))
-	module := target.All()
-	assert.Len(this.T(), module, 2)
-	assert.Equal(this.T(), ModuleID(1), module[0].ModuleID())
-	assert.Equal(this.T(), "module1", module[0].Name())
-	assert.Equal(this.T(), ModuleID(2), module[1].ModuleID())
-	assert.Equal(this.T(), "module2", module[1].Name())
+	assert.Nil(this.T(), target.Add(module1))
+	assert.Nil(this.T(), target.Add(module2))
+	assert.ElementsMatch(this.T(), []Moduler{module1, module2}, target.All())
 }
 
 func (this *SuiteModulemgr) TestCount() {
 	target := NewModulemgr()
 
-	assert.Nil(this.T(), target.Add(NewModule(ModuleID(1), "module1")))
-	assert.Nil(this.T(), target.Add(NewModule(ModuleID(2), "module2")))
+	assert.Nil(this.T(), target.Add(newModuleTester(ModuleID(1))))
+	assert.Nil(this.T(), target.Add(newModuleTester(ModuleID(2))))
 	assert.Equal(this.T(), 2, target.Count())
 }
