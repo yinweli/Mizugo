@@ -91,6 +91,12 @@ linters-settings:
       - golang.org/x/sync/singleflight
   staticcheck:
     checks: [ "all", "-SA1019" ]
+  gosec:
+    excludes:
+      - G401
+      - G501
+      - G502
+      - G503
 
 linters:
   disable-all: true
