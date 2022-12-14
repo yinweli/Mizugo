@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 
+	"github.com/yinweli/Mizugo/mizugo/nets"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -48,10 +49,39 @@ func (this *SuiteEntity) TestEntity() {
 	assert.False(this.T(), target.Enable())
 }
 
-func (this *SuiteEntity) TestModule() {
+func (this *SuiteEntity) TestSession() {
+	session := nets.NewTCPSession(nil)
+
 	target := NewEntity(EntityID(1))
+	assert.Nil(this.T(), target.SetSession(session))
+	assert.Equal(this.T(), session, target.GetSession())
+	assert.NotNil(this.T(), target.SetSession(session))
+
+	target = NewEntity(EntityID(1))
+	target.initialize()
+	assert.NotNil(this.T(), target.SetSession(session))
+	target.finalize()
+}
+
+func (this *SuiteEntity) TestReact() {
+	react := newReactTester()
+
+	target := NewEntity(EntityID(1))
+	assert.Nil(this.T(), target.SetReact(react))
+	assert.Equal(this.T(), react, target.GetReact())
+	assert.NotNil(this.T(), target.SetReact(react))
+
+	target = NewEntity(EntityID(1))
+	target.initialize()
+	assert.NotNil(this.T(), target.SetReact(react))
+	target.finalize()
+}
+
+func (this *SuiteEntity) TestModule() {
 	module1 := newModuleTester(ModuleID(1))
 	module2 := newModuleTester(ModuleID(2))
+
+	target := NewEntity(EntityID(1))
 	assert.Nil(this.T(), target.AddModule(module1))
 	assert.NotNil(this.T(), target.GetModule(module1.ModuleID()))
 	assert.NotNil(this.T(), target.AddModule(module1))
@@ -91,8 +121,8 @@ func (this *SuiteEntity) TestEvent() {
 }
 
 func (this *SuiteEntity) TestInitialize() {
-	target := NewEntity(EntityID(1))
 	module := newModuleTester(ModuleID(1))
+	target := NewEntity(EntityID(1))
 	assert.Nil(this.T(), target.AddModule(module))
 	target.initialize()
 	time.Sleep(updateInterval * 2) // 為了讓update會被執行, 需要長一點的時間

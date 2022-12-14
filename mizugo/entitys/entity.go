@@ -6,23 +6,28 @@ import (
 	"time"
 
 	"github.com/yinweli/Mizugo/mizugo/events"
+	"github.com/yinweli/Mizugo/mizugo/nets"
 )
 
 // NewEntity 建立實體資料
 func NewEntity(entityID EntityID) *Entity {
 	return &Entity{
-		entityID:  entityID,
-		modulemgr: NewModulemgr(),
-		eventmgr:  events.NewEventmgr(eventSize),
+		entityID:   entityID,
+		sessionmgr: NewSessionmgr(),
+		reactmgr:   NewReactmgr(),
+		modulemgr:  NewModulemgr(),
+		eventmgr:   events.NewEventmgr(eventSize),
 	}
 }
 
 // Entity 實體資料
 type Entity struct {
-	entityID  EntityID         // 實體編號
-	modulemgr *Modulemgr       // 模組管理器
-	eventmgr  *events.Eventmgr // 事件管理器
-	enable    atomic.Bool      // 啟用旗標
+	entityID   EntityID         // 實體編號
+	sessionmgr *Sessionmgr      // 會話管理器
+	reactmgr   *Reactmgr        // 反應管理器
+	modulemgr  *Modulemgr       // 模組管理器
+	eventmgr   *events.Eventmgr // 事件管理器
+	enable     atomic.Bool      // 啟用旗標
 }
 
 // EntityID 實體編號
@@ -31,6 +36,44 @@ type EntityID int64
 // EntityID 取得實體編號
 func (this *Entity) EntityID() EntityID {
 	return this.entityID
+}
+
+// SetSession 設定會話物件
+func (this *Entity) SetSession(session nets.Sessioner) error {
+	if this.enable.Load() {
+		return fmt.Errorf("entity set session: overdue")
+	} // if
+
+	if this.sessionmgr.Get() != nil {
+		return fmt.Errorf("entity set session: already set")
+	} // if
+
+	this.sessionmgr.Set(session)
+	return nil
+}
+
+// GetSession 取得會話物件
+func (this *Entity) GetSession() nets.Sessioner {
+	return this.sessionmgr.Get()
+}
+
+// SetReact 設定反應物件
+func (this *Entity) SetReact(react nets.Reactor) error {
+	if this.enable.Load() {
+		return fmt.Errorf("entity set react: overdue")
+	} // if
+
+	if this.reactmgr.Get() != nil {
+		return fmt.Errorf("entity set react: already set")
+	} // if
+
+	this.reactmgr.Set(react)
+	return nil
+}
+
+// GetReact 取得反應物件
+func (this *Entity) GetReact() nets.Reactor {
+	return this.reactmgr.Get()
 }
 
 // AddModule 新增模組

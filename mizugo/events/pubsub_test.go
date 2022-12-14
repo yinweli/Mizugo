@@ -36,9 +36,9 @@ func (this *SuitePubsub) TestNewPubsub() {
 }
 
 func (this *SuitePubsub) TestPubsub() {
-	target := NewPubsub()
 	valid := "param"
 	count := 0
+	target := NewPubsub()
 	target.Sub("proc1", func(param any) {
 		if param.(string) == valid {
 			count++
