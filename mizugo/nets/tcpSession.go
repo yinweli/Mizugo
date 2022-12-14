@@ -32,7 +32,7 @@ type TCPSession struct {
 	signal    sync.WaitGroup // 通知信號
 }
 
-// Start 啟動會話, 當由連接器/監聽器獲得會話器之後, 需要啟動會話才可以傳送或接收封包; 若不是使用多執行緒啟動, 則會被阻塞在這裡直到會話結束
+// Start 啟動會話, 當由連接器/接聽器獲得會話器之後, 需要啟動會話才可以傳送或接收封包; 若不是使用多執行緒啟動, 則會被阻塞在這裡直到會話結束
 func (this *TCPSession) Start(sessionID SessionID, binder Binder) {
 	this.sessionID.Store(sessionID)
 	this.reactor, this.unbinder = binder.Bind(this)

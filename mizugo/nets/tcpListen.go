@@ -20,7 +20,7 @@ type TCPListen struct {
 	closed  atomic.Bool  // 關閉旗標
 }
 
-// Listen 啟動接聽, 若不是使用多執行緒啟動, 則會被阻塞在這裡直到停止接聽
+// Listen 啟動接聽
 func (this *TCPListen) Listen(completer Completer) {
 	listen, err := net.Listen("tcp", this.address)
 
@@ -31,19 +31,22 @@ func (this *TCPListen) Listen(completer Completer) {
 
 	this.listen = listen
 
-	for {
-		conn, err := this.listen.Accept()
+	go func() {
+		for {
+			conn, err := this.listen.Accept()
 
-		if err != nil {
-			if this.closed.Load() == false { // 停止接聽前的錯誤才算是錯誤
-				completer.Complete(nil, fmt.Errorf("tcp listen: %s: %w", this.address, err))
+			if err != nil {
+				if this.closed.Load() {
+					return // 停止接聽, 這不算是錯誤, 但要結束接聽器了
+				} else {
+					completer.Complete(nil, fmt.Errorf("tcp listen: %s: %w", this.address, err))
+					continue // 這次連接出了問題, 但我們還是繼續接聽
+				} // if
 			} // if
 
-			return
-		} // if
-
-		completer.Complete(NewTCPSession(conn), nil)
-	} // for
+			completer.Complete(NewTCPSession(conn), nil)
+		} // for
+	}()
 }
 
 // Stop 停止接聽
