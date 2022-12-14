@@ -19,15 +19,13 @@ func TestTCPListen(t *testing.T) {
 type SuiteTCPListen struct {
 	suite.Suite
 	testdata.TestEnv
-	ip      string
-	port    string
+	host    host
 	timeout time.Duration
 }
 
 func (this *SuiteTCPListen) SetupSuite() {
 	this.Change("test-nets-tcpListen")
-	this.ip = ""
-	this.port = "3001"
+	this.host = host{ip: "", port: "3001"}
 	this.timeout = time.Second
 }
 
@@ -40,16 +38,16 @@ func (this *SuiteTCPListen) TearDownTest() {
 }
 
 func (this *SuiteTCPListen) TestNewTCPListen() {
-	assert.NotNil(this.T(), NewTCPListen(this.ip, this.port))
+	assert.NotNil(this.T(), NewTCPListen(this.host.ip, this.host.port))
 }
 
 func (this *SuiteTCPListen) TestListen() {
 	testerl := newCompleteTester()
-	target := NewTCPListen(this.ip, this.port)
+	target := NewTCPListen(this.host.ip, this.host.port)
 	go target.Listen(testerl)
 
 	testerc := newCompleteTester()
-	client := NewTCPConnect(this.ip, this.port, this.timeout)
+	client := NewTCPConnect(this.host.ip, this.host.port, this.timeout)
 	go client.Connect(testerc)
 
 	time.Sleep(this.timeout)
@@ -60,19 +58,19 @@ func (this *SuiteTCPListen) TestListen() {
 	testerc.get().StopWait()
 
 	tester := newCompleteTester()
-	target = NewTCPListen("!?", this.port)
+	target = NewTCPListen("!?", this.host.port)
 	target.Listen(tester)
 	time.Sleep(this.timeout)
 	assert.False(this.T(), tester.valid())
 
 	tester = newCompleteTester()
-	target = NewTCPListen("192.168.0.1", this.port) // 故意要監聽錯誤位址才會引發錯誤
+	target = NewTCPListen("192.168.0.1", this.host.port) // 故意要監聽錯誤位址才會引發錯誤
 	target.Listen(tester)
 	time.Sleep(this.timeout)
 	assert.False(this.T(), tester.valid())
 }
 
-func (this *SuiteTCPListen) TestTCPListen() {
-	target := NewTCPListen(this.ip, this.port)
-	assert.Equal(this.T(), net.JoinHostPort(this.ip, this.port), target.Address())
+func (this *SuiteTCPListen) TestAddress() {
+	target := NewTCPListen(this.host.ip, this.host.port)
+	assert.Equal(this.T(), net.JoinHostPort(this.host.ip, this.host.port), target.Address())
 }

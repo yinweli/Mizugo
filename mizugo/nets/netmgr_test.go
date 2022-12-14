@@ -18,19 +18,15 @@ func TestNetmgr(t *testing.T) {
 type SuiteNetmgr struct {
 	suite.Suite
 	testdata.TestEnv
-	googleIp   string
-	googlePort string
-	localIp    string
-	localPort  string
+	hostGoogle host
+	hostLocal  host
 	timeout    time.Duration
 }
 
 func (this *SuiteNetmgr) SetupSuite() {
 	this.Change("test-nets-netmgr")
-	this.googleIp = "google.com"
-	this.googlePort = "80"
-	this.localIp = ""
-	this.localPort = "3000"
+	this.hostGoogle = host{ip: "google.com", port: "80"}
+	this.hostLocal = host{ip: "", port: "3000"}
 	this.timeout = time.Second
 }
 
@@ -49,7 +45,7 @@ func (this *SuiteNetmgr) TestNewNetmgr() {
 func (this *SuiteNetmgr) TestAddConnect() {
 	tester := newSessionTester(true, true, true)
 	target := NewNetmgr()
-	target.AddConnect(NewTCPConnect(this.googleIp, this.googlePort, this.timeout), tester)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, this.timeout), tester)
 
 	time.Sleep(this.timeout)
 	assert.True(this.T(), tester.validSession())
@@ -61,10 +57,10 @@ func (this *SuiteNetmgr) TestAddConnect() {
 func (this *SuiteNetmgr) TestAddListen() {
 	testerl := newSessionTester(true, true, true)
 	target := NewNetmgr()
-	target.AddListen(NewTCPListen(this.localIp, this.localPort), testerl)
+	target.AddListen(NewTCPListen(this.hostLocal.ip, this.hostLocal.port), testerl)
 
 	testerc := newCompleteTester()
-	client := NewTCPConnect(this.localIp, this.localPort, this.timeout)
+	client := NewTCPConnect(this.hostLocal.ip, this.hostLocal.port, this.timeout)
 	go client.Connect(testerc)
 
 	time.Sleep(this.timeout)
@@ -79,7 +75,7 @@ func (this *SuiteNetmgr) TestAddListen() {
 func (this *SuiteNetmgr) TestGetSession() {
 	tester := newSessionTester(true, true, true)
 	target := NewNetmgr()
-	target.AddConnect(NewTCPConnect(this.googleIp, this.googlePort, this.timeout), tester)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, this.timeout), tester)
 
 	time.Sleep(this.timeout)
 	assert.True(this.T(), tester.validSession())
@@ -92,7 +88,7 @@ func (this *SuiteNetmgr) TestGetSession() {
 func (this *SuiteNetmgr) TestStopSession() {
 	tester := newSessionTester(true, true, true)
 	target := NewNetmgr()
-	target.AddConnect(NewTCPConnect(this.googleIp, this.googlePort, this.timeout), tester)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, this.timeout), tester)
 
 	time.Sleep(this.timeout)
 	assert.True(this.T(), tester.validSession())
@@ -108,7 +104,7 @@ func (this *SuiteNetmgr) TestStopSession() {
 func (this *SuiteNetmgr) TestStop() {
 	tester := newSessionTester(true, true, true)
 	target := NewNetmgr()
-	target.AddConnect(NewTCPConnect(this.googleIp, this.googlePort, this.timeout), tester)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, this.timeout), tester)
 
 	time.Sleep(this.timeout)
 	assert.True(this.T(), tester.validSession())
@@ -123,10 +119,10 @@ func (this *SuiteNetmgr) TestStop() {
 func (this *SuiteNetmgr) TestStatus() {
 	testerl := newSessionTester(true, true, true)
 	target := NewNetmgr()
-	target.AddListen(NewTCPListen(this.localIp, this.localPort), testerl)
+	target.AddListen(NewTCPListen(this.hostLocal.ip, this.hostLocal.port), testerl)
 
 	testerc := newSessionTester(true, true, true)
-	target.AddConnect(NewTCPConnect(this.googleIp, this.googlePort, this.timeout), testerc)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, this.timeout), testerc)
 
 	time.Sleep(this.timeout)
 	assert.True(this.T(), testerc.validSession())

@@ -220,3 +220,9 @@ func (this *emptySession) RemoteAddr() net.Addr {
 func (this *emptySession) LocalAddr() net.Addr {
 	return &net.TCPAddr{}
 }
+
+// host 端點資料
+type host struct {
+	ip   string
+	port string
+}
