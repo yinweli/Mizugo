@@ -95,7 +95,7 @@ func (this *SuiteEntity) TestInitialize() {
 	module := newModuleTester(ModuleID(1))
 	assert.Nil(this.T(), target.AddModule(module))
 	target.initialize()
-	time.Sleep(this.timeout)
+	time.Sleep(updateInterval * 2) // 為了讓update會被執行, 需要長一點的時間
 	target.finalize()
 	time.Sleep(this.timeout)
 

@@ -1,6 +1,5 @@
 package nets
 
-/*
 import (
 	"testing"
 	"time"
@@ -19,15 +18,19 @@ func TestNetmgr(t *testing.T) {
 type SuiteNetmgr struct {
 	suite.Suite
 	testdata.TestEnv
-	ip      string
-	port    string
-	timeout time.Duration
+	googleIp   string
+	googlePort string
+	localIp    string
+	localPort  string
+	timeout    time.Duration
 }
 
 func (this *SuiteNetmgr) SetupSuite() {
 	this.Change("test-nets-netmgr")
-	this.ip = ""
-	this.port = "3000"
+	this.googleIp = "google.com"
+	this.googlePort = "80"
+	this.localIp = ""
+	this.localPort = "3000"
 	this.timeout = time.Second
 }
 
@@ -44,53 +47,95 @@ func (this *SuiteNetmgr) TestNewNetmgr() {
 }
 
 func (this *SuiteNetmgr) TestAddConnect() {
-	tester := newNetmgrTester()
+	tester := newSessionTester(true, true, true)
 	target := NewNetmgr()
-	target.AddConnect(NewTCPConnect("google.com", "80", this.timeout), tester.Create, tester.Failed)
+	target.AddConnect(NewTCPConnect(this.googleIp, this.googlePort, this.timeout), tester)
 
 	time.Sleep(this.timeout)
-	assert.True(this.T(), tester.valid())
+	assert.True(this.T(), tester.validSession())
+
+	time.Sleep(this.timeout)
 	target.Stop()
 }
 
 func (this *SuiteNetmgr) TestAddListen() {
-	testerl := newNetmgrTester()
+	testerl := newSessionTester(true, true, true)
 	target := NewNetmgr()
-	target.AddListen(NewTCPListen(this.ip, this.port), testerl.Create, testerl.Failed)
+	target.AddListen(NewTCPListen(this.localIp, this.localPort), testerl)
 
-	testerc := newSessionTester()
-	client := NewTCPConnect(this.ip, this.port, this.timeout)
-	go client.Connect(testerc.Complete)
+	testerc := newCompleteTester()
+	client := NewTCPConnect(this.localIp, this.localPort, this.timeout)
+	go client.Connect(testerc)
 
 	time.Sleep(this.timeout)
-	assert.True(this.T(), testerl.valid())
+	assert.True(this.T(), testerl.validSession())
 	assert.True(this.T(), testerc.valid())
+
+	time.Sleep(this.timeout)
 	target.Stop()
 	testerc.get().StopWait()
 }
 
-func (this *SuiteNetmgr) TestNetmgr() {
-	testerl := newNetmgrTester()
+func (this *SuiteNetmgr) TestGetSession() {
+	tester := newSessionTester(true, true, true)
 	target := NewNetmgr()
-	target.AddListen(NewTCPListen(this.ip, this.port), testerl.Create, testerl.Failed)
-
-	testerc := newSessionTester()
-	client := NewTCPConnect(this.ip, this.port, this.timeout)
-	go client.Connect(testerc.Complete)
+	target.AddConnect(NewTCPConnect(this.googleIp, this.googlePort, this.timeout), tester)
 
 	time.Sleep(this.timeout)
-	assert.True(this.T(), testerl.valid())
-	assert.True(this.T(), testerc.valid())
+	assert.True(this.T(), tester.validSession())
+	assert.Equal(this.T(), tester.get(), target.GetSession(tester.get().SessionID()))
+
+	time.Sleep(this.timeout)
+	target.Stop()
+}
+
+func (this *SuiteNetmgr) TestStopSession() {
+	tester := newSessionTester(true, true, true)
+	target := NewNetmgr()
+	target.AddConnect(NewTCPConnect(this.googleIp, this.googlePort, this.timeout), tester)
+
+	time.Sleep(this.timeout)
+	assert.True(this.T(), tester.validSession())
+	target.StopSession(tester.get().SessionID())
+
+	time.Sleep(this.timeout)
+	assert.False(this.T(), tester.validSession())
+
+	time.Sleep(this.timeout)
+	target.Stop()
+}
+
+func (this *SuiteNetmgr) TestStop() {
+	tester := newSessionTester(true, true, true)
+	target := NewNetmgr()
+	target.AddConnect(NewTCPConnect(this.googleIp, this.googlePort, this.timeout), tester)
+
+	time.Sleep(this.timeout)
+	assert.True(this.T(), tester.validSession())
+
+	time.Sleep(this.timeout)
+	target.Stop()
+
+	time.Sleep(this.timeout)
+	assert.False(this.T(), tester.validSession())
+}
+
+func (this *SuiteNetmgr) TestStatus() {
+	testerl := newSessionTester(true, true, true)
+	target := NewNetmgr()
+	target.AddListen(NewTCPListen(this.localIp, this.localPort), testerl)
+
+	testerc := newSessionTester(true, true, true)
+	target.AddConnect(NewTCPConnect(this.googleIp, this.googlePort, this.timeout), testerc)
+
+	time.Sleep(this.timeout)
+	assert.True(this.T(), testerc.validSession())
 	status := target.Status()
 	assert.Len(this.T(), status.Listen, 1)
-	assert.Equal(this.T(), 1, status.session)
-	sessionID := testerl.sessionID()
-	assert.NotNil(this.T(), target.GetSession(sessionID))
-	target.StopSession(sessionID)
-	assert.Nil(this.T(), target.GetSession(sessionID))
+	assert.Equal(this.T(), 1, status.Session)
 
+	time.Sleep(this.timeout)
 	target.Stop()
-	testerc.get().StopWait()
 }
 
 func (this *SuiteNetmgr) TestListenmgr() {
@@ -99,8 +144,9 @@ func (this *SuiteNetmgr) TestListenmgr() {
 	target.add(NewTCPListen("127.0.0.1", "1"))
 	target.add(NewTCPListen("127.0.0.2", "2"))
 	target.add(NewTCPListen("127.0.0.3", "3"))
-	assert.ElementsMatch(this.T(), []string{"127.0.0.1:1", "127.0.0.2:2", "127.0.0.3:3"}, target.address())
+	assert.ElementsMatch(this.T(), target.address(), []string{"127.0.0.1:1", "127.0.0.2:2", "127.0.0.3:3"})
 	target.clear()
+	assert.ElementsMatch(this.T(), target.address(), []string{})
 }
 
 func (this *SuiteNetmgr) TestSessionmgr() {
@@ -109,14 +155,16 @@ func (this *SuiteNetmgr) TestSessionmgr() {
 	assert.Equal(this.T(), SessionID(1), target.add(&emptySession{}))
 	assert.Equal(this.T(), SessionID(2), target.add(&emptySession{}))
 	assert.Equal(this.T(), SessionID(3), target.add(&emptySession{}))
+	assert.NotNil(this.T(), target.get(SessionID(1)))
+	assert.NotNil(this.T(), target.get(SessionID(2)))
+	assert.NotNil(this.T(), target.get(SessionID(3)))
+	assert.Nil(this.T(), target.get(SessionID(4)))
 	assert.Equal(this.T(), 3, target.count())
-	assert.NotNil(this.T(), target.get(1))
 	target.del(1)
+	assert.Nil(this.T(), target.get(SessionID(1)))
 	assert.Equal(this.T(), 2, target.count())
-	assert.Nil(this.T(), target.get(1))
 	target.clear()
+	assert.Nil(this.T(), target.get(SessionID(2)))
+	assert.Nil(this.T(), target.get(SessionID(3)))
 	assert.Equal(this.T(), 0, target.count())
-	assert.Nil(this.T(), target.get(2))
-	assert.Nil(this.T(), target.get(3))
 }
-*/

@@ -27,22 +27,22 @@ type TCPSession struct {
 	conn      net.Conn       // 連接物件
 	message   chan any       // 訊息通道
 	sessionID atomic.Int64   // 會話編號
-	releaser  Releaser       // 釋放會話物件
 	reactor   Reactor        // 反應物件
+	unbinder  Unbinder       // 解綁物件
 	signal    sync.WaitGroup // 通知信號
 }
 
 // Start 啟動會話, 當由連接器/監聽器獲得會話器之後, 需要啟動會話才可以傳送或接收封包; 若不是使用多執行緒啟動, 則會被阻塞在這裡直到會話結束
-func (this *TCPSession) Start(sessionID SessionID, bundler Bundler) {
+func (this *TCPSession) Start(sessionID SessionID, binder Binder) {
 	this.sessionID.Store(sessionID)
-	this.releaser, this.reactor = bundler.Bind(this)
+	this.reactor, this.unbinder = binder.Bind(this)
 	this.signal.Add(2) // 等待接收循環與傳送循環結束
 
 	go this.recvLoop()
 	go this.sendLoop()
 
 	this.signal.Wait() // 如果接收循環與傳送循環結束, 就會繼續進行結束處理
-	this.releaser.Release()
+	this.unbinder.Unbind()
 }
 
 // Stop 停止會話, 不會等待會話內部循環結束

@@ -53,7 +53,7 @@ func (this *SuiteTCPSession) TestStart() {
 	client := NewTCPConnect(this.ip, this.port, this.timeout)
 	go client.Connect(testerc)
 
-	time.Sleep(time.Second)
+	time.Sleep(this.timeout)
 	assert.True(this.T(), testerl.valid())
 	assert.True(this.T(), testerc.valid())
 
@@ -75,7 +75,7 @@ func (this *SuiteTCPSession) TestSend() {
 	client := NewTCPConnect(this.ip, this.port, this.timeout)
 	go client.Connect(testerc)
 
-	time.Sleep(time.Second)
+	time.Sleep(this.timeout)
 	assert.True(this.T(), testerl.valid())
 	assert.True(this.T(), testerc.valid())
 
@@ -109,7 +109,7 @@ func (this *SuiteTCPSession) TestEncodeFailed() {
 	client := NewTCPConnect(this.ip, this.port, this.timeout)
 	go client.Connect(testerc)
 
-	time.Sleep(time.Second)
+	time.Sleep(this.timeout)
 	assert.True(this.T(), testerl.valid())
 	assert.True(this.T(), testerc.valid())
 
@@ -138,7 +138,7 @@ func (this *SuiteTCPSession) TestDecodeFailed() {
 	client := NewTCPConnect(this.ip, this.port, this.timeout)
 	go client.Connect(testerc)
 
-	time.Sleep(time.Second)
+	time.Sleep(this.timeout)
 	assert.True(this.T(), testerl.valid())
 	assert.True(this.T(), testerc.valid())
 
@@ -167,7 +167,7 @@ func (this *SuiteTCPSession) TestReceiveFailed() {
 	client := NewTCPConnect(this.ip, this.port, this.timeout)
 	go client.Connect(testerc)
 
-	time.Sleep(time.Second)
+	time.Sleep(this.timeout)
 	assert.True(this.T(), testerl.valid())
 	assert.True(this.T(), testerc.valid())
 
@@ -196,7 +196,7 @@ func (this *SuiteTCPSession) TestTCPSession() {
 	client := NewTCPConnect(this.ip, this.port, this.timeout)
 	go client.Connect(testerc)
 
-	time.Sleep(time.Second)
+	time.Sleep(this.timeout)
 	assert.True(this.T(), testerl.valid())
 	assert.True(this.T(), testerc.valid())
 

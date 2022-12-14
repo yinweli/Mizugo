@@ -52,7 +52,7 @@ func (this *SuiteTCPListen) TestListen() {
 	client := NewTCPConnect(this.ip, this.port, this.timeout)
 	go client.Connect(testerc)
 
-	time.Sleep(time.Second)
+	time.Sleep(this.timeout)
 	assert.True(this.T(), testerl.valid())
 	assert.True(this.T(), testerc.valid())
 	assert.Nil(this.T(), target.Stop())
@@ -62,13 +62,13 @@ func (this *SuiteTCPListen) TestListen() {
 	tester := newCompleteTester()
 	target = NewTCPListen("!?", this.port)
 	target.Listen(tester)
-	time.Sleep(time.Second)
+	time.Sleep(this.timeout)
 	assert.False(this.T(), tester.valid())
 
 	tester = newCompleteTester()
 	target = NewTCPListen("192.168.0.1", this.port) // 故意要監聽錯誤位址才會引發錯誤
 	target.Listen(tester)
-	time.Sleep(time.Second)
+	time.Sleep(this.timeout)
 	assert.False(this.T(), tester.valid())
 }
 

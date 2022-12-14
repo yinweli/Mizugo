@@ -44,12 +44,12 @@ func (this *SuiteDefine) TestComplete() {
 	assert.True(this.T(), valid)
 }
 
-func (this *SuiteDefine) TestRelease() {
+func (this *SuiteDefine) TestUnbind() {
 	valid := false
-	release := Release(func() {
+	release := Unbind(func() {
 		valid = true
 	})
-	release.Release()
+	release.Unbind()
 	assert.True(this.T(), valid)
 }
 
@@ -109,6 +109,13 @@ type sessionTester struct {
 	err     error
 }
 
+func (this *sessionTester) validSession() bool {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return this.session != nil
+}
+
 func (this *sessionTester) validMessage(message any) bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -123,7 +130,14 @@ func (this *sessionTester) validError() bool {
 	return this.err == nil
 }
 
-func (this *sessionTester) Bind(session Sessioner) (releaser Releaser, reactor Reactor) {
+func (this *sessionTester) get() Sessioner {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return this.session
+}
+
+func (this *sessionTester) Bind(session Sessioner) (reactor Reactor, unbinder Unbinder) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -131,7 +145,7 @@ func (this *sessionTester) Bind(session Sessioner) (releaser Releaser, reactor R
 	return this, this
 }
 
-func (this *sessionTester) Release() {
+func (this *sessionTester) Unbind() {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -179,7 +193,7 @@ func (this *sessionTester) Error(err error) {
 type emptySession struct {
 }
 
-func (this *emptySession) StartStart(_ SessionID, _ Bundler) {
+func (this *emptySession) Start(_ SessionID, _ Binder) {
 	// do nothing...
 }
 
