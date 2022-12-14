@@ -1,7 +1,7 @@
 package entitys
 
 import (
-	"github.com/yinweli/Mizugo/mizugo/events"
+	"github.com/yinweli/Mizugo/core/events"
 )
 
 // NewModule 建立模組資料

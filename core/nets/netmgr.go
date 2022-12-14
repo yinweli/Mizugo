@@ -134,12 +134,12 @@ type sessionmgr struct {
 }
 
 // add 新增會話
-func (this *sessionmgr) add(sessioner Sessioner) SessionID {
+func (this *sessionmgr) add(session Sessioner) SessionID {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.sessionID++
-	this.data[this.sessionID] = sessioner
+	this.data[this.sessionID] = session
 	return this.sessionID
 }
 
