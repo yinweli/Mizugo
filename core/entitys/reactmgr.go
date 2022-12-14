@@ -3,7 +3,7 @@ package entitys
 import (
 	"sync"
 
-	"github.com/yinweli/Mizugo/mizugo/nets"
+	"github.com/yinweli/Mizugo/core/nets"
 )
 
 // NewReactmgr 建立反應管理器

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 
-	"github.com/yinweli/Mizugo/mizugo/nets"
+	"github.com/yinweli/Mizugo/core/nets"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
