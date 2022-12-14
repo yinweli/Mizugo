@@ -23,10 +23,11 @@ type Modulemgr struct {
 func (this *Modulemgr) Add(module Moduler) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
+
 	moduleID := module.ModuleID()
 
 	if _, ok := this.data[moduleID]; ok {
-		return fmt.Errorf("modulemgr add: duplicate moduleID")
+		return fmt.Errorf("modulemgr add: duplicate module: %v", moduleID)
 	} // if
 
 	this.data[moduleID] = module
@@ -58,6 +59,7 @@ func (this *Modulemgr) Get(moduleID ModuleID) Moduler {
 func (this *Modulemgr) All() []Moduler {
 	this.lock.Lock()
 	defer this.lock.Unlock()
+
 	result := []Moduler{}
 
 	for _, itor := range this.data {

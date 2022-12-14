@@ -19,26 +19,15 @@ type Entitymgr struct {
 	lock sync.Mutex           // 執行緒鎖
 }
 
-// Clear 清除實體
-func (this *Entitymgr) Clear() {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	for _, itor := range this.data {
-		itor.finalize()
-	} // for
-
-	this.data = map[EntityID]*Entity{}
-}
-
 // Add 新增實體
 func (this *Entitymgr) Add(entity *Entity) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
+
 	entityID := entity.EntityID()
 
 	if _, ok := this.data[entityID]; ok {
-		return fmt.Errorf("entitymgr add: duplicate entityID")
+		return fmt.Errorf("entitymgr add: duplicate entity: %v", entityID)
 	} // if
 
 	this.data[entityID] = entity
@@ -60,6 +49,18 @@ func (this *Entitymgr) Del(entityID EntityID) *Entity {
 	return nil
 }
 
+// Clear 清除實體
+func (this *Entitymgr) Clear() {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	for _, itor := range this.data {
+		itor.finalize()
+	} // for
+
+	this.data = map[EntityID]*Entity{}
+}
+
 // Get 取得實體
 func (this *Entitymgr) Get(entityID EntityID) *Entity {
 	this.lock.Lock()
@@ -72,6 +73,7 @@ func (this *Entitymgr) Get(entityID EntityID) *Entity {
 func (this *Entitymgr) All() []*Entity {
 	this.lock.Lock()
 	defer this.lock.Unlock()
+
 	result := []*Entity{}
 
 	for _, itor := range this.data {

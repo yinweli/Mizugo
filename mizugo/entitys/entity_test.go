@@ -19,10 +19,12 @@ func TestEntity(t *testing.T) {
 type SuiteEntity struct {
 	suite.Suite
 	testdata.TestEnv
+	timeout time.Duration
 }
 
 func (this *SuiteEntity) SetupSuite() {
 	this.Change("test-entitys-entity")
+	this.timeout = time.Second
 }
 
 func (this *SuiteEntity) TearDownSuite() {
@@ -34,125 +36,71 @@ func (this *SuiteEntity) TearDownTest() {
 }
 
 func (this *SuiteEntity) TestNewEntity() {
-	assert.NotNil(this.T(), NewEntity(EntityID(1), "entity"))
+	assert.NotNil(this.T(), NewEntity(EntityID(1)))
 }
 
 func (this *SuiteEntity) TestEntity() {
-	target := NewEntity(EntityID(1), "entity")
+	target := NewEntity(EntityID(1))
 	target.initialize()
-	defer target.finalize()
-
 	assert.Equal(this.T(), EntityID(1), target.EntityID())
-	assert.Equal(this.T(), "entity", target.Name())
+	assert.True(this.T(), target.Enable())
+	target.finalize()
+	assert.False(this.T(), target.Enable())
 }
 
-func (this *SuiteEntity) TestAddModule() {
-	target := NewEntity(EntityID(1), "entity")
+func (this *SuiteEntity) TestModule() {
+	target := NewEntity(EntityID(1))
+	module1 := newModuleTester(ModuleID(1))
+	module2 := newModuleTester(ModuleID(2))
+	assert.Nil(this.T(), target.AddModule(module1))
+	assert.NotNil(this.T(), target.GetModule(module1.ModuleID()))
+	assert.NotNil(this.T(), target.AddModule(module1))
 	target.initialize()
-	defer target.finalize()
-
-	assert.Nil(this.T(), target.AddModule(NewModule(ModuleID(1), "module")))
-	assert.NotNil(this.T(), target.GetModule(ModuleID(1)))
-
-	assert.NotNil(this.T(), target.AddModule(NewModule(ModuleID(1), "module")))
+	assert.NotNil(this.T(), target.AddModule(module2))
+	target.finalize()
 }
 
-func (this *SuiteEntity) TestDelModule() {
-	target := NewEntity(EntityID(1), "entity")
+func (this *SuiteEntity) TestEvent() {
+	target := NewEntity(EntityID(1))
 	target.initialize()
-	defer target.finalize()
 
-	assert.Nil(this.T(), target.AddModule(NewModule(ModuleID(1), "module")))
-	assert.NotNil(this.T(), target.DelModule(ModuleID(1)))
-	assert.Nil(this.T(), target.GetModule(ModuleID(1)))
+	eventOnce := "eventOnce"
+	paramOnce := "paramOnce"
+	validOnce := atomic.Bool{}
+	target.SubEvent(eventOnce, func(param any) {
+		validOnce.Store(param.(string) == paramOnce)
+	})
+	target.PubOnceEvent(eventOnce, paramOnce)
+	time.Sleep(this.timeout)
+	assert.True(this.T(), validOnce.Load())
 
-	assert.Nil(this.T(), target.DelModule(ModuleID(1)))
-}
-
-func (this *SuiteEntity) TestGetModule() {
-	target := NewEntity(EntityID(1), "entity")
-	target.initialize()
-	defer target.finalize()
-
-	assert.Nil(this.T(), target.AddModule(NewModule(ModuleID(1), "module")))
-	assert.NotNil(this.T(), target.GetModule(ModuleID(1)))
-
-	assert.Nil(this.T(), target.GetModule(ModuleID(2)))
-}
-
-func (this *SuiteEntity) TestPubOnceEvent() {
-	target := NewEntity(EntityID(1), "entity")
-	target.initialize()
-	defer target.finalize()
-
-	valid := atomic.Bool{}
-	target.SubEvent("event", func(param any) {
-		if param.(string) == "pubonce" {
-			valid.Store(true)
+	eventFixed := "eventFixed"
+	paramFixed := "paramFixed"
+	validFixed := atomic.Int64{}
+	target.SubEvent(eventFixed, func(param any) {
+		if param.(string) == paramFixed {
+			validFixed.Add(1)
 		} // if
 	})
-	target.PubOnceEvent("event", "pubonce")
-	time.Sleep(time.Millisecond * 10)
-	assert.True(this.T(), valid.Load())
-}
+	fixed := target.PubFixedEvent(eventFixed, paramFixed, time.Millisecond)
+	time.Sleep(this.timeout)
+	assert.Greater(this.T(), validFixed.Load(), int64(0))
 
-func (this *SuiteEntity) TestPubFixedEvent() {
-	target := NewEntity(EntityID(1), "entity")
-	target.initialize()
-	defer target.finalize()
-
-	valid := atomic.Int64{}
-	target.SubEvent("event", func(param any) {
-		if param.(string) == "pubfixed" {
-			valid.Add(1)
-		} // if
-	})
-	fixed := target.PubFixedEvent("event", "pubfixed", time.Millisecond)
-	defer fixed.Stop()
-	time.Sleep(time.Millisecond * 100)
-	assert.Greater(this.T(), valid.Load(), int64(0))
+	fixed.Stop()
+	target.finalize()
 }
 
 func (this *SuiteEntity) TestInitialize() {
-	target := NewEntity(EntityID(1), "entity")
-	module := &testModule{
-		Module: Module{
-			moduleID: ModuleID(1),
-			name:     "module",
-		},
-	}
+	target := NewEntity(EntityID(1))
+	module := newModuleTester(ModuleID(1))
 	assert.Nil(this.T(), target.AddModule(module))
 	target.initialize()
-	time.Sleep(updateInterval * 2)
+	time.Sleep(updateInterval * 2) // 為了讓update會被執行, 需要長一點的時間
 	target.finalize()
-	time.Sleep(updateInterval * 2)
+	time.Sleep(this.timeout)
 
 	assert.True(this.T(), module.awake.Load())
 	assert.True(this.T(), module.start.Load())
 	assert.True(this.T(), module.dispose.Load())
 	assert.True(this.T(), module.update.Load())
-}
-
-type testModule struct {
-	Module
-	awake   atomic.Bool
-	start   atomic.Bool
-	dispose atomic.Bool
-	update  atomic.Bool
-}
-
-func (this *testModule) Awake() {
-	this.awake.Store(true)
-}
-
-func (this *testModule) Start() {
-	this.start.Store(true)
-}
-
-func (this *testModule) Dispose() {
-	this.dispose.Store(true)
-}
-
-func (this *testModule) Update() {
-	this.update.Store(true)
 }

@@ -5,10 +5,9 @@ import (
 )
 
 // NewModule 建立模組資料
-func NewModule(moduleID ModuleID, name string) *Module {
+func NewModule(moduleID ModuleID) *Module {
 	return &Module{
 		moduleID: moduleID,
-		name:     name,
 	}
 }
 
@@ -17,9 +16,6 @@ type Moduler interface {
 	// ModuleID 取得模組編號
 	ModuleID() ModuleID
 
-	// Name 取得模組名稱
-	Name() string
-
 	// Entity 取得實體物件
 	Entity() *Entity
 
@@ -27,34 +23,9 @@ type Moduler interface {
 	Internal() *Internal
 }
 
-// Awaker awake介面
-type Awaker interface {
-	// Awake awake事件, 模組初始化時第一個被執行
-	Awake()
-}
-
-// Starter start介面
-type Starter interface {
-	// Start start事件, 模組初始化時第二個被執行
-	Start()
-}
-
-// Disposer dispose介面
-type Disposer interface {
-	// Dispose dispose事件, 模組結束時執行
-	Dispose()
-}
-
-// Updater update介面
-type Updater interface {
-	// Update update事件, 模組定時事件, 間隔時間定義在updateInterval
-	Update()
-}
-
 // Module 模組資料
 type Module struct {
 	moduleID ModuleID // 模組編號
-	name     string   // 模組名稱
 	internal Internal // 內部物件
 }
 
@@ -64,11 +35,6 @@ type ModuleID int64
 // ModuleID 取得模組編號
 func (this *Module) ModuleID() ModuleID {
 	return this.moduleID
-}
-
-// Name 取得模組名稱
-func (this *Module) Name() string {
-	return this.name
 }
 
 // Entity 取得實體物件

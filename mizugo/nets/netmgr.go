@@ -15,49 +15,39 @@ func NewNetmgr() *Netmgr {
 
 // Netmgr 網路管理器
 type Netmgr struct {
-	listenmgr  *listenmgr  // 監聽管理器
+	listenmgr  *listenmgr  // 接聽管理器
 	sessionmgr *sessionmgr // 會話管理器
 }
 
 // Status 狀態資料
 type Status struct {
-	Listen  []string // 監聽列表
-	session int      // 會話數量
+	Listen  []string // 接聽列表
+	Session int      // 會話數量
 }
-
-// Create 建立處理函式類型
-type Create func() (coder Coder, reactor Reactor)
-
-// Failed 錯誤處理函式類型
-type Failed func(err error)
 
 // AddConnect 新增連接
-func (this *Netmgr) AddConnect(connecter Connecter, create Create, failed Failed) {
-	go connecter.Connect(func(session Sessioner, err error) {
+func (this *Netmgr) AddConnect(connecter Connecter, binder Binder) {
+	connecter.Connect(Complete(func(session Sessioner, err error) {
 		if err != nil {
-			failed(fmt.Errorf("netmgr connect: %s: %w", connecter.Address(), err))
+			binder.Error(fmt.Errorf("netmgr connect: %s: %w", connecter.Address(), err))
 			return
 		} // if
 
-		sessionID := this.sessionmgr.add(session)
-		coder, reactor := create()
-		go session.Start(sessionID, coder, reactor)
-	})
+		go session.Start(this.sessionmgr.add(session), binder)
+	}))
 }
 
-// AddListen 新增監聽
-func (this *Netmgr) AddListen(listener Listener, create Create, failed Failed) {
+// AddListen 新增接聽
+func (this *Netmgr) AddListen(listener Listener, binder Binder) {
 	this.listenmgr.add(listener)
-	go listener.Listen(func(session Sessioner, err error) {
+	listener.Listen(Complete(func(session Sessioner, err error) {
 		if err != nil {
-			failed(fmt.Errorf("netmgr listen: %s: %w", listener.Address(), err))
+			binder.Error(fmt.Errorf("netmgr listen: %s: %w", listener.Address(), err))
 			return
 		} // if
 
-		sessionID := this.sessionmgr.add(session)
-		coder, reactor := create()
-		go session.Start(sessionID, coder, reactor)
-	})
+		go session.Start(this.sessionmgr.add(session), binder)
+	}))
 }
 
 // GetSession 取得會話
@@ -80,22 +70,22 @@ func (this *Netmgr) Stop() {
 func (this *Netmgr) Status() *Status {
 	return &Status{
 		Listen:  this.listenmgr.address(),
-		session: this.sessionmgr.count(),
+		Session: this.sessionmgr.count(),
 	}
 }
 
-// newListenmgr 建立監聽管理器
+// newListenmgr 建立接聽管理器
 func newListenmgr() *listenmgr {
 	return &listenmgr{}
 }
 
-// listenmgr 監聽管理器
+// listenmgr 接聽管理器
 type listenmgr struct {
-	data []Listener // 監聽列表
+	data []Listener // 接聽列表
 	lock sync.Mutex // 執行緒鎖
 }
 
-// add 新增監聽
+// add 新增接聽
 func (this *listenmgr) add(listener Listener) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -103,7 +93,7 @@ func (this *listenmgr) add(listener Listener) {
 	this.data = append(this.data, listener)
 }
 
-// clear 清除監聽
+// clear 清除接聽
 func (this *listenmgr) clear() {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -111,9 +101,11 @@ func (this *listenmgr) clear() {
 	for _, itor := range this.data {
 		_ = itor.Stop()
 	} // for
+
+	this.data = []Listener{}
 }
 
-// address 取得監聽位址列表
+// address 取得接聽位址列表
 func (this *listenmgr) address() []string {
 	this.lock.Lock()
 	defer this.lock.Unlock()

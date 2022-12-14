@@ -35,72 +35,70 @@ func (this *SuiteEntitymgr) TestNewEntitymgr() {
 	assert.NotNil(this.T(), NewEntitymgr())
 }
 
-func (this *SuiteEntitymgr) TestClear() {
+func (this *SuiteEntitymgr) TestAdd() {
+	entity := NewEntity(EntityID(1))
 	target := NewEntitymgr()
-	defer target.Clear()
 
-	assert.Nil(this.T(), target.Add(NewEntity(EntityID(1), "entity")))
+	assert.Nil(this.T(), target.Add(entity))
+	assert.True(this.T(), entity.Enable())
+	assert.NotNil(this.T(), target.Get(entity.EntityID()))
+	assert.NotNil(this.T(), target.Add(entity))
+
+	target.Clear()
+}
+
+func (this *SuiteEntitymgr) TestDel() {
+	entity := NewEntity(EntityID(1))
+	target := NewEntitymgr()
+
+	assert.Nil(this.T(), target.Add(entity))
+	assert.Equal(this.T(), entity, target.Del(entity.EntityID()))
+	assert.False(this.T(), entity.Enable())
+	assert.Nil(this.T(), target.Get(entity.EntityID()))
+	assert.Nil(this.T(), target.Del(entity.EntityID()))
+
+	target.Clear()
+}
+
+func (this *SuiteEntitymgr) TestClear() {
+	entity := NewEntity(EntityID(1))
+	target := NewEntitymgr()
+
+	assert.Nil(this.T(), target.Add(entity))
 	assert.Equal(this.T(), 1, target.Count())
 	target.Clear()
 	assert.Equal(this.T(), 0, target.Count())
 }
 
-func (this *SuiteEntitymgr) TestAdd() {
-	target := NewEntitymgr()
-	defer target.Clear()
-
-	assert.Nil(this.T(), target.Add(NewEntity(EntityID(1), "entity")))
-	assert.NotNil(this.T(), target.Get(EntityID(1)))
-
-	assert.NotNil(this.T(), target.Add(NewEntity(EntityID(1), "entity")))
-}
-
-func (this *SuiteEntitymgr) TestDel() {
-	target := NewEntitymgr()
-	defer target.Clear()
-
-	assert.Nil(this.T(), target.Add(NewEntity(EntityID(1), "entity")))
-	entity := target.Del(EntityID(1))
-	assert.NotNil(this.T(), entity)
-	assert.Equal(this.T(), EntityID(1), entity.EntityID())
-	assert.Equal(this.T(), "entity", entity.Name())
-	assert.Nil(this.T(), target.Get(EntityID(1)))
-
-	assert.Nil(this.T(), target.Del(EntityID(2)))
-}
-
 func (this *SuiteEntitymgr) TestGet() {
+	entity := NewEntity(EntityID(1))
 	target := NewEntitymgr()
-	defer target.Clear()
 
-	assert.Nil(this.T(), target.Add(NewEntity(EntityID(1), "entity")))
-	entity := target.Get(EntityID(1))
-	assert.NotNil(this.T(), entity)
-	assert.Equal(this.T(), EntityID(1), entity.EntityID())
-	assert.Equal(this.T(), "entity", entity.Name())
-
+	assert.Nil(this.T(), target.Add(entity))
+	assert.Equal(this.T(), entity, target.Get(entity.EntityID()))
 	assert.Nil(this.T(), target.Get(EntityID(2)))
+
+	target.Clear()
 }
 
 func (this *SuiteEntitymgr) TestAll() {
+	entity1 := NewEntity(EntityID(1))
+	entity2 := NewEntity(EntityID(2))
 	target := NewEntitymgr()
-	defer target.Clear()
 
-	assert.Nil(this.T(), target.Add(NewEntity(EntityID(1), "entity1")))
-	assert.Nil(this.T(), target.Add(NewEntity(EntityID(2), "entity2")))
-	entity := target.All()
-	assert.Len(this.T(), entity, 2)
-	assert.Equal(this.T(), EntityID(1), entity[0].EntityID())
-	assert.Equal(this.T(), "entity1", entity[0].Name())
-	assert.Equal(this.T(), EntityID(2), entity[1].EntityID())
-	assert.Equal(this.T(), "entity2", entity[1].Name())
+	assert.Nil(this.T(), target.Add(entity1))
+	assert.Nil(this.T(), target.Add(entity2))
+	assert.ElementsMatch(this.T(), []*Entity{entity1, entity2}, target.All())
+
+	target.Clear()
 }
 
 func (this *SuiteEntitymgr) TestCount() {
 	target := NewEntitymgr()
-	defer target.Clear()
 
-	assert.Nil(this.T(), target.Add(NewEntity(EntityID(1), "entity1")))
-	assert.Nil(this.T(), target.Add(NewEntity(EntityID(2), "entity2")))
+	assert.Nil(this.T(), target.Add(NewEntity(EntityID(1))))
+	assert.Nil(this.T(), target.Add(NewEntity(EntityID(2))))
 	assert.Equal(this.T(), 2, target.Count())
+
+	target.Clear()
 }

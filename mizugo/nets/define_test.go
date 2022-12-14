@@ -4,41 +4,130 @@ import (
 	"fmt"
 	"net"
 	"sync"
+	"testing"
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugo/utils"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
+	"go.uber.org/goleak"
+
+	"github.com/yinweli/Mizugo/testdata"
 )
 
-// 這裡存放用於單元測試的組件
-
-const testerWaitTime = time.Millisecond * 100
-
-// newSessionTester 建立會話測試器
-func newSessionTester() *sessionTester {
-	time.Sleep(testerWaitTime) // 在這邊等待一下, 讓伺服器有機會完成
-
-	return &sessionTester{
-		timeout: utils.NewWaitTimeout(time.Second),
-	}
+func TestDefine(t *testing.T) {
+	suite.Run(t, new(SuiteDefine))
 }
 
-// sessionTester 會話測試器
-type sessionTester struct {
-	timeout *utils.WaitTimeout
+type SuiteDefine struct {
+	suite.Suite
+	testdata.TestEnv
+}
+
+func (this *SuiteDefine) SetupSuite() {
+	this.Change("test-nets-tcpSession")
+}
+
+func (this *SuiteDefine) TearDownSuite() {
+	this.Restore()
+}
+
+func (this *SuiteDefine) TearDownTest() {
+	goleak.VerifyNone(this.T())
+}
+
+func (this *SuiteDefine) TestComplete() {
+	valid := false
+	complete := Complete(func(_ Sessioner, _ error) {
+		valid = true
+	})
+	complete.Complete(nil, nil)
+	assert.True(this.T(), valid)
+}
+
+func (this *SuiteDefine) TestUnbind() {
+	valid := false
+	release := Unbind(func() {
+		valid = true
+	})
+	release.Unbind()
+	assert.True(this.T(), valid)
+}
+
+// newCompleteTester 建立完成會話測試器
+func newCompleteTester() *completeTester {
+	time.Sleep(time.Second) // 在這邊等待一下, 讓程序有機會完成
+	return &completeTester{}
+}
+
+// completeTester 完成會話測試器
+type completeTester struct {
 	lock    sync.Mutex
 	session Sessioner
 	err     error
 }
 
-func (this *sessionTester) wait() bool {
-	return this.timeout.Wait()
-}
-
-func (this *sessionTester) valid() bool {
+func (this *completeTester) valid() bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.session != nil && this.err == nil
+}
+
+func (this *completeTester) get() Sessioner {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return this.session
+}
+
+func (this *completeTester) Complete(session Sessioner, err error) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.session = session
+	this.err = err
+}
+
+// newSessionTester 建立會話測試器
+func newSessionTester(encode, decode, receive bool) *sessionTester {
+	time.Sleep(time.Second) // 在這邊等待一下, 讓程序有機會完成
+	return &sessionTester{
+		encode:  encode,
+		decode:  decode,
+		receive: receive,
+	}
+}
+
+// sessionTester 會話測試器
+type sessionTester struct {
+	encode  bool
+	decode  bool
+	receive bool
+	lock    sync.Mutex
+	session Sessioner
+	message any
+	err     error
+}
+
+func (this *sessionTester) validSession() bool {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return this.session != nil
+}
+
+func (this *sessionTester) validMessage(message any) bool {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return this.message == message
+}
+
+func (this *sessionTester) validError() bool {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return this.err == nil
 }
 
 func (this *sessionTester) get() Sessioner {
@@ -48,30 +137,23 @@ func (this *sessionTester) get() Sessioner {
 	return this.session
 }
 
-func (this *sessionTester) Complete(session Sessioner, err error) {
+func (this *sessionTester) Bind(session Sessioner) (reactor Reactor, unbinder Unbinder) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.session = session
-	this.err = err
-	this.timeout.Done()
+	return this, this
 }
 
-// newCoderTester 建立編碼測試器
-func newCoderTester(encode, decode bool) *coderTester {
-	return &coderTester{
-		encode: encode,
-		decode: decode,
-	}
+func (this *sessionTester) Unbind() {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.session = nil
+	this.message = nil
 }
 
-// coderTester 編碼測試器
-type coderTester struct {
-	encode bool
-	decode bool
-}
-
-func (this *coderTester) Encode(message any) (packet []byte, err error) {
+func (this *sessionTester) Encode(message any) (packet []byte, err error) {
 	if this.encode == false {
 		return nil, fmt.Errorf("encode failed")
 	} // if
@@ -79,7 +161,7 @@ func (this *coderTester) Encode(message any) (packet []byte, err error) {
 	return []byte(message.(string)), nil
 }
 
-func (this *coderTester) Decode(packet []byte) (message any, err error) {
+func (this *sessionTester) Decode(packet []byte) (message any, err error) {
 	if this.decode == false {
 		return nil, fmt.Errorf("decode failed")
 	} // if
@@ -87,60 +169,7 @@ func (this *coderTester) Decode(packet []byte) (message any, err error) {
 	return string(packet), nil
 }
 
-// newReactorTester 建立反應測試器
-func newReactorTester(receive bool) *reactorTester {
-	return &reactorTester{
-		receive: receive,
-	}
-}
-
-// reactorTester 反應測試器
-type reactorTester struct {
-	receive bool
-	lock    sync.Mutex
-	session Sessioner
-	message any
-}
-
-func (this *reactorTester) validSession() bool {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	return this.session != nil
-}
-
-func (this *reactorTester) validMessage(message any) bool {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	return this.message == message
-}
-
-func (this *reactorTester) sessionID() SessionID {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	return this.session.SessionID()
-}
-
-func (this *reactorTester) Active(session Sessioner) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	this.session = session
-}
-
-func (this *reactorTester) Inactive() {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	this.session = nil
-}
-
-func (this *reactorTester) Error(err error) {
-}
-
-func (this *reactorTester) Receive(message any) error {
+func (this *sessionTester) Receive(message any) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -153,45 +182,18 @@ func (this *reactorTester) Receive(message any) error {
 	} // if
 }
 
-// newNetmgrTester 建立網路管理測試器
-func newNetmgrTester() *netmgrTester {
-	time.Sleep(testerWaitTime) // 在這邊等待一下, 讓伺服器有機會完成
+func (this *sessionTester) Error(err error) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
 
-	return &netmgrTester{
-		coder:   newCoderTester(true, true),
-		reactor: newReactorTester(true),
-	}
-}
-
-// netmgrTester 網路管理測試器
-type netmgrTester struct {
-	coder   *coderTester
-	reactor *reactorTester
-	success bool
-}
-
-func (this *netmgrTester) valid() bool {
-	return this.reactor.validSession() && this.success
-}
-
-func (this *netmgrTester) sessionID() SessionID {
-	return this.reactor.sessionID()
-}
-
-func (this *netmgrTester) Create() (coder Coder, reactor Reactor) {
-	this.success = true
-	return this.coder, this.reactor
-}
-
-func (this *netmgrTester) Failed(_ error) {
-	this.success = false
+	this.err = err
 }
 
 // emptySession 空會話
 type emptySession struct {
 }
 
-func (this *emptySession) Start(_ SessionID, _ Coder, _ Reactor) {
+func (this *emptySession) Start(_ SessionID, _ Binder) {
 	// do nothing...
 }
 
@@ -217,4 +219,10 @@ func (this *emptySession) RemoteAddr() net.Addr {
 
 func (this *emptySession) LocalAddr() net.Addr {
 	return &net.TCPAddr{}
+}
+
+// host 端點資料
+type host struct {
+	ip   string
+	port string
 }

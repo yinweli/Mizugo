@@ -19,15 +19,13 @@ func TestTCPListen(t *testing.T) {
 type SuiteTCPListen struct {
 	suite.Suite
 	testdata.TestEnv
-	ip      string
-	port    string
+	host    host
 	timeout time.Duration
 }
 
 func (this *SuiteTCPListen) SetupSuite() {
 	this.Change("test-nets-tcpListen")
-	this.ip = ""
-	this.port = "3001"
+	this.host = host{ip: "", port: "3001"}
 	this.timeout = time.Second
 }
 
@@ -40,40 +38,39 @@ func (this *SuiteTCPListen) TearDownTest() {
 }
 
 func (this *SuiteTCPListen) TestNewTCPListen() {
-	assert.NotNil(this.T(), NewTCPListen(this.ip, this.port))
+	assert.NotNil(this.T(), NewTCPListen(this.host.ip, this.host.port))
 }
 
 func (this *SuiteTCPListen) TestListen() {
-	testerl := newSessionTester()
-	target := NewTCPListen(this.ip, this.port)
-	go target.Listen(testerl.Complete)
+	testerl := newCompleteTester()
+	target := NewTCPListen(this.host.ip, this.host.port)
+	target.Listen(testerl)
 
-	testerc := newSessionTester()
-	client := NewTCPConnect(this.ip, this.port, this.timeout)
-	go client.Connect(testerc.Complete)
+	testerc := newCompleteTester()
+	client := NewTCPConnect(this.host.ip, this.host.port, this.timeout)
+	client.Connect(testerc)
 
-	assert.True(this.T(), testerl.wait())
+	time.Sleep(this.timeout)
 	assert.True(this.T(), testerl.valid())
-	assert.True(this.T(), testerc.wait())
 	assert.True(this.T(), testerc.valid())
 	assert.Nil(this.T(), target.Stop())
 	testerl.get().StopWait()
 	testerc.get().StopWait()
 
-	verify := newSessionTester()
-	target = NewTCPListen("!?", this.port)
-	target.Listen(verify.Complete)
-	assert.True(this.T(), verify.wait())
-	assert.False(this.T(), verify.valid())
+	tester := newCompleteTester()
+	target = NewTCPListen("!?", this.host.port)
+	target.Listen(tester)
+	time.Sleep(this.timeout)
+	assert.False(this.T(), tester.valid())
 
-	verify = newSessionTester()
-	target = NewTCPListen("192.168.0.1", this.port) // 故意要監聽錯誤位址才會引發錯誤
-	target.Listen(verify.Complete)
-	assert.True(this.T(), verify.wait())
-	assert.False(this.T(), verify.valid())
+	tester = newCompleteTester()
+	target = NewTCPListen("192.168.0.1", this.host.port) // 故意要接聽錯誤位址才會引發錯誤
+	target.Listen(tester)
+	time.Sleep(this.timeout)
+	assert.False(this.T(), tester.valid())
 }
 
-func (this *SuiteTCPListen) TestTCPListen() {
-	target := NewTCPListen(this.ip, this.port)
-	assert.Equal(this.T(), net.JoinHostPort(this.ip, this.port), target.Address())
+func (this *SuiteTCPListen) TestAddress() {
+	target := NewTCPListen(this.host.ip, this.host.port)
+	assert.Equal(this.T(), net.JoinHostPort(this.host.ip, this.host.port), target.Address())
 }

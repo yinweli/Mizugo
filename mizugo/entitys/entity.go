@@ -9,10 +9,9 @@ import (
 )
 
 // NewEntity 建立實體資料
-func NewEntity(entityID EntityID, name string) *Entity {
+func NewEntity(entityID EntityID) *Entity {
 	return &Entity{
 		entityID:  entityID,
-		name:      name,
 		modulemgr: NewModulemgr(),
 		eventmgr:  events.NewEventmgr(eventSize),
 	}
@@ -21,10 +20,9 @@ func NewEntity(entityID EntityID, name string) *Entity {
 // Entity 實體資料
 type Entity struct {
 	entityID  EntityID         // 實體編號
-	name      string           // 實體名稱
-	enable    atomic.Bool      // 啟用旗標
 	modulemgr *Modulemgr       // 模組管理器
 	eventmgr  *events.Eventmgr // 事件管理器
+	enable    atomic.Bool      // 啟用旗標
 }
 
 // EntityID 實體編號
@@ -35,36 +33,17 @@ func (this *Entity) EntityID() EntityID {
 	return this.entityID
 }
 
-// Name 取得實體名稱
-func (this *Entity) Name() string {
-	return this.name
-}
-
 // AddModule 新增模組
 func (this *Entity) AddModule(module Moduler) error {
+	if this.enable.Load() {
+		return fmt.Errorf("entity add module: overdue")
+	} // if
+
 	if err := this.modulemgr.Add(module); err != nil {
 		return fmt.Errorf("entity add module: %w", err)
 	} // if
 
 	module.Internal().entity = this
-
-	if this.enable.Load() {
-		this.eventmgr.PubOnce(eventAwake, module)
-		this.eventmgr.PubOnce(eventStart, module)
-		module.Internal().update = this.eventmgr.PubFixed(eventUpdate, module, updateInterval)
-	} // if
-
-	return nil
-}
-
-// DelModule 刪除模組
-func (this *Entity) DelModule(moduleID ModuleID) Moduler {
-	if module := this.modulemgr.Del(moduleID); module != nil {
-		this.eventmgr.PubOnce(eventDispose, module)
-		module.Internal().updateStop()
-		return module
-	} // if
-
 	return nil
 }
 
@@ -86,6 +65,11 @@ func (this *Entity) PubOnceEvent(name string, param any) {
 // PubFixedEvent 發布定時事件, 回傳用於停止定時事件的控制物件
 func (this *Entity) PubFixedEvent(name string, param any, interval time.Duration) *events.Fixed {
 	return this.eventmgr.PubFixed(name, param, interval)
+}
+
+// Enable 取得啟用旗標
+func (this *Entity) Enable() bool {
+	return this.enable.Load()
 }
 
 // initialize 初始化處理
