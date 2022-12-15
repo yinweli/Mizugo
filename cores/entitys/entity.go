@@ -5,8 +5,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yinweli/Mizugo/core/events"
-	"github.com/yinweli/Mizugo/core/nets"
+	"github.com/yinweli/Mizugo/cores/events"
+	"github.com/yinweli/Mizugo/cores/nets"
 )
 
 // NewEntity 建立實體資料

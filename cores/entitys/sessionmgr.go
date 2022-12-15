@@ -3,7 +3,7 @@ package entitys
 import (
 	"sync"
 
-	"github.com/yinweli/Mizugo/core/nets"
+	"github.com/yinweli/Mizugo/cores/nets"
 )
 
 // NewSessionmgr 建立會話管理器
