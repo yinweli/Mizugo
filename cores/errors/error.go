@@ -62,5 +62,5 @@ func (this *wrapError) Unwrap() error {
 
 // wrapError 取得錯誤訊息
 func (this *wrapError) Error() string {
-	return fmt.Sprintf("[%d] %s", this.errorID, this.err.Error())
+	return fmt.Sprintf("[%v] %v", this.errorID, this.err.Error())
 }

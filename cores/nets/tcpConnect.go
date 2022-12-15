@@ -26,7 +26,7 @@ func (this *TCPConnect) Connect(completer Completer) {
 		conn, err := net.DialTimeout("tcp", this.address, this.timeout)
 
 		if err != nil {
-			completer.Complete(nil, fmt.Errorf("tcp connect: %s: %w", this.address, err))
+			completer.Complete(nil, fmt.Errorf("tcp connect: %v: %w", this.address, err))
 			return
 		} // if
 
