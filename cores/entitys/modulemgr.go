@@ -16,7 +16,7 @@ func NewModulemgr() *Modulemgr {
 // Modulemgr 模組管理器
 type Modulemgr struct {
 	data map[ModuleID]Moduler // 模組列表
-	lock sync.Mutex           // 執行緒鎖
+	lock sync.RWMutex         // 執行緒鎖
 }
 
 // Add 新增模組
@@ -49,16 +49,16 @@ func (this *Modulemgr) Del(moduleID ModuleID) Moduler {
 
 // Get 取得模組
 func (this *Modulemgr) Get(moduleID ModuleID) Moduler {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+	this.lock.RLock()
+	defer this.lock.RUnlock()
 
 	return this.data[moduleID]
 }
 
 // All 取得模組列表
 func (this *Modulemgr) All() []Moduler {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+	this.lock.RLock()
+	defer this.lock.RUnlock()
 
 	result := []Moduler{}
 
@@ -74,8 +74,8 @@ func (this *Modulemgr) All() []Moduler {
 
 // Count 取得模組數量
 func (this *Modulemgr) Count() int {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+	this.lock.RLock()
+	defer this.lock.RUnlock()
 
 	return len(this.data)
 }

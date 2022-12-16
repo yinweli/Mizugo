@@ -19,7 +19,7 @@ func NewConfigmgr() *Configmgr {
 // Configmgr 配置管理器
 type Configmgr struct {
 	data map[string]interface{} // 配置列表
-	lock sync.Mutex             // 執行緒鎖
+	lock sync.RWMutex           // 執行緒鎖
 }
 
 // ReadFile 從檔案讀取配置
@@ -66,8 +66,8 @@ func (this *Configmgr) ReadString(str string) error {
 
 // GetInt 取得數字
 func (this *Configmgr) GetInt(key string) (result int, err error) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+	this.lock.RLock()
+	defer this.lock.RUnlock()
 
 	raw, ok := this.data[key]
 
@@ -86,8 +86,8 @@ func (this *Configmgr) GetInt(key string) (result int, err error) {
 
 // GetString 取得字串
 func (this *Configmgr) GetString(key string) (result string, err error) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+	this.lock.RLock()
+	defer this.lock.RUnlock()
 
 	raw, ok := this.data[key]
 
@@ -106,8 +106,8 @@ func (this *Configmgr) GetString(key string) (result string, err error) {
 
 // GetObject 取得物件
 func (this *Configmgr) GetObject(key string, result interface{}) error {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+	this.lock.RLock()
+	defer this.lock.RUnlock()
 
 	raw, ok := this.data[key]
 

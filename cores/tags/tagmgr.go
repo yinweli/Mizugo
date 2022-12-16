@@ -16,7 +16,7 @@ func NewTagmgr() *Tagmgr {
 // Tagmgr 標籤管理器
 type Tagmgr struct {
 	data map[string]*hashset.Set // 標籤列表
-	lock sync.Mutex              // 執行緒鎖
+	lock sync.RWMutex            // 執行緒鎖
 }
 
 // Add 新增標籤
@@ -43,16 +43,16 @@ func (this *Tagmgr) Del(value any, tag ...string) {
 
 // Get 取得物件
 func (this *Tagmgr) Get(tag string) []any {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+	this.lock.RLock()
+	defer this.lock.RUnlock()
 
 	return this.find(tag).Values()
 }
 
 // Tag 取得標籤
 func (this *Tagmgr) Tag(value any) []string {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+	this.lock.RLock()
+	defer this.lock.RUnlock()
 
 	result := []string{}
 

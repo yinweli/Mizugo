@@ -16,7 +16,7 @@ func NewEntitymgr() *Entitymgr {
 // Entitymgr 實體管理器
 type Entitymgr struct {
 	data map[EntityID]*Entity // 實體列表
-	lock sync.Mutex           // 執行緒鎖
+	lock sync.RWMutex         // 執行緒鎖
 }
 
 // Add 新增實體
@@ -63,16 +63,16 @@ func (this *Entitymgr) Clear() {
 
 // Get 取得實體
 func (this *Entitymgr) Get(entityID EntityID) *Entity {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+	this.lock.RLock()
+	defer this.lock.RUnlock()
 
 	return this.data[entityID]
 }
 
 // All 取得實體列表
 func (this *Entitymgr) All() []*Entity {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+	this.lock.RLock()
+	defer this.lock.RUnlock()
 
 	result := []*Entity{}
 
@@ -88,8 +88,8 @@ func (this *Entitymgr) All() []*Entity {
 
 // Count 取得實體數量
 func (this *Entitymgr) Count() int {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+	this.lock.RLock()
+	defer this.lock.RUnlock()
 
 	return len(this.data)
 }
