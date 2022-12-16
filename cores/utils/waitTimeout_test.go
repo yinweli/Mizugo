@@ -37,12 +37,12 @@ func (this *SuiteWaitTimeout) TestNewWaitTimeout() {
 }
 
 func (this *SuiteWaitTimeout) TestWaitTimeout() {
-	target := NewWaitTimeout(time.Second)
+	target := NewWaitTimeout(testdata.Timeout)
 	target.Done()
 	assert.True(this.T(), target.Wait())
 
 	startTime := time.Now()
-	target = NewWaitTimeout(time.Second)
+	target = NewWaitTimeout(testdata.Timeout)
 	assert.False(this.T(), target.Wait())
-	assert.GreaterOrEqual(this.T(), time.Now().Add(-time.Second), startTime)
+	assert.GreaterOrEqual(this.T(), time.Now().Add(-testdata.Timeout), startTime)
 }

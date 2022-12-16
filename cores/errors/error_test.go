@@ -60,5 +60,5 @@ func (this *SuiteError) TestWrapError() {
 
 	assert.Equal(this.T(), target.errorID, target.ErrorID())
 	assert.Equal(this.T(), target.err, target.Unwrap())
-	assert.Equal(this.T(), fmt.Sprintf("[%d] %s", target.errorID, target.err.Error()), target.Error())
+	assert.Equal(this.T(), fmt.Sprintf("[%v] %v", target.errorID, target.err.Error()), target.Error())
 }

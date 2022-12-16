@@ -5,6 +5,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/yinweli/Mizugo/cores/configs"
 	"github.com/yinweli/Mizugo/cores/entitys"
 	"github.com/yinweli/Mizugo/cores/logs"
 	"github.com/yinweli/Mizugo/cores/nets"
@@ -24,6 +25,7 @@ func Start(name string, logger logs.Logger, initialize Initialize, finalize Fina
 	} // if
 
 	fmt.Printf("%v initialize\n", name)
+	serv.configmgr = configs.NewConfigmgr()
 	serv.netmgr = nets.NewNetmgr()
 	serv.entitymgr = entitys.NewEntitymgr()
 	serv.tagmgr = tags.NewTagmgr()
@@ -63,6 +65,15 @@ Finish: // 結束處理
 // Close 關閉伺服器
 func Close() {
 	serv.close.Done()
+}
+
+// Configmgr 取得配置管理器
+func Configmgr() *configs.Configmgr {
+	if serv.exec.Load() {
+		return serv.configmgr
+	} // if
+
+	return nil
 }
 
 // Netmgr 取得網路管理器
@@ -133,6 +144,7 @@ var serv struct {
 	init      atomic.Bool        // 初始化旗標
 	exec      atomic.Bool        // 執行旗標
 	close     sync.WaitGroup     // 關閉旗標
+	configmgr *configs.Configmgr // 配置管理器
 	netmgr    *nets.Netmgr       // 網路管理器
 	entitymgr *entitys.Entitymgr // 實體管理器
 	tagmgr    *tags.Tagmgr       // 標籤管理器

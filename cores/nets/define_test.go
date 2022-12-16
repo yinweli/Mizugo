@@ -55,7 +55,7 @@ func (this *SuiteDefine) TestUnbind() {
 
 // newCompleteTester 建立完成會話測試器
 func newCompleteTester() *completeTester {
-	time.Sleep(time.Second) // 在這邊等待一下, 讓程序有機會完成
+	time.Sleep(testdata.Timeout) // 在這邊等待一下, 讓程序有機會完成
 	return &completeTester{}
 }
 
@@ -90,7 +90,7 @@ func (this *completeTester) Complete(session Sessioner, err error) {
 
 // newSessionTester 建立會話測試器
 func newSessionTester(encode, decode, receive bool) *sessionTester {
-	time.Sleep(time.Second) // 在這邊等待一下, 讓程序有機會完成
+	time.Sleep(testdata.Timeout) // 在這邊等待一下, 讓程序有機會完成
 	return &sessionTester{
 		encode:  encode,
 		decode:  decode,

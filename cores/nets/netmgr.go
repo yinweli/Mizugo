@@ -29,7 +29,7 @@ type Status struct {
 func (this *Netmgr) AddConnect(connecter Connecter, binder Binder) {
 	connecter.Connect(Complete(func(session Sessioner, err error) {
 		if err != nil {
-			binder.Error(fmt.Errorf("netmgr connect: %s: %w", connecter.Address(), err))
+			binder.Error(fmt.Errorf("netmgr connect: %v: %w", connecter.Address(), err))
 			return
 		} // if
 
@@ -42,7 +42,7 @@ func (this *Netmgr) AddListen(listener Listener, binder Binder) {
 	this.listenmgr.add(listener)
 	listener.Listen(Complete(func(session Sessioner, err error) {
 		if err != nil {
-			binder.Error(fmt.Errorf("netmgr listen: %s: %w", listener.Address(), err))
+			binder.Error(fmt.Errorf("netmgr listen: %v: %w", listener.Address(), err))
 			return
 		} // if
 
