@@ -20,12 +20,10 @@ func TestEntity(t *testing.T) {
 type SuiteEntity struct {
 	suite.Suite
 	testdata.TestEnv
-	timeout time.Duration
 }
 
 func (this *SuiteEntity) SetupSuite() {
 	this.Change("test-entitys-entity")
-	this.timeout = time.Second
 }
 
 func (this *SuiteEntity) TearDownSuite() {
@@ -101,7 +99,7 @@ func (this *SuiteEntity) TestEvent() {
 		validOnce.Store(param.(string) == paramOnce)
 	})
 	target.PubOnceEvent(eventOnce, paramOnce)
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), validOnce.Load())
 
 	eventFixed := "eventFixed"
@@ -113,7 +111,7 @@ func (this *SuiteEntity) TestEvent() {
 		} // if
 	})
 	fixed := target.PubFixedEvent(eventFixed, paramFixed, time.Millisecond)
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	assert.Greater(this.T(), validFixed.Load(), int64(0))
 
 	fixed.Stop()
@@ -127,7 +125,7 @@ func (this *SuiteEntity) TestInitialize() {
 	target.initialize()
 	time.Sleep(updateInterval * 2) // 為了讓update會被執行, 需要長一點的時間
 	target.finalize()
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 
 	assert.True(this.T(), module.awake.Load())
 	assert.True(this.T(), module.start.Load())

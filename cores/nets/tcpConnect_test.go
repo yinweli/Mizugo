@@ -19,14 +19,12 @@ func TestTCPConnect(t *testing.T) {
 type SuiteTCPConnect struct {
 	suite.Suite
 	testdata.TestEnv
-	host    host
-	timeout time.Duration
+	host host
 }
 
 func (this *SuiteTCPConnect) SetupSuite() {
 	this.Change("test-nets-tcpConnect")
 	this.host = host{ip: "google.com", port: "80"}
-	this.timeout = time.Second
 }
 
 func (this *SuiteTCPConnect) TearDownSuite() {
@@ -38,31 +36,31 @@ func (this *SuiteTCPConnect) TearDownTest() {
 }
 
 func (this *SuiteTCPConnect) TestNewTCPConnect() {
-	assert.NotNil(this.T(), NewTCPConnect(this.host.ip, this.host.port, this.timeout))
+	assert.NotNil(this.T(), NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout))
 }
 
 func (this *SuiteTCPConnect) TestConnect() {
 	tester := newCompleteTester()
-	target := NewTCPConnect(this.host.ip, this.host.port, this.timeout)
+	target := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
 	target.Connect(tester)
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), tester.valid())
 	tester.get().StopWait()
 
 	tester = newCompleteTester()
-	target = NewTCPConnect("!?", this.host.port, this.timeout)
+	target = NewTCPConnect("!?", this.host.port, testdata.Timeout)
 	target.Connect(tester)
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	assert.False(this.T(), tester.valid())
 
 	tester = newCompleteTester()
-	target = NewTCPConnect(this.host.ip, "9999", this.timeout) // 故意連線到不開放的埠號才會引發錯誤
+	target = NewTCPConnect(this.host.ip, "9999", testdata.Timeout) // 故意連線到不開放的埠號才會引發錯誤
 	target.Connect(tester)
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	assert.False(this.T(), tester.valid())
 }
 
 func (this *SuiteTCPConnect) TestAddress() {
-	target := NewTCPConnect(this.host.ip, this.host.port, this.timeout)
+	target := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
 	assert.Equal(this.T(), net.JoinHostPort(this.host.ip, this.host.port), target.Address())
 }

@@ -33,34 +33,10 @@ func (this *Configmgr) ReadFile(filepath string) error {
 		return fmt.Errorf("configmgr readfile: %v: %w", filepath, err)
 	} // if
 
-	if err = this.ReadData(data); err != nil {
-		return fmt.Errorf("configmgr readfile: %v: %w", filepath, err)
-	} // if
-
-	return nil
-}
-
-// ReadString 從字串讀取配置
-func (this *Configmgr) ReadString(str string) error {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	if err := this.ReadData([]byte(str)); err != nil {
-		return fmt.Errorf("configmgr readstring: %w", err)
-	} // if
-
-	return nil
-}
-
-// ReadData 從二進位資料讀取配置
-func (this *Configmgr) ReadData(data []byte) error {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
 	config := map[string]interface{}{}
 
-	if err := yaml.Unmarshal(data, &config); err != nil {
-		return fmt.Errorf("configmgr readdata: %w", err)
+	if err = yaml.Unmarshal(data, &config); err != nil {
+		return fmt.Errorf("configmgr readfile: %w", err)
 	} // if
 
 	for key, value := range config {
@@ -70,12 +46,22 @@ func (this *Configmgr) ReadData(data []byte) error {
 	return nil
 }
 
-// Clear 清除配置
-func (this *Configmgr) Clear() {
+// ReadString 從字串讀取配置
+func (this *Configmgr) ReadString(str string) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	this.data = map[string]interface{}{}
+	config := map[string]interface{}{}
+
+	if err := yaml.Unmarshal([]byte(str), &config); err != nil {
+		return fmt.Errorf("configmgr readstring: %w", err)
+	} // if
+
+	for key, value := range config {
+		this.data[key] = value
+	} // for
+
+	return nil
 }
 
 // GetInt 取得數字
@@ -129,7 +115,7 @@ func (this *Configmgr) GetObject(key string, result interface{}) error {
 		return fmt.Errorf("configmgr getobject: not exist")
 	} // if
 
-	if err := mapstructure.Decode(raw, &result); err != nil { // TODO: 這樣會成功嗎!? 要測試看看
+	if err := mapstructure.Decode(raw, result); err != nil {
 		return fmt.Errorf("configmgr getobject: %w", err)
 	} // if
 

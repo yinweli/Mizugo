@@ -57,7 +57,7 @@ func (this *SuiteMizugo) TestMizugo() {
 			validFinalize.Store(true)
 		})
 
-	time.Sleep(time.Second)
+	time.Sleep(testdata.Timeout)
 	assert.NotNil(this.T(), Netmgr())
 	assert.NotNil(this.T(), Entitymgr())
 	assert.NotNil(this.T(), Tagmgr())
@@ -68,7 +68,7 @@ func (this *SuiteMizugo) TestMizugo() {
 
 	go Close()
 
-	time.Sleep(time.Second)
+	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), validInitialize.Load())
 	assert.True(this.T(), validFinalize.Load())
 }
@@ -92,11 +92,11 @@ func (this *SuiteMizugo) TestTwice() {
 		func() {
 		})
 
-	time.Sleep(time.Second)
+	time.Sleep(testdata.Timeout)
 
 	go Close()
 
-	time.Sleep(time.Second)
+	time.Sleep(testdata.Timeout)
 	assert.Equal(this.T(), int64(1), valid.Load())
 }
 

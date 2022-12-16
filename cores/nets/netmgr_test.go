@@ -20,14 +20,12 @@ type SuiteNetmgr struct {
 	testdata.TestEnv
 	hostGoogle host
 	hostLocal  host
-	timeout    time.Duration
 }
 
 func (this *SuiteNetmgr) SetupSuite() {
 	this.Change("test-nets-netmgr")
 	this.hostGoogle = host{ip: "google.com", port: "80"}
 	this.hostLocal = host{ip: "", port: "3000"}
-	this.timeout = time.Second
 }
 
 func (this *SuiteNetmgr) TearDownSuite() {
@@ -45,12 +43,12 @@ func (this *SuiteNetmgr) TestNewNetmgr() {
 func (this *SuiteNetmgr) TestAddConnect() {
 	tester := newSessionTester(true, true, true)
 	target := NewNetmgr()
-	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, this.timeout), tester)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), tester)
 
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), tester.validSession())
 
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	target.Stop()
 }
 
@@ -60,14 +58,14 @@ func (this *SuiteNetmgr) TestAddListen() {
 	target.AddListen(NewTCPListen(this.hostLocal.ip, this.hostLocal.port), testerl)
 
 	testerc := newCompleteTester()
-	client := NewTCPConnect(this.hostLocal.ip, this.hostLocal.port, this.timeout)
+	client := NewTCPConnect(this.hostLocal.ip, this.hostLocal.port, testdata.Timeout)
 	client.Connect(testerc)
 
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), testerl.validSession())
 	assert.True(this.T(), testerc.valid())
 
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	target.Stop()
 	testerc.get().StopWait()
 }
@@ -75,44 +73,44 @@ func (this *SuiteNetmgr) TestAddListen() {
 func (this *SuiteNetmgr) TestGetSession() {
 	tester := newSessionTester(true, true, true)
 	target := NewNetmgr()
-	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, this.timeout), tester)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), tester)
 
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), tester.validSession())
 	assert.Equal(this.T(), tester.get(), target.GetSession(tester.get().SessionID()))
 
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	target.Stop()
 }
 
 func (this *SuiteNetmgr) TestStopSession() {
 	tester := newSessionTester(true, true, true)
 	target := NewNetmgr()
-	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, this.timeout), tester)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), tester)
 
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), tester.validSession())
 	target.StopSession(tester.get().SessionID())
 
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	assert.False(this.T(), tester.validSession())
 
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	target.Stop()
 }
 
 func (this *SuiteNetmgr) TestStop() {
 	tester := newSessionTester(true, true, true)
 	target := NewNetmgr()
-	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, this.timeout), tester)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), tester)
 
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), tester.validSession())
 
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	target.Stop()
 
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	assert.False(this.T(), tester.validSession())
 }
 
@@ -122,15 +120,15 @@ func (this *SuiteNetmgr) TestStatus() {
 	target.AddListen(NewTCPListen(this.hostLocal.ip, this.hostLocal.port), testerl)
 
 	testerc := newSessionTester(true, true, true)
-	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, this.timeout), testerc)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), testerc)
 
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), testerc.validSession())
 	status := target.Status()
 	assert.Len(this.T(), status.Listen, 1)
 	assert.Equal(this.T(), 1, status.Session)
 
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	target.Stop()
 }
 

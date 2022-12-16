@@ -19,12 +19,10 @@ func TestEventmgr(t *testing.T) {
 type SuiteEventmgr struct {
 	suite.Suite
 	testdata.TestEnv
-	timeout time.Duration
 }
 
 func (this *SuiteEventmgr) SetupSuite() {
 	this.Change("test-events-eventmgr")
-	this.timeout = time.Second
 }
 
 func (this *SuiteEventmgr) TearDownSuite() {
@@ -55,7 +53,7 @@ func (this *SuiteEventmgr) TestPubOnce() {
 		valid.Store(param.(string) == "pubonce")
 	})
 	target.PubOnce("event", "pubonce")
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), valid.Load())
 }
 
@@ -70,6 +68,6 @@ func (this *SuiteEventmgr) TestPubFixed() {
 	})
 	fixed := target.PubFixed("event", "pubfixed", time.Millisecond)
 	defer fixed.Stop()
-	time.Sleep(this.timeout)
+	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), valid.Load())
 }
