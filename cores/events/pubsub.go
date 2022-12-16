@@ -14,7 +14,7 @@ func NewPubsub() *Pubsub {
 // Pubsub 訂閱/發布資料
 type Pubsub struct {
 	data map[string][]Process // 處理列表
-	lock sync.Mutex           // 執行緒鎖
+	lock sync.RWMutex         // 執行緒鎖
 }
 
 // Process 處理函式類型
@@ -34,8 +34,8 @@ func (this *Pubsub) Sub(name string, process Process) {
 
 // Pub 發布
 func (this *Pubsub) Pub(name string, param any) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+	this.lock.RLock()
+	defer this.lock.RUnlock()
 
 	if event, ok := this.data[name]; ok {
 		for _, itor := range event {

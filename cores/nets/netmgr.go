@@ -81,8 +81,8 @@ func newListenmgr() *listenmgr {
 
 // listenmgr 接聽管理器
 type listenmgr struct {
-	data []Listener // 接聽列表
-	lock sync.Mutex // 執行緒鎖
+	data []Listener   // 接聽列表
+	lock sync.RWMutex // 執行緒鎖
 }
 
 // add 新增接聽
@@ -107,8 +107,8 @@ func (this *listenmgr) clear() {
 
 // address 取得接聽位址列表
 func (this *listenmgr) address() []string {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+	this.lock.RLock()
+	defer this.lock.RUnlock()
 
 	result := []string{}
 
@@ -130,7 +130,7 @@ func newSessionmgr() *sessionmgr {
 type sessionmgr struct {
 	sessionID SessionID               // 會話編號
 	data      map[SessionID]Sessioner // 會話列表
-	lock      sync.Mutex              // 執行緒鎖
+	lock      sync.RWMutex            // 執行緒鎖
 }
 
 // add 新增會話
@@ -168,16 +168,16 @@ func (this *sessionmgr) clear() {
 
 // get 取得會話
 func (this *sessionmgr) get(sessionID SessionID) Sessioner {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+	this.lock.RLock()
+	defer this.lock.RUnlock()
 
 	return this.data[sessionID]
 }
 
 // count 取得會話數量
 func (this *sessionmgr) count() int {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+	this.lock.RLock()
+	defer this.lock.RUnlock()
 
 	return len(this.data)
 }
