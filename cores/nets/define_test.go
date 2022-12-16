@@ -178,7 +178,7 @@ func (this *sessionTester) Receive(message any) error {
 		return nil
 	} else {
 		this.message = nil
-		return fmt.Errorf("receive failed")
+		return fmt.Errorf("failed")
 	} // if
 }
 
