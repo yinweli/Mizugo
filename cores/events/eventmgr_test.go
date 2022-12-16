@@ -66,8 +66,8 @@ func (this *SuiteEventmgr) TestPubFixed() {
 	target.Sub("event", func(param any) {
 		valid.Store(param.(string) == "pubfixed")
 	})
-	fixed := target.PubFixed("event", "pubfixed", time.Millisecond)
+	fixed := target.PubFixed("event", "pubfixed", time.Millisecond*100)
 	defer fixed.Stop()
-	time.Sleep(testdata.Timeout)
+	time.Sleep(testdata.Timeout * 2) // 由於github的windows環境測試會失敗, 只好延長時間
 	assert.True(this.T(), valid.Load())
 }

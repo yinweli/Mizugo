@@ -40,6 +40,7 @@ func (this *SuiteMizugo) TestMizugo() {
 	validInitialize := atomic.Bool{}
 	validFinalize := atomic.Bool{}
 
+	assert.Nil(this.T(), Configmgr())
 	assert.Nil(this.T(), Netmgr())
 	assert.Nil(this.T(), Entitymgr())
 	assert.Nil(this.T(), Tagmgr())
@@ -58,6 +59,7 @@ func (this *SuiteMizugo) TestMizugo() {
 		})
 
 	time.Sleep(testdata.Timeout)
+	assert.NotNil(this.T(), Configmgr())
 	assert.NotNil(this.T(), Netmgr())
 	assert.NotNil(this.T(), Entitymgr())
 	assert.NotNil(this.T(), Tagmgr())
