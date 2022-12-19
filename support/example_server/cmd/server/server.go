@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/yinweli/Mizugo/mizugos"
+	"github.com/yinweli/Mizugo/support/example_server/server/commons"
 	"github.com/yinweli/Mizugo/support/example_server/server/echos"
 )
 
@@ -15,7 +16,14 @@ func main() {
 
 // initialize 初始化處理
 func initialize() error {
-	if err := echos.Initialize(configPath); err != nil {
+	serv.logger = commons.NewLogger(configPath)
+	serv.echoServer = echos.NewServer(configPath)
+
+	if err := serv.logger.Initialize(); err != nil {
+		return fmt.Errorf("initialize: %w", err)
+	} // if
+
+	if err := serv.echoServer.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
@@ -24,5 +32,11 @@ func initialize() error {
 
 // finalize 結束處理
 func finalize() {
-	echos.Finalize()
+	serv.echoServer.Finalize()
+	serv.logger.Finalize()
+}
+
+var serv struct {
+	logger     *commons.Logger // 日誌資料
+	echoServer *echos.Server   // 回音伺服器資料
 }

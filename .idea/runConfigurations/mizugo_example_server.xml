@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="mizugo example server" type="GoApplicationRunConfiguration" factoryName="Go Application">
     <module name="Mizugo" />
-    <working_directory value="$PROJECT_DIR$/support/example_server" />
+    <working_directory value="$PROJECT_DIR$/support/example_server/.runtime" />
     <kind value="DIRECTORY" />
     <package value="github.com/yinweli/Mizugo" />
     <directory value="$PROJECT_DIR$/support/example_server/cmd/server" />
