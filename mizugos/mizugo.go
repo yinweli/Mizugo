@@ -107,6 +107,14 @@ func Tagmgr() *tags.Tagmgr {
 	return serv.tagmgr
 }
 
+// Logmgr 日誌管理器
+func Logmgr() *logs.Logmgr {
+	serv.lock.RLock()
+	defer serv.lock.RUnlock()
+
+	return serv.logmgr
+}
+
 // Debug 記錄除錯訊息
 func Debug(label string) logs.Stream {
 	serv.lock.RLock()
@@ -147,7 +155,7 @@ var serv struct {
 	entitymgr *entitys.Entitymgr // 實體管理器
 	tagmgr    *tags.Tagmgr       // 標籤管理器
 	logmgr    *logs.Logmgr       // 日誌管理器
+	lock      sync.RWMutex       // 執行緒鎖
 	start     atomic.Bool        // 啟動旗標
 	close     sync.WaitGroup     // 關閉旗標
-	lock      sync.RWMutex       // 執行緒鎖
 }
