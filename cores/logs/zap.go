@@ -1,6 +1,7 @@
 package logs
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -104,8 +105,8 @@ type ZapStream struct {
 }
 
 // Message 記錄訊息
-func (this *ZapStream) Message(message string) Stream {
-	this.message = message
+func (this *ZapStream) Message(format string, a ...any) Stream {
+	this.message = fmt.Sprintf(format, a...)
 	return this
 }
 

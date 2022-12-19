@@ -5,7 +5,7 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/support/example_server/server/commons"
-	"github.com/yinweli/Mizugo/support/example_server/server/echos"
+	"github.com/yinweli/Mizugo/support/example_server/server/entrys"
 )
 
 const configPath = "config" // 設定檔案路徑
@@ -16,14 +16,14 @@ func main() {
 
 // initialize 初始化處理
 func initialize() error {
-	serv.logger = commons.NewLogger(configPath)
-	serv.echoServer = echos.NewServer(configPath)
+	server.logger = commons.NewLogger()
+	server.entry.echo = entrys.NewEcho()
 
-	if err := serv.logger.Initialize(); err != nil {
+	if err := server.logger.Initialize(configPath); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := serv.echoServer.Initialize(); err != nil {
+	if err := server.entry.echo.Initialize(configPath); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
@@ -32,11 +32,14 @@ func initialize() error {
 
 // finalize 結束處理
 func finalize() {
-	serv.echoServer.Finalize()
-	serv.logger.Finalize()
+	server.entry.echo.Finalize()
+	server.logger.Finalize()
 }
 
-var serv struct {
-	logger     *commons.Logger // 日誌資料
-	echoServer *echos.Server   // 回音伺服器資料
+// server 伺服器資料
+var server struct {
+	logger *commons.Logger // 日誌資料
+	entry  struct {        // 入口資料
+		echo *entrys.Echo // 回音入口資料
+	}
 }

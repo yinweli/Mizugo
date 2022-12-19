@@ -9,36 +9,31 @@ import (
 )
 
 // NewLogger 建立日誌資料
-func NewLogger(configPath string) *Logger {
+func NewLogger() *Logger {
 	return &Logger{
-		loggerName: "zapLogger",
-		configName: "logger",
-		configFile: "logger.yaml",
-		configPath: configPath,
+		name: "logger",
 	}
 }
 
 // Logger 日誌資料
 type Logger struct {
-	loggerName string         // 日誌名稱
-	configName string         // 設定名稱
-	configFile string         // 設定檔案名稱
-	configPath string         // 設定檔案路徑
-	logger     logs.ZapLogger // 日誌物件
+	name string // 日誌名稱
 }
 
 // Initialize 初始化處理
-func (this *Logger) Initialize() error {
-	if err := mizugos.Configmgr().ReadFile(filepath.Join(this.configPath, this.configFile)); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.loggerName, err)
+func (this *Logger) Initialize(configPath string) error {
+	if err := mizugos.Configmgr().ReadFile(filepath.Join(configPath, this.name+".yaml")); err != nil {
+		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	if err := mizugos.Configmgr().GetObject(this.configName, &this.logger); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.loggerName, err)
+	logger := logs.ZapLogger{}
+
+	if err := mizugos.Configmgr().GetObject(this.name, &logger); err != nil {
+		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	if err := mizugos.Logmgr().Initialize(&this.logger); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.loggerName, err)
+	if err := mizugos.Logmgr().Initialize(&logger); err != nil {
+		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
 	return nil

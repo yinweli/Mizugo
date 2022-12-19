@@ -27,15 +27,16 @@ type TCPSession struct {
 	conn      net.Conn       // 連接物件
 	message   chan any       // 訊息通道
 	sessionID atomic.Int64   // 會話編號
-	reactor   Reactor        // 反應物件
 	unbinder  Unbinder       // 解綁物件
+	encoder   Encoder        // 編碼物件
+	receiver  Receiver       // 接收物件
 	signal    sync.WaitGroup // 通知信號
 }
 
 // Start 啟動會話, 當由連接器/接聽器獲得會話器之後, 需要啟動會話才可以傳送或接收封包; 若不是使用多執行緒啟動, 則會被阻塞在這裡直到會話結束
 func (this *TCPSession) Start(sessionID SessionID, binder Binder) {
 	this.sessionID.Store(sessionID)
-	this.reactor, this.unbinder = binder.Bind(this)
+	this.unbinder, this.encoder, this.receiver = binder.Bind(this)
 	this.signal.Add(2) // 等待接收循環與傳送循環結束
 
 	go this.recvLoop()
@@ -86,19 +87,19 @@ func (this *TCPSession) recvLoop() {
 		packet, err := this.recvPacket(reader)
 
 		if err != nil {
-			this.reactor.Error(fmt.Errorf("tcp session recv loop: %w", err))
+			this.receiver.Error(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 
-		message, err := this.reactor.Decode(packet)
+		message, err := this.encoder.Decode(packet)
 
 		if err != nil {
-			this.reactor.Error(fmt.Errorf("tcp session recv loop: %w", err))
+			this.receiver.Error(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 
-		if err := this.reactor.Receive(message); err != nil {
-			this.reactor.Error(fmt.Errorf("tcp session recv loop: %w", err))
+		if err := this.receiver.Receive(message); err != nil {
+			this.receiver.Error(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 	} // for
@@ -139,15 +140,15 @@ func (this *TCPSession) sendLoop() {
 			break
 		} // if
 
-		packet, err := this.reactor.Encode(message)
+		packet, err := this.encoder.Encode(message)
 
 		if err != nil {
-			this.reactor.Error(fmt.Errorf("tcp session send loop: %w", err))
+			this.receiver.Error(fmt.Errorf("tcp session send loop: %w", err))
 			break
 		} // if
 
 		if err := this.sendPacket(this.conn, packet); err != nil {
-			this.reactor.Error(fmt.Errorf("tcp session send loop: %w", err))
+			this.receiver.Error(fmt.Errorf("tcp session send loop: %w", err))
 			break
 		} // if
 	} // for

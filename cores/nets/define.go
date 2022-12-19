@@ -66,22 +66,7 @@ type Sessioner interface {
 // Binder 綁定介面
 type Binder interface {
 	// Bind 綁定處理
-	Bind(session Sessioner) (reactor Reactor, unbinder Unbinder)
-
-	// Error 錯誤處理
-	Error(err error)
-}
-
-// Reactor 反應介面
-type Reactor interface {
-	// Encode 封包編碼, 用在傳送封包時
-	Encode(message any) (packet []byte, err error)
-
-	// Decode 封包解碼, 用在接收封包時
-	Decode(packet []byte) (message any, err error)
-
-	// Receive 接收處理
-	Receive(message any) error
+	Bind(session Sessioner) (unbinder Unbinder, encoder Encoder, receiver Receiver)
 
 	// Error 錯誤處理
 	Error(err error)
@@ -99,6 +84,29 @@ type Unbind func()
 // Unbind 解綁處理
 func (this Unbind) Unbind() {
 	this()
+}
+
+// TODO: 是否要把Completer + Binder + Unbinder + Encode + Decode + Receive + Error改回函式指標?
+// TODO: Encode + Decode + Receive可能會是一組的封包前置處理程序, 後面應當要接到包括封包編號與封包物件的封包處理器
+// TODO: 封包處理器可能可以固定介面了(封包編號+封包物件)
+// TODO: Encode + Decode實作時要考慮可用開關切換編解碼流程, 例如首次封包不須加密解密之類(因為密鑰還沒送到/收到)
+
+// Encoder 編碼介面
+type Encoder interface {
+	// Encode 封包編碼, 用在傳送封包時
+	Encode(message any) (packet []byte, err error)
+
+	// Decode 封包解碼, 用在接收封包時
+	Decode(packet []byte) (message any, err error)
+}
+
+// Receiver 接收介面
+type Receiver interface {
+	// Receive 接收處理
+	Receive(message any) error
+
+	// Error 錯誤處理
+	Error(err error)
 }
 
 // SessionID 會話編號

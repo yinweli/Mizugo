@@ -25,7 +25,7 @@ type EmptyStream struct {
 }
 
 // Message 記錄訊息
-func (this *EmptyStream) Message(_ string) Stream {
+func (this *EmptyStream) Message(_ string, _ ...any) Stream {
 	return this
 }
 

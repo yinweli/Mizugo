@@ -137,12 +137,12 @@ func (this *sessionTester) get() Sessioner {
 	return this.session
 }
 
-func (this *sessionTester) Bind(session Sessioner) (reactor Reactor, unbinder Unbinder) {
+func (this *sessionTester) Bind(session Sessioner) (unbinder Unbinder, encoder Encoder, receiver Receiver) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.session = session
-	return this, this
+	return this, this, this
 }
 
 func (this *sessionTester) Unbind() {

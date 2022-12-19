@@ -35,27 +35,3 @@ func (this *moduleTester) Dispose() {
 func (this *moduleTester) Update() {
 	this.update.Store(true)
 }
-
-// newReactTester 建立反應測試器
-func newReactTester() *reactTester {
-	return &reactTester{}
-}
-
-// reactTester 反應測試器
-type reactTester struct {
-}
-
-func (this *reactTester) Encode(_ any) (packet []byte, err error) {
-	return nil, nil
-}
-
-func (this *reactTester) Decode(_ []byte) (message any, err error) {
-	return nil, nil
-}
-
-func (this *reactTester) Receive(_ any) error {
-	return nil
-}
-
-func (this *reactTester) Error(_ error) {
-}

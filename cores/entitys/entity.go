@@ -7,27 +7,27 @@ import (
 
 	"github.com/yinweli/Mizugo/cores/events"
 	"github.com/yinweli/Mizugo/cores/nets"
+	"github.com/yinweli/Mizugo/cores/utils"
 )
 
 // NewEntity 建立實體資料
 func NewEntity(entityID EntityID) *Entity {
 	return &Entity{
-		entityID:   entityID,
-		sessionmgr: NewSessionmgr(),
-		reactmgr:   NewReactmgr(),
-		modulemgr:  NewModulemgr(),
-		eventmgr:   events.NewEventmgr(eventSize),
+		entityID:  entityID,
+		modulemgr: NewModulemgr(),
+		eventmgr:  events.NewEventmgr(eventSize),
 	}
 }
 
 // Entity 實體資料
 type Entity struct {
-	entityID   EntityID         // 實體編號
-	sessionmgr *Sessionmgr      // 會話管理器
-	reactmgr   *Reactmgr        // 反應管理器
-	modulemgr  *Modulemgr       // 模組管理器
-	eventmgr   *events.Eventmgr // 事件管理器
-	enable     atomic.Bool      // 啟用旗標
+	entityID  EntityID                       // 實體編號
+	session   utils.SyncAttr[nets.Sessioner] // 會話物件
+	encode    utils.SyncAttr[nets.Encoder]   // 編碼物件
+	receive   utils.SyncAttr[nets.Receiver]  // 接收物件
+	modulemgr *Modulemgr                     // 模組管理器
+	eventmgr  *events.Eventmgr               // 事件管理器
+	enable    atomic.Bool                    // 啟用旗標
 }
 
 // EntityID 實體編號
@@ -44,36 +44,28 @@ func (this *Entity) SetSession(session nets.Sessioner) error {
 		return fmt.Errorf("entity set session: overdue")
 	} // if
 
-	if this.sessionmgr.Get() != nil {
-		return fmt.Errorf("entity set session: already set")
-	} // if
-
-	this.sessionmgr.Set(session)
+	this.session.Set(session)
 	return nil
 }
 
-// GetSession 取得會話物件
-func (this *Entity) GetSession() nets.Sessioner {
-	return this.sessionmgr.Get()
-}
-
-// SetReact 設定反應物件
-func (this *Entity) SetReact(react nets.Reactor) error {
+// SetEncode 設定編碼物件
+func (this *Entity) SetEncode(encoder nets.Encoder) error {
 	if this.enable.Load() {
-		return fmt.Errorf("entity set react: overdue")
+		return fmt.Errorf("entity set encode: overdue")
 	} // if
 
-	if this.reactmgr.Get() != nil {
-		return fmt.Errorf("entity set react: already set")
-	} // if
-
-	this.reactmgr.Set(react)
+	this.encode.Set(encoder)
 	return nil
 }
 
-// GetReact 取得反應物件
-func (this *Entity) GetReact() nets.Reactor {
-	return this.reactmgr.Get()
+// SetReceive 設定接收物件
+func (this *Entity) SetReceive(receiver nets.Receiver) error {
+	if this.enable.Load() {
+		return fmt.Errorf("entity set receive: overdue")
+	} // if
+
+	this.receive.Set(receiver)
+	return nil
 }
 
 // AddModule 新增模組
