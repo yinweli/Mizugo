@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/yinweli/Mizugo/cores/entitys"
 	"github.com/yinweli/Mizugo/cores/nets"
 	"github.com/yinweli/Mizugo/mizugos"
 )
@@ -38,7 +39,7 @@ func (this *Echo) Initialize(configPath string) error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	mizugos.Netmgr().AddListen(nets.NewTCPListen(this.config.IP, this.config.Port), this)
+	mizugos.Netmgr().AddListen(nets.NewTCPListen(this.config.IP, this.config.Port), this.bind, this.wrong)
 	mizugos.Info(this.name).
 		Message("entry start").
 		KV("ip", this.config.IP).
@@ -54,12 +55,34 @@ func (this *Echo) Finalize() {
 		End()
 }
 
-// Bind 綁定處理
-func (this *Echo) Bind(session nets.Sessioner) (unbinder nets.Unbinder, encoder nets.Encoder, receiver nets.Receiver) {
-	return nil, nil, nil
+// bind 綁定處理
+func (this *Echo) bind(session nets.Sessioner) *nets.BindData {
+	entity := entitys.NewEntity(entitys.EntityID(1))
+
+	if err := entity.SetSession(session); err != nil {
+		this.wrong(fmt.Errorf("bind: %w", err))
+		return nil
+	} // if
+
+	// TODO: set messagemgr(include encode, decode, process)
+
+	if err := mizugos.Entitymgr().Add(entity); err != nil {
+		this.wrong(fmt.Errorf("bind: %w", err))
+		return nil
+	} // if
+
+	return &nets.BindData{
+		Unbind: func() {
+
+		},
+		Encode:  nil,
+		Decode:  nil,
+		Receive: nil,
+		Wrong:   this.wrong,
+	}
 }
 
-// Error 錯誤處理
-func (this *Echo) Error(err error) {
+// wrong 錯誤處理
+func (this *Echo) wrong(err error) {
 	_ = mizugos.Error(this.name).EndError(err)
 }

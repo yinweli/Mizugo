@@ -7,7 +7,6 @@ import (
 
 	"github.com/yinweli/Mizugo/cores/events"
 	"github.com/yinweli/Mizugo/cores/nets"
-	"github.com/yinweli/Mizugo/cores/utils"
 )
 
 // NewEntity 建立實體資料
@@ -21,13 +20,11 @@ func NewEntity(entityID EntityID) *Entity {
 
 // Entity 實體資料
 type Entity struct {
-	entityID  EntityID                       // 實體編號
-	session   utils.SyncAttr[nets.Sessioner] // 會話物件
-	encode    utils.SyncAttr[nets.Encoder]   // 編碼物件
-	receive   utils.SyncAttr[nets.Receiver]  // 接收物件
-	modulemgr *Modulemgr                     // 模組管理器
-	eventmgr  *events.Eventmgr               // 事件管理器
-	enable    atomic.Bool                    // 啟用旗標
+	entityID  EntityID         // 實體編號
+	session   SessionAttr      // 會話物件
+	modulemgr *Modulemgr       // 模組管理器
+	eventmgr  *events.Eventmgr // 事件管理器
+	enable    atomic.Bool      // 啟用旗標
 }
 
 // EntityID 實體編號
@@ -45,26 +42,6 @@ func (this *Entity) SetSession(session nets.Sessioner) error {
 	} // if
 
 	this.session.Set(session)
-	return nil
-}
-
-// SetEncode 設定編碼物件
-func (this *Entity) SetEncode(encoder nets.Encoder) error {
-	if this.enable.Load() {
-		return fmt.Errorf("entity set encode: overdue")
-	} // if
-
-	this.encode.Set(encoder)
-	return nil
-}
-
-// SetReceive 設定接收物件
-func (this *Entity) SetReceive(receiver nets.Receiver) error {
-	if this.enable.Load() {
-		return fmt.Errorf("entity set receive: overdue")
-	} // if
-
-	this.receive.Set(receiver)
 	return nil
 }
 
@@ -110,10 +87,10 @@ func (this *Entity) Enable() bool {
 // initialize 初始化處理
 func (this *Entity) initialize() {
 	if this.enable.CompareAndSwap(false, true) {
-		this.eventmgr.Sub(eventAwake, processAwake)
-		this.eventmgr.Sub(eventStart, processStart)
-		this.eventmgr.Sub(eventDispose, processDispose)
-		this.eventmgr.Sub(eventUpdate, processUpdate)
+		this.eventmgr.Sub(eventAwake, this.eventAwake)
+		this.eventmgr.Sub(eventStart, this.eventStart)
+		this.eventmgr.Sub(eventDispose, this.eventDispose)
+		this.eventmgr.Sub(eventUpdate, this.eventUpdate)
 		this.eventmgr.Initialize()
 		module := this.modulemgr.All()
 
@@ -142,30 +119,32 @@ func (this *Entity) finalize() {
 	this.eventmgr.Finalize()
 }
 
-// processAwake 處理awake事件
-func processAwake(param any) {
+// eventAwake 處理awake事件
+func (this *Entity) eventAwake(param any) {
 	if module, ok := param.(Awaker); ok {
 		module.Awake()
 	} // if
 }
 
-// processStart 處理start事件
-func processStart(param any) {
+// eventStart 處理start事件
+func (this *Entity) eventStart(param any) {
 	if module, ok := param.(Starter); ok {
 		module.Start()
 	} // if
 }
 
-// processDispose 處理dispose事件
-func processDispose(param any) {
+// eventDispose 處理dispose事件
+func (this *Entity) eventDispose(param any) {
 	if module, ok := param.(Disposer); ok {
 		module.Dispose()
 	} // if
 }
 
-// processUpdate 處理update事件
-func processUpdate(param any) {
+// eventUpdate 處理update事件
+func (this *Entity) eventUpdate(param any) {
 	if module, ok := param.(Updater); ok {
 		module.Update()
 	} // if
 }
+
+// TODO: 新增封包管理器, 在bind的時候, 以封包管理器當作參數建立合適的reactor(或是實體本身就有合適的介面可以塞到reactor中)

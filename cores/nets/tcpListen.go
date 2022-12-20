@@ -21,11 +21,11 @@ type TCPListen struct {
 }
 
 // Listen 啟動接聽
-func (this *TCPListen) Listen(completer Completer) {
+func (this *TCPListen) Listen(done Done) {
 	listen, err := net.Listen("tcp", this.address)
 
 	if err != nil {
-		completer.Complete(nil, fmt.Errorf("tcp listen: %v: %w", this.address, err))
+		done(nil, fmt.Errorf("tcp listen: %v: %w", this.address, err))
 		return
 	} // if
 
@@ -39,12 +39,12 @@ func (this *TCPListen) Listen(completer Completer) {
 				if this.closed.Load() {
 					return // 停止接聽, 這不算是錯誤, 但要結束接聽器了
 				} else {
-					completer.Complete(nil, fmt.Errorf("tcp listen: %v: %w", this.address, err))
+					done(nil, fmt.Errorf("tcp listen: %v: %w", this.address, err))
 					continue // 這次連接出了問題, 但我們還是繼續接聽
 				} // if
 			} // if
 
-			completer.Complete(NewTCPSession(conn), nil)
+			done(NewTCPSession(conn), nil)
 		} // for
 	}()
 }

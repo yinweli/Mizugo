@@ -21,16 +21,16 @@ type TCPConnect struct {
 }
 
 // Connect 啟動連接
-func (this *TCPConnect) Connect(completer Completer) {
+func (this *TCPConnect) Connect(done Done) {
 	go func() {
 		conn, err := net.DialTimeout("tcp", this.address, this.timeout)
 
 		if err != nil {
-			completer.Complete(nil, fmt.Errorf("tcp connect: %v: %w", this.address, err))
+			done(nil, fmt.Errorf("tcp connect: %v: %w", this.address, err))
 			return
 		} // if
 
-		completer.Complete(NewTCPSession(conn), nil)
+		done(NewTCPSession(conn), nil)
 	}()
 }
 

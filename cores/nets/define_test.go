@@ -4,83 +4,39 @@ import (
 	"fmt"
 	"net"
 	"sync"
-	"testing"
 	"time"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
-	"go.uber.org/goleak"
 
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestDefine(t *testing.T) {
-	suite.Run(t, new(SuiteDefine))
-}
-
-type SuiteDefine struct {
-	suite.Suite
-	testdata.TestEnv
-}
-
-func (this *SuiteDefine) SetupSuite() {
-	this.Change("test-nets-tcpSession")
-}
-
-func (this *SuiteDefine) TearDownSuite() {
-	this.Restore()
-}
-
-func (this *SuiteDefine) TearDownTest() {
-	goleak.VerifyNone(this.T())
-}
-
-func (this *SuiteDefine) TestComplete() {
-	valid := false
-	complete := Complete(func(_ Sessioner, _ error) {
-		valid = true
-	})
-	complete.Complete(nil, nil)
-	assert.True(this.T(), valid)
-}
-
-func (this *SuiteDefine) TestUnbind() {
-	valid := false
-	release := Unbind(func() {
-		valid = true
-	})
-	release.Unbind()
-	assert.True(this.T(), valid)
-}
-
-// newCompleteTester 建立完成會話測試器
-func newCompleteTester() *completeTester {
+// newDoneTester 建立完成會話測試器
+func newDoneTester() *doneTester {
 	time.Sleep(testdata.Timeout) // 在這邊等待一下, 讓程序有機會完成
-	return &completeTester{}
+	return &doneTester{}
 }
 
-// completeTester 完成會話測試器
-type completeTester struct {
+// doneTester 完成會話測試器
+type doneTester struct {
 	lock    sync.Mutex
 	session Sessioner
 	err     error
 }
 
-func (this *completeTester) valid() bool {
+func (this *doneTester) valid() bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.session != nil && this.err == nil
 }
 
-func (this *completeTester) get() Sessioner {
+func (this *doneTester) get() Sessioner {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.session
 }
 
-func (this *completeTester) Complete(session Sessioner, err error) {
+func (this *doneTester) done(session Sessioner, err error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -88,18 +44,18 @@ func (this *completeTester) Complete(session Sessioner, err error) {
 	this.err = err
 }
 
-// newSessionTester 建立會話測試器
-func newSessionTester(encode, decode, receive bool) *sessionTester {
+// newBindTester 建立綁定處理測試器
+func newBindTester(encode, decode, receive bool) *bindTester {
 	time.Sleep(testdata.Timeout) // 在這邊等待一下, 讓程序有機會完成
-	return &sessionTester{
+	return &bindTester{
 		encode:  encode,
 		decode:  decode,
 		receive: receive,
 	}
 }
 
-// sessionTester 會話測試器
-type sessionTester struct {
+// bindTester 綁定處理測試器
+type bindTester struct {
 	encode  bool
 	decode  bool
 	receive bool
@@ -109,80 +65,79 @@ type sessionTester struct {
 	err     error
 }
 
-func (this *sessionTester) validSession() bool {
+func (this *bindTester) validSession() bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.session != nil
 }
 
-func (this *sessionTester) validMessage(message any) bool {
+func (this *bindTester) validMessage(message any) bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.message == message
 }
 
-func (this *sessionTester) validError() bool {
+func (this *bindTester) validError() bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.err == nil
 }
 
-func (this *sessionTester) get() Sessioner {
+func (this *bindTester) get() Sessioner {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.session
 }
 
-func (this *sessionTester) Bind(session Sessioner) (unbinder Unbinder, encoder Encoder, receiver Receiver) {
+func (this *bindTester) bind(session Sessioner) *BindData {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.session = session
-	return this, this, this
+
+	return &BindData{
+		Unbind: func() {
+			this.lock.Lock()
+			defer this.lock.Unlock()
+
+			this.session = nil
+			this.message = nil
+		},
+		Encode: func(message any) (packet []byte, err error) {
+			if this.encode == false {
+				return nil, fmt.Errorf("encode failed")
+			} // if
+
+			return []byte(message.(string)), nil
+		},
+		Decode: func(packet []byte) (message any, err error) {
+			if this.decode == false {
+				return nil, fmt.Errorf("decode failed")
+			} // if
+
+			return string(packet), nil
+		},
+		Receive: func(message any) error {
+			this.lock.Lock()
+			defer this.lock.Unlock()
+
+			if this.receive {
+				this.message = message
+				return nil
+			} else {
+				this.message = nil
+				return fmt.Errorf("failed")
+			} // if
+		},
+		Wrong: this.wrong,
+	}
 }
 
-func (this *sessionTester) Unbind() {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	this.session = nil
-	this.message = nil
-}
-
-func (this *sessionTester) Encode(message any) (packet []byte, err error) {
-	if this.encode == false {
-		return nil, fmt.Errorf("encode failed")
-	} // if
-
-	return []byte(message.(string)), nil
-}
-
-func (this *sessionTester) Decode(packet []byte) (message any, err error) {
-	if this.decode == false {
-		return nil, fmt.Errorf("decode failed")
-	} // if
-
-	return string(packet), nil
-}
-
-func (this *sessionTester) Receive(message any) error {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	if this.receive {
-		this.message = message
-		return nil
-	} else {
-		this.message = nil
-		return fmt.Errorf("failed")
-	} // if
-}
-
-func (this *sessionTester) Error(err error) {
+func (this *bindTester) wrong(err error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -193,7 +148,7 @@ func (this *sessionTester) Error(err error) {
 type emptySession struct {
 }
 
-func (this *emptySession) Start(_ SessionID, _ Binder) {
+func (this *emptySession) Start(_ SessionID, _ Bind) {
 	// do nothing...
 }
 

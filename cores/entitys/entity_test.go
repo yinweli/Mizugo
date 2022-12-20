@@ -56,26 +56,6 @@ func (this *SuiteEntity) TestSession() {
 	target.finalize()
 }
 
-func (this *SuiteEntity) TestEncode() {
-	target := NewEntity(EntityID(1))
-	assert.Nil(this.T(), target.SetEncode(nil))
-
-	target = NewEntity(EntityID(1))
-	target.initialize()
-	assert.NotNil(this.T(), target.SetEncode(nil))
-	target.finalize()
-}
-
-func (this *SuiteEntity) TestReceive() {
-	target := NewEntity(EntityID(1))
-	assert.Nil(this.T(), target.SetReceive(nil))
-
-	target = NewEntity(EntityID(1))
-	target.initialize()
-	assert.NotNil(this.T(), target.SetReceive(nil))
-	target.finalize()
-}
-
 func (this *SuiteEntity) TestModule() {
 	module1 := newModuleTester(ModuleID(1))
 	module2 := newModuleTester(ModuleID(2))

@@ -40,32 +40,32 @@ func (this *SuiteTCPListen) TestNewTCPListen() {
 }
 
 func (this *SuiteTCPListen) TestListen() {
-	testerl := newCompleteTester()
+	donel := newDoneTester()
 	target := NewTCPListen(this.host.ip, this.host.port)
-	target.Listen(testerl)
+	target.Listen(donel.done)
 
-	testerc := newCompleteTester()
+	donec := newDoneTester()
 	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
-	client.Connect(testerc)
+	client.Connect(donec.done)
 
 	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), testerl.valid())
-	assert.True(this.T(), testerc.valid())
+	assert.True(this.T(), donel.valid())
+	assert.True(this.T(), donec.valid())
 	assert.Nil(this.T(), target.Stop())
-	testerl.get().StopWait()
-	testerc.get().StopWait()
+	donel.get().StopWait()
+	donec.get().StopWait()
 
-	tester := newCompleteTester()
+	done := newDoneTester()
 	target = NewTCPListen("!?", this.host.port)
-	target.Listen(tester)
+	target.Listen(done.done)
 	time.Sleep(testdata.Timeout)
-	assert.False(this.T(), tester.valid())
+	assert.False(this.T(), done.valid())
 
-	tester = newCompleteTester()
+	done = newDoneTester()
 	target = NewTCPListen("192.168.0.1", this.host.port) // 故意要接聽錯誤位址才會引發錯誤
-	target.Listen(tester)
+	target.Listen(done.done)
 	time.Sleep(testdata.Timeout)
-	assert.False(this.T(), tester.valid())
+	assert.False(this.T(), done.valid())
 }
 
 func (this *SuiteTCPListen) TestAddress() {

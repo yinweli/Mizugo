@@ -17,13 +17,13 @@ func main() {
 // initialize 初始化處理
 func initialize() error {
 	server.logger = commons.NewLogger()
-	server.entry.echo = entrys.NewEcho()
+	server.entryEcho = entrys.NewEcho()
 
 	if err := server.logger.Initialize(configPath); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := server.entry.echo.Initialize(configPath); err != nil {
+	if err := server.entryEcho.Initialize(configPath); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
@@ -32,14 +32,12 @@ func initialize() error {
 
 // finalize 結束處理
 func finalize() {
-	server.entry.echo.Finalize()
+	server.entryEcho.Finalize()
 	server.logger.Finalize()
 }
 
 // server 伺服器資料
 var server struct {
-	logger *commons.Logger // 日誌資料
-	entry  struct {        // 入口資料
-		echo *entrys.Echo // 回音入口資料
-	}
+	logger    *commons.Logger // 日誌資料
+	entryEcho *entrys.Echo    // 回音入口資料
 }
