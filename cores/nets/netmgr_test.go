@@ -41,89 +41,89 @@ func (this *SuiteNetmgr) TestNewNetmgr() {
 }
 
 func (this *SuiteNetmgr) TestAddConnect() {
-	tester := newSessionTester(true, true, true)
+	bind := newBindTester(true, true, true)
 	target := NewNetmgr()
-	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), tester)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bind.bind, bind.wrong)
 
 	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), tester.validSession())
+	assert.True(this.T(), bind.validSession())
 
 	time.Sleep(testdata.Timeout)
 	target.Stop()
 }
 
 func (this *SuiteNetmgr) TestAddListen() {
-	testerl := newSessionTester(true, true, true)
+	bind := newBindTester(true, true, true)
 	target := NewNetmgr()
-	target.AddListen(NewTCPListen(this.hostLocal.ip, this.hostLocal.port), testerl)
+	target.AddListen(NewTCPListen(this.hostLocal.ip, this.hostLocal.port), bind.bind, bind.wrong)
 
-	testerc := newCompleteTester()
+	done := newDoneTester()
 	client := NewTCPConnect(this.hostLocal.ip, this.hostLocal.port, testdata.Timeout)
-	client.Connect(testerc)
+	client.Connect(done.done)
 
 	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), testerl.validSession())
-	assert.True(this.T(), testerc.valid())
+	assert.True(this.T(), bind.validSession())
+	assert.True(this.T(), done.valid())
 
 	time.Sleep(testdata.Timeout)
 	target.Stop()
-	testerc.get().StopWait()
+	done.get().StopWait()
 }
 
 func (this *SuiteNetmgr) TestGetSession() {
-	tester := newSessionTester(true, true, true)
+	bind := newBindTester(true, true, true)
 	target := NewNetmgr()
-	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), tester)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bind.bind, bind.wrong)
 
 	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), tester.validSession())
-	assert.Equal(this.T(), tester.get(), target.GetSession(tester.get().SessionID()))
+	assert.True(this.T(), bind.validSession())
+	assert.Equal(this.T(), bind.get(), target.GetSession(bind.get().SessionID()))
 
 	time.Sleep(testdata.Timeout)
 	target.Stop()
 }
 
 func (this *SuiteNetmgr) TestStopSession() {
-	tester := newSessionTester(true, true, true)
+	bind := newBindTester(true, true, true)
 	target := NewNetmgr()
-	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), tester)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bind.bind, bind.wrong)
 
 	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), tester.validSession())
-	target.StopSession(tester.get().SessionID())
+	assert.True(this.T(), bind.validSession())
+	target.StopSession(bind.get().SessionID())
 
 	time.Sleep(testdata.Timeout)
-	assert.False(this.T(), tester.validSession())
+	assert.False(this.T(), bind.validSession())
 
 	time.Sleep(testdata.Timeout)
 	target.Stop()
 }
 
 func (this *SuiteNetmgr) TestStop() {
-	tester := newSessionTester(true, true, true)
+	bind := newBindTester(true, true, true)
 	target := NewNetmgr()
-	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), tester)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bind.bind, bind.wrong)
 
 	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), tester.validSession())
+	assert.True(this.T(), bind.validSession())
 
 	time.Sleep(testdata.Timeout)
 	target.Stop()
 
 	time.Sleep(testdata.Timeout)
-	assert.False(this.T(), tester.validSession())
+	assert.False(this.T(), bind.validSession())
 }
 
 func (this *SuiteNetmgr) TestStatus() {
-	testerl := newSessionTester(true, true, true)
+	bindl := newBindTester(true, true, true)
 	target := NewNetmgr()
-	target.AddListen(NewTCPListen(this.hostLocal.ip, this.hostLocal.port), testerl)
+	target.AddListen(NewTCPListen(this.hostLocal.ip, this.hostLocal.port), bindl.bind, bindl.wrong)
 
-	testerc := newSessionTester(true, true, true)
-	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), testerc)
+	bindc := newBindTester(true, true, true)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bindc.bind, bindc.wrong)
 
 	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), testerc.validSession())
+	assert.True(this.T(), bindc.validSession())
 	status := target.Status()
 	assert.Len(this.T(), status.Listen, 1)
 	assert.Equal(this.T(), 1, status.Session)

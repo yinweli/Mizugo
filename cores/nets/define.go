@@ -7,7 +7,7 @@ import (
 // Connecter 連接介面
 type Connecter interface {
 	// Connect 啟動連接
-	Connect(completer Completer)
+	Connect(done Done)
 
 	// Address 取得位址
 	Address() string
@@ -16,7 +16,7 @@ type Connecter interface {
 // Listener 接聽介面
 type Listener interface {
 	// Listen 啟動接聽
-	Listen(completer Completer)
+	Listen(done Done)
 
 	// Stop 停止接聽
 	Stop() error
@@ -25,24 +25,10 @@ type Listener interface {
 	Address() string
 }
 
-// Completer 完成會話介面
-type Completer interface {
-	// Complete 完成會話
-	Complete(session Sessioner, err error)
-}
-
-// Complete 完成會話函式類型
-type Complete func(session Sessioner, err error)
-
-// Complete 完成會話
-func (this Complete) Complete(session Sessioner, err error) {
-	this(session, err)
-}
-
 // Sessioner 會話介面
 type Sessioner interface {
 	// Start 啟動會話, 若不是使用多執行緒啟動, 則一定被阻塞在這裡直到停止會話; 當由連接器/接聽器獲得會話器之後, 需要啟動會話才可以傳送或接收封包
-	Start(sessionID SessionID, binder Binder)
+	Start(sessionID SessionID, bind Bind)
 
 	// Stop 停止會話, 不會等待會話內部循環結束
 	Stop()
@@ -63,43 +49,35 @@ type Sessioner interface {
 	LocalAddr() net.Addr
 }
 
-// Binder 綁定介面
-type Binder interface {
-	// Bind 綁定處理
-	Bind(session Sessioner) (reactor Reactor, unbinder Unbinder)
+// Done 完成會話函式類型
+type Done func(session Sessioner, err error)
 
-	// Error 錯誤處理
-	Error(err error)
-}
-
-// Reactor 反應介面
-type Reactor interface {
-	// Encode 封包編碼, 用在傳送封包時
-	Encode(message any) (packet []byte, err error)
-
-	// Decode 封包解碼, 用在接收封包時
-	Decode(packet []byte) (message any, err error)
-
-	// Receive 接收處理
-	Receive(message any) error
-
-	// Error 錯誤處理
-	Error(err error)
-}
-
-// Unbinder 解綁介面
-type Unbinder interface {
-	// Unbind 解綁處理
-	Unbind()
-}
+// Bind 綁定處理函式類型
+type Bind func(session Sessioner) *BindData
 
 // Unbind 解綁處理函式類型
 type Unbind func()
 
-// Unbind 解綁處理
-func (this Unbind) Unbind() {
-	this()
-}
+// Encode 封包編碼處理函式類型, 用在傳送封包時
+type Encode func(message any) (packet []byte, err error)
+
+// Decode 封包解碼處理函式類型, 用在接收封包時
+type Decode func(packet []byte) (message any, err error)
+
+// Receive 接收封包處理函式類型
+type Receive func(message any) error
+
+// Wrong 錯誤處理函式類型
+type Wrong func(err error)
 
 // SessionID 會話編號
 type SessionID = int64
+
+// BindData 綁定資料
+type BindData struct {
+	Unbind  // 解綁處理函式
+	Encode  // 封包編碼處理函式
+	Decode  // 封包解碼處理函式
+	Receive // 接收封包處理函式
+	Wrong   // 錯誤處理函式
+}

@@ -36,7 +36,7 @@ func (this *loggerTester) New(label string, level Level) Stream {
 type streamTester struct {
 }
 
-func (this *streamTester) Message(_ string) Stream {
+func (this *streamTester) Message(_ string, _ ...any) Stream {
 	return this
 }
 

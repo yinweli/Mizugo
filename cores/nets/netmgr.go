@@ -26,28 +26,28 @@ type Status struct {
 }
 
 // AddConnect 新增連接
-func (this *Netmgr) AddConnect(connecter Connecter, binder Binder) {
-	connecter.Connect(Complete(func(session Sessioner, err error) {
+func (this *Netmgr) AddConnect(connecter Connecter, bind Bind, wrong Wrong) {
+	connecter.Connect(func(session Sessioner, err error) {
 		if err != nil {
-			binder.Error(fmt.Errorf("netmgr connect: %v: %w", connecter.Address(), err))
+			wrong(fmt.Errorf("netmgr connect: %v: %w", connecter.Address(), err))
 			return
 		} // if
 
-		go session.Start(this.sessionmgr.add(session), binder)
-	}))
+		go session.Start(this.sessionmgr.add(session), bind)
+	})
 }
 
 // AddListen 新增接聽
-func (this *Netmgr) AddListen(listener Listener, binder Binder) {
+func (this *Netmgr) AddListen(listener Listener, bind Bind, wrong Wrong) {
 	this.listenmgr.add(listener)
-	listener.Listen(Complete(func(session Sessioner, err error) {
+	listener.Listen(func(session Sessioner, err error) {
 		if err != nil {
-			binder.Error(fmt.Errorf("netmgr listen: %v: %w", listener.Address(), err))
+			wrong(fmt.Errorf("netmgr listen: %v: %w", listener.Address(), err))
 			return
 		} // if
 
-		go session.Start(this.sessionmgr.add(session), binder)
-	}))
+		go session.Start(this.sessionmgr.add(session), bind)
+	})
 }
 
 // GetSession 取得會話

@@ -9,7 +9,6 @@ import (
 	"github.com/yinweli/Mizugo/cores/entitys"
 	"github.com/yinweli/Mizugo/cores/logs"
 	"github.com/yinweli/Mizugo/cores/nets"
-	"github.com/yinweli/Mizugo/cores/tags"
 )
 
 // Initialize 初始化處理函式類型
@@ -29,7 +28,7 @@ func Start(name string, initialize Initialize, finalize Finalize) {
 	serv.configmgr = configs.NewConfigmgr()
 	serv.netmgr = nets.NewNetmgr()
 	serv.entitymgr = entitys.NewEntitymgr()
-	serv.tagmgr = tags.NewTagmgr()
+	serv.entityTagmgr = entitys.NewEntityTagmgr()
 	serv.logmgr = logs.NewLogmgr()
 	serv.lock.Unlock()
 
@@ -56,7 +55,7 @@ Finalize: // 結束處理
 	serv.configmgr = nil
 	serv.netmgr = nil
 	serv.entitymgr = nil
-	serv.tagmgr = nil
+	serv.entityTagmgr = nil
 	serv.logmgr = nil
 	serv.lock.Unlock()
 	serv.start.Store(false)
@@ -99,12 +98,20 @@ func Entitymgr() *entitys.Entitymgr {
 	return serv.entitymgr
 }
 
-// Tagmgr 實體管理器
-func Tagmgr() *tags.Tagmgr {
+// EntityTagmgr 實體標籤管理器
+func EntityTagmgr() *entitys.EntityTagmgr {
 	serv.lock.RLock()
 	defer serv.lock.RUnlock()
 
-	return serv.tagmgr
+	return serv.entityTagmgr
+}
+
+// Logmgr 日誌管理器
+func Logmgr() *logs.Logmgr {
+	serv.lock.RLock()
+	defer serv.lock.RUnlock()
+
+	return serv.logmgr
 }
 
 // Debug 記錄除錯訊息
@@ -141,13 +148,13 @@ func Error(label string) logs.Stream {
 
 // serv 伺服器資料
 var serv struct {
-	name      string             // 伺服器名稱
-	configmgr *configs.Configmgr // 配置管理器
-	netmgr    *nets.Netmgr       // 網路管理器
-	entitymgr *entitys.Entitymgr // 實體管理器
-	tagmgr    *tags.Tagmgr       // 標籤管理器
-	logmgr    *logs.Logmgr       // 日誌管理器
-	start     atomic.Bool        // 啟動旗標
-	close     sync.WaitGroup     // 關閉旗標
-	lock      sync.RWMutex       // 執行緒鎖
+	name         string                // 伺服器名稱
+	configmgr    *configs.Configmgr    // 配置管理器
+	netmgr       *nets.Netmgr          // 網路管理器
+	entitymgr    *entitys.Entitymgr    // 實體管理器
+	entityTagmgr *entitys.EntityTagmgr // 實體標籤管理器
+	logmgr       *logs.Logmgr          // 日誌管理器
+	lock         sync.RWMutex          // 執行緒鎖
+	start        atomic.Bool           // 啟動旗標
+	close        sync.WaitGroup        // 關閉旗標
 }

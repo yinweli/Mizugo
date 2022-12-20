@@ -22,7 +22,7 @@ type Logger interface {
 // Stream 記錄介面, 實作時需要注意會在多執行緒環境下運作
 type Stream interface {
 	// Message 記錄訊息
-	Message(message string) Stream
+	Message(format string, a ...any) Stream
 
 	// KV 記錄索引與數值
 	KV(key string, value any) Stream

@@ -12,22 +12,19 @@ import (
 // NewEntity 建立實體資料
 func NewEntity(entityID EntityID) *Entity {
 	return &Entity{
-		entityID:   entityID,
-		sessionmgr: NewSessionmgr(),
-		reactmgr:   NewReactmgr(),
-		modulemgr:  NewModulemgr(),
-		eventmgr:   events.NewEventmgr(eventSize),
+		entityID:  entityID,
+		modulemgr: NewModulemgr(),
+		eventmgr:  events.NewEventmgr(eventSize),
 	}
 }
 
 // Entity 實體資料
 type Entity struct {
-	entityID   EntityID         // 實體編號
-	sessionmgr *Sessionmgr      // 會話管理器
-	reactmgr   *Reactmgr        // 反應管理器
-	modulemgr  *Modulemgr       // 模組管理器
-	eventmgr   *events.Eventmgr // 事件管理器
-	enable     atomic.Bool      // 啟用旗標
+	entityID  EntityID         // 實體編號
+	session   SessionAttr      // 會話物件
+	modulemgr *Modulemgr       // 模組管理器
+	eventmgr  *events.Eventmgr // 事件管理器
+	enable    atomic.Bool      // 啟用旗標
 }
 
 // EntityID 實體編號
@@ -44,36 +41,8 @@ func (this *Entity) SetSession(session nets.Sessioner) error {
 		return fmt.Errorf("entity set session: overdue")
 	} // if
 
-	if this.sessionmgr.Get() != nil {
-		return fmt.Errorf("entity set session: already set")
-	} // if
-
-	this.sessionmgr.Set(session)
+	this.session.Set(session)
 	return nil
-}
-
-// GetSession 取得會話物件
-func (this *Entity) GetSession() nets.Sessioner {
-	return this.sessionmgr.Get()
-}
-
-// SetReact 設定反應物件
-func (this *Entity) SetReact(react nets.Reactor) error {
-	if this.enable.Load() {
-		return fmt.Errorf("entity set react: overdue")
-	} // if
-
-	if this.reactmgr.Get() != nil {
-		return fmt.Errorf("entity set react: already set")
-	} // if
-
-	this.reactmgr.Set(react)
-	return nil
-}
-
-// GetReact 取得反應物件
-func (this *Entity) GetReact() nets.Reactor {
-	return this.reactmgr.Get()
 }
 
 // AddModule 新增模組
@@ -118,10 +87,10 @@ func (this *Entity) Enable() bool {
 // initialize 初始化處理
 func (this *Entity) initialize() {
 	if this.enable.CompareAndSwap(false, true) {
-		this.eventmgr.Sub(eventAwake, processAwake)
-		this.eventmgr.Sub(eventStart, processStart)
-		this.eventmgr.Sub(eventDispose, processDispose)
-		this.eventmgr.Sub(eventUpdate, processUpdate)
+		this.eventmgr.Sub(eventAwake, this.eventAwake)
+		this.eventmgr.Sub(eventStart, this.eventStart)
+		this.eventmgr.Sub(eventDispose, this.eventDispose)
+		this.eventmgr.Sub(eventUpdate, this.eventUpdate)
 		this.eventmgr.Initialize()
 		module := this.modulemgr.All()
 
@@ -150,30 +119,32 @@ func (this *Entity) finalize() {
 	this.eventmgr.Finalize()
 }
 
-// processAwake 處理awake事件
-func processAwake(param any) {
+// eventAwake 處理awake事件
+func (this *Entity) eventAwake(param any) {
 	if module, ok := param.(Awaker); ok {
 		module.Awake()
 	} // if
 }
 
-// processStart 處理start事件
-func processStart(param any) {
+// eventStart 處理start事件
+func (this *Entity) eventStart(param any) {
 	if module, ok := param.(Starter); ok {
 		module.Start()
 	} // if
 }
 
-// processDispose 處理dispose事件
-func processDispose(param any) {
+// eventDispose 處理dispose事件
+func (this *Entity) eventDispose(param any) {
 	if module, ok := param.(Disposer); ok {
 		module.Dispose()
 	} // if
 }
 
-// processUpdate 處理update事件
-func processUpdate(param any) {
+// eventUpdate 處理update事件
+func (this *Entity) eventUpdate(param any) {
 	if module, ok := param.(Updater); ok {
 		module.Update()
 	} // if
 }
+
+// TODO: 新增封包管理器, 在bind的時候, 以封包管理器當作參數建立合適的reactor(或是實體本身就有合適的介面可以塞到reactor中)

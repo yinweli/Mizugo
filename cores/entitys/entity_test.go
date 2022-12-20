@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 
-	"github.com/yinweli/Mizugo/cores/nets"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -48,30 +47,12 @@ func (this *SuiteEntity) TestEntity() {
 }
 
 func (this *SuiteEntity) TestSession() {
-	session := nets.NewTCPSession(nil)
-
 	target := NewEntity(EntityID(1))
-	assert.Nil(this.T(), target.SetSession(session))
-	assert.Equal(this.T(), session, target.GetSession())
-	assert.NotNil(this.T(), target.SetSession(session))
+	assert.Nil(this.T(), target.SetSession(nil))
 
 	target = NewEntity(EntityID(1))
 	target.initialize()
-	assert.NotNil(this.T(), target.SetSession(session))
-	target.finalize()
-}
-
-func (this *SuiteEntity) TestReact() {
-	react := newReactTester()
-
-	target := NewEntity(EntityID(1))
-	assert.Nil(this.T(), target.SetReact(react))
-	assert.Equal(this.T(), react, target.GetReact())
-	assert.NotNil(this.T(), target.SetReact(react))
-
-	target = NewEntity(EntityID(1))
-	target.initialize()
-	assert.NotNil(this.T(), target.SetReact(react))
+	assert.NotNil(this.T(), target.SetSession(nil))
 	target.finalize()
 }
 

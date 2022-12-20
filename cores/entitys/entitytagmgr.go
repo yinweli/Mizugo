@@ -1,4 +1,4 @@
-package tags
+package entitys
 
 import (
 	"sync"
@@ -6,58 +6,72 @@ import (
 	"github.com/emirpasic/gods/sets/hashset"
 )
 
-// NewTagmgr 建立標籤管理器
-func NewTagmgr() *Tagmgr {
-	return &Tagmgr{
+// NewEntityTagmgr 建立實體標籤管理器
+func NewEntityTagmgr() *EntityTagmgr {
+	return &EntityTagmgr{
 		data: map[string]*hashset.Set{},
 	}
 }
 
-// Tagmgr 標籤管理器
-type Tagmgr struct {
+// EntityTagmgr 實體標籤管理器
+type EntityTagmgr struct {
 	data map[string]*hashset.Set // 標籤列表
 	lock sync.RWMutex            // 執行緒鎖
 }
 
 // Add 新增標籤
-func (this *Tagmgr) Add(value any, tag ...string) {
+func (this *EntityTagmgr) Add(entity *Entity, tag ...string) {
+	if entity == nil || len(tag) == 0 {
+		return
+	} // if
+
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	for _, itor := range tag {
 		set := this.find(itor)
-		set.Add(value)
+		set.Add(entity)
 	} // for
 }
 
 // Del 刪除標籤
-func (this *Tagmgr) Del(value any, tag ...string) {
+func (this *EntityTagmgr) Del(entity *Entity, tag ...string) {
+	if entity == nil || len(tag) == 0 {
+		return
+	} // if
+
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	for _, itor := range tag {
 		set := this.find(itor)
-		set.Remove(value)
+		set.Remove(entity)
 	} // for
 }
 
-// Get 取得物件
-func (this *Tagmgr) Get(tag string) []any {
+// Get 取得實體
+func (this *EntityTagmgr) Get(tag string) []*Entity {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 
-	return this.find(tag).Values()
+	result := []*Entity{}
+
+	for _, itor := range this.find(tag).Values() {
+		result = append(result, itor.(*Entity))
+	} // for
+
+	return result
 }
 
 // Tag 取得標籤
-func (this *Tagmgr) Tag(value any) []string {
+func (this *EntityTagmgr) Tag(entity *Entity) []string {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 
 	result := []string{}
 
 	for tag, set := range this.data {
-		if set.Contains(value) {
+		if set.Contains(entity) {
 			result = append(result, tag)
 		} // if
 	} // for
@@ -66,7 +80,7 @@ func (this *Tagmgr) Tag(value any) []string {
 }
 
 // find 尋找標籤列表
-func (this *Tagmgr) find(tag string) *hashset.Set {
+func (this *EntityTagmgr) find(tag string) *hashset.Set {
 	result, ok := this.data[tag]
 
 	if ok == false {
