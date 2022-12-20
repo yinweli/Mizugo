@@ -11,26 +11,11 @@ func NewModule(moduleID ModuleID) *Module {
 	}
 }
 
-// Moduler 模組介面
-type Moduler interface {
-	// ModuleID 取得模組編號
-	ModuleID() ModuleID
-
-	// Entity 取得實體物件
-	Entity() *Entity
-
-	// Internal 取得內部物件
-	Internal() *Internal
-}
-
 // Module 模組資料
 type Module struct {
 	moduleID ModuleID // 模組編號
 	internal Internal // 內部物件
 }
-
-// ModuleID 模組編號
-type ModuleID int64
 
 // ModuleID 取得模組編號
 func (this *Module) ModuleID() ModuleID {

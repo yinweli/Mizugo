@@ -27,9 +27,6 @@ type Entity struct {
 	enable    atomic.Bool      // 啟用旗標
 }
 
-// EntityID 實體編號
-type EntityID int64
-
 // EntityID 取得實體編號
 func (this *Entity) EntityID() EntityID {
 	return this.entityID

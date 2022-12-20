@@ -64,7 +64,7 @@ type Encode func(message any) (packet []byte, err error)
 // Decode 封包解碼處理函式類型, 用在接收封包時
 type Decode func(packet []byte) (message any, err error)
 
-// Receive 接收封包處理函式類型
+// Receive 接收封包處理函式類型 // TODO: 可能把error移除吧
 type Receive func(message any) error
 
 // Wrong 錯誤處理函式類型

@@ -57,14 +57,8 @@ func (this *Echo) Finalize() {
 
 // bind 綁定處理
 func (this *Echo) bind(session nets.Sessioner) *nets.BindData {
-	entity := entitys.NewEntity(entitys.EntityID(1))
-
-	if err := mizugos.Entitymgr().Add(entity); err != nil {
-		this.wrong(fmt.Errorf("bind: %w", err))
-		return nil
-	} // if
-
-	// TODO: add to Entitymgr
+	entityID := entitys.EntityID(1)
+	entity := entitys.NewEntity(entityID)
 
 	if err := entity.SetSession(session); err != nil {
 		this.wrong(fmt.Errorf("bind: %w", err))
@@ -74,9 +68,17 @@ func (this *Echo) bind(session nets.Sessioner) *nets.BindData {
 	// TODO: set msgemgr(include encode, decode, process)
 	// TODO: add module
 
+	if err := mizugos.Entitymgr().Add(entity); err != nil {
+		this.wrong(fmt.Errorf("bind: %w", err))
+		return nil
+	} // if
+
+	mizugos.EntityTagmgr().Add(entity, "echoc")
+
 	return &nets.BindData{
 		Unbind: func() {
-
+			mizugos.Entitymgr().Del(entityID)
+			mizugos.EntityTagmgr().Del(entity, "echoc")
 		},
 		Encode:  nil,
 		Decode:  nil,
