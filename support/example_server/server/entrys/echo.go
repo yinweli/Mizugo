@@ -59,17 +59,20 @@ func (this *Echo) Finalize() {
 func (this *Echo) bind(session nets.Sessioner) *nets.BindData {
 	entity := entitys.NewEntity(entitys.EntityID(1))
 
+	if err := mizugos.Entitymgr().Add(entity); err != nil {
+		this.wrong(fmt.Errorf("bind: %w", err))
+		return nil
+	} // if
+
+	// TODO: add to Entitymgr
+
 	if err := entity.SetSession(session); err != nil {
 		this.wrong(fmt.Errorf("bind: %w", err))
 		return nil
 	} // if
 
-	// TODO: set messagemgr(include encode, decode, process)
-
-	if err := mizugos.Entitymgr().Add(entity); err != nil {
-		this.wrong(fmt.Errorf("bind: %w", err))
-		return nil
-	} // if
+	// TODO: set msgemgr(include encode, decode, process)
+	// TODO: add module
 
 	return &nets.BindData{
 		Unbind: func() {
