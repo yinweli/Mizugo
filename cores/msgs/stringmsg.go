@@ -1,5 +1,12 @@
 package msgs
 
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/yinweli/Mizugo/cores/utils"
+)
+
 // NewStringMsg 建立字串訊息器
 func NewStringMsg() *StringMsg {
 	return &StringMsg{
@@ -14,19 +21,61 @@ type StringMsg struct {
 
 // Encode 封包編碼
 func (this *StringMsg) Encode(message any) (packet []byte, err error) {
-	// TODO: 檢查是否StringMessage, md5, 轉json字串, 轉[]byte, 加密
-	return nil, nil
+	msg, err := Cast[StringMessage](message)
+
+	if err != nil {
+		return nil, fmt.Errorf("stringmsg encode: %w", err)
+	} // if
+
+	msg.Sum = utils.MD5String([]byte(msg.Message))
+	bytes, err := json.Marshal(msg)
+
+	if err != nil {
+		return nil, fmt.Errorf("stringmsg encode: %w", err)
+	} // if
+
+	packet = utils.Base64Encode(bytes)
+	return packet, nil
 }
 
 // Decode 封包解碼
 func (this *StringMsg) Decode(packet []byte) (message any, err error) {
-	// TODO: 解密, 轉json(StringMessage), md5驗證
-	return nil, nil
+	bytes, err := utils.Base64Decode(packet)
+
+	if err != nil {
+		return nil, fmt.Errorf("stringmsg decode: %w", err)
+	} // if
+
+	msg := &StringMessage{}
+
+	if err := json.Unmarshal(bytes, msg); err != nil {
+		return nil, fmt.Errorf("stringmsg decode: %w", err)
+	} // if
+
+	sum := utils.MD5String([]byte(msg.Message))
+
+	if msg.Sum != sum {
+		return nil, fmt.Errorf("stringmsg decode: sum failed")
+	} // if
+
+	return msg, nil
 }
 
 // Process 訊息處理
 func (this *StringMsg) Process(message any) error {
-	// TODO: 檢查是否StringMessage, 用訊息編號取得處理函式, 執行處理!!!
+	msg, err := Cast[StringMessage](message)
+
+	if err != nil {
+		return fmt.Errorf("stringmsg process: %w", err)
+	} // if
+
+	process := this.Get(msg.MessageID)
+
+	if process == nil {
+		return fmt.Errorf("stringmsg process: messageID not found")
+	} // if
+
+	process(msg.MessageID, msg)
 	return nil
 }
 
@@ -34,5 +83,5 @@ func (this *StringMsg) Process(message any) error {
 type StringMessage struct {
 	MessageID MessageID `json:"messageID"` // 訊息編號
 	Message   string    `json:"message"`   // 訊息字串
-	MD5       string    `json:"MD5"`       // 訊息驗證
+	Sum       string    `json:"sum"`       // 驗證字串
 }

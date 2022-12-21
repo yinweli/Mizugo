@@ -1,6 +1,7 @@
 package msgs
 
 import (
+	"fmt"
 	"sync"
 )
 
@@ -39,4 +40,19 @@ func (this *Msgmgr) Get(messageID MessageID) Process {
 	defer this.lock.RUnlock()
 
 	return this.data[messageID]
+}
+
+// Cast 訊息轉換
+func Cast[T any](message any) (result *T, err error) {
+	if message == nil {
+		return nil, fmt.Errorf("cast: message nil")
+	} // if
+
+	value, ok := message.(*T)
+
+	if ok == false {
+		return nil, fmt.Errorf("cast: type failed")
+	} // if
+
+	return value, nil
 }

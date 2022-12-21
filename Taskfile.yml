@@ -11,7 +11,12 @@ tasks:
   # 進行程式碼測試
   test:
     cmds:
-      - go test -cover ./...
+      - go test ./... -cover 
+  
+  # 進行效能測試
+  bench:
+    cmds:
+      - go test ./... -bench=. -benchmem
   
   # 進行程式碼格式化
   fmt:
