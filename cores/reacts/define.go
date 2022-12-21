@@ -1,7 +1,9 @@
-package packets
+package reacts
 
-// Packeter 封包介面
-type Packeter interface {
+// TODO: 改成 package msgs
+
+// Reactor 反應介面 // TODO: 還是把反應改名為訊息(messenger)吧
+type Reactor interface {
 	// Encode 封包編碼
 	Encode(message any) (packet []byte, err error)
 
@@ -9,7 +11,7 @@ type Packeter interface {
 	Decode(packet []byte) (message any, err error)
 
 	// Process 訊息處理
-	Process(message any)
+	Process(message any) error
 
 	// Add 新增訊息處理
 	Add(messageID MessageID, messenger Messenger)

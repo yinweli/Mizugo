@@ -26,7 +26,6 @@ func (this *Entitymgr) Add() *Entity {
 
 	this.entityID++
 	entity := newEntity(this.entityID)
-	entity.initialize()
 	this.data[this.entityID] = entity
 	return entity
 }
@@ -37,7 +36,6 @@ func (this *Entitymgr) Del(entityID EntityID) *Entity {
 	defer this.lock.Unlock()
 
 	if entity, ok := this.data[entityID]; ok {
-		entity.finalize()
 		delete(this.data, entityID)
 		return entity
 	} // if
@@ -49,10 +47,6 @@ func (this *Entitymgr) Del(entityID EntityID) *Entity {
 func (this *Entitymgr) Clear() {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-
-	for _, itor := range this.data {
-		itor.finalize()
-	} // for
 
 	this.data = map[EntityID]*Entity{}
 }

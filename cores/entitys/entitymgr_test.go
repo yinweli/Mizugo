@@ -37,9 +37,7 @@ func (this *SuiteEntitymgr) TestNewEntitymgr() {
 
 func (this *SuiteEntitymgr) TestAdd() {
 	target := NewEntitymgr()
-	entity := target.Add()
-	assert.NotNil(this.T(), entity)
-	assert.True(this.T(), entity.Enable())
+	assert.NotNil(this.T(), target.Add())
 	target.Clear()
 }
 
@@ -47,9 +45,7 @@ func (this *SuiteEntitymgr) TestDel() {
 	target := NewEntitymgr()
 	entity := target.Add()
 	assert.NotNil(this.T(), entity)
-	assert.True(this.T(), entity.Enable())
-	assert.Equal(this.T(), entity, target.Del(entity.EntityID()))
-	assert.False(this.T(), entity.Enable())
+	assert.NotNil(this.T(), target.Del(entity.EntityID()))
 	assert.Nil(this.T(), target.Get(entity.EntityID()))
 	assert.Nil(this.T(), target.Del(entity.EntityID()))
 	target.Clear()
