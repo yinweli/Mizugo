@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/yinweli/Mizugo/cores/entitys"
 	"github.com/yinweli/Mizugo/cores/nets"
 	"github.com/yinweli/Mizugo/mizugos"
 )
@@ -60,8 +59,12 @@ func (this *Echo) Finalize() {
 
 // Bind 綁定處理
 func (this *Echo) Bind(session nets.Sessioner) *nets.React {
-	entityID := entitys.EntityID(1)
-	entity := entitys.NewEntity(entityID)
+	entity := mizugos.Entitymgr().Add()
+
+	if entity == nil {
+		this.Error(fmt.Errorf("bind: entity nil"))
+		return nil
+	} // if
 
 	if err := entity.SetSession(session); err != nil {
 		this.Error(fmt.Errorf("bind: %w", err))
@@ -71,16 +74,11 @@ func (this *Echo) Bind(session nets.Sessioner) *nets.React {
 	// TODO: set msgemgr(include encode, decode, process)
 	// TODO: add module
 
-	if err := mizugos.Entitymgr().Add(entity); err != nil {
-		this.Error(fmt.Errorf("bind: %w", err))
-		return nil
-	} // if
-
 	mizugos.EntityTagmgr().Add(entity, "echoc")
 
 	return &nets.React{
 		Unbind: func() {
-			mizugos.Entitymgr().Del(entityID)
+			mizugos.Entitymgr().Del(entity.EntityID())
 			mizugos.EntityTagmgr().Del(entity, "echoc")
 		},
 		Encode:  nil,

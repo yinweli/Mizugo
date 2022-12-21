@@ -9,8 +9,8 @@ import (
 	"github.com/yinweli/Mizugo/cores/nets"
 )
 
-// NewEntity 建立實體資料
-func NewEntity(entityID EntityID) *Entity {
+// newEntity 建立實體資料
+func newEntity(entityID EntityID) *Entity {
 	return &Entity{
 		entityID:  entityID,
 		modulemgr: NewModulemgr(),
@@ -21,15 +21,20 @@ func NewEntity(entityID EntityID) *Entity {
 // Entity 實體資料
 type Entity struct {
 	entityID  EntityID         // 實體編號
+	enable    atomic.Bool      // 啟用旗標
 	session   SessionAttr      // 會話物件
 	modulemgr *Modulemgr       // 模組管理器
 	eventmgr  *events.Eventmgr // 事件管理器
-	enable    atomic.Bool      // 啟用旗標
 }
 
 // EntityID 取得實體編號
 func (this *Entity) EntityID() EntityID {
 	return this.entityID
+}
+
+// Enable 取得啟用旗標
+func (this *Entity) Enable() bool {
+	return this.enable.Load()
 }
 
 // SetSession 設定會話物件
@@ -74,11 +79,6 @@ func (this *Entity) PubOnceEvent(name string, param any) {
 // PubFixedEvent 發布定時事件, 回傳用於停止定時事件的控制物件
 func (this *Entity) PubFixedEvent(name string, param any, interval time.Duration) *events.Fixed {
 	return this.eventmgr.PubFixed(name, param, interval)
-}
-
-// Enable 取得啟用旗標
-func (this *Entity) Enable() bool {
-	return this.enable.Load()
 }
 
 // initialize 初始化處理

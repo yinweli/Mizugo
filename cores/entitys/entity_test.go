@@ -33,12 +33,8 @@ func (this *SuiteEntity) TearDownTest() {
 	goleak.VerifyNone(this.T())
 }
 
-func (this *SuiteEntity) TestNewEntity() {
-	assert.NotNil(this.T(), NewEntity(EntityID(1)))
-}
-
 func (this *SuiteEntity) TestEntity() {
-	target := NewEntity(EntityID(1))
+	target := newEntity(EntityID(1))
 	target.initialize()
 	assert.Equal(this.T(), EntityID(1), target.EntityID())
 	assert.True(this.T(), target.Enable())
@@ -47,10 +43,10 @@ func (this *SuiteEntity) TestEntity() {
 }
 
 func (this *SuiteEntity) TestSession() {
-	target := NewEntity(EntityID(1))
+	target := newEntity(EntityID(1))
 	assert.Nil(this.T(), target.SetSession(nil))
 
-	target = NewEntity(EntityID(1))
+	target = newEntity(EntityID(1))
 	target.initialize()
 	assert.NotNil(this.T(), target.SetSession(nil))
 	target.finalize()
@@ -60,7 +56,7 @@ func (this *SuiteEntity) TestModule() {
 	module1 := newModuleTester(ModuleID(1))
 	module2 := newModuleTester(ModuleID(2))
 
-	target := NewEntity(EntityID(1))
+	target := newEntity(EntityID(1))
 	assert.Nil(this.T(), target.AddModule(module1))
 	assert.NotNil(this.T(), target.GetModule(module1.ModuleID()))
 	assert.NotNil(this.T(), target.AddModule(module1))
@@ -70,7 +66,7 @@ func (this *SuiteEntity) TestModule() {
 }
 
 func (this *SuiteEntity) TestEvent() {
-	target := NewEntity(EntityID(1))
+	target := newEntity(EntityID(1))
 	target.initialize()
 
 	eventOnce := "eventOnce"
@@ -101,7 +97,7 @@ func (this *SuiteEntity) TestEvent() {
 
 func (this *SuiteEntity) TestInitialize() {
 	module := newModuleTester(ModuleID(1))
-	target := NewEntity(EntityID(1))
+	target := newEntity(EntityID(1))
 	assert.Nil(this.T(), target.AddModule(module))
 	target.initialize()
 	time.Sleep(updateInterval * 2) // 為了讓update會被執行, 需要長一點的時間
