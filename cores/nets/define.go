@@ -28,7 +28,7 @@ type Listener interface {
 // Sessioner 會話介面
 type Sessioner interface {
 	// Start 啟動會話, 若不是使用多執行緒啟動, 則一定被阻塞在這裡直到停止會話; 當由連接器/接聽器獲得會話器之後, 需要啟動會話才可以傳送或接收封包
-	Start(sessionID SessionID, bind Bind)
+	Start(sessionID SessionID, binder Binder)
 
 	// Stop 停止會話, 不會等待會話內部循環結束
 	Stop()
@@ -49,11 +49,25 @@ type Sessioner interface {
 	LocalAddr() net.Addr
 }
 
+// Binder 綁定介面
+type Binder interface {
+	// Bind 綁定處理
+	Bind(session Sessioner) *React
+
+	// Error 錯誤處理
+	Error(err error)
+}
+
+// React 反應資料
+type React struct {
+	Unbind  // 解綁處理函式
+	Encode  // 封包編碼處理函式
+	Decode  // 封包解碼處理函式
+	Receive // 接收封包處理函式
+}
+
 // Done 完成會話函式類型
 type Done func(session Sessioner, err error)
-
-// Bind 綁定處理函式類型
-type Bind func(session Sessioner) *Notice
 
 // Unbind 解綁處理函式類型
 type Unbind func()
@@ -67,17 +81,5 @@ type Decode func(packet []byte) (message any, err error)
 // Receive 接收封包處理函式類型
 type Receive func(message any) error
 
-// Wrong 錯誤處理函式類型
-type Wrong func(err error)
-
 // SessionID 會話編號
 type SessionID = int64
-
-// Notice 通知資料
-type Notice struct {
-	Unbind  // 解綁處理函式
-	Encode  // 封包編碼處理函式
-	Decode  // 封包解碼處理函式
-	Receive // 接收封包處理函式
-	Wrong   // 錯誤處理函式
-}

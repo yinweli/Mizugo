@@ -27,25 +27,17 @@ type TCPSession struct {
 	conn      net.Conn       // 連接物件
 	message   chan any       // 訊息通道
 	sessionID atomic.Int64   // 會話編號
-	unbind    Unbind         // 解綁物件
-	encode    Encode         // 封包編碼物件
-	decode    Decode         // 封包解碼物件
-	receive   Receive        // 接收封包物件
-	wrong     Wrong          // 錯誤物件
+	binder    Binder         // 綁定物件
+	react     *React         // 反應物件
 	signal    sync.WaitGroup // 通知信號
 }
 
 // Start 啟動會話, 當由連接器/接聽器獲得會話器之後, 需要啟動會話才可以傳送或接收封包; 若不是使用多執行緒啟動, 則會被阻塞在這裡直到會話結束
-func (this *TCPSession) Start(sessionID SessionID, bind Bind) {
+func (this *TCPSession) Start(sessionID SessionID, binder Binder) {
 	this.sessionID.Store(sessionID)
+	this.binder = binder
 
-	if notice := bind(this); notice != nil {
-		this.unbind = notice.Unbind
-		this.encode = notice.Encode
-		this.decode = notice.Decode
-		this.receive = notice.Receive
-		this.wrong = notice.Wrong
-	} else {
+	if this.react = binder.Bind(this); this.react == nil {
 		return // bind錯誤, 直接結束
 	} // if
 
@@ -55,7 +47,7 @@ func (this *TCPSession) Start(sessionID SessionID, bind Bind) {
 	go this.sendLoop()
 
 	this.signal.Wait() // 如果接收循環與傳送循環結束, 就會繼續進行結束處理
-	this.unbind()
+	this.react.Unbind()
 }
 
 // Stop 停止會話, 不會等待會話內部循環結束
@@ -99,19 +91,19 @@ func (this *TCPSession) recvLoop() {
 		packet, err := this.recvPacket(reader)
 
 		if err != nil {
-			this.wrong(fmt.Errorf("tcp session recv loop: %w", err))
+			this.binder.Error(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 
-		message, err := this.decode(packet)
+		message, err := this.react.Decode(packet)
 
 		if err != nil {
-			this.wrong(fmt.Errorf("tcp session recv loop: %w", err))
+			this.binder.Error(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 
-		if err := this.receive(message); err != nil {
-			this.wrong(fmt.Errorf("tcp session recv loop: %w", err))
+		if err := this.react.Receive(message); err != nil {
+			this.binder.Error(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 	} // for
@@ -152,15 +144,15 @@ func (this *TCPSession) sendLoop() {
 			break
 		} // if
 
-		packet, err := this.encode(message)
+		packet, err := this.react.Encode(message)
 
 		if err != nil {
-			this.wrong(fmt.Errorf("tcp session send loop: %w", err))
+			this.binder.Error(fmt.Errorf("tcp session send loop: %w", err))
 			break
 		} // if
 
 		if err := this.sendPacket(this.conn, packet); err != nil {
-			this.wrong(fmt.Errorf("tcp session send loop: %w", err))
+			this.binder.Error(fmt.Errorf("tcp session send loop: %w", err))
 			break
 		} // if
 	} // for

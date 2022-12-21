@@ -18,11 +18,14 @@ func NewEcho() *Echo {
 
 // Echo 回音入口資料
 type Echo struct {
-	name   string   // 入口名稱
-	config struct { // 設定資料
-		IP   string `yaml:"ip"`   // 入口位址
-		Port string `yaml:"port"` // 入口埠號
-	}
+	name   string     // 入口名稱
+	config EchoConfig // 設定資料
+}
+
+// EchoConfig 回音設定資料
+type EchoConfig struct {
+	IP   string `yaml:"ip"`   // 位址
+	Port string `yaml:"port"` // 埠號
 }
 
 // Initialize 初始化處理
@@ -39,7 +42,7 @@ func (this *Echo) Initialize(configPath string) error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	mizugos.Netmgr().AddListen(nets.NewTCPListen(this.config.IP, this.config.Port), this.bind, this.wrong)
+	mizugos.Netmgr().AddListen(nets.NewTCPListen(this.config.IP, this.config.Port), this)
 	mizugos.Info(this.name).
 		Message("entry start").
 		KV("ip", this.config.IP).
@@ -55,13 +58,13 @@ func (this *Echo) Finalize() {
 		End()
 }
 
-// bind 綁定處理
-func (this *Echo) bind(session nets.Sessioner) *nets.Notice {
+// Bind 綁定處理
+func (this *Echo) Bind(session nets.Sessioner) *nets.React {
 	entityID := entitys.EntityID(1)
 	entity := entitys.NewEntity(entityID)
 
 	if err := entity.SetSession(session); err != nil {
-		this.wrong(fmt.Errorf("bind: %w", err))
+		this.Error(fmt.Errorf("bind: %w", err))
 		return nil
 	} // if
 
@@ -69,13 +72,13 @@ func (this *Echo) bind(session nets.Sessioner) *nets.Notice {
 	// TODO: add module
 
 	if err := mizugos.Entitymgr().Add(entity); err != nil {
-		this.wrong(fmt.Errorf("bind: %w", err))
+		this.Error(fmt.Errorf("bind: %w", err))
 		return nil
 	} // if
 
 	mizugos.EntityTagmgr().Add(entity, "echoc")
 
-	return &nets.Notice{
+	return &nets.React{
 		Unbind: func() {
 			mizugos.Entitymgr().Del(entityID)
 			mizugos.EntityTagmgr().Del(entity, "echoc")
@@ -83,11 +86,10 @@ func (this *Echo) bind(session nets.Sessioner) *nets.Notice {
 		Encode:  nil,
 		Decode:  nil,
 		Receive: nil,
-		Wrong:   this.wrong,
 	}
 }
 
-// wrong 錯誤處理
-func (this *Echo) wrong(err error) {
+// Error 錯誤處理
+func (this *Echo) Error(err error) {
 	_ = mizugos.Error(this.name).EndError(err)
 }

@@ -56,9 +56,9 @@ func (this *SuiteTCPSession) TestStart() {
 	assert.True(this.T(), donec.valid())
 
 	bindl := newBindTester(true, true, true)
-	go donel.get().Start(SessionID(0), bindl.bind)
+	go donel.get().Start(SessionID(0), bindl)
 	bindc := newBindTester(true, true, true)
-	go donec.get().Start(SessionID(1), bindc.bind)
+	go donec.get().Start(SessionID(1), bindc)
 
 	time.Sleep(testdata.Timeout)
 	assert.Nil(this.T(), listen.Stop())
@@ -80,9 +80,9 @@ func (this *SuiteTCPSession) TestSend() {
 	assert.True(this.T(), donec.valid())
 
 	bindl := newBindTester(true, true, true)
-	go donel.get().Start(SessionID(0), bindl.bind)
+	go donel.get().Start(SessionID(0), bindl)
 	bindc := newBindTester(true, true, true)
-	go donec.get().Start(SessionID(1), bindc.bind)
+	go donec.get().Start(SessionID(1), bindc)
 
 	time.Sleep(testdata.Timeout)
 	donel.get().Send(this.message)
@@ -114,9 +114,9 @@ func (this *SuiteTCPSession) TestEncodeFailed() {
 	assert.True(this.T(), donec.valid())
 
 	bindl := newBindTester(false, true, true)
-	go donel.get().Start(SessionID(0), bindl.bind)
+	go donel.get().Start(SessionID(0), bindl)
 	bindc := newBindTester(true, true, true)
-	go donec.get().Start(SessionID(1), bindc.bind)
+	go donec.get().Start(SessionID(1), bindc)
 
 	time.Sleep(testdata.Timeout)
 	donel.get().Send(this.message)
@@ -143,9 +143,9 @@ func (this *SuiteTCPSession) TestDecodeFailed() {
 	assert.True(this.T(), donec.valid())
 
 	bindl := newBindTester(true, true, true)
-	go donel.get().Start(SessionID(0), bindl.bind)
+	go donel.get().Start(SessionID(0), bindl)
 	bindc := newBindTester(true, false, true)
-	go donec.get().Start(SessionID(1), bindc.bind)
+	go donec.get().Start(SessionID(1), bindc)
 
 	time.Sleep(testdata.Timeout)
 	donel.get().Send(this.message)
@@ -172,9 +172,9 @@ func (this *SuiteTCPSession) TestReceiveFailed() {
 	assert.True(this.T(), donec.valid())
 
 	bindl := newBindTester(true, true, true)
-	go donel.get().Start(SessionID(0), bindl.bind)
+	go donel.get().Start(SessionID(0), bindl)
 	bindc := newBindTester(true, true, false)
-	go donec.get().Start(SessionID(1), bindc.bind)
+	go donec.get().Start(SessionID(1), bindc)
 
 	time.Sleep(testdata.Timeout)
 	donel.get().Send(this.message)
@@ -201,9 +201,9 @@ func (this *SuiteTCPSession) TestTCPSession() {
 	assert.True(this.T(), donec.valid())
 
 	bindl := newBindTester(true, true, true)
-	go donel.get().Start(SessionID(0), bindl.bind)
+	go donel.get().Start(SessionID(0), bindl)
 	bindc := newBindTester(true, true, true)
-	go donec.get().Start(SessionID(1), bindc.bind)
+	go donec.get().Start(SessionID(1), bindc)
 
 	time.Sleep(testdata.Timeout)
 	assert.Equal(this.T(), SessionID(0), donel.get().SessionID())
