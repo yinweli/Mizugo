@@ -66,20 +66,27 @@ func (this *Echo) Bind(session nets.Sessioner) *nets.React {
 		return nil
 	} // if
 
+	// TODO: add module
+
 	if err := entity.SetSession(session); err != nil {
 		this.Error(fmt.Errorf("bind: %w", err))
 		return nil
 	} // if
 
-	// TODO: set msgemgr(include encode, decode, process)
-	// TODO: add module
+	// TODO: set msg(include encode, decode, process)
 
-	mizugos.EntityTagmgr().Add(entity, "echoc")
+	if err := entity.Initialize(); err != nil {
+		this.Error(fmt.Errorf("bind: %w", err))
+		return nil
+	} // if
+
+	mizugos.EntityTagmgr().Add(entity, this.name)
 
 	return &nets.React{
 		Unbind: func() {
+			_ = entity.Finalize()
 			mizugos.Entitymgr().Del(entity.EntityID())
-			mizugos.EntityTagmgr().Del(entity, "echoc")
+			mizugos.EntityTagmgr().Del(entity, this.name)
 		},
 		Encode:  nil,
 		Decode:  nil,

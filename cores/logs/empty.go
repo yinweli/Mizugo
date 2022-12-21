@@ -16,7 +16,7 @@ func (this *EmptyLogger) Finalize() {
 }
 
 // New 建立日誌
-func (this *EmptyLogger) New(label string, level Level) Stream {
+func (this *EmptyLogger) New(_ string, _ Level) Stream {
 	return &EmptyStream{}
 }
 
