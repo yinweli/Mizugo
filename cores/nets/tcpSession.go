@@ -39,12 +39,12 @@ type TCPSession struct {
 func (this *TCPSession) Start(sessionID SessionID, bind Bind) {
 	this.sessionID.Store(sessionID)
 
-	if bindData := bind(this); bindData != nil {
-		this.unbind = bindData.Unbind
-		this.encode = bindData.Encode
-		this.decode = bindData.Decode
-		this.receive = bindData.Receive
-		this.wrong = bindData.Wrong
+	if notice := bind(this); notice != nil {
+		this.unbind = notice.Unbind
+		this.encode = notice.Encode
+		this.decode = notice.Decode
+		this.receive = notice.Receive
+		this.wrong = notice.Wrong
 	} else {
 		return // bind錯誤, 直接結束
 	} // if

@@ -56,7 +56,7 @@ func (this *Echo) Finalize() {
 }
 
 // bind 綁定處理
-func (this *Echo) bind(session nets.Sessioner) *nets.BindData {
+func (this *Echo) bind(session nets.Sessioner) *nets.Notice {
 	entityID := entitys.EntityID(1)
 	entity := entitys.NewEntity(entityID)
 
@@ -75,7 +75,7 @@ func (this *Echo) bind(session nets.Sessioner) *nets.BindData {
 
 	mizugos.EntityTagmgr().Add(entity, "echoc")
 
-	return &nets.BindData{
+	return &nets.Notice{
 		Unbind: func() {
 			mizugos.Entitymgr().Del(entityID)
 			mizugos.EntityTagmgr().Del(entity, "echoc")

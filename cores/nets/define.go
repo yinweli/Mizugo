@@ -53,7 +53,7 @@ type Sessioner interface {
 type Done func(session Sessioner, err error)
 
 // Bind 綁定處理函式類型
-type Bind func(session Sessioner) *BindData
+type Bind func(session Sessioner) *Notice
 
 // Unbind 解綁處理函式類型
 type Unbind func()
@@ -64,7 +64,7 @@ type Encode func(message any) (packet []byte, err error)
 // Decode 封包解碼處理函式類型, 用在接收封包時
 type Decode func(packet []byte) (message any, err error)
 
-// Receive 接收封包處理函式類型 // TODO: 可能把error移除吧
+// Receive 接收封包處理函式類型
 type Receive func(message any) error
 
 // Wrong 錯誤處理函式類型
@@ -73,8 +73,8 @@ type Wrong func(err error)
 // SessionID 會話編號
 type SessionID = int64
 
-// BindData 綁定資料
-type BindData struct {
+// Notice 通知資料
+type Notice struct {
 	Unbind  // 解綁處理函式
 	Encode  // 封包編碼處理函式
 	Decode  // 封包解碼處理函式

@@ -93,13 +93,13 @@ func (this *bindTester) get() Sessioner {
 	return this.session
 }
 
-func (this *bindTester) bind(session Sessioner) *BindData {
+func (this *bindTester) bind(session Sessioner) *Notice {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.session = session
 
-	return &BindData{
+	return &Notice{
 		Unbind: func() {
 			this.lock.Lock()
 			defer this.lock.Unlock()
