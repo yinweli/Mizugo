@@ -7,21 +7,21 @@ import (
 	"github.com/yinweli/Mizugo/cores/utils"
 )
 
-// NewStringMsg 建立字串訊息器
-func NewStringMsg() *StringMsg {
-	return &StringMsg{
-		Msgmgr: NewMsgmgr(),
+// NewStringProc 建立字串處理器
+func NewStringProc() *StringProc {
+	return &StringProc{
+		Procmgr: NewProcmgr(),
 	}
 }
 
-// StringMsg 字串訊息器
-type StringMsg struct {
-	*Msgmgr // 訊息管理器
+// StringProc 字串處理器
+type StringProc struct {
+	*Procmgr // 處理管理器
 }
 
 // Encode 封包編碼
-func (this *StringMsg) Encode(message any) (packet []byte, err error) {
-	msg, err := Cast[StringMessage](message)
+func (this *StringProc) Encode(message any) (packet []byte, err error) {
+	msg, err := Cast[StringMsg](message)
 
 	if err != nil {
 		return nil, fmt.Errorf("stringmsg encode: %w", err)
@@ -39,14 +39,14 @@ func (this *StringMsg) Encode(message any) (packet []byte, err error) {
 }
 
 // Decode 封包解碼
-func (this *StringMsg) Decode(packet []byte) (message any, err error) {
+func (this *StringProc) Decode(packet []byte) (message any, err error) {
 	bytes, err := utils.Base64Decode(packet)
 
 	if err != nil {
 		return nil, fmt.Errorf("stringmsg decode: %w", err)
 	} // if
 
-	msg := &StringMessage{}
+	msg := &StringMsg{}
 
 	if err := json.Unmarshal(bytes, msg); err != nil {
 		return nil, fmt.Errorf("stringmsg decode: %w", err)
@@ -62,8 +62,8 @@ func (this *StringMsg) Decode(packet []byte) (message any, err error) {
 }
 
 // Process 訊息處理
-func (this *StringMsg) Process(message any) error {
-	msg, err := Cast[StringMessage](message)
+func (this *StringProc) Process(message any) error {
+	msg, err := Cast[StringMsg](message)
 
 	if err != nil {
 		return fmt.Errorf("stringmsg process: %w", err)
@@ -79,8 +79,8 @@ func (this *StringMsg) Process(message any) error {
 	return nil
 }
 
-// StringMessage 字串訊息資料
-type StringMessage struct {
+// StringMsg 字串訊息資料
+type StringMsg struct {
 	MessageID MessageID `json:"messageID"` // 訊息編號
 	Message   string    `json:"message"`   // 訊息字串
 	Sum       string    `json:"sum"`       // 驗證字串

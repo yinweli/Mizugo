@@ -93,13 +93,13 @@ func (this *bindTester) get() Sessioner {
 	return this.session
 }
 
-func (this *bindTester) Bind(session Sessioner) *React {
+func (this *bindTester) Bind(session Sessioner) (content Content, err error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.session = session
 
-	return &React{
+	return Content{
 		Unbind: func() {
 			this.lock.Lock()
 			defer this.lock.Unlock()
@@ -133,7 +133,7 @@ func (this *bindTester) Bind(session Sessioner) *React {
 				return fmt.Errorf("failed")
 			} // if
 		},
-	}
+	}, nil
 }
 
 func (this *bindTester) Error(err error) {

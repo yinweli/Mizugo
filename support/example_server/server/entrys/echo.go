@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/yinweli/Mizugo/cores/msgs"
 	"github.com/yinweli/Mizugo/cores/nets"
 	"github.com/yinweli/Mizugo/mizugos"
 )
@@ -58,40 +59,38 @@ func (this *Echo) Finalize() {
 }
 
 // Bind 綁定處理
-func (this *Echo) Bind(session nets.Sessioner) *nets.React {
+func (this *Echo) Bind(session nets.Sessioner) (content nets.Content, err error) {
 	entity := mizugos.Entitymgr().Add()
 
 	if entity == nil {
-		this.Error(fmt.Errorf("bind: entity nil"))
-		return nil
+		return content, fmt.Errorf("bind: entity nil")
 	} // if
 
 	// TODO: add module
 
 	if err := entity.SetSession(session); err != nil {
-		this.Error(fmt.Errorf("bind: %w", err))
-		return nil
+		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	// TODO: set msg(include encode, decode, process)
+	if err := entity.SetProcess(msgs.NewStringProc()); err != nil {
+		return content, fmt.Errorf("bind: %w", err)
+	} // if
 
 	if err := entity.Initialize(); err != nil {
-		this.Error(fmt.Errorf("bind: %w", err))
-		return nil
+		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
 	mizugos.EntityTagmgr().Add(entity, this.name)
-
-	return &nets.React{
-		Unbind: func() {
-			_ = entity.Finalize()
-			mizugos.Entitymgr().Del(entity.EntityID())
-			mizugos.EntityTagmgr().Del(entity, this.name)
-		},
-		Encode:  nil,
-		Decode:  nil,
-		Receive: nil,
+	content.Unbind = func() {
+		_ = entity.Finalize()
+		mizugos.Entitymgr().Del(entity.EntityID())
+		mizugos.EntityTagmgr().Del(entity, this.name)
 	}
+	content.Encode = nil
+	content.Decode = nil
+	content.Receive = nil
+
+	return content, nil
 }
 
 // Error 錯誤處理

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/yinweli/Mizugo/cores/events"
+	"github.com/yinweli/Mizugo/cores/msgs"
 	"github.com/yinweli/Mizugo/cores/nets"
 	"github.com/yinweli/Mizugo/cores/utils"
 )
@@ -26,6 +27,7 @@ type Entity struct {
 	eventmgr  *events.Eventmgr               // 事件管理器
 	enable    atomic.Bool                    // 啟用旗標
 	session   utils.SyncAttr[nets.Sessioner] // 會話物件
+	process   utils.SyncAttr[msgs.Processor] // 處理物件
 }
 
 // ===== 基礎功能 =====
@@ -143,7 +145,22 @@ func (this *Entity) GetSession() nets.Sessioner {
 	return this.session.Get()
 }
 
-// ===== 訊息功能 =====
+// ===== 處理功能 =====
+
+// SetProcess 設定處理物件, 初始化完成後就不能設定處理物件
+func (this *Entity) SetProcess(process msgs.Processor) error {
+	if this.enable.Load() {
+		return fmt.Errorf("entity set process: overdue")
+	} // if
+
+	this.process.Set(process)
+	return nil
+}
+
+// GetProcess 取得處理物件
+func (this *Entity) GetProcess() msgs.Processor {
+	return this.process.Get()
+}
 
 // ===== 內部功能 =====
 

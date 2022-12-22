@@ -28,26 +28,29 @@ type TCPSession struct {
 	message   chan any       // 訊息通道
 	sessionID atomic.Int64   // 會話編號
 	binder    Binder         // 綁定物件
-	react     *React         // 反應物件
+	content   Content        // 內容物件
 	signal    sync.WaitGroup // 通知信號
 }
 
 // Start 啟動會話, 當由連接器/接聽器獲得會話器之後, 需要啟動會話才可以傳送或接收封包; 若不是使用多執行緒啟動, 則會被阻塞在這裡直到會話結束
 func (this *TCPSession) Start(sessionID SessionID, binder Binder) {
 	this.sessionID.Store(sessionID)
-	this.binder = binder
+	content, err := binder.Bind(this)
 
-	if this.react = binder.Bind(this); this.react == nil {
-		return // bind錯誤, 直接結束
+	if err != nil { // bind錯誤, 直接結束
+		binder.Error(fmt.Errorf("tcp session start: %w", err))
+		return
 	} // if
 
+	this.binder = binder
+	this.content = content
 	this.signal.Add(2) // 等待接收循環與傳送循環結束
 
 	go this.recvLoop()
 	go this.sendLoop()
 
 	this.signal.Wait() // 如果接收循環與傳送循環結束, 就會繼續進行結束處理
-	this.react.Unbind()
+	this.content.Unbind()
 }
 
 // Stop 停止會話, 不會等待會話內部循環結束
@@ -95,14 +98,14 @@ func (this *TCPSession) recvLoop() {
 			break
 		} // if
 
-		message, err := this.react.Decode(packet)
+		message, err := this.content.Decode(packet)
 
 		if err != nil {
 			this.binder.Error(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 
-		if err := this.react.Receive(message); err != nil {
+		if err := this.content.Receive(message); err != nil {
 			this.binder.Error(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
@@ -144,7 +147,7 @@ func (this *TCPSession) sendLoop() {
 			break
 		} // if
 
-		packet, err := this.react.Encode(message)
+		packet, err := this.content.Encode(message)
 
 		if err != nil {
 			this.binder.Error(fmt.Errorf("tcp session send loop: %w", err))

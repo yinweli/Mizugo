@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 
+	"github.com/yinweli/Mizugo/cores/msgs"
 	"github.com/yinweli/Mizugo/cores/nets"
 	"github.com/yinweli/Mizugo/testdata"
 )
@@ -116,5 +117,17 @@ func (this *SuiteEntity) TestSession() {
 
 	assert.Nil(this.T(), target.Initialize())
 	assert.NotNil(this.T(), target.SetSession(session))
+	assert.Nil(this.T(), target.Finalize())
+}
+
+func (this *SuiteEntity) TestProcess() {
+	target := newEntity(EntityID(1))
+	process := msgs.NewStringProc()
+
+	assert.Nil(this.T(), target.SetProcess(process))
+	assert.Equal(this.T(), process, target.GetProcess())
+
+	assert.Nil(this.T(), target.Initialize())
+	assert.NotNil(this.T(), target.SetProcess(process))
 	assert.Nil(this.T(), target.Finalize())
 }
