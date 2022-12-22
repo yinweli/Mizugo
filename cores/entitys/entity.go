@@ -28,12 +28,13 @@ type Entity struct {
 	enable    atomic.Bool                    // 啟用旗標
 	session   utils.SyncAttr[nets.Sessioner] // 會話物件
 	process   utils.SyncAttr[msgs.Processor] // 處理物件
+	closes    []func()                       // 結束處理列表
 }
 
 // ===== 基礎功能 =====
 
 // Initialize 初始化處理
-func (this *Entity) Initialize() error {
+func (this *Entity) Initialize(closes ...func()) error {
 	if this.enable.CompareAndSwap(false, true) == false {
 		return fmt.Errorf("entity initialize: already initialize")
 	} // if
@@ -57,14 +58,19 @@ func (this *Entity) Initialize() error {
 		itor.Internal().update = this.eventmgr.PubFixed(eventUpdate, itor, updateInterval)
 	} // for
 
+	this.closes = closes
 	return nil
 }
 
 // Finalize 結束處理, 請不要重複使用結束的實體物件
-func (this *Entity) Finalize() error {
+func (this *Entity) Finalize() {
 	if this.enable.CompareAndSwap(true, false) == false {
-		return fmt.Errorf("entity initialize: already finalize or not initialize")
+		return
 	} // if
+
+	for _, itor := range this.closes {
+		itor()
+	} // for
 
 	for _, itor := range this.modulemgr.All() {
 		itor.Internal().updateStop()
@@ -72,7 +78,6 @@ func (this *Entity) Finalize() error {
 	} // for
 
 	this.eventmgr.Finalize()
-	return nil
 }
 
 // EntityID 取得實體編號

@@ -76,16 +76,15 @@ func (this *Echo) Bind(session nets.Sessioner) (content nets.Content, err error)
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	if err := entity.Initialize(); err != nil {
+	if err := entity.Initialize(func() {
+		mizugos.Entitymgr().Del(entity.EntityID())
+		mizugos.EntityTagmgr().Del(entity, this.name)
+	}); err != nil {
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
 	mizugos.EntityTagmgr().Add(entity, this.name)
-	content.Unbind = func() {
-		_ = entity.Finalize()
-		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.EntityTagmgr().Del(entity, this.name)
-	}
+	content.Unbind = entity.Finalize
 	content.Encode = nil
 	content.Decode = nil
 	content.Receive = nil

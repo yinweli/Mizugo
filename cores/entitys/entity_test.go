@@ -42,22 +42,27 @@ func (this *SuiteEntity) TestNewEntity() {
 func (this *SuiteEntity) TestInitialize() {
 	target := newEntity(EntityID(1))
 	module := newModuleTester(ModuleID(1))
+	closeCount := 0
+	closeFunc := func() {
+		closeCount++
+	}
 
 	assert.Nil(this.T(), target.AddModule(module))
-	assert.Nil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.Initialize())
+	assert.Nil(this.T(), target.Initialize(closeFunc))
+	assert.NotNil(this.T(), target.Initialize(closeFunc))
 	assert.True(this.T(), target.Enable())
 
 	time.Sleep(updateInterval * 2) // 為了讓update會被執行, 需要長一點的時間
-	assert.Nil(this.T(), target.Finalize())
-	assert.NotNil(this.T(), target.Finalize())
+	target.Finalize()
+	target.Finalize() // 故意結束兩次, 這次應該不執行
 	assert.False(this.T(), target.Enable())
 
 	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), module.awake.Load())
-	assert.True(this.T(), module.start.Load())
-	assert.True(this.T(), module.dispose.Load())
-	assert.True(this.T(), module.update.Load())
+	assert.Equal(this.T(), 1, closeCount)
+	assert.Equal(this.T(), int64(1), module.awake.Load())
+	assert.Equal(this.T(), int64(1), module.start.Load())
+	assert.Equal(this.T(), int64(1), module.dispose.Load())
+	assert.Equal(this.T(), int64(1), module.update.Load())
 }
 
 func (this *SuiteEntity) TestModule() {
@@ -70,7 +75,7 @@ func (this *SuiteEntity) TestModule() {
 	assert.NotNil(this.T(), target.AddModule(module1))
 	assert.Nil(this.T(), target.Initialize())
 	assert.NotNil(this.T(), target.AddModule(module2))
-	assert.Nil(this.T(), target.Finalize())
+	target.Finalize()
 }
 
 func (this *SuiteEntity) TestEvent() {
@@ -105,7 +110,7 @@ func (this *SuiteEntity) TestEvent() {
 		// do nothing
 	}))
 
-	assert.Nil(this.T(), target.Finalize())
+	target.Finalize()
 }
 
 func (this *SuiteEntity) TestSession() {
@@ -117,7 +122,7 @@ func (this *SuiteEntity) TestSession() {
 
 	assert.Nil(this.T(), target.Initialize())
 	assert.NotNil(this.T(), target.SetSession(session))
-	assert.Nil(this.T(), target.Finalize())
+	target.Finalize()
 }
 
 func (this *SuiteEntity) TestProcess() {
@@ -133,5 +138,5 @@ func (this *SuiteEntity) TestProcess() {
 
 	assert.Nil(this.T(), target.Initialize())
 	assert.NotNil(this.T(), target.SetProcess(process))
-	assert.Nil(this.T(), target.Finalize())
+	target.Finalize()
 }
