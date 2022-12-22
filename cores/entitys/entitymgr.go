@@ -25,7 +25,7 @@ func (this *Entitymgr) Add() *Entity {
 	defer this.lock.Unlock()
 
 	this.entityID++
-	entity := newEntity(this.entityID)
+	entity := NewEntity(this.entityID)
 	this.data[this.entityID] = entity
 	return entity
 }

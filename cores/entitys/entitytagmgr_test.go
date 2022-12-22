@@ -36,9 +36,9 @@ func (this *SuiteEntityTagmgr) TestNewEntityTagmgr() {
 }
 
 func (this *SuiteEntityTagmgr) TestEntityTagmgr() {
-	tag := []string{"tag1", "tag2", "tag3"}
-	entity := newEntity(EntityID(1))
 	target := NewEntityTagmgr()
+	entity := NewEntity(EntityID(1))
+	tag := []string{"tag1", "tag2", "tag3"}
 
 	target.Add(entity, tag...)
 	target.Add(entity)
@@ -49,6 +49,7 @@ func (this *SuiteEntityTagmgr) TestEntityTagmgr() {
 	} // for
 
 	assert.ElementsMatch(this.T(), tag, target.Tag(entity))
+	assert.ElementsMatch(this.T(), tag, entity.Tag())
 
 	target.Del(entity, tag...)
 	target.Del(entity)
@@ -59,6 +60,7 @@ func (this *SuiteEntityTagmgr) TestEntityTagmgr() {
 	} // for
 
 	assert.ElementsMatch(this.T(), []string{}, target.Tag(entity))
+	assert.ElementsMatch(this.T(), []string{}, entity.Tag())
 }
 
 func (this *SuiteEntityTagmgr) TestFind() {
@@ -66,4 +68,17 @@ func (this *SuiteEntityTagmgr) TestFind() {
 	assert.NotNil(this.T(), target.find("tag1"))
 	assert.NotNil(this.T(), target.find("tag2"))
 	assert.NotNil(this.T(), target.find("tag3"))
+}
+
+func (this *SuiteEntityTagmgr) TestNewEntityTag() {
+	assert.NotNil(this.T(), newEntityTag())
+}
+
+func (this *SuiteEntityTagmgr) TestEntityTag() {
+	target := newEntityTag()
+	tag := []string{"tag1", "tag2", "tag3"}
+	target.Add(tag...)
+	assert.ElementsMatch(this.T(), tag, target.Tag())
+	target.Del(tag...)
+	assert.ElementsMatch(this.T(), []string{}, target.Tag())
 }

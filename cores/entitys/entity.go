@@ -11,10 +11,11 @@ import (
 	"github.com/yinweli/Mizugo/cores/utils"
 )
 
-// newEntity 建立實體資料
-func newEntity(entityID EntityID) *Entity {
+// NewEntity 建立實體資料
+func NewEntity(entityID EntityID) *Entity {
 	return &Entity{
 		entityID:  entityID,
+		tag:       newEntityTag(),
 		modulemgr: NewModulemgr(),
 		eventmgr:  events.NewEventmgr(eventSize),
 	}
@@ -23,12 +24,13 @@ func newEntity(entityID EntityID) *Entity {
 // Entity 實體資料
 type Entity struct {
 	entityID  EntityID                       // 實體編號
+	enable    atomic.Bool                    // 啟用旗標
+	close     []func()                       // 結束處理列表
+	tag       *entityTag                     // 標籤列表
 	modulemgr *Modulemgr                     // 模組管理器
 	eventmgr  *events.Eventmgr               // 事件管理器
-	enable    atomic.Bool                    // 啟用旗標
 	session   utils.SyncAttr[nets.Sessioner] // 會話物件
 	process   utils.SyncAttr[msgs.Processor] // 處理物件
-	closes    []func()                       // 結束處理列表
 }
 
 // ===== 基礎功能 =====
@@ -39,6 +41,7 @@ func (this *Entity) Initialize(closes ...func()) error {
 		return fmt.Errorf("entity initialize: already initialize")
 	} // if
 
+	this.close = closes
 	this.eventmgr.Sub(eventAwake, this.eventAwake)
 	this.eventmgr.Sub(eventStart, this.eventStart)
 	this.eventmgr.Sub(eventDispose, this.eventDispose)
@@ -58,7 +61,6 @@ func (this *Entity) Initialize(closes ...func()) error {
 		itor.Internal().update = this.eventmgr.PubFixed(eventUpdate, itor, updateInterval)
 	} // for
 
-	this.closes = closes
 	return nil
 }
 
@@ -68,7 +70,7 @@ func (this *Entity) Finalize() {
 		return
 	} // if
 
-	for _, itor := range this.closes {
+	for _, itor := range this.close {
 		itor()
 	} // for
 
@@ -88,6 +90,13 @@ func (this *Entity) EntityID() EntityID {
 // Enable 取得啟用旗標
 func (this *Entity) Enable() bool {
 	return this.enable.Load()
+}
+
+// ===== 標籤功能 =====
+
+// Tag 取得標籤列表
+func (this *Entity) Tag() []string {
+	return this.tag.Tag()
 }
 
 // ===== 模組功能 =====

@@ -36,11 +36,11 @@ func (this *SuiteEntity) TearDownTest() {
 }
 
 func (this *SuiteEntity) TestNewEntity() {
-	assert.NotNil(this.T(), newEntity(EntityID(1)))
+	assert.NotNil(this.T(), NewEntity(EntityID(1)))
 }
 
 func (this *SuiteEntity) TestInitialize() {
-	target := newEntity(EntityID(1))
+	target := NewEntity(EntityID(1))
 	module := newModuleTester(ModuleID(1))
 	closeCount := 0
 	closeFunc := func() {
@@ -66,7 +66,7 @@ func (this *SuiteEntity) TestInitialize() {
 }
 
 func (this *SuiteEntity) TestModule() {
-	target := newEntity(EntityID(1))
+	target := NewEntity(EntityID(1))
 	module1 := newModuleTester(ModuleID(1))
 	module2 := newModuleTester(ModuleID(2))
 
@@ -79,7 +79,7 @@ func (this *SuiteEntity) TestModule() {
 }
 
 func (this *SuiteEntity) TestEvent() {
-	target := newEntity(EntityID(1))
+	target := NewEntity(EntityID(1))
 	eventOnce := "eventOnce"
 	paramOnce := "paramOnce"
 	validOnce := atomic.Bool{}
@@ -114,7 +114,7 @@ func (this *SuiteEntity) TestEvent() {
 }
 
 func (this *SuiteEntity) TestSession() {
-	target := newEntity(EntityID(1))
+	target := NewEntity(EntityID(1))
 	session := nets.NewTCPSession(nil)
 
 	assert.Nil(this.T(), target.SetSession(session))
@@ -126,7 +126,7 @@ func (this *SuiteEntity) TestSession() {
 }
 
 func (this *SuiteEntity) TestProcess() {
-	target := newEntity(EntityID(1))
+	target := NewEntity(EntityID(1))
 	process := msgs.NewStringProc()
 
 	assert.Nil(this.T(), target.SetProcess(process))

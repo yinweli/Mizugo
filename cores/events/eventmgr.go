@@ -6,10 +6,10 @@ import (
 )
 
 // NewEventmgr 建立事件管理器
-func NewEventmgr(channelSize int) *Eventmgr {
+func NewEventmgr(eventSize int) *Eventmgr {
 	return &Eventmgr{
 		pubsub: NewPubsub(),
-		event:  make(chan *event, channelSize),
+		event:  make(chan *event, eventSize),
 	}
 }
 
