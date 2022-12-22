@@ -93,13 +93,13 @@ func (this *bindTester) get() Sessioner {
 	return this.session
 }
 
-func (this *bindTester) bind(session Sessioner) *BindData {
+func (this *bindTester) Bind(session Sessioner) *React {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.session = session
 
-	return &BindData{
+	return &React{
 		Unbind: func() {
 			this.lock.Lock()
 			defer this.lock.Unlock()
@@ -133,11 +133,10 @@ func (this *bindTester) bind(session Sessioner) *BindData {
 				return fmt.Errorf("failed")
 			} // if
 		},
-		Wrong: this.wrong,
 	}
 }
 
-func (this *bindTester) wrong(err error) {
+func (this *bindTester) Error(err error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -148,7 +147,7 @@ func (this *bindTester) wrong(err error) {
 type emptySession struct {
 }
 
-func (this *emptySession) Start(_ SessionID, _ Bind) {
+func (this *emptySession) Start(_ SessionID, _ Binder) {
 	// do nothing...
 }
 

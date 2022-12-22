@@ -15,26 +15,44 @@ const (
 	eventUpdate  = "update"  // update事件, 模組定時事件; 參數類型為Moduler
 )
 
-// Awaker awake介面
+// EntityID 實體編號
+type EntityID int64
+
+// ModuleID 模組編號
+type ModuleID int64
+
+// Moduler 模組介面
+type Moduler interface {
+	// ModuleID 取得模組編號
+	ModuleID() ModuleID
+
+	// Entity 取得實體物件
+	Entity() *Entity
+
+	// Internal 取得內部物件
+	Internal() *Internal
+}
+
+// Awaker awake模組事件介面
 type Awaker interface {
-	// Awake awake事件, 模組初始化時第一個被執行
+	// Awake 模組初始化時第一個被執行
 	Awake()
 }
 
-// Starter start介面
+// Starter start模組事件介面
 type Starter interface {
-	// Start start事件, 模組初始化時第二個被執行
+	// Start 模組初始化時第二個被執行
 	Start()
 }
 
-// Disposer dispose介面
+// Disposer dispose模組事件介面
 type Disposer interface {
-	// Dispose dispose事件, 模組結束時執行
+	// Dispose 模組結束時執行
 	Dispose()
 }
 
-// Updater update介面
+// Updater update模組事件介面
 type Updater interface {
-	// Update update事件, 模組定時事件, 間隔時間定義在updateInterval
+	// Update 模組定時執行, 間隔時間定義在updateInterval
 	Update()
 }

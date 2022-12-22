@@ -35,7 +35,7 @@ func Start(name string, initialize Initialize, finalize Finalize) {
 	fmt.Printf("%v initialize\n", name)
 
 	if err := initialize(); err != nil {
-		fmt.Println(fmt.Errorf("initialize: %w", err))
+		fmt.Println(fmt.Errorf("%v initialize: %w", name, err))
 		goto Finalize
 	} // if
 

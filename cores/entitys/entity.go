@@ -7,10 +7,11 @@ import (
 
 	"github.com/yinweli/Mizugo/cores/events"
 	"github.com/yinweli/Mizugo/cores/nets"
+	"github.com/yinweli/Mizugo/cores/utils"
 )
 
-// NewEntity 建立實體資料
-func NewEntity(entityID EntityID) *Entity {
+// newEntity 建立實體資料
+func newEntity(entityID EntityID) *Entity {
 	return &Entity{
 		entityID:  entityID,
 		modulemgr: NewModulemgr(),
@@ -20,32 +21,71 @@ func NewEntity(entityID EntityID) *Entity {
 
 // Entity 實體資料
 type Entity struct {
-	entityID  EntityID         // 實體編號
-	session   SessionAttr      // 會話物件
-	modulemgr *Modulemgr       // 模組管理器
-	eventmgr  *events.Eventmgr // 事件管理器
-	enable    atomic.Bool      // 啟用旗標
+	entityID  EntityID                       // 實體編號
+	modulemgr *Modulemgr                     // 模組管理器
+	eventmgr  *events.Eventmgr               // 事件管理器
+	enable    atomic.Bool                    // 啟用旗標
+	session   utils.SyncAttr[nets.Sessioner] // 會話物件
 }
 
-// EntityID 實體編號
-type EntityID int64
+// ===== 基礎功能 =====
+
+// Initialize 初始化處理
+func (this *Entity) Initialize() error {
+	if this.enable.CompareAndSwap(false, true) == false {
+		return fmt.Errorf("entity initialize: already initialize")
+	} // if
+
+	this.eventmgr.Sub(eventAwake, this.eventAwake)
+	this.eventmgr.Sub(eventStart, this.eventStart)
+	this.eventmgr.Sub(eventDispose, this.eventDispose)
+	this.eventmgr.Sub(eventUpdate, this.eventUpdate)
+	this.eventmgr.Initialize()
+	module := this.modulemgr.All()
+
+	for _, itor := range module {
+		this.eventmgr.PubOnce(eventAwake, itor)
+	} // for
+
+	for _, itor := range module {
+		this.eventmgr.PubOnce(eventStart, itor)
+	} // for
+
+	for _, itor := range module {
+		itor.Internal().update = this.eventmgr.PubFixed(eventUpdate, itor, updateInterval)
+	} // for
+
+	return nil
+}
+
+// Finalize 結束處理, 請不要重複使用結束的實體物件
+func (this *Entity) Finalize() error {
+	if this.enable.CompareAndSwap(true, false) == false {
+		return fmt.Errorf("entity initialize: already finalize or not initialize")
+	} // if
+
+	for _, itor := range this.modulemgr.All() {
+		itor.Internal().updateStop()
+		this.eventmgr.PubOnce(eventDispose, itor)
+	} // for
+
+	this.eventmgr.Finalize()
+	return nil
+}
 
 // EntityID 取得實體編號
 func (this *Entity) EntityID() EntityID {
 	return this.entityID
 }
 
-// SetSession 設定會話物件
-func (this *Entity) SetSession(session nets.Sessioner) error {
-	if this.enable.Load() {
-		return fmt.Errorf("entity set session: overdue")
-	} // if
-
-	this.session.Set(session)
-	return nil
+// Enable 取得啟用旗標
+func (this *Entity) Enable() bool {
+	return this.enable.Load()
 }
 
-// AddModule 新增模組
+// ===== 模組功能 =====
+
+// AddModule 新增模組, 初始化完成後就不能新增模組
 func (this *Entity) AddModule(module Moduler) error {
 	if this.enable.Load() {
 		return fmt.Errorf("entity add module: overdue")
@@ -64,9 +104,16 @@ func (this *Entity) GetModule(moduleID ModuleID) Moduler {
 	return this.modulemgr.Get(moduleID)
 }
 
-// SubEvent 訂閱事件, 由於初始化完成後就會開始處理事件, 因此可能需要在初始化之前做完訂閱事件
-func (this *Entity) SubEvent(name string, process events.Process) {
+// ===== 事件功能 =====
+
+// SubEvent 訂閱事件, 初始化完成後就不能訂閱事件
+func (this *Entity) SubEvent(name string, process events.Process) error {
+	if this.enable.Load() {
+		return fmt.Errorf("entity sub event: overdue")
+	} // if
+
 	this.eventmgr.Sub(name, process)
+	return nil
 }
 
 // PubOnceEvent 發布單次事件
@@ -79,45 +126,26 @@ func (this *Entity) PubFixedEvent(name string, param any, interval time.Duration
 	return this.eventmgr.PubFixed(name, param, interval)
 }
 
-// Enable 取得啟用旗標
-func (this *Entity) Enable() bool {
-	return this.enable.Load()
-}
+// ===== 會話功能 =====
 
-// initialize 初始化處理
-func (this *Entity) initialize() {
-	if this.enable.CompareAndSwap(false, true) {
-		this.eventmgr.Sub(eventAwake, this.eventAwake)
-		this.eventmgr.Sub(eventStart, this.eventStart)
-		this.eventmgr.Sub(eventDispose, this.eventDispose)
-		this.eventmgr.Sub(eventUpdate, this.eventUpdate)
-		this.eventmgr.Initialize()
-		module := this.modulemgr.All()
-
-		for _, itor := range module {
-			this.eventmgr.PubOnce(eventAwake, itor)
-		} // for
-
-		for _, itor := range module {
-			this.eventmgr.PubOnce(eventStart, itor)
-		} // for
-
-		for _, itor := range module {
-			itor.Internal().update = this.eventmgr.PubFixed(eventUpdate, itor, updateInterval)
-		} // for
+// SetSession 設定會話物件, 初始化完成後就不能設定會話物件
+func (this *Entity) SetSession(session nets.Sessioner) error {
+	if this.enable.Load() {
+		return fmt.Errorf("entity set session: overdue")
 	} // if
+
+	this.session.Set(session)
+	return nil
 }
 
-// finalize 結束處理
-func (this *Entity) finalize() {
-	for _, itor := range this.modulemgr.All() {
-		this.eventmgr.PubOnce(eventDispose, itor)
-		itor.Internal().updateStop()
-	} // for
-
-	this.enable.Store(false)
-	this.eventmgr.Finalize()
+// GetSession 取得會話物件
+func (this *Entity) GetSession() nets.Sessioner {
+	return this.session.Get()
 }
+
+// ===== 訊息功能 =====
+
+// ===== 內部功能 =====
 
 // eventAwake 處理awake事件
 func (this *Entity) eventAwake(param any) {
@@ -146,5 +174,3 @@ func (this *Entity) eventUpdate(param any) {
 		module.Update()
 	} // if
 }
-
-// TODO: 新增封包管理器, 在bind的時候, 以封包管理器當作參數建立合適的reactor(或是實體本身就有合適的介面可以塞到reactor中)

@@ -1,7 +1,6 @@
 package entitys
 
 import (
-	"fmt"
 	"sort"
 	"sync"
 )
@@ -15,24 +14,20 @@ func NewEntitymgr() *Entitymgr {
 
 // Entitymgr 實體管理器
 type Entitymgr struct {
-	data map[EntityID]*Entity // 實體列表
-	lock sync.RWMutex         // 執行緒鎖
+	entityID EntityID             // 實體編號
+	data     map[EntityID]*Entity // 實體列表
+	lock     sync.RWMutex         // 執行緒鎖
 }
 
 // Add 新增實體
-func (this *Entitymgr) Add(entity *Entity) error {
+func (this *Entitymgr) Add() *Entity {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	entityID := entity.EntityID()
-
-	if _, ok := this.data[entityID]; ok {
-		return fmt.Errorf("entitymgr add: duplicate entity: %v", entityID)
-	} // if
-
-	this.data[entityID] = entity
-	entity.initialize()
-	return nil
+	this.entityID++
+	entity := newEntity(this.entityID)
+	this.data[this.entityID] = entity
+	return entity
 }
 
 // Del 刪除實體
@@ -42,7 +37,6 @@ func (this *Entitymgr) Del(entityID EntityID) *Entity {
 
 	if entity, ok := this.data[entityID]; ok {
 		delete(this.data, entityID)
-		entity.finalize()
 		return entity
 	} // if
 
@@ -53,10 +47,6 @@ func (this *Entitymgr) Del(entityID EntityID) *Entity {
 func (this *Entitymgr) Clear() {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-
-	for _, itor := range this.data {
-		itor.finalize()
-	} // for
 
 	this.data = map[EntityID]*Entity{}
 }

@@ -37,7 +37,7 @@ func (this *SuiteEntityTagmgr) TestNewEntityTagmgr() {
 
 func (this *SuiteEntityTagmgr) TestEntityTagmgr() {
 	tag := []string{"tag1", "tag2", "tag3"}
-	entity := NewEntity(EntityID(1))
+	entity := newEntity(EntityID(1))
 	target := NewEntityTagmgr()
 
 	target.Add(entity, tag...)

@@ -26,27 +26,27 @@ type Status struct {
 }
 
 // AddConnect 新增連接
-func (this *Netmgr) AddConnect(connecter Connecter, bind Bind, wrong Wrong) {
+func (this *Netmgr) AddConnect(connecter Connecter, binder Binder) {
 	connecter.Connect(func(session Sessioner, err error) {
 		if err != nil {
-			wrong(fmt.Errorf("netmgr connect: %v: %w", connecter.Address(), err))
+			binder.Error(fmt.Errorf("netmgr connect: %v: %w", connecter.Address(), err))
 			return
 		} // if
 
-		go session.Start(this.sessionmgr.add(session), bind)
+		go session.Start(this.sessionmgr.add(session), binder)
 	})
 }
 
 // AddListen 新增接聽
-func (this *Netmgr) AddListen(listener Listener, bind Bind, wrong Wrong) {
+func (this *Netmgr) AddListen(listener Listener, binder Binder) {
 	this.listenmgr.add(listener)
 	listener.Listen(func(session Sessioner, err error) {
 		if err != nil {
-			wrong(fmt.Errorf("netmgr listen: %v: %w", listener.Address(), err))
+			binder.Error(fmt.Errorf("netmgr listen: %v: %w", listener.Address(), err))
 			return
 		} // if
 
-		go session.Start(this.sessionmgr.add(session), bind)
+		go session.Start(this.sessionmgr.add(session), binder)
 	})
 }
 

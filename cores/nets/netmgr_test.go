@@ -43,7 +43,7 @@ func (this *SuiteNetmgr) TestNewNetmgr() {
 func (this *SuiteNetmgr) TestAddConnect() {
 	bind := newBindTester(true, true, true)
 	target := NewNetmgr()
-	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bind.bind, bind.wrong)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bind)
 
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), bind.validSession())
@@ -55,7 +55,7 @@ func (this *SuiteNetmgr) TestAddConnect() {
 func (this *SuiteNetmgr) TestAddListen() {
 	bind := newBindTester(true, true, true)
 	target := NewNetmgr()
-	target.AddListen(NewTCPListen(this.hostLocal.ip, this.hostLocal.port), bind.bind, bind.wrong)
+	target.AddListen(NewTCPListen(this.hostLocal.ip, this.hostLocal.port), bind)
 
 	done := newDoneTester()
 	client := NewTCPConnect(this.hostLocal.ip, this.hostLocal.port, testdata.Timeout)
@@ -73,7 +73,7 @@ func (this *SuiteNetmgr) TestAddListen() {
 func (this *SuiteNetmgr) TestGetSession() {
 	bind := newBindTester(true, true, true)
 	target := NewNetmgr()
-	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bind.bind, bind.wrong)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bind)
 
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), bind.validSession())
@@ -86,7 +86,7 @@ func (this *SuiteNetmgr) TestGetSession() {
 func (this *SuiteNetmgr) TestStopSession() {
 	bind := newBindTester(true, true, true)
 	target := NewNetmgr()
-	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bind.bind, bind.wrong)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bind)
 
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), bind.validSession())
@@ -102,7 +102,7 @@ func (this *SuiteNetmgr) TestStopSession() {
 func (this *SuiteNetmgr) TestStop() {
 	bind := newBindTester(true, true, true)
 	target := NewNetmgr()
-	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bind.bind, bind.wrong)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bind)
 
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), bind.validSession())
@@ -117,10 +117,10 @@ func (this *SuiteNetmgr) TestStop() {
 func (this *SuiteNetmgr) TestStatus() {
 	bindl := newBindTester(true, true, true)
 	target := NewNetmgr()
-	target.AddListen(NewTCPListen(this.hostLocal.ip, this.hostLocal.port), bindl.bind, bindl.wrong)
+	target.AddListen(NewTCPListen(this.hostLocal.ip, this.hostLocal.port), bindl)
 
 	bindc := newBindTester(true, true, true)
-	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bindc.bind, bindc.wrong)
+	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bindc)
 
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), bindc.validSession())
