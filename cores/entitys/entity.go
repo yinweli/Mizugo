@@ -162,6 +162,16 @@ func (this *Entity) GetProcess() msgs.Processor {
 	return this.process.Get()
 }
 
+// AddMsgProc 新增訊息處理
+func (this *Entity) AddMsgProc(messageID msgs.MessageID, process msgs.Process) {
+	this.process.Get().Add(messageID, process)
+}
+
+// DelMsgProc 刪除訊息處理
+func (this *Entity) DelMsgProc(messageID msgs.MessageID) {
+	this.process.Get().Del(messageID)
+}
+
 // ===== 內部功能 =====
 
 // eventAwake 處理awake事件
