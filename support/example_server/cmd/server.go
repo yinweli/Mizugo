@@ -14,15 +14,16 @@ func main() {
 
 // initialize 初始化處理
 func initialize() error {
-	configPath := "config"
 	feature.logger = commons.NewLogger()
 	feature.entryEcho = entryechos.NewEntry()
 
-	if err := feature.logger.Initialize(configPath); err != nil {
+	mizugos.Configmgr().AddPath("config")
+
+	if err := feature.logger.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := feature.entryEcho.Initialize(configPath); err != nil {
+	if err := feature.entryEcho.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 

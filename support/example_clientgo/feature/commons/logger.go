@@ -2,7 +2,6 @@ package commons
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/yinweli/Mizugo/cores/logs"
 	"github.com/yinweli/Mizugo/mizugos"
@@ -21,14 +20,14 @@ type Logger struct {
 }
 
 // Initialize 初始化處理
-func (this *Logger) Initialize(configPath string) error {
-	if err := mizugos.Configmgr().ReadFile(filepath.Join(configPath, this.name+".yaml")); err != nil {
+func (this *Logger) Initialize() error {
+	logger := logs.ZapLogger{}
+
+	if err := mizugos.Configmgr().ReadFile(this.name, "yaml"); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	logger := logs.ZapLogger{}
-
-	if err := mizugos.Configmgr().GetObject(this.name, &logger); err != nil {
+	if err := mizugos.Configmgr().Unmarshal(this.name, &logger); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 

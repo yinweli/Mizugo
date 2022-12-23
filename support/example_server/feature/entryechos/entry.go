@@ -2,7 +2,6 @@ package entryechos
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/yinweli/Mizugo/cores/msgs"
 	"github.com/yinweli/Mizugo/cores/nets"
@@ -24,21 +23,21 @@ type Entry struct {
 
 // Config 設定資料
 type Config struct {
-	IP   string `yaml:"ip"`   // 位址
-	Port string `yaml:"port"` // 埠號
+	IP   string // 位址
+	Port string // 埠號
 }
 
 // Initialize 初始化處理
-func (this *Entry) Initialize(configPath string) error {
+func (this *Entry) Initialize() error {
 	mizugos.Info(this.name).
 		Message("entry initialize").
 		End()
 
-	if err := mizugos.Configmgr().ReadFile(filepath.Join(configPath, this.name+".yaml")); err != nil {
+	if err := mizugos.Configmgr().ReadFile(this.name, "yaml"); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	if err := mizugos.Configmgr().GetObject(this.name, &this.config); err != nil {
+	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 

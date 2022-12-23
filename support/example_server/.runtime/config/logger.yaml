@@ -1,6 +1,6 @@
 logger:
-  name: "example_server.log"
-  path: "log"
+  name: example_server.log
+  path: log
   json: false
   console: true
   file: true

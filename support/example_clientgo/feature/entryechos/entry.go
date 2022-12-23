@@ -2,7 +2,6 @@ package entryechos
 
 import (
 	"fmt"
-	"path/filepath"
 	"time"
 
 	"github.com/yinweli/Mizugo/cores/msgs"
@@ -25,26 +24,25 @@ type Entry struct {
 
 // Config 設定資料
 type Config struct {
-	IP      string        `yaml:"ip"`      // 位址
-	Port    string        `yaml:"port"`    // 埠號
-	Timeout time.Duration `yaml:"timeout"` // 逾期時間
+	IP      string        // 位址
+	Port    string        // 埠號
+	Timeout time.Duration // 逾期時間(秒)
 }
 
 // Initialize 初始化處理
-func (this *Entry) Initialize(configPath string) error {
+func (this *Entry) Initialize() error {
 	mizugos.Info(this.name).
 		Message("entry initialize").
 		End()
 
-	if err := mizugos.Configmgr().ReadFile(filepath.Join(configPath, this.name+".yaml")); err != nil {
+	if err := mizugos.Configmgr().ReadFile(this.name, "yaml"); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	if err := mizugos.Configmgr().GetObject(this.name, &this.config); err != nil {
+	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	// TODO: connect!
 	mizugos.Netmgr().AddConnect(nets.NewTCPConnect(this.config.IP, this.config.Port, this.config.Timeout), this)
 	mizugos.Info(this.name).
 		Message("entry start").

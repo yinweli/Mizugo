@@ -1,8 +1,10 @@
 package configs
 
 import (
-	"os"
+	"bytes"
+	"io"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -18,81 +20,32 @@ func TestConfigmgr(t *testing.T) {
 type SuiteConfigmgr struct {
 	suite.Suite
 	testdata.TestEnv
-	content     string
-	fileValid   string
-	fileInvalid string
-	kInt        string
-	kInt32      string
-	kInt64      string
-	kString     string
-	kList       string
-	kMap        string
-	kObject     string
-	vint        int
-	vint32      int
-	vint64      int
-	vstring     string
-	vlist       []string
-	vmap        map[string]interface{}
-	vobject     configTester
+	name1   string
+	name2   string
+	value1  string
+	value2  string
+	reader1 io.Reader
+	reader2 io.Reader
+	object  configTester
+	ext     string
+	valid   string
 }
 
 func (this *SuiteConfigmgr) SetupSuite() {
 	this.Change("test-configs-configmgr")
-	this.content = `
-Int: 1
-Int32: 32
-Int64: 64
-String: string
-List: [ "s1", "s2", "s3" ]
-Map:
-  Int: 1
-  Int32: 32
-  Int64: 64
-  String: string
-Object:
-  Int: 1
-  Int32: 32
-  Int64: 64
-  String: string
-  List: [ "s1", "s2", "s3" ]
-  Map:
-    Int: 1
-    Int32: 32
-    Int64: 64
-    String: string
-`
-	this.fileValid = "valid.yaml"
-	this.fileInvalid = "invalid.yaml"
-	this.kInt = "Int"
-	this.kInt32 = "Int32"
-	this.kInt64 = "Int64"
-	this.kString = "String"
-	this.kList = "List"
-	this.kMap = "Map"
-	this.kObject = "Object"
-	this.vint = 1
-	this.vint32 = 32
-	this.vint64 = 64
-	this.vstring = "string"
-	this.vlist = []string{"s1", "s2", "s3"}
-	this.vmap = map[string]interface{}{
-		"Int":    this.vint,
-		"Int32":  this.vint32,
-		"Int64":  this.vint64,
-		"String": this.vstring,
+	this.name1 = "configmgr"
+	this.name2 = "!?"
+	this.value1 = "valid: valid"
+	this.value2 = "valid=valid"
+	this.reader1 = bytes.NewBuffer([]byte(this.value1))
+	this.reader2 = bytes.NewBuffer([]byte(this.value2))
+	this.object = configTester{
+		Value1: 1,
+		Value2: "2",
+		Value3: []string{"a", "b", "c"},
 	}
-	this.vobject = configTester{
-		Int:    this.vint,
-		Int32:  int32(this.vint32),
-		Int64:  int64(this.vint64),
-		String: this.vstring,
-		List:   this.vlist,
-		Map:    this.vmap,
-	}
-
-	assert.Nil(this.T(), os.WriteFile(this.fileValid, []byte(this.content), os.ModePerm))
-	assert.Nil(this.T(), os.WriteFile(this.fileInvalid, []byte("fake"), os.ModePerm))
+	this.ext = "yaml"
+	this.valid = "valid"
 }
 
 func (this *SuiteConfigmgr) TearDownSuite() {
@@ -109,80 +62,67 @@ func (this *SuiteConfigmgr) TestNewConfigmgr() {
 
 func (this *SuiteConfigmgr) TestReadFile() {
 	target := NewConfigmgr()
-	assert.Nil(this.T(), target.ReadFile(this.fileValid))
-	assert.NotNil(this.T(), target.ReadFile(this.fileInvalid))
-	assert.NotNil(this.T(), target.ReadFile("!?"))
+	target.AddPath(".")
+	assert.Nil(this.T(), target.ReadFile(this.name1, this.ext))
+	assert.Nil(this.T(), target.ReadFile(this.name1, this.ext))
+	assert.NotNil(this.T(), target.ReadFile(this.name2, this.ext))
+	assert.Equal(this.T(), this.valid, target.Get(this.valid))
+	target.Reset()
 }
 
 func (this *SuiteConfigmgr) TestReadString() {
 	target := NewConfigmgr()
-	assert.Nil(this.T(), target.ReadString(this.content))
-	assert.NotNil(this.T(), target.ReadString("!?"))
+	assert.Nil(this.T(), target.ReadString(this.value1, this.ext))
+	assert.Nil(this.T(), target.ReadString(this.value1, this.ext))
+	assert.NotNil(this.T(), target.ReadString(this.value2, this.ext))
+	assert.Equal(this.T(), this.valid, target.Get(this.valid))
+	target.Reset()
 }
 
-func (this *SuiteConfigmgr) TestGetInt() {
+func (this *SuiteConfigmgr) TestReadBuffer() {
 	target := NewConfigmgr()
-	assert.Nil(this.T(), target.ReadFile(this.fileValid))
-
-	result, err := target.GetInt(this.kInt)
-	assert.Nil(this.T(), err)
-	assert.Equal(this.T(), this.vint, result)
-
-	result, err = target.GetInt(this.kInt32)
-	assert.Nil(this.T(), err)
-	assert.Equal(this.T(), this.vint32, result)
-
-	result, err = target.GetInt(this.kInt64)
-	assert.Nil(this.T(), err)
-	assert.Equal(this.T(), this.vint64, result)
-
-	_, err = target.GetInt("!?")
-	assert.NotNil(this.T(), err)
-
-	_, err = target.GetInt(this.kString)
-	assert.NotNil(this.T(), err)
+	assert.Nil(this.T(), target.ReadBuffer(this.reader1, this.ext))
+	assert.Nil(this.T(), target.ReadBuffer(this.reader1, this.ext))
+	assert.NotNil(this.T(), target.ReadBuffer(this.reader2, this.ext))
+	assert.Equal(this.T(), this.valid, target.Get(this.valid))
+	target.Reset()
 }
 
-func (this *SuiteConfigmgr) TestGetString() {
+func (this *SuiteConfigmgr) TestGet() {
 	target := NewConfigmgr()
-	assert.Nil(this.T(), target.ReadFile(this.fileValid))
-
-	result, err := target.GetString(this.kString)
-	assert.Nil(this.T(), err)
-	assert.Equal(this.T(), this.vstring, result)
-
-	_, err = target.GetString("!?")
-	assert.NotNil(this.T(), err)
-
-	_, err = target.GetString(this.kInt)
-	assert.NotNil(this.T(), err)
+	target.AddPath(".")
+	assert.Nil(this.T(), target.ReadFile(this.name1, this.ext))
+	assert.Equal(this.T(), true, target.GetBool("valueb"))
+	assert.Equal(this.T(), 1, target.GetInt("valuei"))
+	assert.Equal(this.T(), int32(100000000), target.GetInt32("valuei32"))
+	assert.Equal(this.T(), int64(100000000000), target.GetInt64("valuei64"))
+	assert.Equal(this.T(), uint(2), target.GetUInt("valueu"))
+	assert.Equal(this.T(), uint32(200000000), target.GetUInt32("valueu32"))
+	assert.Equal(this.T(), uint64(200000000000), target.GetUInt64("valueu64"))
+	assert.Equal(this.T(), 3.33, target.GetFloat("valuef"))
+	assert.Equal(this.T(), "string", target.GetString("values"))
+	assert.Equal(this.T(), []int{1, 2, 3}, target.GetIntSlice("valuelisti"))
+	assert.Equal(this.T(), []string{"a", "b", "c"}, target.GetStringSlice("valuelists"))
+	assert.Equal(this.T(), "2020-12-31 09:30:30", target.GetTime("valuet").Format("2006-01-02 15:04:05"))
+	assert.Equal(this.T(), time.Second*360, target.GetDuration("valued"))
+	assert.Equal(this.T(), uint(1024), target.GetSizeInBytes("valuec"))
+	target.Reset()
 }
 
-func (this *SuiteConfigmgr) TestGetObject() {
+func (this *SuiteConfigmgr) TestUnmarshal() {
 	target := NewConfigmgr()
-	assert.Nil(this.T(), target.ReadFile(this.fileValid))
-
-	resultList := []string{}
-	assert.Nil(this.T(), target.GetObject(this.kList, &resultList))
-	assert.Equal(this.T(), this.vlist, resultList)
-
-	resultMap := map[string]interface{}{}
-	assert.Nil(this.T(), target.GetObject(this.kMap, &resultMap))
-	assert.Equal(this.T(), this.vmap, resultMap)
-
-	resultObject := configTester{}
-	assert.Nil(this.T(), target.GetObject(this.kObject, &resultObject))
-	assert.Equal(this.T(), this.vobject, resultObject)
-
-	assert.NotNil(this.T(), target.GetObject("!?", &resultList))
-	assert.NotNil(this.T(), target.GetObject(this.kMap, &resultList))
+	object := configTester{}
+	target.AddPath(".")
+	assert.Nil(this.T(), target.ReadFile(this.name1, this.ext))
+	assert.Nil(this.T(), target.Unmarshal("object", &object))
+	assert.NotNil(this.T(), target.Unmarshal("!?", &object))
+	assert.NotNil(this.T(), target.Unmarshal("object", nil))
+	assert.Equal(this.T(), this.object, object)
+	target.Reset()
 }
 
 type configTester struct {
-	Int    int
-	Int32  int32
-	Int64  int64
-	String string
-	List   []string
-	Map    map[string]interface{}
+	Value1 int
+	Value2 string
+	Value3 []string
 }
