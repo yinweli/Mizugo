@@ -3,6 +3,7 @@ package entryechos
 import (
 	"fmt"
 	"path/filepath"
+	"time"
 
 	"github.com/yinweli/Mizugo/cores/msgs"
 	"github.com/yinweli/Mizugo/cores/nets"
@@ -24,8 +25,9 @@ type Entry struct {
 
 // Config 設定資料
 type Config struct {
-	IP   string `yaml:"ip"`   // 位址
-	Port string `yaml:"port"` // 埠號
+	IP      string        `yaml:"ip"`      // 位址
+	Port    string        `yaml:"port"`    // 埠號
+	Timeout time.Duration `yaml:"timeout"` // 逾期時間
 }
 
 // Initialize 初始化處理
@@ -43,6 +45,7 @@ func (this *Entry) Initialize(configPath string) error {
 	} // if
 
 	// TODO: connect!
+	mizugos.Netmgr().AddConnect(nets.NewTCPConnect(this.config.IP, this.config.Port, this.config.Timeout), this)
 	mizugos.Info(this.name).
 		Message("entry start").
 		KV("ip", this.config.IP).
