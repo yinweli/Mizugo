@@ -58,7 +58,7 @@ func (this *Entity) Initialize(closes ...func()) error {
 	} // for
 
 	for _, itor := range module {
-		itor.Internal().update = this.eventmgr.PubFixed(eventUpdate, itor, updateInterval)
+		itor.internal().update = this.eventmgr.PubFixed(eventUpdate, itor, updateInterval)
 	} // for
 
 	return nil
@@ -75,7 +75,7 @@ func (this *Entity) Finalize() {
 	} // for
 
 	for _, itor := range this.modulemgr.All() {
-		itor.Internal().updateStop()
+		itor.internal().updateStop()
 		this.eventmgr.PubOnce(eventDispose, itor)
 	} // for
 
@@ -111,7 +111,7 @@ func (this *Entity) AddModule(module Moduler) error {
 		return fmt.Errorf("entity add module: %w", err)
 	} // if
 
-	module.Internal().entity = this
+	module.internal().entity = this
 	return nil
 }
 

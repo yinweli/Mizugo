@@ -14,7 +14,19 @@ func NewModule(moduleID ModuleID) *Module {
 // Module 模組資料
 type Module struct {
 	moduleID ModuleID // 模組編號
-	internal Internal // 內部物件
+	inner    internal // 內部物件
+}
+
+// Moduler 模組介面
+type Moduler interface {
+	// ModuleID 取得模組編號
+	ModuleID() ModuleID
+
+	// Entity 取得實體物件
+	Entity() *Entity
+
+	// internal 取得內部物件
+	internal() *internal
 }
 
 // ModuleID 取得模組編號
@@ -24,22 +36,22 @@ func (this *Module) ModuleID() ModuleID {
 
 // Entity 取得實體物件
 func (this *Module) Entity() *Entity {
-	return this.internal.entity
+	return this.inner.entity
 }
 
 // Internal 取得內部物件
-func (this *Module) Internal() *Internal {
-	return &this.internal
+func (this *Module) internal() *internal {
+	return &this.inner
 }
 
-// Internal 內部資料
-type Internal struct {
+// internal 內部資料
+type internal struct {
 	entity *Entity       // 實體物件
 	update *events.Fixed // update事件定時物件
 }
 
 // updateStop 停止update事件定時
-func (this *Internal) updateStop() {
+func (this *internal) updateStop() {
 	if this.update != nil {
 		this.update.Stop()
 	} // if
