@@ -28,11 +28,11 @@ type Entity struct {
 	entityID  EntityID                       // 實體編號
 	enable    atomic.Bool                    // 啟用旗標
 	close     []func()                       // 結束處理列表
+	session   utils.SyncAttr[nets.Sessioner] // 會話物件
+	process   utils.SyncAttr[msgs.Processor] // 處理物件
 	modulemgr *Modulemgr                     // 模組管理器
 	eventmgr  *events.Eventmgr               // 事件管理器
 	labelobj  *labels.Labelobj               // 標籤物件
-	session   utils.SyncAttr[nets.Sessioner] // 會話物件
-	process   utils.SyncAttr[msgs.Processor] // 處理物件
 }
 
 // ===== 基礎功能 =====
@@ -98,49 +98,6 @@ func (this *Entity) Enable() bool {
 	return this.enable.Load()
 }
 
-// ===== 模組功能 =====
-
-// AddModule 新增模組, 初始化完成後就不能新增模組
-func (this *Entity) AddModule(module Moduler) error {
-	if this.enable.Load() {
-		return fmt.Errorf("entity add module: overdue")
-	} // if
-
-	if err := this.modulemgr.Add(module); err != nil {
-		return fmt.Errorf("entity add module: %w", err)
-	} // if
-
-	module.internal().entity = this
-	return nil
-}
-
-// GetModule 取得模組
-func (this *Entity) GetModule(moduleID ModuleID) Moduler {
-	return this.modulemgr.Get(moduleID)
-}
-
-// ===== 事件功能 =====
-
-// SubEvent 訂閱事件, 初始化完成後就不能訂閱事件
-func (this *Entity) SubEvent(name string, process events.Process) error {
-	if this.enable.Load() {
-		return fmt.Errorf("entity sub event: overdue")
-	} // if
-
-	this.eventmgr.Sub(name, process)
-	return nil
-}
-
-// PubOnceEvent 發布單次事件
-func (this *Entity) PubOnceEvent(name string, param any) {
-	this.eventmgr.PubOnce(name, param)
-}
-
-// PubFixedEvent 發布定時事件, 回傳用於停止定時事件的控制物件
-func (this *Entity) PubFixedEvent(name string, param any, interval time.Duration) *events.Fixed {
-	return this.eventmgr.PubFixed(name, param, interval)
-}
-
 // ===== 會話功能 =====
 
 // SetSession 設定會話物件, 初始化完成後就不能設定會話物件
@@ -203,6 +160,49 @@ func (this *Entity) AddMessage(messageID msgs.MessageID, process msgs.Process) {
 // DelMessage 刪除訊息處理
 func (this *Entity) DelMessage(messageID msgs.MessageID) {
 	this.process.Get().Del(messageID)
+}
+
+// ===== 模組功能 =====
+
+// AddModule 新增模組, 初始化完成後就不能新增模組
+func (this *Entity) AddModule(module Moduler) error {
+	if this.enable.Load() {
+		return fmt.Errorf("entity add module: overdue")
+	} // if
+
+	if err := this.modulemgr.Add(module); err != nil {
+		return fmt.Errorf("entity add module: %w", err)
+	} // if
+
+	module.internal().entity = this
+	return nil
+}
+
+// GetModule 取得模組
+func (this *Entity) GetModule(moduleID ModuleID) Moduler {
+	return this.modulemgr.Get(moduleID)
+}
+
+// ===== 事件功能 =====
+
+// SubEvent 訂閱事件, 初始化完成後就不能訂閱事件
+func (this *Entity) SubEvent(name string, process events.Process) error {
+	if this.enable.Load() {
+		return fmt.Errorf("entity sub event: overdue")
+	} // if
+
+	this.eventmgr.Sub(name, process)
+	return nil
+}
+
+// PubOnceEvent 發布單次事件
+func (this *Entity) PubOnceEvent(name string, param any) {
+	this.eventmgr.PubOnce(name, param)
+}
+
+// PubFixedEvent 發布定時事件, 回傳用於停止定時事件的控制物件
+func (this *Entity) PubFixedEvent(name string, param any, interval time.Duration) *events.Fixed {
+	return this.eventmgr.PubFixed(name, param, interval)
 }
 
 // ===== 內部功能 =====

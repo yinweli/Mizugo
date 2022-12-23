@@ -68,6 +68,41 @@ func (this *SuiteEntity) TestInitialize() {
 	assert.Equal(this.T(), int64(1), module.update.Load())
 }
 
+func (this *SuiteEntity) TestSession() {
+	target := NewEntity(EntityID(1))
+	conn, _ := net.Dial("tcp", net.JoinHostPort("google.com", "80"))
+	session := nets.NewTCPSession(conn)
+
+	assert.Nil(this.T(), target.SetSession(session))
+	assert.Equal(this.T(), session, target.GetSession())
+
+	assert.Nil(this.T(), target.Initialize())
+	assert.NotNil(this.T(), target.SetSession(session))
+
+	target.Send("message")
+	assert.Equal(this.T(), session.SessionID(), target.SessionID())
+	assert.Equal(this.T(), session.RemoteAddr(), target.RemoteAddr())
+	assert.Equal(this.T(), session.LocalAddr(), target.LocalAddr())
+
+	target.Finalize()
+}
+
+func (this *SuiteEntity) TestProcess() {
+	target := NewEntity(EntityID(1))
+	process := msgs.NewStringProc()
+
+	assert.Nil(this.T(), target.SetProcess(process))
+	assert.Equal(this.T(), process, target.GetProcess())
+	target.AddMessage(msgs.MessageID(1), func(messageID msgs.MessageID, message any) {
+		// do nothing
+	})
+	target.DelMessage(msgs.MessageID(1))
+
+	assert.Nil(this.T(), target.Initialize())
+	assert.NotNil(this.T(), target.SetProcess(process))
+	target.Finalize()
+}
+
 func (this *SuiteEntity) TestModule() {
 	target := NewEntity(EntityID(1))
 	module1 := newModuleTester(ModuleID(1))
@@ -113,40 +148,5 @@ func (this *SuiteEntity) TestEvent() {
 		// do nothing
 	}))
 
-	target.Finalize()
-}
-
-func (this *SuiteEntity) TestSession() {
-	target := NewEntity(EntityID(1))
-	conn, _ := net.Dial("tcp", net.JoinHostPort("google.com", "80"))
-	session := nets.NewTCPSession(conn)
-
-	assert.Nil(this.T(), target.SetSession(session))
-	assert.Equal(this.T(), session, target.GetSession())
-
-	assert.Nil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.SetSession(session))
-
-	target.Send("message")
-	assert.Equal(this.T(), session.SessionID(), target.SessionID())
-	assert.Equal(this.T(), session.RemoteAddr(), target.RemoteAddr())
-	assert.Equal(this.T(), session.LocalAddr(), target.LocalAddr())
-
-	target.Finalize()
-}
-
-func (this *SuiteEntity) TestProcess() {
-	target := NewEntity(EntityID(1))
-	process := msgs.NewStringProc()
-
-	assert.Nil(this.T(), target.SetProcess(process))
-	assert.Equal(this.T(), process, target.GetProcess())
-	target.AddMessage(msgs.MessageID(1), func(messageID msgs.MessageID, message any) {
-		// do nothing
-	})
-	target.DelMessage(msgs.MessageID(1))
-
-	assert.Nil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.SetProcess(process))
 	target.Finalize()
 }

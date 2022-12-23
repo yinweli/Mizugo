@@ -1,0 +1,11 @@
+logger:
+  name: "example_client.log"
+  path: "log"
+  json: false
+  console: true
+  file: true
+  level: 0
+  maxSize: 100
+  maxTime: 0
+  maxBackups: 0
+  compress: false
