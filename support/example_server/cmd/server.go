@@ -5,7 +5,7 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/support/example_server/feature/commons"
-	"github.com/yinweli/Mizugo/support/example_server/feature/entryEchos"
+	"github.com/yinweli/Mizugo/support/example_server/feature/entryechos"
 )
 
 func main() {
@@ -16,7 +16,7 @@ func main() {
 func initialize() error {
 	configPath := "config"
 	feature.logger = commons.NewLogger()
-	feature.entryEcho = entryEchos.NewEntry()
+	feature.entryEcho = entryechos.NewEntry()
 
 	if err := feature.logger.Initialize(configPath); err != nil {
 		return fmt.Errorf("initialize: %w", err)
@@ -38,5 +38,5 @@ func finalize() {
 // feature 功能資料
 var feature struct {
 	logger    *commons.Logger   // 日誌資料
-	entryEcho *entryEchos.Entry // 回音入口
+	entryEcho *entryechos.Entry // 回音入口
 }
