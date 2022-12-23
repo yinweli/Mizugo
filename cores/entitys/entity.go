@@ -195,13 +195,13 @@ func (this *Entity) GetProcess() msgs.Processor {
 	return this.process.Get()
 }
 
-// AddMsgProc 新增訊息處理
-func (this *Entity) AddMsgProc(messageID msgs.MessageID, process msgs.Process) {
+// AddMessage 新增訊息處理
+func (this *Entity) AddMessage(messageID msgs.MessageID, process msgs.Process) {
 	this.process.Get().Add(messageID, process)
 }
 
-// DelMsgProc 刪除訊息處理
-func (this *Entity) DelMsgProc(messageID msgs.MessageID) {
+// DelMessage 刪除訊息處理
+func (this *Entity) DelMessage(messageID msgs.MessageID) {
 	this.process.Get().Del(messageID)
 }
 
