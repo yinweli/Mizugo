@@ -1,6 +1,7 @@
 package entitys
 
 import (
+	"net"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -40,7 +41,8 @@ func (this *SuiteEntity) TestNewEntity() {
 }
 
 func (this *SuiteEntity) TestInitialize() {
-	target := NewEntity(EntityID(1))
+	entityID := EntityID(1)
+	target := NewEntity(entityID)
 	module := newModuleTester(ModuleID(1))
 	closeCount := 0
 	closeFunc := func() {
@@ -50,6 +52,7 @@ func (this *SuiteEntity) TestInitialize() {
 	assert.Nil(this.T(), target.AddModule(module))
 	assert.Nil(this.T(), target.Initialize(closeFunc))
 	assert.NotNil(this.T(), target.Initialize(closeFunc))
+	assert.Equal(this.T(), entityID, target.EntityID())
 	assert.True(this.T(), target.Enable())
 
 	time.Sleep(updateInterval * 2) // 為了讓update會被執行, 需要長一點的時間
@@ -115,13 +118,20 @@ func (this *SuiteEntity) TestEvent() {
 
 func (this *SuiteEntity) TestSession() {
 	target := NewEntity(EntityID(1))
-	session := nets.NewTCPSession(nil)
+	conn, _ := net.Dial("tcp", net.JoinHostPort("google.com", "80"))
+	session := nets.NewTCPSession(conn)
 
 	assert.Nil(this.T(), target.SetSession(session))
 	assert.Equal(this.T(), session, target.GetSession())
 
 	assert.Nil(this.T(), target.Initialize())
 	assert.NotNil(this.T(), target.SetSession(session))
+
+	target.Send("message")
+	assert.Equal(this.T(), session.SessionID(), target.SessionID())
+	assert.Equal(this.T(), session.RemoteAddr(), target.RemoteAddr())
+	assert.Equal(this.T(), session.LocalAddr(), target.LocalAddr())
+
 	target.Finalize()
 }
 

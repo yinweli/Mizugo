@@ -2,6 +2,7 @@ package entitys
 
 import (
 	"fmt"
+	"net"
 	"sync/atomic"
 	"time"
 
@@ -81,6 +82,10 @@ func (this *Entity) Finalize() {
 	} // for
 
 	this.eventmgr.Finalize()
+
+	if session := this.session.Get(); session != nil {
+		session.Stop()
+	} // if
 }
 
 // EntityID 取得實體編號
@@ -151,6 +156,26 @@ func (this *Entity) SetSession(session nets.Sessioner) error {
 // GetSession 取得會話物件
 func (this *Entity) GetSession() nets.Sessioner {
 	return this.session.Get()
+}
+
+// Send 傳送封包
+func (this *Entity) Send(message any) {
+	this.session.Get().Send(message)
+}
+
+// SessionID 取得會話編號
+func (this *Entity) SessionID() nets.SessionID {
+	return this.session.Get().SessionID()
+}
+
+// RemoteAddr 取得遠端位址
+func (this *Entity) RemoteAddr() net.Addr {
+	return this.session.Get().RemoteAddr()
+}
+
+// LocalAddr 取得本地位址
+func (this *Entity) LocalAddr() net.Addr {
+	return this.session.Get().LocalAddr()
 }
 
 // ===== 處理功能 =====

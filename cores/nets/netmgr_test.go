@@ -41,7 +41,7 @@ func (this *SuiteNetmgr) TestNewNetmgr() {
 }
 
 func (this *SuiteNetmgr) TestAddConnect() {
-	bind := newBindTester(true, true, true)
+	bind := newBindTester(true, true, true, true)
 	target := NewNetmgr()
 	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bind)
 
@@ -53,7 +53,7 @@ func (this *SuiteNetmgr) TestAddConnect() {
 }
 
 func (this *SuiteNetmgr) TestAddListen() {
-	bind := newBindTester(true, true, true)
+	bind := newBindTester(true, true, true, true)
 	target := NewNetmgr()
 	target.AddListen(NewTCPListen(this.hostLocal.ip, this.hostLocal.port), bind)
 
@@ -71,7 +71,7 @@ func (this *SuiteNetmgr) TestAddListen() {
 }
 
 func (this *SuiteNetmgr) TestGetSession() {
-	bind := newBindTester(true, true, true)
+	bind := newBindTester(true, true, true, true)
 	target := NewNetmgr()
 	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bind)
 
@@ -84,7 +84,7 @@ func (this *SuiteNetmgr) TestGetSession() {
 }
 
 func (this *SuiteNetmgr) TestStopSession() {
-	bind := newBindTester(true, true, true)
+	bind := newBindTester(true, true, true, true)
 	target := NewNetmgr()
 	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bind)
 
@@ -100,7 +100,7 @@ func (this *SuiteNetmgr) TestStopSession() {
 }
 
 func (this *SuiteNetmgr) TestStop() {
-	bind := newBindTester(true, true, true)
+	bind := newBindTester(true, true, true, true)
 	target := NewNetmgr()
 	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bind)
 
@@ -115,11 +115,11 @@ func (this *SuiteNetmgr) TestStop() {
 }
 
 func (this *SuiteNetmgr) TestStatus() {
-	bindl := newBindTester(true, true, true)
+	bindl := newBindTester(true, true, true, true)
 	target := NewNetmgr()
 	target.AddListen(NewTCPListen(this.hostLocal.ip, this.hostLocal.port), bindl)
 
-	bindc := newBindTester(true, true, true)
+	bindc := newBindTester(true, true, true, true)
 	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bindc)
 
 	time.Sleep(testdata.Timeout)

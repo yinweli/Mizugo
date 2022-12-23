@@ -45,9 +45,10 @@ func (this *doneTester) done(session Sessioner, err error) {
 }
 
 // newBindTester 建立綁定處理測試器
-func newBindTester(encode, decode, receive bool) *bindTester {
+func newBindTester(bind, encode, decode, receive bool) *bindTester {
 	time.Sleep(testdata.Timeout) // 在這邊等待一下, 讓程序有機會完成
 	return &bindTester{
+		bind:    bind,
 		encode:  encode,
 		decode:  decode,
 		receive: receive,
@@ -56,6 +57,7 @@ func newBindTester(encode, decode, receive bool) *bindTester {
 
 // bindTester 綁定處理測試器
 type bindTester struct {
+	bind    bool
 	encode  bool
 	decode  bool
 	receive bool
@@ -99,6 +101,10 @@ func (this *bindTester) Bind(session Sessioner) (content Content, err error) {
 
 	this.session = session
 
+	if this.bind == false {
+		err = fmt.Errorf("bind failed")
+	} // if
+
 	return Content{
 		Unbind: func() {
 			this.lock.Lock()
@@ -133,7 +139,7 @@ func (this *bindTester) Bind(session Sessioner) (content Content, err error) {
 				return fmt.Errorf("failed")
 			} // if
 		},
-	}, nil
+	}, err
 }
 
 func (this *bindTester) Error(err error) {
