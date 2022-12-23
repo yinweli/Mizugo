@@ -30,8 +30,8 @@ type Labeler interface {
 	// erase 清除標籤
 	erase()
 
-	// Label 取得標籤
-	Label() []string
+	// label 取得標籤
+	label() []string
 }
 
 // Add 新增標籤
@@ -70,7 +70,7 @@ func (this *Labelmgr) Erase(obj any) {
 		this.lock.Lock()
 		defer this.lock.Unlock()
 
-		for _, itor := range labelObj.Label() {
+		for _, itor := range labelObj.label() {
 			set := this.find(itor)
 			set.Remove(obj)
 		} // for
@@ -89,8 +89,11 @@ func (this *Labelmgr) Get(label string) []any {
 
 // Label 取得標籤
 func (this *Labelmgr) Label(obj any) []string {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+
 	if labelObj, ok := obj.(Labeler); ok {
-		return labelObj.Label()
+		return labelObj.label()
 	} // if
 
 	return []string{}

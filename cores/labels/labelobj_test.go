@@ -40,13 +40,13 @@ func (this *SuiteLabelobj) TestLabelobj() {
 	label := []string{"label1", "label2", "label3"}
 
 	target.add(label...)
-	assert.ElementsMatch(this.T(), label, target.Label())
+	assert.ElementsMatch(this.T(), label, target.label())
 
 	target.del(label...)
-	assert.ElementsMatch(this.T(), []string{}, target.Label())
+	assert.ElementsMatch(this.T(), []string{}, target.label())
 
 	target.add(label...)
-	assert.ElementsMatch(this.T(), label, target.Label())
+	assert.ElementsMatch(this.T(), label, target.label())
 	target.erase()
-	assert.ElementsMatch(this.T(), []string{}, target.Label())
+	assert.ElementsMatch(this.T(), []string{}, target.label())
 }

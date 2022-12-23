@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/yinweli/Mizugo/cores/events"
+	"github.com/yinweli/Mizugo/cores/labels"
 	"github.com/yinweli/Mizugo/cores/msgs"
 	"github.com/yinweli/Mizugo/cores/nets"
 	"github.com/yinweli/Mizugo/cores/utils"
@@ -15,9 +16,9 @@ import (
 func NewEntity(entityID EntityID) *Entity {
 	return &Entity{
 		entityID:  entityID,
-		tag:       newEntityTag(),
 		modulemgr: NewModulemgr(),
 		eventmgr:  events.NewEventmgr(eventSize),
+		labelobj:  labels.NewLabelobj(),
 	}
 }
 
@@ -26,9 +27,9 @@ type Entity struct {
 	entityID  EntityID                       // 實體編號
 	enable    atomic.Bool                    // 啟用旗標
 	close     []func()                       // 結束處理列表
-	tag       *entityTag                     // 標籤列表
 	modulemgr *Modulemgr                     // 模組管理器
 	eventmgr  *events.Eventmgr               // 事件管理器
+	labelobj  *labels.Labelobj               // 標籤物件
 	session   utils.SyncAttr[nets.Sessioner] // 會話物件
 	process   utils.SyncAttr[msgs.Processor] // 處理物件
 }
@@ -90,13 +91,6 @@ func (this *Entity) EntityID() EntityID {
 // Enable 取得啟用旗標
 func (this *Entity) Enable() bool {
 	return this.enable.Load()
-}
-
-// ===== 標籤功能 =====
-
-// Tag 取得標籤列表
-func (this *Entity) Tag() []string {
-	return this.tag.Tag()
 }
 
 // ===== 模組功能 =====

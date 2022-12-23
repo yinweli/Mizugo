@@ -78,12 +78,12 @@ func (this *Echo) Bind(session nets.Sessioner) (content nets.Content, err error)
 
 	if err := entity.Initialize(func() {
 		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.EntityTagmgr().Del(entity, this.name)
+		mizugos.Labelmgr().Erase(entity)
 	}); err != nil {
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	mizugos.EntityTagmgr().Add(entity, this.name)
+	mizugos.Labelmgr().Add(entity, this.name)
 	content.Unbind = entity.Finalize
 	content.Encode = nil
 	content.Decode = nil
