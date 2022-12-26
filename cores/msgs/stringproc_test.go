@@ -12,34 +12,34 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestStringMsg(t *testing.T) {
-	suite.Run(t, new(SuiteStringMsg))
+func TestStringProc(t *testing.T) {
+	suite.Run(t, new(SuiteStringProc))
 }
 
-type SuiteStringMsg struct {
+type SuiteStringProc struct {
 	suite.Suite
 	testdata.TestEnv
 }
 
-func (this *SuiteStringMsg) SetupSuite() {
-	this.Change("test-msgs-stringmsg")
+func (this *SuiteStringProc) SetupSuite() {
+	this.Change("test-msgs-stringproc")
 }
 
-func (this *SuiteStringMsg) TearDownSuite() {
+func (this *SuiteStringProc) TearDownSuite() {
 	this.Restore()
 }
 
-func (this *SuiteStringMsg) TearDownTest() {
+func (this *SuiteStringProc) TearDownTest() {
 	goleak.VerifyNone(this.T())
 }
 
-func (this *SuiteStringMsg) TestNewStringMsg() {
-	assert.NotNil(this.T(), NewStringMsg())
+func (this *SuiteStringProc) TestNewStringProc() {
+	assert.NotNil(this.T(), NewStringProc())
 }
 
-func (this *SuiteStringMsg) TestEncodeDecode() {
-	target := NewStringMsg()
-	msg := &StringMessage{
+func (this *SuiteStringProc) TestEncodeDecode() {
+	target := NewStringProc()
+	msg := &StringMsg{
 		MessageID: 1,
 		Message:   "test encode/decode message",
 	}
@@ -67,9 +67,9 @@ func (this *SuiteStringMsg) TestEncodeDecode() {
 	assert.NotNil(this.T(), err)
 }
 
-func (this *SuiteStringMsg) TestProcess() {
-	target := NewStringMsg()
-	msg := &StringMessage{
+func (this *SuiteStringProc) TestProcess() {
+	target := NewStringProc()
+	msg := &StringMsg{
 		MessageID: 1,
 		Message:   "test process message",
 	}
@@ -87,9 +87,9 @@ func (this *SuiteStringMsg) TestProcess() {
 	assert.NotNil(this.T(), target.Process(nil))
 }
 
-func BenchmarkStringMsgEncode(b *testing.B) {
-	target := NewStringMsg()
-	msg := &StringMessage{
+func BenchmarkStringProcEncode(b *testing.B) {
+	target := NewStringProc()
+	msg := &StringMsg{
 		MessageID: 1,
 		Message:   "benchmark encode message",
 	}
@@ -99,9 +99,9 @@ func BenchmarkStringMsgEncode(b *testing.B) {
 	} // for
 }
 
-func BenchmarkStringMsgDecode(b *testing.B) {
-	target := NewStringMsg()
-	msg := &StringMessage{
+func BenchmarkStringProcDecode(b *testing.B) {
+	target := NewStringProc()
+	msg := &StringMsg{
 		MessageID: 1,
 		Message:   "benchmark decode message",
 	}

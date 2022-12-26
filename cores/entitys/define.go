@@ -21,18 +21,6 @@ type EntityID int64
 // ModuleID 模組編號
 type ModuleID int64
 
-// Moduler 模組介面
-type Moduler interface {
-	// ModuleID 取得模組編號
-	ModuleID() ModuleID
-
-	// Entity 取得實體物件
-	Entity() *Entity
-
-	// Internal 取得內部物件
-	Internal() *Internal
-}
-
 // Awaker awake模組事件介面
 type Awaker interface {
 	// Awake 模組初始化時第一個被執行

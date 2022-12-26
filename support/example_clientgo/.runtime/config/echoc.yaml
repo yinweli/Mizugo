@@ -1,0 +1,4 @@
+echoc:
+  ip:
+  port: 4001
+  timeout: 1s

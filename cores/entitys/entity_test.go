@@ -1,6 +1,7 @@
 package entitys
 
 import (
+	"net"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 
+	"github.com/yinweli/Mizugo/cores/msgs"
 	"github.com/yinweli/Mizugo/cores/nets"
 	"github.com/yinweli/Mizugo/testdata"
 )
@@ -35,32 +37,74 @@ func (this *SuiteEntity) TearDownTest() {
 }
 
 func (this *SuiteEntity) TestNewEntity() {
-	assert.NotNil(this.T(), newEntity(EntityID(1)))
+	assert.NotNil(this.T(), NewEntity(EntityID(1)))
 }
 
 func (this *SuiteEntity) TestInitialize() {
-	target := newEntity(EntityID(1))
+	entityID := EntityID(1)
+	target := NewEntity(entityID)
 	module := newModuleTester(ModuleID(1))
+	closeCount := 0
+	closeFunc := func() {
+		closeCount++
+	}
 
 	assert.Nil(this.T(), target.AddModule(module))
-	assert.Nil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.Initialize())
+	assert.Nil(this.T(), target.Initialize(closeFunc))
+	assert.NotNil(this.T(), target.Initialize(closeFunc))
+	assert.Equal(this.T(), entityID, target.EntityID())
 	assert.True(this.T(), target.Enable())
 
 	time.Sleep(updateInterval * 2) // 為了讓update會被執行, 需要長一點的時間
-	assert.Nil(this.T(), target.Finalize())
-	assert.NotNil(this.T(), target.Finalize())
+	target.Finalize()
+	target.Finalize() // 故意結束兩次, 這次應該不執行
 	assert.False(this.T(), target.Enable())
 
 	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), module.awake.Load())
-	assert.True(this.T(), module.start.Load())
-	assert.True(this.T(), module.dispose.Load())
-	assert.True(this.T(), module.update.Load())
+	assert.Equal(this.T(), 1, closeCount)
+	assert.Equal(this.T(), int64(1), module.awake.Load())
+	assert.Equal(this.T(), int64(1), module.start.Load())
+	assert.Equal(this.T(), int64(1), module.dispose.Load())
+	assert.Equal(this.T(), int64(1), module.update.Load())
+}
+
+func (this *SuiteEntity) TestSession() {
+	target := NewEntity(EntityID(1))
+	conn, _ := net.Dial("tcp", net.JoinHostPort("google.com", "80"))
+	session := nets.NewTCPSession(conn)
+
+	assert.Nil(this.T(), target.SetSession(session))
+	assert.Equal(this.T(), session, target.GetSession())
+
+	assert.Nil(this.T(), target.Initialize())
+	assert.NotNil(this.T(), target.SetSession(session))
+
+	target.Send("message")
+	assert.Equal(this.T(), session.SessionID(), target.SessionID())
+	assert.Equal(this.T(), session.RemoteAddr(), target.RemoteAddr())
+	assert.Equal(this.T(), session.LocalAddr(), target.LocalAddr())
+
+	target.Finalize()
+}
+
+func (this *SuiteEntity) TestProcess() {
+	target := NewEntity(EntityID(1))
+	process := msgs.NewStringProc()
+
+	assert.Nil(this.T(), target.SetProcess(process))
+	assert.Equal(this.T(), process, target.GetProcess())
+	target.AddMessage(msgs.MessageID(1), func(messageID msgs.MessageID, message any) {
+		// do nothing
+	})
+	target.DelMessage(msgs.MessageID(1))
+
+	assert.Nil(this.T(), target.Initialize())
+	assert.NotNil(this.T(), target.SetProcess(process))
+	target.Finalize()
 }
 
 func (this *SuiteEntity) TestModule() {
-	target := newEntity(EntityID(1))
+	target := NewEntity(EntityID(1))
 	module1 := newModuleTester(ModuleID(1))
 	module2 := newModuleTester(ModuleID(2))
 
@@ -69,11 +113,11 @@ func (this *SuiteEntity) TestModule() {
 	assert.NotNil(this.T(), target.AddModule(module1))
 	assert.Nil(this.T(), target.Initialize())
 	assert.NotNil(this.T(), target.AddModule(module2))
-	assert.Nil(this.T(), target.Finalize())
+	target.Finalize()
 }
 
 func (this *SuiteEntity) TestEvent() {
-	target := newEntity(EntityID(1))
+	target := NewEntity(EntityID(1))
 	eventOnce := "eventOnce"
 	paramOnce := "paramOnce"
 	validOnce := atomic.Bool{}
@@ -104,17 +148,5 @@ func (this *SuiteEntity) TestEvent() {
 		// do nothing
 	}))
 
-	assert.Nil(this.T(), target.Finalize())
-}
-
-func (this *SuiteEntity) TestSession() {
-	target := newEntity(EntityID(1))
-	session := nets.NewTCPSession(nil)
-
-	assert.Nil(this.T(), target.SetSession(session))
-	assert.Equal(this.T(), session, target.GetSession())
-
-	assert.Nil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.SetSession(session))
-	assert.Nil(this.T(), target.Finalize())
+	target.Finalize()
 }

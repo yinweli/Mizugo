@@ -10,33 +10,33 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestMsgmgr(t *testing.T) {
-	suite.Run(t, new(SuiteMsgmgr))
+func TestProcmgr(t *testing.T) {
+	suite.Run(t, new(SuiteProcmgr))
 }
 
-type SuiteMsgmgr struct {
+type SuiteProcmgr struct {
 	suite.Suite
 	testdata.TestEnv
 }
 
-func (this *SuiteMsgmgr) SetupSuite() {
-	this.Change("test-msgs-msgmgr")
+func (this *SuiteProcmgr) SetupSuite() {
+	this.Change("test-msgs-procmgr")
 }
 
-func (this *SuiteMsgmgr) TearDownSuite() {
+func (this *SuiteProcmgr) TearDownSuite() {
 	this.Restore()
 }
 
-func (this *SuiteMsgmgr) TearDownTest() {
+func (this *SuiteProcmgr) TearDownTest() {
 	goleak.VerifyNone(this.T())
 }
 
-func (this *SuiteMsgmgr) TestNewMsgmgr() {
-	assert.NotNil(this.T(), NewMsgmgr())
+func (this *SuiteProcmgr) TestNewProcmgr() {
+	assert.NotNil(this.T(), NewProcmgr())
 }
 
-func (this *SuiteMsgmgr) TestMsgmgr() {
-	target := NewMsgmgr()
+func (this *SuiteProcmgr) TestProcmgr() {
+	target := NewProcmgr()
 	messageID := MessageID(1)
 	target.Add(messageID, func(messageID MessageID, message any) {
 		// do nothing
@@ -46,7 +46,7 @@ func (this *SuiteMsgmgr) TestMsgmgr() {
 	assert.Nil(this.T(), target.Get(messageID))
 }
 
-func (this *SuiteMsgmgr) TestCast() {
+func (this *SuiteProcmgr) TestCast() {
 	msg := &msgTester1{}
 
 	result, err := Cast[msgTester1](msg)

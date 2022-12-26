@@ -1,5 +1,5 @@
 logger:
-  name: example_server.log
+  name: example_client.log
   path: log
   json: false
   console: true

@@ -2,40 +2,48 @@ package entitys
 
 import (
 	"fmt"
+	"net"
 	"sync/atomic"
 	"time"
 
 	"github.com/yinweli/Mizugo/cores/events"
+	"github.com/yinweli/Mizugo/cores/labels"
+	"github.com/yinweli/Mizugo/cores/msgs"
 	"github.com/yinweli/Mizugo/cores/nets"
 	"github.com/yinweli/Mizugo/cores/utils"
 )
 
-// newEntity 建立實體資料
-func newEntity(entityID EntityID) *Entity {
+// NewEntity 建立實體資料
+func NewEntity(entityID EntityID) *Entity {
 	return &Entity{
 		entityID:  entityID,
 		modulemgr: NewModulemgr(),
 		eventmgr:  events.NewEventmgr(eventSize),
+		labelobj:  labels.NewLabelobj(),
 	}
 }
 
 // Entity 實體資料
 type Entity struct {
 	entityID  EntityID                       // 實體編號
+	enable    atomic.Bool                    // 啟用旗標
+	close     []func()                       // 結束處理列表
+	session   utils.SyncAttr[nets.Sessioner] // 會話物件
+	process   utils.SyncAttr[msgs.Processor] // 處理物件
 	modulemgr *Modulemgr                     // 模組管理器
 	eventmgr  *events.Eventmgr               // 事件管理器
-	enable    atomic.Bool                    // 啟用旗標
-	session   utils.SyncAttr[nets.Sessioner] // 會話物件
+	labelobj  *labels.Labelobj               // 標籤物件
 }
 
 // ===== 基礎功能 =====
 
 // Initialize 初始化處理
-func (this *Entity) Initialize() error {
+func (this *Entity) Initialize(closes ...func()) error {
 	if this.enable.CompareAndSwap(false, true) == false {
 		return fmt.Errorf("entity initialize: already initialize")
 	} // if
 
+	this.close = closes
 	this.eventmgr.Sub(eventAwake, this.eventAwake)
 	this.eventmgr.Sub(eventStart, this.eventStart)
 	this.eventmgr.Sub(eventDispose, this.eventDispose)
@@ -52,25 +60,32 @@ func (this *Entity) Initialize() error {
 	} // for
 
 	for _, itor := range module {
-		itor.Internal().update = this.eventmgr.PubFixed(eventUpdate, itor, updateInterval)
+		itor.internal().update = this.eventmgr.PubFixed(eventUpdate, itor, updateInterval)
 	} // for
 
 	return nil
 }
 
 // Finalize 結束處理, 請不要重複使用結束的實體物件
-func (this *Entity) Finalize() error {
+func (this *Entity) Finalize() {
 	if this.enable.CompareAndSwap(true, false) == false {
-		return fmt.Errorf("entity initialize: already finalize or not initialize")
+		return
 	} // if
 
+	for _, itor := range this.close {
+		itor()
+	} // for
+
 	for _, itor := range this.modulemgr.All() {
-		itor.Internal().updateStop()
+		itor.internal().updateStop()
 		this.eventmgr.PubOnce(eventDispose, itor)
 	} // for
 
 	this.eventmgr.Finalize()
-	return nil
+
+	if session := this.session.Get(); session != nil {
+		session.Stop()
+	} // if
 }
 
 // EntityID 取得實體編號
@@ -81,6 +96,70 @@ func (this *Entity) EntityID() EntityID {
 // Enable 取得啟用旗標
 func (this *Entity) Enable() bool {
 	return this.enable.Load()
+}
+
+// ===== 會話功能 =====
+
+// SetSession 設定會話物件, 初始化完成後就不能設定會話物件
+func (this *Entity) SetSession(session nets.Sessioner) error {
+	if this.enable.Load() {
+		return fmt.Errorf("entity set session: overdue")
+	} // if
+
+	this.session.Set(session)
+	return nil
+}
+
+// GetSession 取得會話物件
+func (this *Entity) GetSession() nets.Sessioner {
+	return this.session.Get()
+}
+
+// Send 傳送封包
+func (this *Entity) Send(message any) {
+	this.session.Get().Send(message)
+}
+
+// SessionID 取得會話編號
+func (this *Entity) SessionID() nets.SessionID {
+	return this.session.Get().SessionID()
+}
+
+// RemoteAddr 取得遠端位址
+func (this *Entity) RemoteAddr() net.Addr {
+	return this.session.Get().RemoteAddr()
+}
+
+// LocalAddr 取得本地位址
+func (this *Entity) LocalAddr() net.Addr {
+	return this.session.Get().LocalAddr()
+}
+
+// ===== 處理功能 =====
+
+// SetProcess 設定處理物件, 初始化完成後就不能設定處理物件
+func (this *Entity) SetProcess(process msgs.Processor) error {
+	if this.enable.Load() {
+		return fmt.Errorf("entity set process: overdue")
+	} // if
+
+	this.process.Set(process)
+	return nil
+}
+
+// GetProcess 取得處理物件
+func (this *Entity) GetProcess() msgs.Processor {
+	return this.process.Get()
+}
+
+// AddMessage 新增訊息處理
+func (this *Entity) AddMessage(messageID msgs.MessageID, process msgs.Process) {
+	this.process.Get().Add(messageID, process)
+}
+
+// DelMessage 刪除訊息處理
+func (this *Entity) DelMessage(messageID msgs.MessageID) {
+	this.process.Get().Del(messageID)
 }
 
 // ===== 模組功能 =====
@@ -95,7 +174,7 @@ func (this *Entity) AddModule(module Moduler) error {
 		return fmt.Errorf("entity add module: %w", err)
 	} // if
 
-	module.Internal().entity = this
+	module.internal().entity = this
 	return nil
 }
 
@@ -125,25 +204,6 @@ func (this *Entity) PubOnceEvent(name string, param any) {
 func (this *Entity) PubFixedEvent(name string, param any, interval time.Duration) *events.Fixed {
 	return this.eventmgr.PubFixed(name, param, interval)
 }
-
-// ===== 會話功能 =====
-
-// SetSession 設定會話物件, 初始化完成後就不能設定會話物件
-func (this *Entity) SetSession(session nets.Sessioner) error {
-	if this.enable.Load() {
-		return fmt.Errorf("entity set session: overdue")
-	} // if
-
-	this.session.Set(session)
-	return nil
-}
-
-// GetSession 取得會話物件
-func (this *Entity) GetSession() nets.Sessioner {
-	return this.session.Get()
-}
-
-// ===== 訊息功能 =====
 
 // ===== 內部功能 =====
 

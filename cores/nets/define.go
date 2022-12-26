@@ -52,14 +52,14 @@ type Sessioner interface {
 // Binder 綁定介面
 type Binder interface {
 	// Bind 綁定處理
-	Bind(session Sessioner) *React
+	Bind(session Sessioner) (content Content, err error)
 
 	// Error 錯誤處理
 	Error(err error)
 }
 
-// React 反應資料
-type React struct {
+// Content 內容資料
+type Content struct {
 	Unbind  // 解綁處理函式
 	Encode  // 封包編碼處理函式
 	Decode  // 封包解碼處理函式

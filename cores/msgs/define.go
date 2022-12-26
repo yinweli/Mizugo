@@ -1,7 +1,7 @@
 package msgs
 
-// Messenger 訊息介面
-type Messenger interface {
+// Processor 處理介面
+type Processor interface {
 	// Encode 封包編碼
 	Encode(message any) (packet []byte, err error)
 
