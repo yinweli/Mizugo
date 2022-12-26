@@ -6,6 +6,7 @@ import (
 	"github.com/yinweli/Mizugo/cores/msgs"
 	"github.com/yinweli/Mizugo/cores/nets"
 	"github.com/yinweli/Mizugo/mizugos"
+	"github.com/yinweli/Mizugo/support/example_server/module"
 )
 
 // NewEntry 建立入口資料
@@ -73,7 +74,9 @@ func (this *Entry) Bind(session nets.Sessioner) (content nets.Content, err error
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	// TODO: add module
+	if err := entity.AddModule(module.NewEchos()); err != nil {
+		return content, fmt.Errorf("bind: %w", err)
+	} // if
 
 	if err := entity.Initialize(func() {
 		mizugos.Entitymgr().Del(entity.EntityID())
