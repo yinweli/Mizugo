@@ -1,40 +1,49 @@
 package events
 
 import (
+	"sync"
 	"sync/atomic"
 	"time"
 )
 
 // NewEventmgr 建立事件管理器
-func NewEventmgr(eventSize int) *Eventmgr {
+func NewEventmgr(capacity int) *Eventmgr {
 	return &Eventmgr{
-		pubsub: NewPubsub(),
-		event:  make(chan *event, eventSize),
+		event:  make(chan event, capacity),
+		pubsub: newPubsub(),
 	}
 }
 
 // Eventmgr 事件管理器
 type Eventmgr struct {
-	pubsub *Pubsub     // 訂閱/發布資料
-	event  chan *event // 事件通道
+	event  chan event  // 事件通道
+	pubsub *pubsub     // 訂閱/發布資料
 	finish atomic.Bool // 結束旗標
 }
 
-// event 事件資料
-type event struct {
-	name  string // 事件名稱
-	param any    // 事件參數
-}
+// Process 處理函式類型
+type Process func(param any)
 
 // Initialize 初始化處理, 由於初始化完成後就會開始處理事件, 因此可能需要在初始化之前做完訂閱事件
 func (this *Eventmgr) Initialize() {
 	go func() {
-		for itor := range this.event {
-			if itor != nil {
-				this.pubsub.Pub(itor.name, itor.param)
-			} else {
-				return // 當收到空物件時表示結束事件循環
-			} // if
+		for {
+			select {
+			case e := <-this.event:
+				this.pubsub.pub(e.name, e.param)
+
+			default:
+				if this.finish.Load() {
+					goto Finish
+				} // if
+			} // select
+		} // for
+
+	Finish:
+		close(this.event)
+
+		for e := range this.event { // 把剩餘的事件都做完
+			this.pubsub.pub(e.name, e.param)
 		} // for
 	}()
 }
@@ -42,27 +51,30 @@ func (this *Eventmgr) Initialize() {
 // Finalize 結束處理
 func (this *Eventmgr) Finalize() {
 	this.finish.Store(true)
-	this.event <- nil // 新增一個空事件, 讓事件循環可以結束
 }
 
 // Sub 訂閱事件, 由於初始化完成後就會開始處理事件, 因此可能需要在初始化之前做完訂閱事件
 func (this *Eventmgr) Sub(name string, process Process) {
-	this.pubsub.Sub(name, process)
+	this.pubsub.sub(name, process)
 }
 
 // PubOnce 發布單次事件
 func (this *Eventmgr) PubOnce(name string, param any) {
-	if this.finish.Load() == false {
-		this.event <- &event{
-			name:  name,
-			param: param,
-		}
+	if this.finish.Load() {
+		return
 	} // if
+
+	this.event <- event{
+		name:  name,
+		param: param,
+	}
 }
 
-// PubFixed 發布定時事件, 回傳用於停止定時事件的定時控制器
-func (this *Eventmgr) PubFixed(name string, param any, interval time.Duration) *Fixed {
-	fixed := &Fixed{}
+// PubFixed 發布定時事件
+func (this *Eventmgr) PubFixed(name string, param any, interval time.Duration) {
+	if this.finish.Load() {
+		return
+	} // if
 
 	go func() {
 		timeout := time.After(interval)
@@ -70,15 +82,53 @@ func (this *Eventmgr) PubFixed(name string, param any, interval time.Duration) *
 		for {
 			select {
 			case <-timeout:
-				this.PubOnce(name, param)
+				this.event <- event{
+					name:  name,
+					param: param,
+				}
 
 			default:
-				if fixed.State() {
+				if this.finish.Load() {
 					return
 				} // if
 			} // select
 		} // for
 	}()
+}
 
-	return fixed
+// newPubsub 建立訂閱/發布資料
+func newPubsub() *pubsub {
+	return &pubsub{
+		data: map[string]Process{},
+	}
+}
+
+// pubsub 訂閱/發布資料
+type pubsub struct {
+	data map[string]Process // 處理列表
+	lock sync.RWMutex       // 執行緒鎖
+}
+
+// sub 訂閱
+func (this *pubsub) sub(name string, process Process) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.data[name] = process
+}
+
+// pub 發布
+func (this *pubsub) pub(name string, param any) {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+
+	if process, ok := this.data[name]; ok {
+		process(param)
+	} // if
+}
+
+// event 事件資料
+type event struct {
+	name  string // 事件名稱
+	param any    // 事件參數
 }

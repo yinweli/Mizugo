@@ -37,9 +37,9 @@ func (this *SuiteModule) TestNewModule() {
 
 func (this *SuiteModule) TestModule() {
 	target := NewModule(ModuleID(1))
-	target.internal().entity = NewEntity(EntityID(1))
+	entity := NewEntity(EntityID(1))
+	target.SetEntity(entity)
 
 	assert.Equal(this.T(), ModuleID(1), target.ModuleID())
-	assert.Equal(this.T(), EntityID(1), target.Entity().EntityID())
-	assert.NotNil(this.T(), target.internal())
+	assert.Equal(this.T(), entity, target.GetEntity())
 }
