@@ -18,11 +18,11 @@ type Moduler interface {
 	// ModuleID 取得模組編號
 	ModuleID() ModuleID
 
-	// SetEntity 設定實體物件
-	SetEntity(entity *Entity)
+	// Entity 取得實體物件
+	Entity() *Entity
 
-	// GetEntity 取得實體物件
-	GetEntity() *Entity
+	// setup 設定模組
+	setup(entity *Entity)
 }
 
 // ModuleID 取得模組編號
@@ -30,12 +30,12 @@ func (this *Module) ModuleID() ModuleID {
 	return this.moduleID
 }
 
-// SetEntity 設定實體物件
-func (this *Module) SetEntity(entity *Entity) {
-	this.entity = entity
+// Entity 取得實體物件
+func (this *Module) Entity() *Entity {
+	return this.entity
 }
 
-// GetEntity 取得實體物件
-func (this *Module) GetEntity() *Entity {
-	return this.entity
+// setup 設定模組
+func (this *Module) setup(entity *Entity) {
+	this.entity = entity
 }

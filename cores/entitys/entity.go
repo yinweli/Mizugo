@@ -189,7 +189,7 @@ func (this *Entity) AddModule(module Moduler) error {
 		return fmt.Errorf("entity add module: %w", err)
 	} // if
 
-	module.SetEntity(this)
+	module.setup(this)
 	return nil
 }
 
