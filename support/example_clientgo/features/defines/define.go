@@ -10,11 +10,13 @@ const ConfigType = "yaml"   // 配置類型
 const ( // 入口名稱
 	EntryEchoOnce  = "echoonce"
 	EntryEchoMulti = "echomulti"
+	EntryEchoCycle = "echocycle"
 )
 
 const ( // 標籤名稱
 	LabelEchoOnce  = "echoonce"
 	LabelEchoMulti = "echomulti"
+	LabelEchoCycle = "echocycle"
 )
 
 const ( // 訊息編號

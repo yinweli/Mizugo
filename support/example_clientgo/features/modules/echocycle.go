@@ -8,18 +8,17 @@ import (
 	"github.com/yinweli/Mizugo/support/example_clientgo/features/defines"
 )
 
-// NewEchoMulti 建立多次回音模組
-func NewEchoMulti(echoString string, echoCount int) *EchoMulti {
-	return &EchoMulti{
+// NewEchoCycle 建立循環回音模組
+func NewEchoCycle(echoString string) *EchoCycle {
+	return &EchoCycle{
 		Module:     entitys.NewModule(1),
-		name:       "module echo multi",
+		name:       "module echo cycle",
 		echoString: echoString,
-		echoCount:  echoCount,
 	}
 }
 
-// EchoMulti 多次回音模組
-type EchoMulti struct {
+// EchoCycle 循環回音模組
+type EchoCycle struct {
 	*entitys.Module        // 模組資料
 	name            string // 模組名稱
 	echoString      string // 回音字串
@@ -27,13 +26,13 @@ type EchoMulti struct {
 }
 
 // Start start事件
-func (this *EchoMulti) Start() {
+func (this *EchoCycle) Start() {
 	this.Entity().AddMessage(defines.MessageIDEcho, this.ProcMsgEcho)
 	this.SendMsgEcho()
 }
 
 // ProcMsgEcho 處理回音訊息
-func (this *EchoMulti) ProcMsgEcho(messageID msgs.MessageID, message any) {
+func (this *EchoCycle) ProcMsgEcho(messageID msgs.MessageID, message any) {
 	msg, err := utils.CastPointer[msgs.StringMsg](message)
 
 	if err != nil {
@@ -41,21 +40,16 @@ func (this *EchoMulti) ProcMsgEcho(messageID msgs.MessageID, message any) {
 		return
 	} // if
 
-	this.echoCount--
+	this.echoCount++
 	mizugos.Info(this.name).Message("ProcMsgEcho").
 		KV("result", msg.Message == this.echoString).
 		KV("count", this.echoCount).
 		End()
-
-	if this.echoCount > 0 {
-		this.SendMsgEcho()
-	} else {
-		this.Entity().Finalize()
-	} // if
+	this.SendMsgEcho()
 }
 
 // SendMsgEcho 傳送回音訊息
-func (this *EchoMulti) SendMsgEcho() {
+func (this *EchoCycle) SendMsgEcho() {
 	this.Entity().Send(&msgs.StringMsg{
 		MessageID: defines.MessageIDEcho,
 		Message:   this.echoString,
