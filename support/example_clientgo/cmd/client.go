@@ -4,8 +4,9 @@ import (
 	"fmt"
 
 	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/support/example_clientgo/feature/commons"
-	"github.com/yinweli/Mizugo/support/example_clientgo/feature/entryechos"
+	"github.com/yinweli/Mizugo/support/example_clientgo/features/commons"
+	"github.com/yinweli/Mizugo/support/example_clientgo/features/defines"
+	"github.com/yinweli/Mizugo/support/example_clientgo/features/entrys"
 )
 
 func main() {
@@ -15,15 +16,20 @@ func main() {
 // initialize 初始化處理
 func initialize() error {
 	feature.logger = commons.NewLogger()
-	feature.entryEcho = entryechos.NewEntry()
+	feature.echoOnce = entrys.NewEchoOnce()
+	feature.echoMulti = entrys.NewEchoMulti()
 
-	mizugos.Configmgr().AddPath("config")
+	mizugos.Configmgr().AddPath(defines.ConfigPath)
 
 	if err := feature.logger.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := feature.entryEcho.Initialize(); err != nil {
+	if err := feature.echoOnce.Initialize(); err != nil {
+		return fmt.Errorf("initialize: %w", err)
+	} // if
+
+	if err := feature.echoMulti.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
@@ -33,11 +39,12 @@ func initialize() error {
 // finalize 結束處理
 func finalize() {
 	feature.logger.Finalize()
-	feature.entryEcho.Finalize()
+	feature.echoOnce.Finalize()
 }
 
 // feature 功能資料
 var feature struct {
 	logger    *commons.Logger   // 日誌資料
-	entryEcho *entryechos.Entry // 回音入口
+	echoOnce  *entrys.EchoOnce  // 單次回音
+	echoMulti *entrys.EchoMulti // 多次回音
 }
