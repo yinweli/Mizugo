@@ -10,31 +10,29 @@ import (
 	"github.com/yinweli/Mizugo/support/example_server/features/modules"
 )
 
-// NewEchos 建立入口資料
-func NewEchos() *Echos {
-	return &Echos{
-		name: defines.EntryEchos,
+// NewEchoServer 建立回音伺服器資料
+func NewEchoServer() *EchoServer {
+	return &EchoServer{
+		name: defines.EntryEchoServer,
 	}
 }
 
-// Echos 入口資料
-type Echos struct {
-	name   string        // 入口名稱
-	config EchosConfig   // 設定資料
-	listen nets.Listener // 接聽物件
+// EchoServer 回音伺服器資料
+type EchoServer struct {
+	name   string           // 入口名稱
+	config EchoServerConfig // 設定資料
+	listen nets.Listener    // 接聽物件
 }
 
-// EchosConfig 設定資料
-type EchosConfig struct {
+// EchoServerConfig 設定資料
+type EchoServerConfig struct {
 	IP   string // 位址
 	Port string // 埠號
 }
 
 // Initialize 初始化處理
-func (this *Echos) Initialize() error {
-	mizugos.Info(this.name).
-		Message("entry initialize").
-		End()
+func (this *EchoServer) Initialize() error {
+	mizugos.Info(this.name).Message("entry initialize").End()
 
 	if err := mizugos.Configmgr().ReadFile(this.name, defines.ConfigType); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
@@ -46,19 +44,13 @@ func (this *Echos) Initialize() error {
 
 	this.listen = nets.NewTCPListen(this.config.IP, this.config.Port)
 	mizugos.Netmgr().AddListen(this.listen, this)
-	mizugos.Info(this.name).
-		Message("entry start").
-		KV("ip", this.config.IP).
-		KV("port", this.config.Port).
-		End()
+	mizugos.Info(this.name).Message("entry start").KV("ip", this.config.IP).KV("port", this.config.Port).End()
 	return nil
 }
 
 // Finalize 結束處理
-func (this *Echos) Finalize() {
-	mizugos.Info(this.name).
-		Message("entry stop").
-		End()
+func (this *EchoServer) Finalize() {
+	mizugos.Info(this.name).Message("entry finalize").End()
 
 	if err := this.listen.Stop(); err != nil {
 		_ = mizugos.Error(this.name).EndError(err)
@@ -66,7 +58,8 @@ func (this *Echos) Finalize() {
 }
 
 // Bind 綁定處理
-func (this *Echos) Bind(session nets.Sessioner) (content nets.Content, err error) {
+func (this *EchoServer) Bind(session nets.Sessioner) (content nets.Content, err error) {
+	mizugos.Info(this.name).Message("session").KV("sessionID", session.SessionID()).End()
 	entity := mizugos.Entitymgr().Add()
 
 	if entity == nil {
@@ -81,7 +74,7 @@ func (this *Echos) Bind(session nets.Sessioner) (content nets.Content, err error
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	if err := entity.AddModule(modules.NewEchos()); err != nil {
+	if err := entity.AddModule(modules.NewEchoServer()); err != nil {
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
@@ -93,7 +86,7 @@ func (this *Echos) Bind(session nets.Sessioner) (content nets.Content, err error
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	mizugos.Labelmgr().Add(entity, defines.LabelEchos)
+	mizugos.Labelmgr().Add(entity, defines.LabelEchoServer)
 	content.Unbind = entity.Finalize
 	content.Encode = entity.GetProcess().Encode
 	content.Decode = entity.GetProcess().Decode
@@ -102,6 +95,6 @@ func (this *Echos) Bind(session nets.Sessioner) (content nets.Content, err error
 }
 
 // Error 錯誤處理
-func (this *Echos) Error(err error) {
+func (this *EchoServer) Error(err error) {
 	_ = mizugos.Error(this.name).EndError(err)
 }

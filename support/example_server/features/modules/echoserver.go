@@ -8,27 +8,27 @@ import (
 	"github.com/yinweli/Mizugo/support/example_server/features/defines"
 )
 
-// NewEchos 建立回音伺服器模組
-func NewEchos() *Echos {
-	return &Echos{
+// NewEchoServer 建立回音伺服器模組
+func NewEchoServer() *EchoServer {
+	return &EchoServer{
 		Module: entitys.NewModule(1),
 		name:   "module echo server",
 	}
 }
 
-// Echos 回音伺服器模組
-type Echos struct {
+// EchoServer 回音伺服器模組
+type EchoServer struct {
 	*entitys.Module        // 模組資料
 	name            string // 模組名稱
 }
 
 // Start start事件
-func (this *Echos) Start() {
+func (this *EchoServer) Start() {
 	this.Entity().AddMessage(defines.MessageIDEcho, this.ProcMsgEcho)
 }
 
 // ProcMsgEcho 處理回音訊息
-func (this *Echos) ProcMsgEcho(messageID msgs.MessageID, message any) {
+func (this *EchoServer) ProcMsgEcho(messageID msgs.MessageID, message any) {
 	_, err := utils.CastPointer[msgs.StringMsg](message)
 
 	if err != nil {
@@ -37,4 +37,5 @@ func (this *Echos) ProcMsgEcho(messageID msgs.MessageID, message any) {
 	} // if
 
 	this.Entity().Send(message)
+	mizugos.Info(this.name).Message("ProcMsgEcho receive").End()
 }

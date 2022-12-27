@@ -8,12 +8,11 @@ const ConfigPath = "config" // 配置路徑
 const ConfigType = "yaml"   // 配置類型
 
 const ( // 入口名稱
-	EntryEchoc = "echoc"
+	EntryEchoOnce = "echoonce"
 )
 
 const ( // 標籤名稱
-	LabelWatcher = "watcher"
-	LabelEchoc   = "echoc"
+	LabelEchoOnce = "echoonce"
 )
 
 const ( // 訊息編號

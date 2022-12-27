@@ -8,33 +8,33 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/msgs"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/support/example_clientgo/features/defines"
+	"github.com/yinweli/Mizugo/support/example_clientgo/features/modules"
 )
 
-// NewEchoc 建立入口資料
-func NewEchoc() *Echoc {
-	return &Echoc{
-		name: defines.EntryEchoc,
+// NewEchoOnce 建立單次回音資料
+func NewEchoOnce() *EchoOnce {
+	return &EchoOnce{
+		name: defines.EntryEchoOnce,
 	}
 }
 
-// Echoc 入口資料
-type Echoc struct {
-	name   string      // 入口名稱
-	config EchocConfig // 設定資料
+// EchoOnce 單次回音資料
+type EchoOnce struct {
+	name   string         // 入口名稱
+	config EchoOnceConfig // 設定資料
 }
 
-// EchocConfig 設定資料
-type EchocConfig struct {
-	IP      string        // 位址
-	Port    string        // 埠號
-	Timeout time.Duration // 逾期時間(秒)
+// EchoOnceConfig 設定資料
+type EchoOnceConfig struct {
+	IP         string        // 位址
+	Port       string        // 埠號
+	Timeout    time.Duration // 逾期時間(秒)
+	EchoString string        // 回音字串
 }
 
 // Initialize 初始化處理
-func (this *Echoc) Initialize() error {
-	mizugos.Info(this.name).
-		Message("entry initialize").
-		End()
+func (this *EchoOnce) Initialize() error {
+	mizugos.Info(this.name).Message("entry initialize").End()
 
 	if err := mizugos.Configmgr().ReadFile(this.name, defines.ConfigType); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
@@ -45,23 +45,18 @@ func (this *Echoc) Initialize() error {
 	} // if
 
 	mizugos.Netmgr().AddConnect(nets.NewTCPConnect(this.config.IP, this.config.Port, this.config.Timeout), this)
-	mizugos.Info(this.name).
-		Message("entry start").
-		KV("ip", this.config.IP).
-		KV("port", this.config.Port).
-		End()
+	mizugos.Info(this.name).Message("entry start").KV("ip", this.config.IP).KV("port", this.config.Port).KV("timeout", this.config.Timeout).End()
 	return nil
 }
 
 // Finalize 結束處理
-func (this *Echoc) Finalize() {
-	mizugos.Info(this.name).
-		Message("entry stop").
-		End()
+func (this *EchoOnce) Finalize() {
+	mizugos.Info(this.name).Message("entry finalize").End()
 }
 
 // Bind 綁定處理
-func (this *Echoc) Bind(session nets.Sessioner) (content nets.Content, err error) {
+func (this *EchoOnce) Bind(session nets.Sessioner) (content nets.Content, err error) {
+	mizugos.Info(this.name).Message("session").KV("sessionID", session.SessionID()).End()
 	entity := mizugos.Entitymgr().Add()
 
 	if entity == nil {
@@ -76,7 +71,9 @@ func (this *Echoc) Bind(session nets.Sessioner) (content nets.Content, err error
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	// TODO: add module
+	if err := entity.AddModule(modules.NewEchoOnce(this.config.EchoString)); err != nil {
+		return content, fmt.Errorf("bind: %w", err)
+	} // if
 
 	if err := entity.Initialize(func() {
 		mizugos.Entitymgr().Del(entity.EntityID())
@@ -85,7 +82,7 @@ func (this *Echoc) Bind(session nets.Sessioner) (content nets.Content, err error
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	mizugos.Labelmgr().Add(entity, defines.LabelEchoc)
+	mizugos.Labelmgr().Add(entity, defines.LabelEchoOnce)
 	content.Unbind = entity.Finalize
 	content.Encode = entity.GetProcess().Encode
 	content.Decode = entity.GetProcess().Decode
@@ -94,6 +91,6 @@ func (this *Echoc) Bind(session nets.Sessioner) (content nets.Content, err error
 }
 
 // Error 錯誤處理
-func (this *Echoc) Error(err error) {
+func (this *EchoOnce) Error(err error) {
 	_ = mizugos.Error(this.name).EndError(err)
 }

@@ -8,11 +8,11 @@ const ConfigPath = "config" // 配置路徑
 const ConfigType = "yaml"   // 配置類型
 
 const ( // 入口名稱
-	EntryEchos = "echos"
+	EntryEchoServer = "echoserver"
 )
 
 const ( // 標籤名稱
-	LabelEchos = "echos"
+	LabelEchoServer = "echoserver"
 )
 
 const ( // 訊息編號
