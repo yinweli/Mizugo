@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yinweli/Mizugo/cores/msgs"
-	"github.com/yinweli/Mizugo/cores/nets"
 	"github.com/yinweli/Mizugo/mizugos"
+	"github.com/yinweli/Mizugo/mizugos/msgs"
+	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/support/example_clientgo/features/defines"
 )
 

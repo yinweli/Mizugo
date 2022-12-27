@@ -5,11 +5,11 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/yinweli/Mizugo/cores/configs"
-	"github.com/yinweli/Mizugo/cores/entitys"
-	"github.com/yinweli/Mizugo/cores/labels"
-	"github.com/yinweli/Mizugo/cores/logs"
-	"github.com/yinweli/Mizugo/cores/nets"
+	"github.com/yinweli/Mizugo/mizugos/configs"
+	"github.com/yinweli/Mizugo/mizugos/entitys"
+	"github.com/yinweli/Mizugo/mizugos/labels"
+	"github.com/yinweli/Mizugo/mizugos/logs"
+	"github.com/yinweli/Mizugo/mizugos/nets"
 )
 
 // Initialize 初始化處理函式類型

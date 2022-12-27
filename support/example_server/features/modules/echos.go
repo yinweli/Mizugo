@@ -1,9 +1,9 @@
 package modules
 
 import (
-	"github.com/yinweli/Mizugo/cores/entitys"
-	"github.com/yinweli/Mizugo/cores/msgs"
 	"github.com/yinweli/Mizugo/mizugos"
+	"github.com/yinweli/Mizugo/mizugos/entitys"
+	"github.com/yinweli/Mizugo/mizugos/msgs"
 	"github.com/yinweli/Mizugo/support/example_server/features/defines"
 )
 

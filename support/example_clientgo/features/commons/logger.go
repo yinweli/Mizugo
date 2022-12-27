@@ -3,8 +3,8 @@ package commons
 import (
 	"fmt"
 
-	"github.com/yinweli/Mizugo/cores/logs"
 	"github.com/yinweli/Mizugo/mizugos"
+	"github.com/yinweli/Mizugo/mizugos/logs"
 )
 
 // NewLogger 建立日誌資料

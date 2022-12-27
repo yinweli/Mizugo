@@ -1,7 +1,7 @@
 package defines
 
 import (
-	"github.com/yinweli/Mizugo/cores/msgs"
+	"github.com/yinweli/Mizugo/mizugos/msgs"
 )
 
 const (

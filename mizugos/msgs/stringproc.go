@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/yinweli/Mizugo/cores/utils"
+	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
 // NewStringProc 建立字串處理器
