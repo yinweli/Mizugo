@@ -139,10 +139,9 @@ func (this *SuiteEntity) TestEvent() {
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), validOnce.Load())
 
-	fixed := target.PubFixedEvent(eventFixed, paramFixed, time.Millisecond)
-	time.Sleep(testdata.Timeout)
+	target.PubFixedEvent(eventFixed, paramFixed, time.Millisecond)
+	time.Sleep(testdata.Timeout * 5) // 多等一下讓定時事件發生
 	assert.Greater(this.T(), validFixed.Load(), int64(0))
-	fixed.Stop()
 
 	assert.NotNil(this.T(), target.SubEvent(eventOnce, func(param any) {
 		// do nothing

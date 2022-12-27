@@ -38,7 +38,7 @@ func (this *SuiteEventmgr) TestNewEventmgr() {
 }
 
 func (this *SuiteEventmgr) TestEventmgr() {
-	target := NewEventmgr(1)
+	target := NewEventmgr(10)
 	target.Initialize()
 	target.Finalize()
 }
@@ -46,28 +46,37 @@ func (this *SuiteEventmgr) TestEventmgr() {
 func (this *SuiteEventmgr) TestPubOnce() {
 	target := NewEventmgr(10)
 	target.Initialize()
-	defer target.Finalize()
 
+	name := "event once"
+	value := "value once"
 	valid := atomic.Bool{}
-	target.Sub("event", func(param any) {
-		valid.Store(param.(string) == "pubonce")
+	target.Sub(name, func(param any) {
+		valid.Store(param.(string) == value)
 	})
-	target.PubOnce("event", "pubonce")
+	target.PubOnce(name, value)
+
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), valid.Load())
+
+	target.Finalize()
+	target.PubOnce(name, value)
 }
 
 func (this *SuiteEventmgr) TestPubFixed() {
 	target := NewEventmgr(10)
 	target.Initialize()
-	defer target.Finalize()
 
+	name := "event fixed"
+	value := "value fixed"
 	valid := atomic.Bool{}
-	target.Sub("event", func(param any) {
-		valid.Store(param.(string) == "pubfixed")
+	target.Sub(name, func(param any) {
+		valid.Store(param.(string) == value)
 	})
-	fixed := target.PubFixed("event", "pubfixed", time.Millisecond*100)
-	defer fixed.Stop()
-	time.Sleep(testdata.Timeout * 2) // 由於github的windows環境測試會失敗, 只好延長時間
+	target.PubFixed(name, value, testdata.Timeout)
+
+	time.Sleep(testdata.Timeout * 5) // 多等一下讓定時事件發生
 	assert.True(this.T(), valid.Load())
+
+	target.Finalize()
+	target.PubFixed(name, value, testdata.Timeout)
 }

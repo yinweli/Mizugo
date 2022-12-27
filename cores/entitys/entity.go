@@ -44,10 +44,26 @@ func (this *Entity) Initialize(closes ...func()) error {
 	} // if
 
 	this.close = closes
-	this.eventmgr.Sub(eventAwake, this.eventAwake)
-	this.eventmgr.Sub(eventStart, this.eventStart)
-	this.eventmgr.Sub(eventDispose, this.eventDispose)
-	this.eventmgr.Sub(eventUpdate, this.eventUpdate)
+	this.eventmgr.Sub(eventAwake, func(param any) {
+		if module, ok := param.(Awaker); ok {
+			module.Awake()
+		} // if
+	})
+	this.eventmgr.Sub(eventStart, func(param any) {
+		if module, ok := param.(Starter); ok {
+			module.Start()
+		} // if
+	})
+	this.eventmgr.Sub(eventDispose, func(param any) {
+		if module, ok := param.(Disposer); ok {
+			module.Dispose()
+		} // if
+	})
+	this.eventmgr.Sub(eventUpdate, func(param any) {
+		if module, ok := param.(Updater); ok {
+			module.Update()
+		} // if
+	})
 	this.eventmgr.Initialize()
 	module := this.modulemgr.All()
 
@@ -60,7 +76,7 @@ func (this *Entity) Initialize(closes ...func()) error {
 	} // for
 
 	for _, itor := range module {
-		itor.internal().update = this.eventmgr.PubFixed(eventUpdate, itor, updateInterval)
+		this.eventmgr.PubFixed(eventUpdate, itor, updateInterval)
 	} // for
 
 	return nil
@@ -77,7 +93,6 @@ func (this *Entity) Finalize() {
 	} // for
 
 	for _, itor := range this.modulemgr.All() {
-		itor.internal().updateStop()
 		this.eventmgr.PubOnce(eventDispose, itor)
 	} // for
 
@@ -174,7 +189,7 @@ func (this *Entity) AddModule(module Moduler) error {
 		return fmt.Errorf("entity add module: %w", err)
 	} // if
 
-	module.internal().entity = this
+	module.SetEntity(this)
 	return nil
 }
 
@@ -201,36 +216,6 @@ func (this *Entity) PubOnceEvent(name string, param any) {
 }
 
 // PubFixedEvent 發布定時事件, 回傳用於停止定時事件的控制物件
-func (this *Entity) PubFixedEvent(name string, param any, interval time.Duration) *events.Fixed {
-	return this.eventmgr.PubFixed(name, param, interval)
-}
-
-// ===== 內部功能 =====
-
-// eventAwake 處理awake事件
-func (this *Entity) eventAwake(param any) {
-	if module, ok := param.(Awaker); ok {
-		module.Awake()
-	} // if
-}
-
-// eventStart 處理start事件
-func (this *Entity) eventStart(param any) {
-	if module, ok := param.(Starter); ok {
-		module.Start()
-	} // if
-}
-
-// eventDispose 處理dispose事件
-func (this *Entity) eventDispose(param any) {
-	if module, ok := param.(Disposer); ok {
-		module.Dispose()
-	} // if
-}
-
-// eventUpdate 處理update事件
-func (this *Entity) eventUpdate(param any) {
-	if module, ok := param.(Updater); ok {
-		module.Update()
-	} // if
+func (this *Entity) PubFixedEvent(name string, param any, interval time.Duration) {
+	this.eventmgr.PubFixed(name, param, interval)
 }
