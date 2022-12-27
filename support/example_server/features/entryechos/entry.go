@@ -2,17 +2,18 @@ package entryechos
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/yinweli/Mizugo/cores/msgs"
 	"github.com/yinweli/Mizugo/cores/nets"
 	"github.com/yinweli/Mizugo/mizugos"
+	"github.com/yinweli/Mizugo/support/example_server/features/defines"
+	"github.com/yinweli/Mizugo/support/example_server/features/modules"
 )
 
 // NewEntry 建立入口資料
 func NewEntry() *Entry {
 	return &Entry{
-		name: "echoc",
+		name: "echos",
 	}
 }
 
@@ -24,9 +25,8 @@ type Entry struct {
 
 // Config 設定資料
 type Config struct {
-	IP      string        // 位址
-	Port    string        // 埠號
-	Timeout time.Duration // 逾期時間(秒)
+	IP   string // 位址
+	Port string // 埠號
 }
 
 // Initialize 初始化處理
@@ -43,7 +43,7 @@ func (this *Entry) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	mizugos.Netmgr().AddConnect(nets.NewTCPConnect(this.config.IP, this.config.Port, this.config.Timeout), this)
+	mizugos.Netmgr().AddListen(nets.NewTCPListen(this.config.IP, this.config.Port), this)
 	mizugos.Info(this.name).
 		Message("entry start").
 		KV("ip", this.config.IP).
@@ -75,7 +75,9 @@ func (this *Entry) Bind(session nets.Sessioner) (content nets.Content, err error
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	// TODO: add module
+	if err := entity.AddModule(modules.NewEchos()); err != nil {
+		return content, fmt.Errorf("bind: %w", err)
+	} // if
 
 	if err := entity.Initialize(func() {
 		mizugos.Entitymgr().Del(entity.EntityID())
@@ -84,7 +86,7 @@ func (this *Entry) Bind(session nets.Sessioner) (content nets.Content, err error
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	mizugos.Labelmgr().Add(entity, this.name)
+	mizugos.Labelmgr().Add(entity, defines.LabelEcho)
 	content.Unbind = entity.Finalize
 	content.Encode = nil
 	content.Decode = nil

@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/support/example_clientgo/feature/commons"
-	"github.com/yinweli/Mizugo/support/example_clientgo/feature/entryechos"
+	"github.com/yinweli/Mizugo/support/example_clientgo/features/commons"
+	"github.com/yinweli/Mizugo/support/example_clientgo/features/entryechos"
 )
 
 func main() {
