@@ -12,7 +12,8 @@ const ( // 入口名稱
 )
 
 const ( // 標籤名稱
-	LabelEchoc = "echoc"
+	LabelWatcher = "watcher"
+	LabelEchoc   = "echoc"
 )
 
 const ( // 訊息編號

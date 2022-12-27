@@ -87,9 +87,9 @@ func (this *Echoc) Bind(session nets.Sessioner) (content nets.Content, err error
 
 	mizugos.Labelmgr().Add(entity, defines.LabelEchoc)
 	content.Unbind = entity.Finalize
-	content.Encode = nil
-	content.Decode = nil
-	content.Receive = nil
+	content.Encode = entity.GetProcess().Encode
+	content.Decode = entity.GetProcess().Decode
+	content.Receive = entity.GetProcess().Process
 	return content, nil
 }
 

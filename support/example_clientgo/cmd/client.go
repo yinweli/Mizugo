@@ -16,7 +16,7 @@ func main() {
 // initialize 初始化處理
 func initialize() error {
 	feature.logger = commons.NewLogger()
-	feature.entryEcho = entrys.NewEchoc()
+	feature.echoc = entrys.NewEchoc()
 
 	mizugos.Configmgr().AddPath(defines.ConfigPath)
 
@@ -24,7 +24,7 @@ func initialize() error {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := feature.entryEcho.Initialize(); err != nil {
+	if err := feature.echoc.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
@@ -34,11 +34,11 @@ func initialize() error {
 // finalize 結束處理
 func finalize() {
 	feature.logger.Finalize()
-	feature.entryEcho.Finalize()
+	feature.echoc.Finalize()
 }
 
 // feature 功能資料
 var feature struct {
-	logger    *commons.Logger // 日誌資料
-	entryEcho *entrys.Echoc   // 回音入口
+	logger *commons.Logger // 日誌資料
+	echoc  *entrys.Echoc   // 回音入口
 }

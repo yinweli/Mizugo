@@ -4,6 +4,7 @@ import (
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/msgs"
+	"github.com/yinweli/Mizugo/mizugos/utils"
 	"github.com/yinweli/Mizugo/support/example_server/features/defines"
 )
 
@@ -11,14 +12,14 @@ import (
 func NewEchos() *Echos {
 	return &Echos{
 		Module: entitys.NewModule(1),
-		name:   "module echos",
+		name:   "module echo server",
 	}
 }
 
 // Echos 回音伺服器模組
 type Echos struct {
-	*entitys.Module
-	name string
+	*entitys.Module        // 模組資料
+	name            string // 模組名稱
 }
 
 // Start start事件
@@ -28,7 +29,7 @@ func (this *Echos) Start() {
 
 // ProcMsgEcho 處理回音訊息
 func (this *Echos) ProcMsgEcho(messageID msgs.MessageID, message any) {
-	_, err := msgs.Cast[msgs.StringMsg](message)
+	_, err := utils.CastPointer[msgs.StringMsg](message)
 
 	if err != nil {
 		_ = mizugos.Error(this.name).Message("ProcMsgEcho").EndError(err)

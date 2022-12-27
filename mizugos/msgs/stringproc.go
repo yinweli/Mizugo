@@ -21,7 +21,7 @@ type StringProc struct {
 
 // Encode 封包編碼
 func (this *StringProc) Encode(message any) (packet []byte, err error) {
-	msg, err := Cast[StringMsg](message)
+	msg, err := utils.CastPointer[StringMsg](message)
 
 	if err != nil {
 		return nil, fmt.Errorf("stringmsg encode: %w", err)
@@ -63,7 +63,7 @@ func (this *StringProc) Decode(packet []byte) (message any, err error) {
 
 // Process 訊息處理
 func (this *StringProc) Process(message any) error {
-	msg, err := Cast[StringMsg](message)
+	msg, err := utils.CastPointer[StringMsg](message)
 
 	if err != nil {
 		return fmt.Errorf("stringmsg process: %w", err)

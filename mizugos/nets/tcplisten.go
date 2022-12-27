@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 )
 
-// NewTCPListen 建立tcp連接器
+// NewTCPListen 建立tcp接聽器
 func NewTCPListen(ip, port string) *TCPListen {
 	return &TCPListen{
 		address: net.JoinHostPort(ip, port),

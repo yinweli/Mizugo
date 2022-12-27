@@ -19,8 +19,9 @@ func NewEchos() *Echos {
 
 // Echos 入口資料
 type Echos struct {
-	name   string      // 入口名稱
-	config EchosConfig // 設定資料
+	name   string        // 入口名稱
+	config EchosConfig   // 設定資料
+	listen nets.Listener // 接聽物件
 }
 
 // EchosConfig 設定資料
@@ -43,7 +44,8 @@ func (this *Echos) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	mizugos.Netmgr().AddListen(nets.NewTCPListen(this.config.IP, this.config.Port), this)
+	this.listen = nets.NewTCPListen(this.config.IP, this.config.Port)
+	mizugos.Netmgr().AddListen(this.listen, this)
 	mizugos.Info(this.name).
 		Message("entry start").
 		KV("ip", this.config.IP).
@@ -57,6 +59,10 @@ func (this *Echos) Finalize() {
 	mizugos.Info(this.name).
 		Message("entry stop").
 		End()
+
+	if err := this.listen.Stop(); err != nil {
+		_ = mizugos.Error(this.name).EndError(err)
+	} // if
 }
 
 // Bind 綁定處理
@@ -83,14 +89,15 @@ func (this *Echos) Bind(session nets.Sessioner) (content nets.Content, err error
 		mizugos.Entitymgr().Del(entity.EntityID())
 		mizugos.Labelmgr().Erase(entity)
 	}); err != nil {
+		mizugos.Entitymgr().Del(entity.EntityID())
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
 	mizugos.Labelmgr().Add(entity, defines.LabelEchos)
 	content.Unbind = entity.Finalize
-	content.Encode = nil
-	content.Decode = nil
-	content.Receive = nil
+	content.Encode = entity.GetProcess().Encode
+	content.Decode = entity.GetProcess().Decode
+	content.Receive = entity.GetProcess().Process
 	return content, nil
 }
 
