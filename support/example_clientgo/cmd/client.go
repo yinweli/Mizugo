@@ -5,7 +5,8 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/support/example_clientgo/features/commons"
-	"github.com/yinweli/Mizugo/support/example_clientgo/features/entryechos"
+	"github.com/yinweli/Mizugo/support/example_clientgo/features/defines"
+	"github.com/yinweli/Mizugo/support/example_clientgo/features/entrys"
 )
 
 func main() {
@@ -15,9 +16,9 @@ func main() {
 // initialize 初始化處理
 func initialize() error {
 	feature.logger = commons.NewLogger()
-	feature.entryEcho = entryechos.NewEntry()
+	feature.entryEcho = entrys.NewEchoc()
 
-	mizugos.Configmgr().AddPath("config")
+	mizugos.Configmgr().AddPath(defines.ConfigPath)
 
 	if err := feature.logger.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
@@ -38,6 +39,6 @@ func finalize() {
 
 // feature 功能資料
 var feature struct {
-	logger    *commons.Logger   // 日誌資料
-	entryEcho *entryechos.Entry // 回音入口
+	logger    *commons.Logger // 日誌資料
+	entryEcho *entrys.Echoc   // 回音入口
 }

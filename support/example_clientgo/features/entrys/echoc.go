@@ -1,4 +1,4 @@
-package entryechos
+package entrys
 
 import (
 	"fmt"
@@ -10,33 +10,33 @@ import (
 	"github.com/yinweli/Mizugo/support/example_clientgo/features/defines"
 )
 
-// NewEntry 建立入口資料
-func NewEntry() *Entry {
-	return &Entry{
-		name: "echoc",
+// NewEchoc 建立入口資料
+func NewEchoc() *Echoc {
+	return &Echoc{
+		name: defines.EntryEchoc,
 	}
 }
 
-// Entry 入口資料
-type Entry struct {
-	name   string // 入口名稱
-	config Config // 設定資料
+// Echoc 入口資料
+type Echoc struct {
+	name   string      // 入口名稱
+	config EchocConfig // 設定資料
 }
 
-// Config 設定資料
-type Config struct {
+// EchocConfig 設定資料
+type EchocConfig struct {
 	IP      string        // 位址
 	Port    string        // 埠號
 	Timeout time.Duration // 逾期時間(秒)
 }
 
 // Initialize 初始化處理
-func (this *Entry) Initialize() error {
+func (this *Echoc) Initialize() error {
 	mizugos.Info(this.name).
 		Message("entry initialize").
 		End()
 
-	if err := mizugos.Configmgr().ReadFile(this.name, "yaml"); err != nil {
+	if err := mizugos.Configmgr().ReadFile(this.name, defines.ConfigType); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
@@ -54,14 +54,14 @@ func (this *Entry) Initialize() error {
 }
 
 // Finalize 結束處理
-func (this *Entry) Finalize() {
+func (this *Echoc) Finalize() {
 	mizugos.Info(this.name).
 		Message("entry stop").
 		End()
 }
 
 // Bind 綁定處理
-func (this *Entry) Bind(session nets.Sessioner) (content nets.Content, err error) {
+func (this *Echoc) Bind(session nets.Sessioner) (content nets.Content, err error) {
 	entity := mizugos.Entitymgr().Add()
 
 	if entity == nil {
@@ -85,7 +85,7 @@ func (this *Entry) Bind(session nets.Sessioner) (content nets.Content, err error
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	mizugos.Labelmgr().Add(entity, defines.LabelEcho)
+	mizugos.Labelmgr().Add(entity, defines.LabelEchoc)
 	content.Unbind = entity.Finalize
 	content.Encode = nil
 	content.Decode = nil
@@ -94,6 +94,6 @@ func (this *Entry) Bind(session nets.Sessioner) (content nets.Content, err error
 }
 
 // Error 錯誤處理
-func (this *Entry) Error(err error) {
+func (this *Echoc) Error(err error) {
 	_ = mizugos.Error(this.name).EndError(err)
 }
