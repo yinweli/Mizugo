@@ -2,36 +2,39 @@ package entrys
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/msgs"
 	"github.com/yinweli/Mizugo/mizugos/nets"
-	"github.com/yinweli/Mizugo/support/example_server/features/defines"
-	"github.com/yinweli/Mizugo/support/example_server/features/modules"
+	"github.com/yinweli/Mizugo/support/example_clientgo/features/defines"
+	"github.com/yinweli/Mizugo/support/example_clientgo/features/modules"
 )
 
-// NewEchoServer 建立回音伺服器資料
-func NewEchoServer() *EchoServer {
-	return &EchoServer{
-		name: defines.EntryEchoServer,
+// NewEchoMulti 建立多次回音資料
+func NewEchoMulti() *EchoMulti {
+	return &EchoMulti{
+		name: defines.EntryEchoMulti,
 	}
 }
 
-// EchoServer 回音伺服器資料
-type EchoServer struct {
-	name   string           // 入口名稱
-	config EchoServerConfig // 設定資料
-	listen nets.Listener    // 接聽物件
+// EchoMulti 多次回音資料
+type EchoMulti struct {
+	name   string          // 入口名稱
+	config EchoMultiConfig // 設定資料
 }
 
-// EchoServerConfig 設定資料
-type EchoServerConfig struct {
-	IP   string // 位址
-	Port string // 埠號
+// EchoMultiConfig 設定資料
+type EchoMultiConfig struct {
+	IP         string        // 位址
+	Port       string        // 埠號
+	Timeout    time.Duration // 逾期時間(秒)
+	EchoString string        // 回音字串
+	EchoCount  int           // 回音次數
 }
 
 // Initialize 初始化處理
-func (this *EchoServer) Initialize() error {
+func (this *EchoMulti) Initialize() error {
 	mizugos.Info(this.name).Message("entry initialize").End()
 
 	if err := mizugos.Configmgr().ReadFile(this.name, defines.ConfigType); err != nil {
@@ -42,23 +45,18 @@ func (this *EchoServer) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	this.listen = nets.NewTCPListen(this.config.IP, this.config.Port)
-	mizugos.Netmgr().AddListen(this.listen, this)
+	mizugos.Netmgr().AddConnect(nets.NewTCPConnect(this.config.IP, this.config.Port, this.config.Timeout), this)
 	mizugos.Info(this.name).Message("entry start").KV("config", this.config).End()
 	return nil
 }
 
 // Finalize 結束處理
-func (this *EchoServer) Finalize() {
+func (this *EchoMulti) Finalize() {
 	mizugos.Info(this.name).Message("entry finalize").End()
-
-	if err := this.listen.Stop(); err != nil {
-		_ = mizugos.Error(this.name).EndError(err)
-	} // if
 }
 
 // Bind 綁定處理
-func (this *EchoServer) Bind(session nets.Sessioner) (content nets.Content, err error) {
+func (this *EchoMulti) Bind(session nets.Sessioner) (content nets.Content, err error) {
 	mizugos.Info(this.name).Message("session").KV("sessionID", session.SessionID()).End()
 	entity := mizugos.Entitymgr().Add()
 
@@ -74,7 +72,7 @@ func (this *EchoServer) Bind(session nets.Sessioner) (content nets.Content, err 
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	if err := entity.AddModule(modules.NewEchoServer()); err != nil {
+	if err := entity.AddModule(modules.NewEchoMulti(this.config.EchoString, this.config.EchoCount)); err != nil {
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
@@ -82,11 +80,10 @@ func (this *EchoServer) Bind(session nets.Sessioner) (content nets.Content, err 
 		mizugos.Entitymgr().Del(entity.EntityID())
 		mizugos.Labelmgr().Erase(entity)
 	}); err != nil {
-		mizugos.Entitymgr().Del(entity.EntityID())
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	mizugos.Labelmgr().Add(entity, defines.LabelEchoServer)
+	mizugos.Labelmgr().Add(entity, defines.LabelEchoMulti)
 	content.Unbind = entity.Finalize
 	content.Encode = entity.GetProcess().Encode
 	content.Decode = entity.GetProcess().Decode
@@ -95,6 +92,6 @@ func (this *EchoServer) Bind(session nets.Sessioner) (content nets.Content, err 
 }
 
 // Error 錯誤處理
-func (this *EchoServer) Error(err error) {
+func (this *EchoMulti) Error(err error) {
 	_ = mizugos.Error(this.name).EndError(err)
 }

@@ -2,4 +2,4 @@ echoonce:
   ip:
   port: 4001
   timeout: 1s
-  echostring: someThingThere
+  echostring: echo once!

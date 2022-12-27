@@ -45,7 +45,7 @@ func (this *EchoOnce) Initialize() error {
 	} // if
 
 	mizugos.Netmgr().AddConnect(nets.NewTCPConnect(this.config.IP, this.config.Port, this.config.Timeout), this)
-	mizugos.Info(this.name).Message("entry start").KV("ip", this.config.IP).KV("port", this.config.Port).KV("timeout", this.config.Timeout).End()
+	mizugos.Info(this.name).Message("entry start").KV("config", this.config).End()
 	return nil
 }
 

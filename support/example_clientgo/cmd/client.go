@@ -17,6 +17,7 @@ func main() {
 func initialize() error {
 	feature.logger = commons.NewLogger()
 	feature.echoOnce = entrys.NewEchoOnce()
+	feature.echoMulti = entrys.NewEchoMulti()
 
 	mizugos.Configmgr().AddPath(defines.ConfigPath)
 
@@ -25,6 +26,10 @@ func initialize() error {
 	} // if
 
 	if err := feature.echoOnce.Initialize(); err != nil {
+		return fmt.Errorf("initialize: %w", err)
+	} // if
+
+	if err := feature.echoMulti.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
@@ -39,6 +44,7 @@ func finalize() {
 
 // feature 功能資料
 var feature struct {
-	logger   *commons.Logger  // 日誌資料
-	echoOnce *entrys.EchoOnce // 單次回音
+	logger    *commons.Logger   // 日誌資料
+	echoOnce  *entrys.EchoOnce  // 單次回音
+	echoMulti *entrys.EchoMulti // 多次回音
 }

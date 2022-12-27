@@ -124,6 +124,10 @@ func (this *SuiteZap) TestZapStreamKV() {
 	ss := []string{s}
 	b := false
 	bs := []bool{b}
+	obj := struct {
+		Name  string
+		Value int
+	}{Name: "name", Value: 1}
 
 	target := logger.New("log", LevelDebug)
 	assert.Equal(this.T(), target, target.KV(key, i8))
@@ -174,6 +178,7 @@ func (this *SuiteZap) TestZapStreamKV() {
 	assert.Equal(this.T(), target, target.KV(key, b))
 	assert.Equal(this.T(), target, target.KV(key, &b))
 	assert.Equal(this.T(), target, target.KV(key, bs))
+	assert.Equal(this.T(), target, target.KV(key, obj))
 	target.End()
 
 	logger.Finalize()

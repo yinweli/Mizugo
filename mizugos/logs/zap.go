@@ -226,6 +226,9 @@ func (this *ZapStream) KV(key string, value any) Stream { //nolint
 		this.field = append(this.field, zap.Uintptrp(key, v))
 	case []uintptr:
 		this.field = append(this.field, zap.Uintptrs(key, v))
+
+	default:
+		this.field = append(this.field, zap.Reflect(key, v))
 	} // switch
 
 	return this
