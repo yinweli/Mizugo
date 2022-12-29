@@ -5,7 +5,7 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/metrics"
-	"github.com/yinweli/Mizugo/support/example_server/features/defines"
+	"github.com/yinweli/Mizugo/support/example_server/internal/defines"
 )
 
 // NewMetrics 建立統計資料
@@ -42,6 +42,8 @@ func (this *Metrics) Initialize() error {
 		Username: this.config.Username,
 		Password: this.config.Password,
 	})
+	mizugos.Info(this.name).Message("initialize").KV("config", this.config).End()
+	StatEcho = mizugos.Metricsmgr().NewRuntime("echo")
 	return nil
 }
 
@@ -49,3 +51,5 @@ func (this *Metrics) Initialize() error {
 func (this *Metrics) Finalize() {
 	mizugos.Metricsmgr().Finalize()
 }
+
+var StatEcho *metrics.Runtime // 回音統計物件

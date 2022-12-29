@@ -7,6 +7,8 @@ import (
 	"sync/atomic"
 )
 
+// TODO: 可能要考慮放棄用帳號密碼保護監測伺服器了
+
 // NewMetricsmgr 建立統計管理器
 func NewMetricsmgr() *Metricsmgr {
 	return &Metricsmgr{}

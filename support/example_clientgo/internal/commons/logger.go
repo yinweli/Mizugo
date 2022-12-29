@@ -5,7 +5,7 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/logs"
-	"github.com/yinweli/Mizugo/support/example_clientgo/features/defines"
+	"github.com/yinweli/Mizugo/support/example_clientgo/internal/defines"
 )
 
 // NewLogger 建立日誌資料
@@ -35,6 +35,7 @@ func (this *Logger) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
+	mizugos.Info(this.name).Message("initialize").KV("config", this.config).End()
 	return nil
 }
 

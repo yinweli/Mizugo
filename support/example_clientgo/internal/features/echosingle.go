@@ -1,4 +1,4 @@
-package entrys
+package features
 
 import (
 	"fmt"
@@ -7,8 +7,8 @@ import (
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/msgs"
 	"github.com/yinweli/Mizugo/mizugos/nets"
-	"github.com/yinweli/Mizugo/support/example_clientgo/features/defines"
-	"github.com/yinweli/Mizugo/support/example_clientgo/features/modules"
+	"github.com/yinweli/Mizugo/support/example_clientgo/internal/defines"
+	"github.com/yinweli/Mizugo/support/example_clientgo/internal/modules"
 )
 
 // NewEchoSingle 建立單次回音資料

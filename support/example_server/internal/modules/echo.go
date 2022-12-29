@@ -5,7 +5,8 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/msgs"
 	"github.com/yinweli/Mizugo/mizugos/utils"
-	"github.com/yinweli/Mizugo/support/example_server/features/defines"
+	"github.com/yinweli/Mizugo/support/example_server/internal/commons"
+	"github.com/yinweli/Mizugo/support/example_server/internal/defines"
 )
 
 // NewEcho 建立回音模組
@@ -29,6 +30,7 @@ func (this *Echo) Start() {
 
 // ProcMsgEcho 處理回音訊息
 func (this *Echo) ProcMsgEcho(messageID msgs.MessageID, message any) {
+	defer commons.StatEcho.Rec()
 	_, err := utils.CastPointer[msgs.StringMsg](message)
 
 	if err != nil {

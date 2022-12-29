@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/support/example_clientgo/features/commons"
-	"github.com/yinweli/Mizugo/support/example_clientgo/features/defines"
-	"github.com/yinweli/Mizugo/support/example_clientgo/features/entrys"
+	"github.com/yinweli/Mizugo/support/example_clientgo/internal/commons"
+	"github.com/yinweli/Mizugo/support/example_clientgo/internal/defines"
+	"github.com/yinweli/Mizugo/support/example_clientgo/internal/features"
 )
 
 // TODO: 要裝統計入口
@@ -18,8 +18,8 @@ func main() {
 // initialize 初始化處理
 func initialize() error {
 	feature.logger = commons.NewLogger()
-	feature.echoSingle = entrys.NewEchoSingle()
-	feature.echoCycle = entrys.NewEchoCycle()
+	feature.echoSingle = features.NewEchoSingle()
+	feature.echoCycle = features.NewEchoCycle()
 
 	mizugos.Configmgr().AddPath(defines.ConfigPath)
 
@@ -47,7 +47,7 @@ func finalize() {
 
 // feature 功能資料
 var feature struct {
-	logger     *commons.Logger    // 日誌資料
-	echoSingle *entrys.EchoSingle // 單次回音
-	echoCycle  *entrys.EchoCycle  // 循環回音
+	logger     *commons.Logger      // 日誌資料
+	echoSingle *features.EchoSingle // 單次回音
+	echoCycle  *features.EchoCycle  // 循環回音
 }
