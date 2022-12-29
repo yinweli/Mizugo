@@ -23,7 +23,9 @@ type Metrics struct {
 
 // MetricsConfig 設定資料
 type MetricsConfig struct {
-	Port int // 埠號
+	Port     int    // 埠號
+	Username string // 帳號
+	Password string // 密碼
 }
 
 // Initialize 初始化處理
@@ -38,7 +40,10 @@ func (this *Metrics) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	metrics.Initialize(this.config.Port)
+	metrics.Initialize(this.config.Port, &metrics.Auth{
+		Username: this.config.Username,
+		Password: this.config.Password,
+	})
 	mizugos.Info(this.name).Message("entry start").KV("config", this.config).End()
 	return nil
 }

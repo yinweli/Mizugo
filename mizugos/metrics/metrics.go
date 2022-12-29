@@ -21,13 +21,20 @@ const (
 	interval60 = 3600 // 間隔時間: 60分鐘
 )
 
-// Initialize 初始化處理
-func Initialize(port int) {
+// Auth 認證資料
+type Auth struct {
+	Username string // 帳號
+	Password string // 密碼
+}
+
+// Initialize 初始化處理, 如果有提供auth資料, 則會為監控的http伺服器添加帳號密碼認證
+func Initialize(port int, auth *Auth) {
 	go func() {
 		stop.Store(false)
 		server := &http.Server{
 			Addr:              fmt.Sprintf(":%v", port),
 			ReadHeaderTimeout: time.Second * 5,
+			Handler:           handle(auth),
 		}
 		_ = server.ListenAndServe()
 	}()
@@ -190,6 +197,29 @@ func mean(total time.Duration, count int64) string {
 	} else {
 		return "n/a"
 	} // if
+}
+
+// handle 取得http路由器, 會依照是否有認證資料來決定是否要添加帳號密碼認證
+func handle(auth *Auth) http.Handler {
+	handler := http.NewServeMux()
+
+	if auth != nil {
+		handler.Handle("/debug/vars", func(next http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if username, password, ok := r.BasicAuth(); ok == false || username != auth.Username || password != auth.Password {
+					w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
+					http.Error(w, "Unauthorized", http.StatusUnauthorized)
+					return
+				} // if
+
+				next.ServeHTTP(w, r)
+			})
+		}(expvar.Handler()))
+	} else {
+		handler.Handle("/debug/vars", expvar.Handler())
+	} // if
+
+	return handler
 }
 
 var stop atomic.Bool // 結束旗標
