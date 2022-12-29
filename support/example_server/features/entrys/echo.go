@@ -10,28 +10,28 @@ import (
 	"github.com/yinweli/Mizugo/support/example_server/features/modules"
 )
 
-// NewEchoServer 建立回音伺服器資料
-func NewEchoServer() *EchoServer {
-	return &EchoServer{
-		name: defines.EntryEchoServer,
+// NewEcho 建立回音入口資料
+func NewEcho() *Echo {
+	return &Echo{
+		name: defines.EntryEcho,
 	}
 }
 
-// EchoServer 回音伺服器資料
-type EchoServer struct {
-	name   string           // 入口名稱
-	config EchoServerConfig // 設定資料
-	listen nets.Listener    // 接聽物件
+// Echo 回音入口資料
+type Echo struct {
+	name   string        // 入口名稱
+	config EchoConfig    // 設定資料
+	listen nets.Listener // 接聽物件
 }
 
-// EchoServerConfig 設定資料
-type EchoServerConfig struct {
+// EchoConfig 設定資料
+type EchoConfig struct {
 	IP   string // 位址
 	Port string // 埠號
 }
 
 // Initialize 初始化處理
-func (this *EchoServer) Initialize() error {
+func (this *Echo) Initialize() error {
 	mizugos.Info(this.name).Message("entry initialize").End()
 
 	if err := mizugos.Configmgr().ReadFile(this.name, defines.ConfigType); err != nil {
@@ -49,7 +49,7 @@ func (this *EchoServer) Initialize() error {
 }
 
 // Finalize 結束處理
-func (this *EchoServer) Finalize() {
+func (this *Echo) Finalize() {
 	mizugos.Info(this.name).Message("entry finalize").End()
 
 	if err := this.listen.Stop(); err != nil {
@@ -58,7 +58,7 @@ func (this *EchoServer) Finalize() {
 }
 
 // Bind 綁定處理
-func (this *EchoServer) Bind(session nets.Sessioner) (content nets.Content, err error) {
+func (this *Echo) Bind(session nets.Sessioner) (content nets.Content, err error) {
 	mizugos.Info(this.name).Message("session").KV("sessionID", session.SessionID()).End()
 	entity := mizugos.Entitymgr().Add()
 
@@ -74,7 +74,7 @@ func (this *EchoServer) Bind(session nets.Sessioner) (content nets.Content, err 
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	if err := entity.AddModule(modules.NewEchoServer()); err != nil {
+	if err := entity.AddModule(modules.NewEcho()); err != nil {
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
@@ -86,7 +86,7 @@ func (this *EchoServer) Bind(session nets.Sessioner) (content nets.Content, err 
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	mizugos.Labelmgr().Add(entity, defines.LabelEchoServer)
+	mizugos.Labelmgr().Add(entity, defines.LabelEcho)
 	content.Unbind = entity.Finalize
 	content.Encode = entity.GetProcess().Encode
 	content.Decode = entity.GetProcess().Decode
@@ -95,6 +95,6 @@ func (this *EchoServer) Bind(session nets.Sessioner) (content nets.Content, err 
 }
 
 // Error 錯誤處理
-func (this *EchoServer) Error(err error) {
+func (this *Echo) Error(err error) {
 	_ = mizugos.Error(this.name).EndError(err)
 }
