@@ -9,11 +9,12 @@ import (
 )
 
 // NewEchoCycle 建立循環回音模組
-func NewEchoCycle(echoString string) *EchoCycle {
+func NewEchoCycle(message string, disconnect bool) *EchoCycle {
 	return &EchoCycle{
 		Module:     entitys.NewModule(1),
 		name:       "module echo cycle",
-		echoString: echoString,
+		message:    message,
+		disconnect: disconnect,
 	}
 }
 
@@ -21,8 +22,9 @@ func NewEchoCycle(echoString string) *EchoCycle {
 type EchoCycle struct {
 	*entitys.Module        // 模組資料
 	name            string // 模組名稱
-	echoString      string // 回音字串
-	echoCount       int    // 回音次數
+	message         string // 回音字串
+	disconnect      bool   // 斷線旗標
+	count           int    // 回音次數
 }
 
 // Start start事件
@@ -40,18 +42,23 @@ func (this *EchoCycle) ProcMsgEcho(messageID msgs.MessageID, message any) {
 		return
 	} // if
 
-	this.echoCount++
+	this.count++
 	mizugos.Info(this.name).Message("ProcMsgEcho").
-		KV("result", msg.Message == this.echoString).
-		KV("count", this.echoCount).
+		KV("result", msg.Message == this.message).
+		KV("count", this.count).
 		End()
-	this.SendMsgEcho()
+
+	if this.disconnect == false {
+		this.SendMsgEcho()
+	} else {
+		this.Entity().GetSession().Stop()
+	} // if
 }
 
 // SendMsgEcho 傳送回音訊息
 func (this *EchoCycle) SendMsgEcho() {
 	this.Entity().Send(&msgs.StringMsg{
 		MessageID: defines.MessageIDEcho,
-		Message:   this.echoString,
+		Message:   this.message,
 	})
 }

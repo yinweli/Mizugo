@@ -1,2 +1,4 @@
 metrics:
   port: 8080
+  username: test
+  password: test

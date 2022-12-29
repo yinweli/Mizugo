@@ -16,6 +16,7 @@ func main() {
 // initialize 初始化處理
 func initialize() error {
 	feature.logger = commons.NewLogger()
+	feature.metrics = entrys.NewMetrics()
 	feature.echo = entrys.NewEcho()
 
 	mizugos.Configmgr().AddPath(defines.ConfigPath)

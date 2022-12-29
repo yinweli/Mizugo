@@ -37,7 +37,10 @@ func (this *SuiteMetrics) TearDownTest() {
 }
 
 func (this *SuiteMetrics) TestInitialize() {
-	Initialize(8080)
+	Initialize(8080, &Auth{
+		Username: "username",
+		Password: "password",
+	})
 	Finalize()
 }
 
@@ -50,7 +53,7 @@ func (this *SuiteMetrics) TestNew() {
 }
 
 func (this *SuiteMetrics) TestRuntime() {
-	Initialize(8080)
+	Initialize(8080, nil)
 	target := NewRuntime("test")
 	assert.NotNil(this.T(), target)
 	assert.NotNil(this.T(), target.String())
@@ -67,7 +70,7 @@ func (this *SuiteMetrics) TestRuntime() {
 }
 
 func BenchmarkAdd(b *testing.B) {
-	Initialize(8080)
+	Initialize(8080, nil)
 	value, _ := rand.Int(rand.Reader, big.NewInt(1000))
 	target := NewRuntime(strconv.FormatInt(value.Int64(), 10))
 
@@ -79,7 +82,7 @@ func BenchmarkAdd(b *testing.B) {
 }
 
 func BenchmarkString(b *testing.B) {
-	Initialize(8080)
+	Initialize(8080, nil)
 	value, _ := rand.Int(rand.Reader, big.NewInt(1000))
 	target := NewRuntime(strconv.FormatInt(value.Int64(), 10))
 	target.Add(time.Second)

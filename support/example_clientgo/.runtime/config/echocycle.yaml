@@ -2,4 +2,7 @@ echocycle:
   ip:
   port: 4001
   timeout: 1s
-  echostring: echo cycle!
+  message: echo strong
+  disconnect: true
+  reconnect: true
+  waittime: 100ms

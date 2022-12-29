@@ -1,0 +1,6 @@
+echosingle:
+  ip:
+  port: 4001
+  timeout: 1s
+  message: echo single
+  repeat: 100

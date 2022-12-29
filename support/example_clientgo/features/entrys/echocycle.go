@@ -11,14 +11,14 @@ import (
 	"github.com/yinweli/Mizugo/support/example_clientgo/features/modules"
 )
 
-// NewEchoCycle 建立 循環回音資料
+// NewEchoCycle 建立循環回音資料
 func NewEchoCycle() *EchoCycle {
 	return &EchoCycle{
 		name: defines.EntryEchoCycle,
 	}
 }
 
-// EchoCycle  循環回音資料
+// EchoCycle 循環回音資料
 type EchoCycle struct {
 	name   string          // 入口名稱
 	config EchoCycleConfig // 設定資料
@@ -29,7 +29,10 @@ type EchoCycleConfig struct {
 	IP         string        // 位址
 	Port       string        // 埠號
 	Timeout    time.Duration // 逾期時間(秒)
-	EchoString string        // 回音字串
+	Message    string        // 回音字串
+	Disconnect bool          // 斷線旗標
+	Reconnect  bool          // 重連旗標
+	WaitTime   time.Duration // 重連等待時間
 }
 
 // Initialize 初始化處理
@@ -44,7 +47,7 @@ func (this *EchoCycle) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	go this.cycle()
+	go this.connect()
 	mizugos.Info(this.name).Message("entry start").KV("config", this.config).End()
 	return nil
 }
@@ -71,14 +74,18 @@ func (this *EchoCycle) Bind(session nets.Sessioner) (content nets.Content, err e
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	if err := entity.AddModule(modules.NewEchoCycle(this.config.EchoString)); err != nil {
+	if err := entity.AddModule(modules.NewEchoCycle(this.config.Message, this.config.Disconnect)); err != nil {
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
 	if err := entity.Initialize(func() {
 		mizugos.Entitymgr().Del(entity.EntityID())
 		mizugos.Labelmgr().Erase(entity)
-		go this.cycle()
+
+		if this.config.Reconnect {
+			time.Sleep(this.config.WaitTime)
+			go this.connect()
+		} // if
 	}); err != nil {
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
@@ -96,7 +103,7 @@ func (this *EchoCycle) Error(err error) {
 	_ = mizugos.Error(this.name).EndError(err)
 }
 
-// cycle 循環啟動
-func (this *EchoCycle) cycle() {
+// connect 進行連線
+func (this *EchoCycle) connect() {
 	mizugos.Netmgr().AddConnect(nets.NewTCPConnect(this.config.IP, this.config.Port, this.config.Timeout), this)
 }
