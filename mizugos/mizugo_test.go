@@ -56,6 +56,7 @@ func (this *SuiteMizugo) TestMizugo() {
 	assert.NotNil(this.T(), Entitymgr())
 	assert.NotNil(this.T(), Labelmgr())
 	assert.NotNil(this.T(), Logmgr())
+	assert.NotNil(this.T(), Metricsmgr())
 	assert.NotNil(this.T(), Debug(""))
 	assert.NotNil(this.T(), Info(""))
 	assert.NotNil(this.T(), Warn(""))

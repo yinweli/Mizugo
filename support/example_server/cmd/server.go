@@ -16,7 +16,7 @@ func main() {
 // initialize 初始化處理
 func initialize() error {
 	feature.logger = commons.NewLogger()
-	feature.metrics = entrys.NewMetrics()
+	feature.metrics = commons.NewMetrics()
 	feature.echo = entrys.NewEcho()
 
 	mizugos.Configmgr().AddPath(defines.ConfigPath)
@@ -45,7 +45,7 @@ func finalize() {
 
 // feature 功能資料
 var feature struct {
-	logger  *commons.Logger // 日誌資料
-	metrics *entrys.Metrics // 統計入口
-	echo    *entrys.Echo    // 回音入口
+	logger  *commons.Logger  // 日誌資料
+	metrics *commons.Metrics // 統計資料
+	echo    *entrys.Echo     // 回音入口
 }

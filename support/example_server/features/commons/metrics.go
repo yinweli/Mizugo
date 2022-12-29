@@ -1,4 +1,4 @@
-package entrys
+package commons
 
 import (
 	"fmt"
@@ -8,16 +8,16 @@ import (
 	"github.com/yinweli/Mizugo/support/example_server/features/defines"
 )
 
-// NewMetrics 建立統計入口資料
+// NewMetrics 建立統計資料
 func NewMetrics() *Metrics {
 	return &Metrics{
-		name: defines.EntryMetrics,
+		name: "metrics",
 	}
 }
 
-// Metrics 統計入口資料
+// Metrics 統計資料
 type Metrics struct {
-	name   string        // 入口名稱
+	name   string        // 統計名稱
 	config MetricsConfig // 設定資料
 }
 
@@ -30,8 +30,6 @@ type MetricsConfig struct {
 
 // Initialize 初始化處理
 func (this *Metrics) Initialize() error {
-	mizugos.Info(this.name).Message("entry initialize").End()
-
 	if err := mizugos.Configmgr().ReadFile(this.name, defines.ConfigType); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
@@ -40,16 +38,14 @@ func (this *Metrics) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	metrics.Initialize(this.config.Port, &metrics.Auth{
+	mizugos.Metricsmgr().Initialize(this.config.Port, &metrics.Auth{
 		Username: this.config.Username,
 		Password: this.config.Password,
 	})
-	mizugos.Info(this.name).Message("entry start").KV("config", this.config).End()
 	return nil
 }
 
 // Finalize 結束處理
 func (this *Metrics) Finalize() {
-	mizugos.Info(this.name).Message("entry finalize").End()
-	metrics.Finalize()
+	mizugos.Metricsmgr().Finalize()
 }
