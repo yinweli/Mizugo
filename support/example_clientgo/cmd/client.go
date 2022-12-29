@@ -9,6 +9,8 @@ import (
 	"github.com/yinweli/Mizugo/support/example_clientgo/features/entrys"
 )
 
+// TODO: 要裝統計入口
+
 func main() {
 	mizugos.Start("example_client_go", initialize, finalize)
 }
@@ -16,8 +18,7 @@ func main() {
 // initialize 初始化處理
 func initialize() error {
 	feature.logger = commons.NewLogger()
-	feature.echoOnce = entrys.NewEchoOnce()
-	feature.echoMulti = entrys.NewEchoMulti()
+	feature.echoSingle = entrys.NewEchoSingle()
 	feature.echoCycle = entrys.NewEchoCycle()
 
 	mizugos.Configmgr().AddPath(defines.ConfigPath)
@@ -26,11 +27,7 @@ func initialize() error {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := feature.echoOnce.Initialize(); err != nil {
-		return fmt.Errorf("initialize: %w", err)
-	} // if
-
-	if err := feature.echoMulti.Initialize(); err != nil {
+	if err := feature.echoSingle.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
@@ -43,14 +40,14 @@ func initialize() error {
 
 // finalize 結束處理
 func finalize() {
-	feature.logger.Finalize()
-	feature.echoOnce.Finalize()
+	feature.echoSingle.Finalize()
+	feature.echoCycle.Finalize()
+	feature.logger.Finalize() // 日誌必須最後結束
 }
 
 // feature 功能資料
 var feature struct {
-	logger    *commons.Logger   // 日誌資料
-	echoOnce  *entrys.EchoOnce  // 單次回音
-	echoMulti *entrys.EchoMulti // 多次回音
-	echoCycle *entrys.EchoCycle // 循環回音
+	logger     *commons.Logger    // 日誌資料
+	echoSingle *entrys.EchoSingle // 單次回音
+	echoCycle  *entrys.EchoCycle  // 循環回音
 }

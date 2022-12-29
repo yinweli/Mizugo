@@ -11,29 +11,30 @@ import (
 	"github.com/yinweli/Mizugo/support/example_clientgo/features/modules"
 )
 
-// NewEchoOnce 建立單次回音資料
-func NewEchoOnce() *EchoOnce {
-	return &EchoOnce{
-		name: defines.EntryEchoOnce,
+// NewEchoSingle 建立單次回音資料
+func NewEchoSingle() *EchoSingle {
+	return &EchoSingle{
+		name: defines.EntryEchoSingle,
 	}
 }
 
-// EchoOnce 單次回音資料
-type EchoOnce struct {
-	name   string         // 入口名稱
-	config EchoOnceConfig // 設定資料
+// EchoSingle 單次回音資料
+type EchoSingle struct {
+	name   string           // 入口名稱
+	config EchoSingleConfig // 設定資料
 }
 
-// EchoOnceConfig 設定資料
-type EchoOnceConfig struct {
-	IP         string        // 位址
-	Port       string        // 埠號
-	Timeout    time.Duration // 逾期時間(秒)
-	EchoString string        // 回音字串
+// EchoSingleConfig 設定資料
+type EchoSingleConfig struct {
+	IP      string        // 位址
+	Port    string        // 埠號
+	Timeout time.Duration // 逾期時間(秒)
+	Message string        // 回音字串
+	Repeat  int           // 重複次數
 }
 
 // Initialize 初始化處理
-func (this *EchoOnce) Initialize() error {
+func (this *EchoSingle) Initialize() error {
 	mizugos.Info(this.name).Message("entry initialize").End()
 
 	if err := mizugos.Configmgr().ReadFile(this.name, defines.ConfigType); err != nil {
@@ -50,12 +51,12 @@ func (this *EchoOnce) Initialize() error {
 }
 
 // Finalize 結束處理
-func (this *EchoOnce) Finalize() {
+func (this *EchoSingle) Finalize() {
 	mizugos.Info(this.name).Message("entry finalize").End()
 }
 
 // Bind 綁定處理
-func (this *EchoOnce) Bind(session nets.Sessioner) (content nets.Content, err error) {
+func (this *EchoSingle) Bind(session nets.Sessioner) (content nets.Content, err error) {
 	mizugos.Info(this.name).Message("session").KV("sessionID", session.SessionID()).End()
 	entity := mizugos.Entitymgr().Add()
 
@@ -71,7 +72,7 @@ func (this *EchoOnce) Bind(session nets.Sessioner) (content nets.Content, err er
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	if err := entity.AddModule(modules.NewEchoOnce(this.config.EchoString)); err != nil {
+	if err := entity.AddModule(modules.NewEchoSingle(this.config.Message, this.config.Repeat)); err != nil {
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
@@ -82,7 +83,7 @@ func (this *EchoOnce) Bind(session nets.Sessioner) (content nets.Content, err er
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	mizugos.Labelmgr().Add(entity, defines.LabelEchoOnce)
+	mizugos.Labelmgr().Add(entity, defines.LabelEchoSingle)
 	content.Unbind = entity.Finalize
 	content.Encode = entity.GetProcess().Encode
 	content.Decode = entity.GetProcess().Decode
@@ -91,6 +92,6 @@ func (this *EchoOnce) Bind(session nets.Sessioner) (content nets.Content, err er
 }
 
 // Error 錯誤處理
-func (this *EchoOnce) Error(err error) {
+func (this *EchoSingle) Error(err error) {
 	_ = mizugos.Error(this.name).EndError(err)
 }
