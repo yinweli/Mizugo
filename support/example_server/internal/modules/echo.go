@@ -30,10 +30,10 @@ func (this *Echo) Start() {
 
 // ProcMsgEcho 處理回音訊息
 func (this *Echo) ProcMsgEcho(messageID msgs.MessageID, message any) {
-	defer commons.StatEcho.Rec()
-	_, err := utils.CastPointer[msgs.StringMsg](message)
+	rec := commons.Echo.Rec()
+	defer rec()
 
-	if err != nil {
+	if _, err := utils.CastPointer[msgs.StringMsg](message); err != nil {
 		_ = mizugos.Error(this.name).Message("ProcMsgEcho").EndError(err)
 		return
 	} // if

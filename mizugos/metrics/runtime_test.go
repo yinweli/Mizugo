@@ -43,11 +43,10 @@ func (this *SuiteRuntime) TestRuntime() {
 	target := metricsmgr.NewRuntime("test")
 	assert.NotNil(this.T(), target)
 	assert.NotNil(this.T(), target.String())
-	target.Add(time.Second)
-	target.Add(time.Second)
-	target.Add(time.Second)
-	target.Add(time.Second)
-	target.Add(time.Second)
+	target.Rec()()
+	target.Rec()()
+	target.Rec()()
+	target.Rec()()
 	target.Rec()()
 	time.Sleep(time.Second * 2)
 	assert.NotNil(this.T(), target.String())
@@ -56,14 +55,14 @@ func (this *SuiteRuntime) TestRuntime() {
 	metricsmgr.Finalize()
 }
 
-func BenchmarkRuntimeAdd(b *testing.B) {
+func BenchmarkRuntimeRec(b *testing.B) {
 	metricsmgr := NewMetricsmgr()
 	metricsmgr.Initialize(8080, nil)
 
 	target := metricsmgr.NewRuntime(randString(10))
 
 	for i := 0; i < b.N; i++ {
-		target.Add(time.Second)
+		target.Rec()()
 	} // for
 
 	metricsmgr.Finalize()
@@ -74,11 +73,11 @@ func BenchmarkRuntimeString(b *testing.B) {
 	metricsmgr.Initialize(8080, nil)
 
 	target := metricsmgr.NewRuntime(randString(10))
-	target.Add(time.Second)
-	target.Add(time.Second)
-	target.Add(time.Second)
-	target.Add(time.Second)
-	target.Add(time.Second)
+	target.Rec()()
+	target.Rec()()
+	target.Rec()()
+	target.Rec()()
+	target.Rec()()
 
 	for i := 0; i < b.N; i++ {
 		_ = target.String()
