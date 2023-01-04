@@ -8,8 +8,8 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos/events"
 	"github.com/yinweli/Mizugo/mizugos/labels"
-	"github.com/yinweli/Mizugo/mizugos/msgs"
 	"github.com/yinweli/Mizugo/mizugos/nets"
+	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
@@ -25,14 +25,14 @@ func NewEntity(entityID EntityID) *Entity {
 
 // Entity 實體資料
 type Entity struct {
-	entityID  EntityID                       // 實體編號
-	enable    atomic.Bool                    // 啟用旗標
-	close     []func()                       // 結束處理列表
-	session   utils.SyncAttr[nets.Sessioner] // 會話物件
-	process   utils.SyncAttr[msgs.Processor] // 處理物件
-	modulemgr *Modulemgr                     // 模組管理器
-	eventmgr  *events.Eventmgr               // 事件管理器
-	labelobj  *labels.Labelobj               // 標籤物件
+	entityID  EntityID                        // 實體編號
+	enable    atomic.Bool                     // 啟用旗標
+	close     []func()                        // 結束處理列表
+	session   utils.SyncAttr[nets.Sessioner]  // 會話物件
+	process   utils.SyncAttr[procs.Processor] // 處理物件
+	modulemgr *Modulemgr                      // 模組管理器
+	eventmgr  *events.Eventmgr                // 事件管理器
+	labelobj  *labels.Labelobj                // 標籤物件
 }
 
 // ===== 基礎功能 =====
@@ -153,7 +153,7 @@ func (this *Entity) LocalAddr() net.Addr {
 // ===== 處理功能 =====
 
 // SetProcess 設定處理物件, 初始化完成後就不能設定處理物件
-func (this *Entity) SetProcess(process msgs.Processor) error {
+func (this *Entity) SetProcess(process procs.Processor) error {
 	if this.enable.Load() {
 		return fmt.Errorf("entity set process: overdue")
 	} // if
@@ -163,17 +163,17 @@ func (this *Entity) SetProcess(process msgs.Processor) error {
 }
 
 // GetProcess 取得處理物件
-func (this *Entity) GetProcess() msgs.Processor {
+func (this *Entity) GetProcess() procs.Processor {
 	return this.process.Get()
 }
 
 // AddMessage 新增訊息處理
-func (this *Entity) AddMessage(messageID msgs.MessageID, process msgs.Process) {
+func (this *Entity) AddMessage(messageID procs.MessageID, process procs.Process) {
 	this.process.Get().Add(messageID, process)
 }
 
 // DelMessage 刪除訊息處理
-func (this *Entity) DelMessage(messageID msgs.MessageID) {
+func (this *Entity) DelMessage(messageID procs.MessageID) {
 	this.process.Get().Del(messageID)
 }
 

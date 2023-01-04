@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/mizugos/msgs"
 	"github.com/yinweli/Mizugo/mizugos/nets"
+	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/example_server/internal/defines"
 	"github.com/yinweli/Mizugo/support/example_server/internal/modules"
 )
@@ -70,7 +70,7 @@ func (this *Echo) Bind(session nets.Sessioner) (content nets.Content, err error)
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	if err := entity.SetProcess(msgs.NewString()); err != nil {
+	if err := entity.SetProcess(procs.NewString()); err != nil {
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 

@@ -1,7 +1,7 @@
 package defines
 
 import (
-	"github.com/yinweli/Mizugo/mizugos/msgs"
+	"github.com/yinweli/Mizugo/mizugos/procs"
 )
 
 const ConfigPath = "config" // 配置路徑
@@ -18,5 +18,5 @@ const ( // 標籤名稱
 )
 
 const ( // 訊息編號
-	MessageIDEcho = msgs.MessageID(1)
+	MessageIDEcho = procs.MessageID(1)
 )

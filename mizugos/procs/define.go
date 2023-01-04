@@ -1,4 +1,4 @@
-package msgs
+package procs
 
 // Processor 處理介面
 type Processor interface {

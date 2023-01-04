@@ -3,7 +3,7 @@ package modules
 import (
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/msgs"
+	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/mizugos/utils"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/defines"
 )
@@ -34,8 +34,8 @@ func (this *EchoCycle) Start() {
 }
 
 // ProcMsgEcho 處理回音訊息
-func (this *EchoCycle) ProcMsgEcho(messageID msgs.MessageID, message any) {
-	msg, err := utils.CastPointer[msgs.StringMsg](message)
+func (this *EchoCycle) ProcMsgEcho(messageID procs.MessageID, message any) {
+	msg, err := utils.CastPointer[procs.StringMsg](message)
 
 	if err != nil {
 		_ = mizugos.Error(this.name).Message("ProcMsgEcho").EndError(err)
@@ -57,7 +57,7 @@ func (this *EchoCycle) ProcMsgEcho(messageID msgs.MessageID, message any) {
 
 // SendMsgEcho 傳送回音訊息
 func (this *EchoCycle) SendMsgEcho() {
-	this.Entity().Send(&msgs.StringMsg{
+	this.Entity().Send(&procs.StringMsg{
 		MessageID: defines.MessageIDEcho,
 		Message:   this.message,
 	})

@@ -1,4 +1,4 @@
-package msgs
+package procs
 
 import (
 	"encoding/json"

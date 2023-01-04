@@ -1,4 +1,4 @@
-package msgs
+package procs
 
 import (
 	"encoding/base64"
@@ -22,7 +22,7 @@ type SuiteString struct {
 }
 
 func (this *SuiteString) SetupSuite() {
-	this.Change("test-msgs-string")
+	this.Change("test-procs-string")
 }
 
 func (this *SuiteString) TearDownSuite() {
