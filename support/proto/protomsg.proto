@@ -1,0 +1,8 @@
+syntax = "proto3";
+option go_package = "/protomsg;procs";
+
+import "google/protobuf/any.proto";
+
+message MyMessage {
+  repeated google.protobuf.Any any_values = 1;
+}
