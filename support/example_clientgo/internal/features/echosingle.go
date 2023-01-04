@@ -68,7 +68,7 @@ func (this *EchoSingle) Bind(session nets.Sessioner) (content nets.Content, err 
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	if err := entity.SetProcess(procs.NewString()); err != nil {
+	if err := entity.SetProcess(procs.NewSimple()); err != nil {
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 

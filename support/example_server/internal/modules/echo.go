@@ -33,7 +33,7 @@ func (this *Echo) ProcMsgEcho(messageID procs.MessageID, message any) {
 	rec := commons.Echo.Rec()
 	defer rec()
 
-	if _, err := utils.CastPointer[procs.StringMsg](message); err != nil {
+	if _, err := utils.CastPointer[procs.SimpleMsg](message); err != nil {
 		_ = mizugos.Error(this.name).Message("ProcMsgEcho").EndError(err)
 		return
 	} // if

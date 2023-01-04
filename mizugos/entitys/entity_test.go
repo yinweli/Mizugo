@@ -89,7 +89,7 @@ func (this *SuiteEntity) TestSession() {
 
 func (this *SuiteEntity) TestProcess() {
 	target := NewEntity(EntityID(1))
-	process := procs.NewString()
+	process := procs.NewSimple()
 
 	assert.Nil(this.T(), target.SetProcess(process))
 	assert.Equal(this.T(), process, target.GetProcess())

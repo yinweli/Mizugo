@@ -12,34 +12,34 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestString(t *testing.T) {
-	suite.Run(t, new(SuiteString))
+func TestSimple(t *testing.T) {
+	suite.Run(t, new(SuiteSimple))
 }
 
-type SuiteString struct {
+type SuiteSimple struct {
 	suite.Suite
 	testdata.TestEnv
 }
 
-func (this *SuiteString) SetupSuite() {
-	this.Change("test-procs-string")
+func (this *SuiteSimple) SetupSuite() {
+	this.Change("test-procs-simple")
 }
 
-func (this *SuiteString) TearDownSuite() {
+func (this *SuiteSimple) TearDownSuite() {
 	this.Restore()
 }
 
-func (this *SuiteString) TearDownTest() {
+func (this *SuiteSimple) TearDownTest() {
 	goleak.VerifyNone(this.T())
 }
 
-func (this *SuiteString) TestNewString() {
-	assert.NotNil(this.T(), NewString())
+func (this *SuiteSimple) TestNewSimple() {
+	assert.NotNil(this.T(), NewSimple())
 }
 
-func (this *SuiteString) TestEncodeDecode() {
-	target := NewString()
-	msg := &StringMsg{
+func (this *SuiteSimple) TestEncodeDecode() {
+	target := NewSimple()
+	msg := &SimpleMsg{
 		MessageID: 1,
 		Message:   "test encode/decode message",
 	}
@@ -67,9 +67,9 @@ func (this *SuiteString) TestEncodeDecode() {
 	assert.NotNil(this.T(), err)
 }
 
-func (this *SuiteString) TestProcess() {
-	target := NewString()
-	msg := &StringMsg{
+func (this *SuiteSimple) TestProcess() {
+	target := NewSimple()
+	msg := &SimpleMsg{
 		MessageID: 1,
 		Message:   "test process message",
 	}
@@ -87,9 +87,9 @@ func (this *SuiteString) TestProcess() {
 	assert.NotNil(this.T(), target.Process(nil))
 }
 
-func BenchmarkStringEncode(b *testing.B) {
-	target := NewString()
-	msg := &StringMsg{
+func BenchmarkSimpleEncode(b *testing.B) {
+	target := NewSimple()
+	msg := &SimpleMsg{
 		MessageID: 1,
 		Message:   "benchmark encode message",
 	}
@@ -99,9 +99,9 @@ func BenchmarkStringEncode(b *testing.B) {
 	} // for
 }
 
-func BenchmarkStringDecode(b *testing.B) {
-	target := NewString()
-	msg := &StringMsg{
+func BenchmarkSimpleDecode(b *testing.B) {
+	target := NewSimple()
+	msg := &SimpleMsg{
 		MessageID: 1,
 		Message:   "benchmark decode message",
 	}

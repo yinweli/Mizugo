@@ -70,7 +70,7 @@ func (this *EchoCycle) Bind(session nets.Sessioner) (content nets.Content, err e
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	if err := entity.SetProcess(procs.NewString()); err != nil {
+	if err := entity.SetProcess(procs.NewSimple()); err != nil {
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 

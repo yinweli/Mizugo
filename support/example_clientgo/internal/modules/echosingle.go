@@ -34,7 +34,7 @@ func (this *EchoSingle) Start() {
 
 // ProcMsgEcho 處理回音訊息
 func (this *EchoSingle) ProcMsgEcho(messageID procs.MessageID, message any) {
-	msg, err := utils.CastPointer[procs.StringMsg](message)
+	msg, err := utils.CastPointer[procs.SimpleMsg](message)
 
 	if err != nil {
 		_ = mizugos.Error(this.name).Message("ProcMsgEcho").EndError(err)
@@ -56,7 +56,7 @@ func (this *EchoSingle) ProcMsgEcho(messageID procs.MessageID, message any) {
 
 // SendMsgEcho 傳送回音訊息
 func (this *EchoSingle) SendMsgEcho() {
-	this.Entity().Send(&procs.StringMsg{
+	this.Entity().Send(&procs.SimpleMsg{
 		MessageID: defines.MessageIDEcho,
 		Message:   this.message,
 	})
