@@ -5,6 +5,8 @@ import (
 	"sync"
 )
 
+// TODO: 還是要讓Listen可以被單獨刪除
+
 // NewNetmgr 建立網路管理器
 func NewNetmgr() *Netmgr {
 	return &Netmgr{

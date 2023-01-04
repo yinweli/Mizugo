@@ -1,4 +1,4 @@
-package entrys
+package features
 
 import (
 	"fmt"
@@ -6,8 +6,8 @@ import (
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/msgs"
 	"github.com/yinweli/Mizugo/mizugos/nets"
-	"github.com/yinweli/Mizugo/support/example_server/features/defines"
-	"github.com/yinweli/Mizugo/support/example_server/features/modules"
+	"github.com/yinweli/Mizugo/support/example_server/internal/defines"
+	"github.com/yinweli/Mizugo/support/example_server/internal/modules"
 )
 
 // NewEcho 建立回音入口資料

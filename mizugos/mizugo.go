@@ -9,6 +9,7 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/labels"
 	"github.com/yinweli/Mizugo/mizugos/logs"
+	"github.com/yinweli/Mizugo/mizugos/metrics"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 )
 
@@ -31,6 +32,7 @@ func Start(name string, initialize Initialize, finalize Finalize) {
 	serv.entitymgr = entitys.NewEntitymgr()
 	serv.labelmgr = labels.NewLabelmgr()
 	serv.logmgr = logs.NewLogmgr()
+	serv.metricsmgr = metrics.NewMetricsmgr()
 	serv.lock.Unlock()
 
 	fmt.Printf("%v initialize\n", name)
@@ -58,6 +60,7 @@ Finalize: // 結束處理
 	serv.entitymgr = nil
 	serv.labelmgr = nil
 	serv.logmgr = nil
+	serv.metricsmgr = nil
 	serv.lock.Unlock()
 	serv.start.Store(false)
 }
@@ -115,6 +118,14 @@ func Logmgr() *logs.Logmgr {
 	return serv.logmgr
 }
 
+// Metricsmgr 統計管理器
+func Metricsmgr() *metrics.Metricsmgr {
+	serv.lock.RLock()
+	defer serv.lock.RUnlock()
+
+	return serv.metricsmgr
+}
+
 // Debug 記錄除錯訊息
 func Debug(label string) logs.Stream {
 	serv.lock.RLock()
@@ -149,13 +160,14 @@ func Error(label string) logs.Stream {
 
 // serv 伺服器資料
 var serv struct {
-	name      string             // 伺服器名稱
-	configmgr *configs.Configmgr // 配置管理器
-	netmgr    *nets.Netmgr       // 網路管理器
-	entitymgr *entitys.Entitymgr // 實體管理器
-	labelmgr  *labels.Labelmgr   // 標籤管理器
-	logmgr    *logs.Logmgr       // 日誌管理器
-	lock      sync.RWMutex       // 執行緒鎖
-	start     atomic.Bool        // 啟動旗標
-	close     sync.WaitGroup     // 關閉旗標
+	name       string              // 伺服器名稱
+	configmgr  *configs.Configmgr  // 配置管理器
+	netmgr     *nets.Netmgr        // 網路管理器
+	entitymgr  *entitys.Entitymgr  // 實體管理器
+	labelmgr   *labels.Labelmgr    // 標籤管理器
+	logmgr     *logs.Logmgr        // 日誌管理器
+	metricsmgr *metrics.Metricsmgr // 統計管理器
+	lock       sync.RWMutex        // 執行緒鎖
+	start      atomic.Bool         // 啟動旗標
+	close      sync.WaitGroup      // 關閉旗標
 }

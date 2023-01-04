@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/support/example_server/features/commons"
-	"github.com/yinweli/Mizugo/support/example_server/features/defines"
-	"github.com/yinweli/Mizugo/support/example_server/features/entrys"
+	"github.com/yinweli/Mizugo/support/example_server/internal/commons"
+	"github.com/yinweli/Mizugo/support/example_server/internal/defines"
+	"github.com/yinweli/Mizugo/support/example_server/internal/features"
 )
 
 func main() {
@@ -16,8 +16,8 @@ func main() {
 // initialize 初始化處理
 func initialize() error {
 	feature.logger = commons.NewLogger()
-	feature.metrics = entrys.NewMetrics()
-	feature.echo = entrys.NewEcho()
+	feature.metrics = commons.NewMetrics()
+	feature.echo = features.NewEcho()
 
 	mizugos.Configmgr().AddPath(defines.ConfigPath)
 
@@ -45,7 +45,7 @@ func finalize() {
 
 // feature 功能資料
 var feature struct {
-	logger  *commons.Logger // 日誌資料
-	metrics *entrys.Metrics // 統計入口
-	echo    *entrys.Echo    // 回音入口
+	logger  *commons.Logger  // 日誌資料
+	metrics *commons.Metrics // 統計資料
+	echo    *features.Echo   // 回音入口
 }
