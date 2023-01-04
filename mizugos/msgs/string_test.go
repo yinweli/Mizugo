@@ -12,33 +12,33 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestStringProc(t *testing.T) {
-	suite.Run(t, new(SuiteStringProc))
+func TestString(t *testing.T) {
+	suite.Run(t, new(SuiteString))
 }
 
-type SuiteStringProc struct {
+type SuiteString struct {
 	suite.Suite
 	testdata.TestEnv
 }
 
-func (this *SuiteStringProc) SetupSuite() {
-	this.Change("test-msgs-stringproc")
+func (this *SuiteString) SetupSuite() {
+	this.Change("test-msgs-string")
 }
 
-func (this *SuiteStringProc) TearDownSuite() {
+func (this *SuiteString) TearDownSuite() {
 	this.Restore()
 }
 
-func (this *SuiteStringProc) TearDownTest() {
+func (this *SuiteString) TearDownTest() {
 	goleak.VerifyNone(this.T())
 }
 
-func (this *SuiteStringProc) TestNewStringProc() {
-	assert.NotNil(this.T(), NewStringProc())
+func (this *SuiteString) TestNewString() {
+	assert.NotNil(this.T(), NewString())
 }
 
-func (this *SuiteStringProc) TestEncodeDecode() {
-	target := NewStringProc()
+func (this *SuiteString) TestEncodeDecode() {
+	target := NewString()
 	msg := &StringMsg{
 		MessageID: 1,
 		Message:   "test encode/decode message",
@@ -67,8 +67,8 @@ func (this *SuiteStringProc) TestEncodeDecode() {
 	assert.NotNil(this.T(), err)
 }
 
-func (this *SuiteStringProc) TestProcess() {
-	target := NewStringProc()
+func (this *SuiteString) TestProcess() {
+	target := NewString()
 	msg := &StringMsg{
 		MessageID: 1,
 		Message:   "test process message",
@@ -87,8 +87,8 @@ func (this *SuiteStringProc) TestProcess() {
 	assert.NotNil(this.T(), target.Process(nil))
 }
 
-func BenchmarkStringProcEncode(b *testing.B) {
-	target := NewStringProc()
+func BenchmarkStringEncode(b *testing.B) {
+	target := NewString()
 	msg := &StringMsg{
 		MessageID: 1,
 		Message:   "benchmark encode message",
@@ -99,8 +99,8 @@ func BenchmarkStringProcEncode(b *testing.B) {
 	} // for
 }
 
-func BenchmarkStringProcDecode(b *testing.B) {
-	target := NewStringProc()
+func BenchmarkStringDecode(b *testing.B) {
+	target := NewString()
 	msg := &StringMsg{
 		MessageID: 1,
 		Message:   "benchmark decode message",

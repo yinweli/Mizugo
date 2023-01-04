@@ -70,7 +70,7 @@ func (this *Echo) Bind(session nets.Sessioner) (content nets.Content, err error)
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	if err := entity.SetProcess(msgs.NewStringProc()); err != nil {
+	if err := entity.SetProcess(msgs.NewString()); err != nil {
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 

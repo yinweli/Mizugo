@@ -7,20 +7,20 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
-// NewStringProc 建立字串處理器
-func NewStringProc() *StringProc {
-	return &StringProc{
+// NewString 建立字串處理器
+func NewString() *String {
+	return &String{
 		Procmgr: NewProcmgr(),
 	}
 }
 
-// StringProc 字串處理器
-type StringProc struct {
+// String 字串處理器
+type String struct {
 	*Procmgr // 處理管理器
 }
 
 // Encode 封包編碼
-func (this *StringProc) Encode(message any) (packet []byte, err error) {
+func (this *String) Encode(message any) (packet []byte, err error) {
 	msg, err := utils.CastPointer[StringMsg](message)
 
 	if err != nil {
@@ -39,7 +39,7 @@ func (this *StringProc) Encode(message any) (packet []byte, err error) {
 }
 
 // Decode 封包解碼
-func (this *StringProc) Decode(packet []byte) (message any, err error) {
+func (this *String) Decode(packet []byte) (message any, err error) {
 	bytes, err := utils.Base64Decode(packet)
 
 	if err != nil {
@@ -62,7 +62,7 @@ func (this *StringProc) Decode(packet []byte) (message any, err error) {
 }
 
 // Process 訊息處理
-func (this *StringProc) Process(message any) error {
+func (this *String) Process(message any) error {
 	msg, err := utils.CastPointer[StringMsg](message)
 
 	if err != nil {
