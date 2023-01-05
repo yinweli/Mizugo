@@ -6,12 +6,12 @@ import (
 	"fmt"
 )
 
-const desKeyLen = 8 // Des密鑰長度
+const DesKeySize = 8 // Des密鑰長度
 
 // DesEncrypt Des加密處理, 注意key只能是8位陣列
 // 這裡選用 https://blog.csdn.net/wade3015/article/details/84454836 提供的方式, 數據填充方式用zeropad
 func DesEncrypt(key, input []byte) (result []byte, err error) {
-	if len(key) != desKeyLen {
+	if len(key) != DesKeySize {
 		return nil, fmt.Errorf("des encrypt: key len must 8")
 	} // if
 
@@ -46,7 +46,7 @@ func DesEncrypt(key, input []byte) (result []byte, err error) {
 // DesDecrypt Des解密處理, 注意key只能是8位陣列
 // 這裡選用 https://blog.csdn.net/wade3015/article/details/84454836 提供的方式, 數據填充方式用zeropad
 func DesDecrypt(key, input []byte) (result []byte, err error) {
-	if len(key) != desKeyLen {
+	if len(key) != DesKeySize {
 		return nil, fmt.Errorf("des decrypt: key len must 8")
 	} // if
 

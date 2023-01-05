@@ -34,29 +34,34 @@ func (this *SuiteCrypt) TearDownTest() {
 }
 
 func (this *SuiteCrypt) TestDesEncryptDecrypt() {
-	test := func(dataSize int) {
-		key := []byte(RandString(desKeyLen))
-		input := []byte(RandString(dataSize))
+	for size := 16; size <= 64; size++ {
+		key := []byte(RandString(DesKeySize))
+		input := []byte(RandString(size))
 		crypt, err := DesEncrypt(key, input)
 		assert.Nil(this.T(), err)
 		output, err := DesDecrypt(key, crypt)
 		assert.Nil(this.T(), err)
 		assert.Equal(this.T(), input, output)
 
-		fmt.Printf("----- size: %v -----\n", dataSize)
+		fmt.Printf("----- size: %v -----\n", size)
 		fmt.Printf("key=%v\n", string(key))
 		fmt.Printf("input=%v\n", string(input))
 		fmt.Printf("output=%v\n", string(output))
 		fmt.Printf("crypt=%v\n", hex.EncodeToString(crypt))
-	}
-
-	for i := 16; i <= 64; i++ {
-		test(i)
 	} // for
+
+	key := []byte(RandString(15))
+	data := []byte(RandString(15))
+
+	_, err := DesEncrypt(key, data)
+	assert.NotNil(this.T(), err)
+
+	_, err = DesDecrypt(key, data)
+	assert.NotNil(this.T(), err)
 }
 
 func BenchmarkDesEncrypt1024(b *testing.B) {
-	key := []byte(RandString(desKeyLen))
+	key := []byte(RandString(DesKeySize))
 	input := []byte(RandString(1024))
 
 	for i := 0; i < b.N; i++ {
@@ -65,7 +70,7 @@ func BenchmarkDesEncrypt1024(b *testing.B) {
 }
 
 func BenchmarkDesEncrypt2048(b *testing.B) {
-	key := []byte(RandString(desKeyLen))
+	key := []byte(RandString(DesKeySize))
 	input := []byte(RandString(2048))
 
 	for i := 0; i < b.N; i++ {
@@ -74,7 +79,7 @@ func BenchmarkDesEncrypt2048(b *testing.B) {
 }
 
 func BenchmarkDesEncrypt4096(b *testing.B) {
-	key := []byte(RandString(desKeyLen))
+	key := []byte(RandString(DesKeySize))
 	input := []byte(RandString(4096))
 
 	for i := 0; i < b.N; i++ {
@@ -83,7 +88,7 @@ func BenchmarkDesEncrypt4096(b *testing.B) {
 }
 
 func BenchmarkDesDecrypt1024(b *testing.B) {
-	key := []byte(RandString(desKeyLen))
+	key := []byte(RandString(DesKeySize))
 	input := []byte(RandString(1024))
 
 	for i := 0; i < b.N; i++ {
@@ -92,7 +97,7 @@ func BenchmarkDesDecrypt1024(b *testing.B) {
 }
 
 func BenchmarkDesDecrypt2048(b *testing.B) {
-	key := []byte(RandString(desKeyLen))
+	key := []byte(RandString(DesKeySize))
 	input := []byte(RandString(2048))
 
 	for i := 0; i < b.N; i++ {
@@ -101,7 +106,7 @@ func BenchmarkDesDecrypt2048(b *testing.B) {
 }
 
 func BenchmarkDesDecrypt4096(b *testing.B) {
-	key := []byte(RandString(desKeyLen))
+	key := []byte(RandString(DesKeySize))
 	input := []byte(RandString(4096))
 
 	for i := 0; i < b.N; i++ {
