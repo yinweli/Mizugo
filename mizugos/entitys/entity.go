@@ -8,8 +8,8 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos/events"
 	"github.com/yinweli/Mizugo/mizugos/labels"
-	"github.com/yinweli/Mizugo/mizugos/msgs"
 	"github.com/yinweli/Mizugo/mizugos/nets"
+	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
@@ -25,14 +25,14 @@ func NewEntity(entityID EntityID) *Entity {
 
 // Entity 實體資料
 type Entity struct {
-	entityID  EntityID                       // 實體編號
-	enable    atomic.Bool                    // 啟用旗標
-	close     []func()                       // 結束處理列表
-	session   utils.SyncAttr[nets.Sessioner] // 會話物件
-	process   utils.SyncAttr[msgs.Processor] // 處理物件
-	modulemgr *Modulemgr                     // 模組管理器
-	eventmgr  *events.Eventmgr               // 事件管理器
-	labelobj  *labels.Labelobj               // 標籤物件
+	entityID  EntityID                        // 實體編號
+	enable    atomic.Bool                     // 啟用旗標
+	close     []func()                        // 結束處理列表
+	session   utils.SyncAttr[nets.Sessioner]  // 會話物件
+	process   utils.SyncAttr[procs.Processor] // 處理物件
+	modulemgr *Modulemgr                      // 模組管理器
+	eventmgr  *events.Eventmgr                // 事件管理器
+	labelobj  *labels.Labelobj                // 標籤物件
 }
 
 // ===== 基礎功能 =====
@@ -54,14 +54,23 @@ func (this *Entity) Initialize(closes ...func()) error {
 			module.Start()
 		} // if
 	})
+	this.eventmgr.Sub(eventUpdate, func(param any) {
+		if module, ok := param.(Updater); ok {
+			module.Update()
+		} // if
+	})
 	this.eventmgr.Sub(eventDispose, func(param any) {
 		if module, ok := param.(Disposer); ok {
 			module.Dispose()
 		} // if
 	})
-	this.eventmgr.Sub(eventUpdate, func(param any) {
-		if module, ok := param.(Updater); ok {
-			module.Update()
+	this.eventmgr.Sub(eventFinalize, func(_ any) {
+		for _, itor := range this.close {
+			itor()
+		} // for
+
+		if session := this.session.Get(); session != nil {
+			session.Stop()
 		} // if
 	})
 	this.eventmgr.Initialize()
@@ -82,25 +91,18 @@ func (this *Entity) Initialize(closes ...func()) error {
 	return nil
 }
 
-// Finalize 結束處理, 請不要重複使用結束的實體物件
+// Finalize 結束處理
 func (this *Entity) Finalize() {
 	if this.enable.CompareAndSwap(true, false) == false {
 		return
 	} // if
 
-	for _, itor := range this.close {
-		itor()
-	} // for
-
 	for _, itor := range this.modulemgr.All() {
 		this.eventmgr.PubOnce(eventDispose, itor)
 	} // for
 
+	this.eventmgr.PubOnce(eventFinalize, nil)
 	this.eventmgr.Finalize()
-
-	if session := this.session.Get(); session != nil {
-		session.Stop()
-	} // if
 }
 
 // EntityID 取得實體編號
@@ -152,28 +154,24 @@ func (this *Entity) LocalAddr() net.Addr {
 
 // ===== 處理功能 =====
 
-// SetProcess 設定處理物件, 初始化完成後就不能設定處理物件
-func (this *Entity) SetProcess(process msgs.Processor) error {
-	if this.enable.Load() {
-		return fmt.Errorf("entity set process: overdue")
-	} // if
-
+// SetProcess 設定處理物件
+func (this *Entity) SetProcess(process procs.Processor) error {
 	this.process.Set(process)
 	return nil
 }
 
 // GetProcess 取得處理物件
-func (this *Entity) GetProcess() msgs.Processor {
+func (this *Entity) GetProcess() procs.Processor {
 	return this.process.Get()
 }
 
 // AddMessage 新增訊息處理
-func (this *Entity) AddMessage(messageID msgs.MessageID, process msgs.Process) {
+func (this *Entity) AddMessage(messageID procs.MessageID, process procs.Process) {
 	this.process.Get().Add(messageID, process)
 }
 
 // DelMessage 刪除訊息處理
-func (this *Entity) DelMessage(messageID msgs.MessageID) {
+func (this *Entity) DelMessage(messageID procs.MessageID) {
 	this.process.Get().Del(messageID)
 }
 
@@ -205,6 +203,18 @@ func (this *Entity) SubEvent(name string, process events.Process) error {
 	if this.enable.Load() {
 		return fmt.Errorf("entity sub event: overdue")
 	} // if
+
+	for _, itor := range []string{
+		eventAwake,
+		eventStart,
+		eventUpdate,
+		eventDispose,
+		eventFinalize,
+	} {
+		if name == itor {
+			return fmt.Errorf("entity sub event: keyword")
+		} // if
+	} // for
 
 	this.eventmgr.Sub(name, process)
 	return nil

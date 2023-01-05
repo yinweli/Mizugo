@@ -1,4 +1,4 @@
-package msgs
+package procs
 
 import (
 	"testing"
@@ -20,7 +20,7 @@ type SuiteProcmgr struct {
 }
 
 func (this *SuiteProcmgr) SetupSuite() {
-	this.Change("test-msgs-procmgr")
+	this.Change("test-procs-procmgr")
 }
 
 func (this *SuiteProcmgr) TearDownSuite() {

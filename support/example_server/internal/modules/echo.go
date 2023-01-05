@@ -3,7 +3,7 @@ package modules
 import (
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/msgs"
+	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/mizugos/utils"
 	"github.com/yinweli/Mizugo/support/example_server/internal/commons"
 	"github.com/yinweli/Mizugo/support/example_server/internal/defines"
@@ -29,11 +29,11 @@ func (this *Echo) Start() {
 }
 
 // ProcMsgEcho 處理回音訊息
-func (this *Echo) ProcMsgEcho(messageID msgs.MessageID, message any) {
+func (this *Echo) ProcMsgEcho(messageID procs.MessageID, message any) {
 	rec := commons.Echo.Rec()
 	defer rec()
 
-	if _, err := utils.CastPointer[msgs.StringMsg](message); err != nil {
+	if _, err := utils.CastPointer[procs.SimpleMsg](message); err != nil {
 		_ = mizugos.Error(this.name).Message("ProcMsgEcho").EndError(err)
 		return
 	} // if

@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 
-	"github.com/yinweli/Mizugo/mizugos/msgs"
 	"github.com/yinweli/Mizugo/mizugos/nets"
+	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -44,9 +44,9 @@ func (this *SuiteEntity) TestInitialize() {
 	entityID := EntityID(1)
 	target := NewEntity(entityID)
 	module := newModuleTester(ModuleID(1))
-	closeCount := 0
+	closeCount := atomic.Int64{}
 	closeFunc := func() {
-		closeCount++
+		closeCount.Add(1)
 	}
 
 	assert.Nil(this.T(), target.AddModule(module))
@@ -60,12 +60,12 @@ func (this *SuiteEntity) TestInitialize() {
 	target.Finalize() // 故意結束兩次, 這次應該不執行
 	assert.False(this.T(), target.Enable())
 
-	time.Sleep(testdata.Timeout)
-	assert.Equal(this.T(), 1, closeCount)
+	time.Sleep(testdata.Timeout * 2) // 為了給finalize執行, 需要長一點的時間
+	assert.Equal(this.T(), int64(1), closeCount.Load())
 	assert.Equal(this.T(), int64(1), module.awake.Load())
 	assert.Equal(this.T(), int64(1), module.start.Load())
+	assert.Greater(this.T(), module.update.Load(), int64(0))
 	assert.Equal(this.T(), int64(1), module.dispose.Load())
-	assert.Equal(this.T(), int64(1), module.update.Load())
 }
 
 func (this *SuiteEntity) TestSession() {
@@ -89,17 +89,16 @@ func (this *SuiteEntity) TestSession() {
 
 func (this *SuiteEntity) TestProcess() {
 	target := NewEntity(EntityID(1))
-	process := msgs.NewStringProc()
+	process := procs.NewSimple()
 
 	assert.Nil(this.T(), target.SetProcess(process))
 	assert.Equal(this.T(), process, target.GetProcess())
-	target.AddMessage(msgs.MessageID(1), func(messageID msgs.MessageID, message any) {
+	target.AddMessage(procs.MessageID(1), func(messageID procs.MessageID, message any) {
 		// do nothing
 	})
-	target.DelMessage(msgs.MessageID(1))
+	target.DelMessage(procs.MessageID(1))
 
 	assert.Nil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.SetProcess(process))
 	target.Finalize()
 }
 
@@ -134,6 +133,9 @@ func (this *SuiteEntity) TestEvent() {
 		} // if
 	}))
 	assert.Nil(this.T(), target.Initialize())
+	assert.NotNil(this.T(), target.SubEvent(eventOnce, func(param any) {
+		// do nothing
+	}))
 
 	target.PubOnceEvent(eventOnce, paramOnce)
 	time.Sleep(testdata.Timeout)
@@ -142,10 +144,6 @@ func (this *SuiteEntity) TestEvent() {
 	target.PubFixedEvent(eventFixed, paramFixed, time.Millisecond)
 	time.Sleep(testdata.Timeout * 5) // 多等一下讓定時事件發生
 	assert.Greater(this.T(), validFixed.Load(), int64(0))
-
-	assert.NotNil(this.T(), target.SubEvent(eventOnce, func(param any) {
-		// do nothing
-	}))
 
 	target.Finalize()
 }

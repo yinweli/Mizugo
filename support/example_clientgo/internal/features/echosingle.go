@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/mizugos/msgs"
 	"github.com/yinweli/Mizugo/mizugos/nets"
+	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/defines"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/modules"
 )
@@ -68,7 +68,7 @@ func (this *EchoSingle) Bind(session nets.Sessioner) (content nets.Content, err 
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	if err := entity.SetProcess(msgs.NewStringProc()); err != nil {
+	if err := entity.SetProcess(procs.NewSimple()); err != nil {
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 

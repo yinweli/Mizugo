@@ -1,4 +1,4 @@
-package msgs
+package procs
 
 // Processor 處理介面
 type Processor interface {
@@ -22,4 +22,4 @@ type Processor interface {
 type Process func(messageID MessageID, message any)
 
 // MessageID 訊息編號
-type MessageID = int64
+type MessageID = uint32

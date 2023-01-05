@@ -1,10 +1,7 @@
 package metrics
 
 import (
-	"bytes"
-	"crypto/rand"
 	"fmt"
-	"math/big"
 	"testing"
 	"time"
 
@@ -12,6 +9,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 
+	"github.com/yinweli/Mizugo/mizugos/utils"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -59,7 +57,7 @@ func BenchmarkRuntimeRec(b *testing.B) {
 	metricsmgr := NewMetricsmgr()
 	metricsmgr.Initialize(8080, nil)
 
-	target := metricsmgr.NewRuntime(randString(10))
+	target := metricsmgr.NewRuntime(utils.RandString(10))
 
 	for i := 0; i < b.N; i++ {
 		target.Rec()()
@@ -72,7 +70,7 @@ func BenchmarkRuntimeString(b *testing.B) {
 	metricsmgr := NewMetricsmgr()
 	metricsmgr.Initialize(8080, nil)
 
-	target := metricsmgr.NewRuntime(randString(10))
+	target := metricsmgr.NewRuntime(utils.RandString(10))
 	target.Rec()()
 	target.Rec()()
 	target.Rec()()
@@ -84,17 +82,4 @@ func BenchmarkRuntimeString(b *testing.B) {
 	} // for
 
 	metricsmgr.Finalize()
-}
-
-func randString(count int) string {
-	letter := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	generator, _ := rand.Int(rand.Reader, big.NewInt(int64(len(letter))))
-	builder := bytes.Buffer{}
-
-	for i := 0; i < count; i++ {
-		index := int(generator.Int64())
-		builder.WriteByte(letter[index])
-	} // for
-
-	return builder.String()
 }

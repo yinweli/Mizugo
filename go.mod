@@ -10,6 +10,7 @@ require (
 	github.com/stretchr/testify v1.8.1
 	go.uber.org/goleak v1.2.0
 	go.uber.org/zap v1.24.0
+	google.golang.org/protobuf v1.28.1
 )
 
 require (

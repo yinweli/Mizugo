@@ -55,4 +55,5 @@ func (this *Metrics) Finalize() {
 // Echo 回音統計物件. 使用expvarmon監控時, 可使用以下參數
 // -ports="http://帳號:密碼@網址:埠號"
 // -vars="time:echo.time,max:echo.max,mean:echo.mean,count:echo.count,count(1m):echo.count(1m),count(5m):echo.count(5m),count(10m):echo.count(10m),count(60m):echo.count(60m)"
+// -i 間隔時間
 var Echo *metrics.Runtime

@@ -1,8 +1,6 @@
-package msgs
+package procs
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,40 +10,42 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestStringProc(t *testing.T) {
-	suite.Run(t, new(SuiteStringProc))
+func TestSimple(t *testing.T) {
+	suite.Run(t, new(SuiteSimple))
 }
 
-type SuiteStringProc struct {
+type SuiteSimple struct {
 	suite.Suite
 	testdata.TestEnv
 }
 
-func (this *SuiteStringProc) SetupSuite() {
-	this.Change("test-msgs-stringproc")
+func (this *SuiteSimple) SetupSuite() {
+	this.Change("test-procs-simple")
 }
 
-func (this *SuiteStringProc) TearDownSuite() {
+func (this *SuiteSimple) TearDownSuite() {
 	this.Restore()
 }
 
-func (this *SuiteStringProc) TearDownTest() {
+func (this *SuiteSimple) TearDownTest() {
 	goleak.VerifyNone(this.T())
 }
 
-func (this *SuiteStringProc) TestNewStringProc() {
-	assert.NotNil(this.T(), NewStringProc())
+func (this *SuiteSimple) TestNewSimple() {
+	assert.NotNil(this.T(), NewSimple())
 }
 
-func (this *SuiteStringProc) TestEncodeDecode() {
-	target := NewStringProc()
-	msg := &StringMsg{
+func (this *SuiteSimple) TestEncodeDecode() {
+	target := NewSimple()
+	msg := &SimpleMsg{
 		MessageID: 1,
-		Message:   "test encode/decode message",
+		Message:   []byte("test encode/decode message"),
 	}
+
 	packet, err := target.Encode(msg)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), packet)
+
 	result, err := target.Decode(packet)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), result)
@@ -59,20 +59,15 @@ func (this *SuiteStringProc) TestEncodeDecode() {
 
 	_, err = target.Decode([]byte("unknown packet data"))
 	assert.NotNil(this.T(), err)
-
-	msg.Sum = "unknown md5 string"
-	bytes, _ := json.Marshal(msg)
-	packet = []byte(base64.StdEncoding.EncodeToString(bytes))
-	_, err = target.Decode(packet)
-	assert.NotNil(this.T(), err)
 }
 
-func (this *SuiteStringProc) TestProcess() {
-	target := NewStringProc()
-	msg := &StringMsg{
+func (this *SuiteSimple) TestProcess() {
+	target := NewSimple()
+	msg := &SimpleMsg{
 		MessageID: 1,
-		Message:   "test process message",
+		Message:   []byte("test process message"),
 	}
+
 	valid := false
 	target.Add(msg.MessageID, func(messageID MessageID, message any) {
 		assert.Equal(this.T(), msg, message)
@@ -87,11 +82,11 @@ func (this *SuiteStringProc) TestProcess() {
 	assert.NotNil(this.T(), target.Process(nil))
 }
 
-func BenchmarkStringProcEncode(b *testing.B) {
-	target := NewStringProc()
-	msg := &StringMsg{
+func BenchmarkSimpleEncode(b *testing.B) {
+	target := NewSimple()
+	msg := &SimpleMsg{
 		MessageID: 1,
-		Message:   "benchmark encode message",
+		Message:   []byte("benchmark encode message"),
 	}
 
 	for i := 0; i < b.N; i++ {
@@ -99,11 +94,11 @@ func BenchmarkStringProcEncode(b *testing.B) {
 	} // for
 }
 
-func BenchmarkStringProcDecode(b *testing.B) {
-	target := NewStringProc()
-	msg := &StringMsg{
+func BenchmarkSimpleDecode(b *testing.B) {
+	target := NewSimple()
+	msg := &SimpleMsg{
 		MessageID: 1,
-		Message:   "benchmark decode message",
+		Message:   []byte("benchmark decode message"),
 	}
 	packet, _ := target.Encode(msg)
 

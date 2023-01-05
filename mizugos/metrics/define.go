@@ -15,3 +15,6 @@ const (
 
 // 如果需要查看統計數據, 可以通過以下工具
 // https://github.com/divan/expvarmon
+// 如果想查看記憶體使用情況, 可使用以下參數
+// -ports="http://帳號:密碼@網址:埠號"
+// -i 間隔時間
