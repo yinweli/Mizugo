@@ -77,11 +77,11 @@ func (this *Eventmgr) PubFixed(name string, param any, interval time.Duration) {
 	} // if
 
 	go func() {
-		timeout := time.After(interval)
+		timeout := time.NewTicker(interval)
 
 		for {
 			select {
-			case <-timeout:
+			case <-timeout.C:
 				this.event <- event{
 					name:  name,
 					param: param,
@@ -89,6 +89,7 @@ func (this *Eventmgr) PubFixed(name string, param any, interval time.Duration) {
 
 			default:
 				if this.finish.Load() {
+					timeout.Stop()
 					return
 				} // if
 			} // select

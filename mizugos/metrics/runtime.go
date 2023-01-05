@@ -119,6 +119,11 @@ func (this *Runtime) start() {
 
 			default:
 				if this.finish() {
+					timeout.Stop()
+					timeout1.Stop()
+					timeout5.Stop()
+					timeout10.Stop()
+					timeout60.Stop()
 					return
 				} // if
 			} // select
