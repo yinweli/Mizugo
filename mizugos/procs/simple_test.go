@@ -41,9 +41,11 @@ func (this *SuiteSimple) TestEncodeDecode() {
 		MessageID: 1,
 		Message:   []byte("test encode/decode message"),
 	}
+
 	packet, err := target.Encode(msg)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), packet)
+
 	result, err := target.Decode(packet)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), result)
@@ -65,6 +67,7 @@ func (this *SuiteSimple) TestProcess() {
 		MessageID: 1,
 		Message:   []byte("test process message"),
 	}
+
 	valid := false
 	target.Add(msg.MessageID, func(messageID MessageID, message any) {
 		assert.Equal(this.T(), msg, message)
