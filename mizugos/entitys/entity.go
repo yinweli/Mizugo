@@ -54,14 +54,18 @@ func (this *Entity) Initialize(closes ...func()) error {
 			module.Start()
 		} // if
 	})
+	this.eventmgr.Sub(eventUpdate, func(param any) {
+		if module, ok := param.(Updater); ok {
+			module.Update()
+		} // if
+	})
 	this.eventmgr.Sub(eventDispose, func(param any) {
 		if module, ok := param.(Disposer); ok {
 			module.Dispose()
 		} // if
-	})
-	this.eventmgr.Sub(eventUpdate, func(param any) {
-		if module, ok := param.(Updater); ok {
-			module.Update()
+
+		if session := this.session.Get(); session != nil {
+			session.Stop()
 		} // if
 	})
 	this.eventmgr.Initialize()
@@ -82,7 +86,7 @@ func (this *Entity) Initialize(closes ...func()) error {
 	return nil
 }
 
-// Finalize 結束處理, 請不要重複使用結束的實體物件
+// Finalize 結束處理
 func (this *Entity) Finalize() {
 	if this.enable.CompareAndSwap(true, false) == false {
 		return
@@ -97,10 +101,6 @@ func (this *Entity) Finalize() {
 	} // for
 
 	this.eventmgr.Finalize()
-
-	if session := this.session.Get(); session != nil {
-		session.Stop()
-	} // if
 }
 
 // EntityID 取得實體編號

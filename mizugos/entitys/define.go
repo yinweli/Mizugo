@@ -11,8 +11,8 @@ const updateInterval = time.Second // update事件間隔時間
 const (
 	eventAwake   = "awake"   // awake事件, 模組初始化時第一個被執行; 參數類型為Moduler
 	eventStart   = "start"   // start事件, 模組初始化時第二個被執行; 參數類型為Moduler
-	eventDispose = "dispose" // dispose事件, 模組結束時執行; 參數類型為Moduler
 	eventUpdate  = "update"  // update事件, 模組定時事件; 參數類型為Moduler
+	eventDispose = "dispose" // dispose事件, 模組結束時執行; 參數類型為Moduler
 )
 
 // EntityID 實體編號
@@ -33,14 +33,14 @@ type Starter interface {
 	Start()
 }
 
-// Disposer dispose模組事件介面
-type Disposer interface {
-	// Dispose 模組結束時執行
-	Dispose()
-}
-
 // Updater update模組事件介面
 type Updater interface {
 	// Update 模組定時執行, 間隔時間定義在updateInterval
 	Update()
+}
+
+// Disposer dispose模組事件介面
+type Disposer interface {
+	// Dispose 模組結束時執行
+	Dispose()
 }

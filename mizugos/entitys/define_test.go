@@ -28,10 +28,10 @@ func (this *moduleTester) Start() {
 	this.start.Add(1)
 }
 
-func (this *moduleTester) Dispose() {
-	this.dispose.Add(1)
-}
-
 func (this *moduleTester) Update() {
 	this.update.Add(1)
+}
+
+func (this *moduleTester) Dispose() {
+	this.dispose.Add(1)
 }
