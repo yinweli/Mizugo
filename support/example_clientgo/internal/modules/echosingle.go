@@ -1,6 +1,8 @@
 package modules
 
 import (
+	"bytes"
+
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/procs"
@@ -13,7 +15,7 @@ func NewEchoSingle(message string, count int) *EchoSingle {
 	return &EchoSingle{
 		Module:  entitys.NewModule(1),
 		name:    "module echo single",
-		message: message,
+		message: []byte(message),
 		count:   count,
 	}
 }
@@ -22,7 +24,7 @@ func NewEchoSingle(message string, count int) *EchoSingle {
 type EchoSingle struct {
 	*entitys.Module        // 模組資料
 	name            string // 模組名稱
-	message         string // 回音字串
+	message         []byte // 回音資料
 	count           int    // 回音次數
 }
 
@@ -43,7 +45,7 @@ func (this *EchoSingle) ProcMsgEcho(messageID procs.MessageID, message any) {
 
 	this.count--
 	mizugos.Info(this.name).Message("ProcMsgEcho").
-		KV("result", msg.Message == this.message).
+		KV("result", bytes.Equal(msg.Message, this.message)).
 		KV("count", this.count).
 		End()
 

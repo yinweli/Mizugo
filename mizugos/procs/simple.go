@@ -27,7 +27,6 @@ func (this *Simple) Encode(message any) (packet []byte, err error) {
 		return nil, fmt.Errorf("simplemsg encode: %w", err)
 	} // if
 
-	msg.Sum = utils.MD5String([]byte(msg.Message))
 	bytes, err := json.Marshal(msg)
 
 	if err != nil {
@@ -50,12 +49,6 @@ func (this *Simple) Decode(packet []byte) (message any, err error) {
 
 	if err := json.Unmarshal(bytes, msg); err != nil {
 		return nil, fmt.Errorf("simplemsg decode: %w", err)
-	} // if
-
-	sum := utils.MD5String([]byte(msg.Message))
-
-	if msg.Sum != sum {
-		return nil, fmt.Errorf("simplemsg decode: sum failed")
 	} // if
 
 	return msg, nil

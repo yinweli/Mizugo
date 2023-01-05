@@ -1,8 +1,6 @@
 package procs
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -41,7 +39,7 @@ func (this *SuiteSimple) TestEncodeDecode() {
 	target := NewSimple()
 	msg := &SimpleMsg{
 		MessageID: 1,
-		Message:   "test encode/decode message",
+		Message:   []byte("test encode/decode message"),
 	}
 	packet, err := target.Encode(msg)
 	assert.Nil(this.T(), err)
@@ -59,19 +57,13 @@ func (this *SuiteSimple) TestEncodeDecode() {
 
 	_, err = target.Decode([]byte("unknown packet data"))
 	assert.NotNil(this.T(), err)
-
-	msg.Sum = "unknown md5 string"
-	bytes, _ := json.Marshal(msg)
-	packet = []byte(base64.StdEncoding.EncodeToString(bytes))
-	_, err = target.Decode(packet)
-	assert.NotNil(this.T(), err)
 }
 
 func (this *SuiteSimple) TestProcess() {
 	target := NewSimple()
 	msg := &SimpleMsg{
 		MessageID: 1,
-		Message:   "test process message",
+		Message:   []byte("test process message"),
 	}
 	valid := false
 	target.Add(msg.MessageID, func(messageID MessageID, message any) {
@@ -91,7 +83,7 @@ func BenchmarkSimpleEncode(b *testing.B) {
 	target := NewSimple()
 	msg := &SimpleMsg{
 		MessageID: 1,
-		Message:   "benchmark encode message",
+		Message:   []byte("benchmark encode message"),
 	}
 
 	for i := 0; i < b.N; i++ {
@@ -103,7 +95,7 @@ func BenchmarkSimpleDecode(b *testing.B) {
 	target := NewSimple()
 	msg := &SimpleMsg{
 		MessageID: 1,
-		Message:   "benchmark decode message",
+		Message:   []byte("benchmark decode message"),
 	}
 	packet, _ := target.Encode(msg)
 
