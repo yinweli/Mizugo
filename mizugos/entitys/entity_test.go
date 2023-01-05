@@ -64,8 +64,8 @@ func (this *SuiteEntity) TestInitialize() {
 	assert.Equal(this.T(), 1, closeCount)
 	assert.Equal(this.T(), int64(1), module.awake.Load())
 	assert.Equal(this.T(), int64(1), module.start.Load())
+	assert.Greater(this.T(), module.update.Load(), int64(0))
 	assert.Equal(this.T(), int64(1), module.dispose.Load())
-	assert.Equal(this.T(), int64(1), module.update.Load())
 }
 
 func (this *SuiteEntity) TestSession() {
@@ -134,6 +134,9 @@ func (this *SuiteEntity) TestEvent() {
 		} // if
 	}))
 	assert.Nil(this.T(), target.Initialize())
+	assert.NotNil(this.T(), target.SubEvent(eventOnce, func(param any) {
+		// do nothing
+	}))
 
 	target.PubOnceEvent(eventOnce, paramOnce)
 	time.Sleep(testdata.Timeout)
@@ -142,10 +145,6 @@ func (this *SuiteEntity) TestEvent() {
 	target.PubFixedEvent(eventFixed, paramFixed, time.Millisecond)
 	time.Sleep(testdata.Timeout * 5) // 多等一下讓定時事件發生
 	assert.Greater(this.T(), validFixed.Load(), int64(0))
-
-	assert.NotNil(this.T(), target.SubEvent(eventOnce, func(param any) {
-		// do nothing
-	}))
 
 	target.Finalize()
 }

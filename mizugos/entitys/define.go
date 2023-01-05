@@ -9,10 +9,11 @@ const updateInterval = time.Second // update事件間隔時間
 
 // 內部事件名稱
 const (
-	eventAwake   = "awake"   // awake事件, 模組初始化時第一個被執行; 參數類型為Moduler
-	eventStart   = "start"   // start事件, 模組初始化時第二個被執行; 參數類型為Moduler
-	eventUpdate  = "update"  // update事件, 模組定時事件; 參數類型為Moduler
-	eventDispose = "dispose" // dispose事件, 模組結束時執行; 參數類型為Moduler
+	eventAwake    = "awake"    // awake事件, 模組初始化時第一個被執行; 參數類型為Moduler
+	eventStart    = "start"    // start事件, 模組初始化時第二個被執行; 參數類型為Moduler
+	eventUpdate   = "update"   // update事件, 模組定時事件; 參數類型為Moduler
+	eventDispose  = "dispose"  // dispose事件, 模組結束時執行; 參數類型為Moduler
+	eventFinalize = "finalize" // finalize事件, 模組結束時執行; 沒有參數
 )
 
 // EntityID 實體編號

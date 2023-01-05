@@ -63,6 +63,11 @@ func (this *Entity) Initialize(closes ...func()) error {
 		if module, ok := param.(Disposer); ok {
 			module.Dispose()
 		} // if
+	})
+	this.eventmgr.Sub(eventFinalize, func(_ any) {
+		for _, itor := range this.close {
+			itor()
+		} // for
 
 		if session := this.session.Get(); session != nil {
 			session.Stop()
@@ -92,14 +97,11 @@ func (this *Entity) Finalize() {
 		return
 	} // if
 
-	for _, itor := range this.close {
-		itor()
-	} // for
-
 	for _, itor := range this.modulemgr.All() {
 		this.eventmgr.PubOnce(eventDispose, itor)
 	} // for
 
+	this.eventmgr.PubOnce(eventFinalize, nil)
 	this.eventmgr.Finalize()
 }
 
@@ -205,6 +207,18 @@ func (this *Entity) SubEvent(name string, process events.Process) error {
 	if this.enable.Load() {
 		return fmt.Errorf("entity sub event: overdue")
 	} // if
+
+	for _, itor := range []string{
+		eventAwake,
+		eventStart,
+		eventUpdate,
+		eventDispose,
+		eventFinalize,
+	} {
+		if name == itor {
+			return fmt.Errorf("entity sub event: keyword")
+		} // if
+	} // for
 
 	this.eventmgr.Sub(name, process)
 	return nil

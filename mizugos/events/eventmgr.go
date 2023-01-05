@@ -82,10 +82,12 @@ func (this *Eventmgr) PubFixed(name string, param any, interval time.Duration) {
 		for {
 			select {
 			case <-timeout.C:
-				this.event <- event{
-					name:  name,
-					param: param,
-				}
+				if this.finish.Load() == false {
+					this.event <- event{
+						name:  name,
+						param: param,
+					}
+				} // if
 
 			default:
 				if this.finish.Load() {
