@@ -22,4 +22,4 @@ type Processor interface {
 type Process func(messageID MessageID, message any)
 
 // MessageID 訊息編號
-type MessageID = int64
+type MessageID = uint32

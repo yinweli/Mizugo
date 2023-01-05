@@ -1,8 +1,11 @@
 syntax = "proto3";
-option go_package = "/protomsg;procs";
 
 import "google/protobuf/any.proto";
 
-message MyMessage {
-  repeated google.protobuf.Any any_values = 1;
+option go_package = "/protomsg;procs";
+
+// proto訊息資料
+message ProtoMsg {
+  uint32 MessageID = 1; // 訊息編號
+  google.protobuf.Any Message = 2; // 訊息資料
 }

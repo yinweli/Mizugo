@@ -4,26 +4,18 @@ tasks:
   # 進行程式碼檢查
   lint:
     cmds:
-      - task: install-lint
-      - task: fmt
-      - golangci-lint -v run
-  
+      - gofmt -s -w -l . # 程式碼格式化
+      - go install github.com/bufbuild/buf/cmd/buf@latest # 安裝/更新proto格式化工具
+      - buf format -w . # proto格式化
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest # 安裝/更新golangci-lint
+      - golangci-lint -v run # 程式碼檢查
+
   # 進行程式碼測試
   test:
     cmds:
-      - go test ./... -cover 
-  
+      - go test ./... -cover
+
   # 進行效能測試
   bench:
     cmds:
       - go test ./... -bench=. -benchmem
-  
-  # 進行程式碼格式化
-  fmt:
-    cmds:
-      - gofmt -s -w -l .
-  
-  # 安裝/更新golangci-lint
-  install-lint:
-    cmds:
-      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
