@@ -154,12 +154,8 @@ func (this *Entity) LocalAddr() net.Addr {
 
 // ===== 處理功能 =====
 
-// SetProcess 設定處理物件, 初始化完成後就不能設定處理物件
+// SetProcess 設定處理物件
 func (this *Entity) SetProcess(process procs.Processor) error {
-	if this.enable.Load() {
-		return fmt.Errorf("entity set process: overdue")
-	} // if
-
 	this.process.Set(process)
 	return nil
 }

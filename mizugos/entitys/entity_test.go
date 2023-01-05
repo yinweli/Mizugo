@@ -99,7 +99,6 @@ func (this *SuiteEntity) TestProcess() {
 	target.DelMessage(procs.MessageID(1))
 
 	assert.Nil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.SetProcess(process))
 	target.Finalize()
 }
 
