@@ -9,6 +9,8 @@ import (
 	"github.com/yinweli/Mizugo/support/example_server/internal/features"
 )
 
+// TODO: 做一個包含用普通處理器傳送密鑰, 然後用proto處理器傳送ping的入口以及模組相關機制
+
 func main() {
 	mizugos.Start("example_server", initialize, finalize)
 }
