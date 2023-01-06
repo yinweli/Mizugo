@@ -31,16 +31,17 @@ func (this *SuiteSimple) TearDownTest() {
 	goleak.VerifyNone(this.T())
 }
 
+func (this *SuiteSimple) TestNewSimpleMsg() {
+	assert.NotNil(this.T(), NewSimpleMsg(0, []byte{}))
+}
+
 func (this *SuiteSimple) TestNewSimple() {
 	assert.NotNil(this.T(), NewSimple())
 }
 
 func (this *SuiteSimple) TestEncodeDecode() {
 	target := NewSimple()
-	msg := &SimpleMsg{
-		MessageID: 1,
-		Message:   []byte("test encode/decode message"),
-	}
+	msg := NewSimpleMsg(1, []byte("test encode/decode message"))
 
 	packet, err := target.Encode(msg)
 	assert.Nil(this.T(), err)
@@ -63,10 +64,7 @@ func (this *SuiteSimple) TestEncodeDecode() {
 
 func (this *SuiteSimple) TestProcess() {
 	target := NewSimple()
-	msg := &SimpleMsg{
-		MessageID: 1,
-		Message:   []byte("test process message"),
-	}
+	msg := NewSimpleMsg(1, []byte("test process message"))
 
 	valid := false
 	target.Add(msg.MessageID, func(messageID MessageID, message any) {
@@ -84,10 +82,7 @@ func (this *SuiteSimple) TestProcess() {
 
 func BenchmarkSimpleEncode(b *testing.B) {
 	target := NewSimple()
-	msg := &SimpleMsg{
-		MessageID: 1,
-		Message:   []byte("benchmark encode message"),
-	}
+	msg := NewSimpleMsg(1, []byte("benchmark encode message"))
 
 	for i := 0; i < b.N; i++ {
 		_, _ = target.Encode(msg)
@@ -96,10 +91,7 @@ func BenchmarkSimpleEncode(b *testing.B) {
 
 func BenchmarkSimpleDecode(b *testing.B) {
 	target := NewSimple()
-	msg := &SimpleMsg{
-		MessageID: 1,
-		Message:   []byte("benchmark decode message"),
-	}
+	msg := NewSimpleMsg(1, []byte("benchmark decode message"))
 	packet, _ := target.Encode(msg)
 
 	for i := 0; i < b.N; i++ {

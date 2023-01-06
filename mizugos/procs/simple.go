@@ -12,6 +12,14 @@ import (
 // 封包解碼通過Base64簡單解碼, 再通過json解碼成封包結構
 // 由於沒有使用加密技術, 所以安全性很低, 僅用於傳送簡單訊息或是傳送密鑰使用
 
+// NewSimpleMsg 建立簡單訊息
+func NewSimpleMsg(messageID MessageID, message []byte) *SimpleMsg {
+	return &SimpleMsg{
+		MessageID: messageID,
+		Message:   message,
+	}
+}
+
 // NewSimple 建立簡單處理器
 func NewSimple() *Simple {
 	return &Simple{
