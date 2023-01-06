@@ -83,6 +83,7 @@ func (this *EchoSingle) Bind(session nets.Sessioner) (content nets.Content, err 
 	mizugos.Labelmgr().Add(entity, defines.LabelEchoSingle)
 	content.Unbind = func() {
 		entity.Finalize()
+		mizugos.Netmgr().DelSession(session.SessionID())
 		mizugos.Entitymgr().Del(entity.EntityID())
 		mizugos.Labelmgr().Erase(entity)
 	}

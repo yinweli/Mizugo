@@ -55,14 +55,14 @@ func (this *Netmgr) DelListen(listenID ListenID) {
 	this.listenmgr.del(listenID)
 }
 
+// DelSession 刪除會話, 當會話結束時(連接結束時)務必要呼叫此方法, 不然會造成會話無法被釋放
+func (this *Netmgr) DelSession(sessionID SessionID) {
+	this.sessionmgr.del(sessionID)
+}
+
 // GetSession 取得會話
 func (this *Netmgr) GetSession(sessionID SessionID) Sessioner {
 	return this.sessionmgr.get(sessionID)
-}
-
-// StopSession 停止會話
-func (this *Netmgr) StopSession(sessionID SessionID) {
-	this.sessionmgr.del(sessionID)
 }
 
 // Stop 停止網路

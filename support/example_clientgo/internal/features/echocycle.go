@@ -121,6 +121,7 @@ func (this *EchoCycle) Bind(session nets.Sessioner) (content nets.Content, err e
 	content.Unbind = func() {
 		this.connect.Store(false)
 		entity.Finalize()
+		mizugos.Netmgr().DelSession(session.SessionID())
 		mizugos.Entitymgr().Del(entity.EntityID())
 		mizugos.Labelmgr().Erase(entity)
 	}
