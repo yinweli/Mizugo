@@ -23,9 +23,7 @@ type Metrics struct {
 
 // MetricsConfig 設定資料
 type MetricsConfig struct {
-	Port     int    // 埠號
-	Username string // 帳號
-	Password string // 密碼
+	Port int // 埠號
 }
 
 // Initialize 初始化處理
@@ -38,10 +36,7 @@ func (this *Metrics) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	mizugos.Metricsmgr().Initialize(this.config.Port, &metrics.Auth{
-		Username: this.config.Username,
-		Password: this.config.Password,
-	})
+	mizugos.Metricsmgr().Initialize(this.config.Port)
 	mizugos.Info(this.name).Message("initialize").KV("config", this.config).End()
 	Echo = mizugos.Metricsmgr().NewRuntime("echo")
 	return nil
@@ -52,8 +47,5 @@ func (this *Metrics) Finalize() {
 	mizugos.Metricsmgr().Finalize()
 }
 
-// Echo 回音統計物件. 使用expvarmon監控時, 可使用以下參數
-// -ports="http://帳號:密碼@網址:埠號"
-// -vars="time:echo.time,max:echo.max,mean:echo.mean,count:echo.count,count(1m):echo.count(1m),count(5m):echo.count(5m),count(10m):echo.count(10m),count(60m):echo.count(60m)"
-// -i 間隔時間
+// Echo 回音統計物件
 var Echo *metrics.Runtime

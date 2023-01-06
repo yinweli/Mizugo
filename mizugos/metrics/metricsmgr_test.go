@@ -33,16 +33,13 @@ func (this *SuiteMetricsmgr) TearDownTest() {
 
 func (this *SuiteMetricsmgr) TestInitialize() {
 	target := NewMetricsmgr()
-	target.Initialize(8080, &Auth{
-		Username: "username",
-		Password: "password",
-	})
+	target.Initialize(8080)
 	target.Finalize()
 }
 
 func (this *SuiteMetricsmgr) TestNew() {
 	target := NewMetricsmgr()
-	target.Initialize(8080, nil)
+	target.Initialize(8080)
 
 	assert.NotNil(this.T(), target.NewInt("int"))
 	assert.NotNil(this.T(), target.NewFloat("float"))
