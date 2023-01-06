@@ -9,8 +9,6 @@ import (
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/features"
 )
 
-// TODO: 要裝統計入口
-
 func main() {
 	mizugos.Start("example_client_go", initialize, finalize)
 }
@@ -24,6 +22,10 @@ func initialize() error {
 	mizugos.Configmgr().AddPath(defines.ConfigPath)
 
 	if err := feature.logger.Initialize(); err != nil {
+		return fmt.Errorf("initialize: %w", err)
+	} // if
+
+	if err := feature.metrics.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
@@ -42,12 +44,14 @@ func initialize() error {
 func finalize() {
 	feature.echoSingle.Finalize()
 	feature.echoCycle.Finalize()
+	feature.metrics.Finalize()
 	feature.logger.Finalize() // 日誌必須最後結束
 }
 
 // feature 功能資料
 var feature struct {
 	logger     *commons.Logger      // 日誌資料
+	metrics    *commons.Metrics     // 統計資料
 	echoSingle *features.EchoSingle // 單次回音
 	echoCycle  *features.EchoCycle  // 循環回音
 }
