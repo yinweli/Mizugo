@@ -105,6 +105,7 @@ func (this *SuiteEntity) TestModule() {
 	assert.Nil(this.T(), target.AddModule(module1))
 	assert.NotNil(this.T(), target.GetModule(module1.ModuleID()))
 	assert.NotNil(this.T(), target.AddModule(module1))
+
 	assert.Nil(this.T(), target.Initialize())
 	assert.NotNil(this.T(), target.AddModule(module2))
 	target.Finalize()

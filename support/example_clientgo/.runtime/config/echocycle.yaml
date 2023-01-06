@@ -5,4 +5,4 @@ echocycle:
   message: echo strong
   disconnect: true
   reconnect: true
-  waittime: 100ms
+  checktime: 20ms

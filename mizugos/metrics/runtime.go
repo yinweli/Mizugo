@@ -87,35 +87,45 @@ func (this *Runtime) start() {
 		for {
 			select {
 			case <-timeout.C:
-				this.lock.Lock()
-				this.last.time = this.curr.time
-				this.last.max = this.curr.max
-				this.last.count = this.curr.count
-				this.lock.Unlock()
+				if this.finish() == false {
+					this.lock.Lock()
+					this.last.time = this.curr.time
+					this.last.max = this.curr.max
+					this.last.count = this.curr.count
+					this.lock.Unlock()
+				} // if
 
 			case <-timeout1.C:
-				this.lock.Lock()
-				this.last.count1 = this.curr.count1
-				this.curr.count1 = 0
-				this.lock.Unlock()
+				if this.finish() == false {
+					this.lock.Lock()
+					this.last.count1 = this.curr.count1
+					this.curr.count1 = 0
+					this.lock.Unlock()
+				} // if
 
 			case <-timeout5.C:
-				this.lock.Lock()
-				this.last.count5 = this.curr.count5
-				this.curr.count5 = 0
-				this.lock.Unlock()
+				if this.finish() == false {
+					this.lock.Lock()
+					this.last.count5 = this.curr.count5
+					this.curr.count5 = 0
+					this.lock.Unlock()
+				} // if
 
 			case <-timeout10.C:
-				this.lock.Lock()
-				this.last.count10 = this.curr.count10
-				this.curr.count10 = 0
-				this.lock.Unlock()
+				if this.finish() == false {
+					this.lock.Lock()
+					this.last.count10 = this.curr.count10
+					this.curr.count10 = 0
+					this.lock.Unlock()
+				} // if
 
 			case <-timeout60.C:
-				this.lock.Lock()
-				this.last.count60 = this.curr.count60
-				this.curr.count60 = 0
-				this.lock.Unlock()
+				if this.finish() == false {
+					this.lock.Lock()
+					this.last.count60 = this.curr.count60
+					this.curr.count60 = 0
+					this.lock.Unlock()
+				} // if
 
 			default:
 				if this.finish() {
