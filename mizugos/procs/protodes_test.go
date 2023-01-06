@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/anypb"
 
 	"github.com/yinweli/Mizugo/mizugos/utils"
 	"github.com/yinweli/Mizugo/testdata"
@@ -32,6 +31,14 @@ func (this *SuiteProtoDes) TearDownSuite() {
 
 func (this *SuiteProtoDes) TearDownTest() {
 	goleak.VerifyNone(this.T())
+}
+
+func (this *SuiteProtoDes) TestNewProtoDesMsg() {
+	message, err := NewProtoDesMsg(0, &ProtoDesMsgTest{
+		Message: "new proto des msg",
+	})
+	assert.Nil(this.T(), err)
+	assert.NotNil(this.T(), message)
 }
 
 func (this *SuiteProtoDes) TestNewProtoDes() {
@@ -103,11 +110,8 @@ func BenchmarkProtoDesDecode(b *testing.B) {
 }
 
 func protoDesTestMsg(message string) *ProtoDesMsg {
-	msg, _ := anypb.New(&ProtoDesMsgTest{
+	result, _ := NewProtoDesMsg(1, &ProtoDesMsgTest{
 		Message: message,
 	})
-	return &ProtoDesMsg{
-		MessageID: 1,
-		Message:   msg,
-	}
+	return result
 }

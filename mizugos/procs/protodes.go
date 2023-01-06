@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
 
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
@@ -15,6 +16,20 @@ import (
 // 封包解碼通過Des解密, 再通過proto解碼成封包結構
 // 由於使用到Des加密, 所以需要在建立處理器時指定密鑰
 // 安全性較高, 適合用來傳送一般封包
+
+// NewProtoDesMsg 建立protoDes訊息
+func NewProtoDesMsg(messageID MessageID, message proto.Message) (result *ProtoDesMsg, err error) {
+	temp, err := anypb.New(message)
+
+	if err != nil {
+		return nil, fmt.Errorf("newProtoDesMsg: %w", err)
+	} // if
+
+	return &ProtoDesMsg{
+		MessageID: messageID,
+		Message:   temp,
+	}, nil
+}
 
 // NewProtoDes 建立protoDes處理器
 func NewProtoDes(key []byte) *ProtoDes {
