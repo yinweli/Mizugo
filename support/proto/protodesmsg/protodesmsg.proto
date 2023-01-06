@@ -6,11 +6,11 @@ option go_package = "/protodesmsg;procs";
 
 // ProtoDes訊息資料
 message ProtoDesMsg {
-  uint32 MessageID = 1; // 訊息編號
-  google.protobuf.Any Message = 2; // 訊息資料
+  int32 messageID = 1; // 訊息編號, 設置為int32以跟proto的列舉類型統一
+  google.protobuf.Any message = 2; // 訊息資料
 }
 
 // ProtoDes測試用訊息資料
 message ProtoDesMsgTest {
-  string Message = 1; // 訊息內容
+  string message = 1; // 訊息內容
 }

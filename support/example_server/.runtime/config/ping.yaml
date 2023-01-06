@@ -1,0 +1,4 @@
+ping:
+  ip:
+  port: 4001
+  initkey: firstkey

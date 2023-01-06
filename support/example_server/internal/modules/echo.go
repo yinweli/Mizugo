@@ -7,13 +7,14 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/utils"
 	"github.com/yinweli/Mizugo/support/example_server/internal/commons"
 	"github.com/yinweli/Mizugo/support/example_server/internal/defines"
+	"github.com/yinweli/Mizugo/support/example_server/internal/messages"
 )
 
 // NewEcho 建立回音模組
 func NewEcho() *Echo {
 	return &Echo{
-		Module: entitys.NewModule(1),
-		name:   "module echo server",
+		Module: entitys.NewModule(defines.ModuleIDEcho),
+		name:   "module echo(server)",
 	}
 }
 
@@ -25,7 +26,7 @@ type Echo struct {
 
 // Start start事件
 func (this *Echo) Start() {
-	this.Entity().AddMessage(defines.MessageIDEcho, this.ProcMsgEcho)
+	this.Entity().AddMessage(procs.MessageID(messages.MsgID_Echo), this.ProcMsgEcho)
 }
 
 // ProcMsgEcho 處理回音訊息

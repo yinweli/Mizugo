@@ -7,7 +7,7 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/mizugos/utils"
-	"github.com/yinweli/Mizugo/support/example_clientgo/internal/defines"
+	"github.com/yinweli/Mizugo/support/example_clientgo/internal/messages"
 )
 
 // NewEchoSingle 建立單次回音模組
@@ -30,7 +30,7 @@ type EchoSingle struct {
 
 // Start start事件
 func (this *EchoSingle) Start() {
-	this.Entity().AddMessage(defines.MessageIDEcho, this.ProcMsgEcho)
+	this.Entity().AddMessage(procs.MessageID(messages.MsgID_Echo), this.ProcMsgEcho)
 	this.SendMsgEcho()
 }
 
@@ -58,8 +58,5 @@ func (this *EchoSingle) ProcMsgEcho(messageID procs.MessageID, message any) {
 
 // SendMsgEcho 傳送回音訊息
 func (this *EchoSingle) SendMsgEcho() {
-	this.Entity().Send(&procs.SimpleMsg{
-		MessageID: defines.MessageIDEcho,
-		Message:   this.message,
-	})
+	this.Entity().Send(procs.NewSimpleMsg(procs.MessageID(messages.MsgID_Echo), this.message))
 }
