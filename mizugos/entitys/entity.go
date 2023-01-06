@@ -27,7 +27,6 @@ func NewEntity(entityID EntityID) *Entity {
 type Entity struct {
 	entityID  EntityID                        // 實體編號
 	enable    atomic.Bool                     // 啟用旗標
-	close     []func()                        // 結束處理列表
 	session   utils.SyncAttr[nets.Sessioner]  // 會話物件
 	process   utils.SyncAttr[procs.Processor] // 處理物件
 	modulemgr *Modulemgr                      // 模組管理器
@@ -38,12 +37,11 @@ type Entity struct {
 // ===== 基礎功能 =====
 
 // Initialize 初始化處理
-func (this *Entity) Initialize(closes ...func()) error {
+func (this *Entity) Initialize() error {
 	if this.enable.CompareAndSwap(false, true) == false {
 		return fmt.Errorf("entity initialize: already initialize")
 	} // if
 
-	this.close = closes
 	this.eventmgr.Sub(eventAwake, func(param any) {
 		if module, ok := param.(Awaker); ok {
 			module.Awake()
@@ -65,10 +63,6 @@ func (this *Entity) Initialize(closes ...func()) error {
 		} // if
 	})
 	this.eventmgr.Sub(eventFinalize, func(_ any) {
-		for _, itor := range this.close {
-			itor()
-		} // for
-
 		if session := this.session.Get(); session != nil {
 			session.Stop()
 		} // if

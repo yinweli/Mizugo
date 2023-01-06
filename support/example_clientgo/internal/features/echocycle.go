@@ -78,20 +78,21 @@ func (this *EchoCycle) Bind(session nets.Sessioner) (content nets.Content, err e
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	if err := entity.Initialize(func() {
-		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.Labelmgr().Erase(entity)
-
-		if this.config.Reconnect {
-			time.Sleep(this.config.WaitTime)
-			go this.connect()
-		} // if
-	}); err != nil {
+	if err := entity.Initialize(); err != nil {
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
 	mizugos.Labelmgr().Add(entity, defines.LabelEchoCycle)
-	content.Unbind = entity.Finalize
+	content.Unbind = func() {
+		entity.Finalize()
+		mizugos.Entitymgr().Del(entity.EntityID())
+		mizugos.Labelmgr().Erase(entity)
+
+		if this.config.Reconnect { // TODO: 重連改成在外面跑執行緒檢查是否有需要重連
+			time.Sleep(this.config.WaitTime)
+			go this.connect()
+		} // if
+	}
 	content.Encode = entity.GetProcess().Encode
 	content.Decode = entity.GetProcess().Decode
 	content.Receive = entity.GetProcess().Process

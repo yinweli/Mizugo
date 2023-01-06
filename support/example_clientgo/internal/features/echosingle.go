@@ -76,15 +76,16 @@ func (this *EchoSingle) Bind(session nets.Sessioner) (content nets.Content, err 
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
-	if err := entity.Initialize(func() {
-		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.Labelmgr().Erase(entity)
-	}); err != nil {
+	if err := entity.Initialize(); err != nil {
 		return content, fmt.Errorf("bind: %w", err)
 	} // if
 
 	mizugos.Labelmgr().Add(entity, defines.LabelEchoSingle)
-	content.Unbind = entity.Finalize
+	content.Unbind = func() {
+		entity.Finalize()
+		mizugos.Entitymgr().Del(entity.EntityID())
+		mizugos.Labelmgr().Erase(entity)
+	}
 	content.Encode = entity.GetProcess().Encode
 	content.Decode = entity.GetProcess().Decode
 	content.Receive = entity.GetProcess().Process

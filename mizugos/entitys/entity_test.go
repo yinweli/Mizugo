@@ -44,14 +44,10 @@ func (this *SuiteEntity) TestInitialize() {
 	entityID := EntityID(1)
 	target := NewEntity(entityID)
 	module := newModuleTester(ModuleID(1))
-	closeCount := atomic.Int64{}
-	closeFunc := func() {
-		closeCount.Add(1)
-	}
 
 	assert.Nil(this.T(), target.AddModule(module))
-	assert.Nil(this.T(), target.Initialize(closeFunc))
-	assert.NotNil(this.T(), target.Initialize(closeFunc))
+	assert.Nil(this.T(), target.Initialize())
+	assert.NotNil(this.T(), target.Initialize())
 	assert.Equal(this.T(), entityID, target.EntityID())
 	assert.True(this.T(), target.Enable())
 
@@ -61,7 +57,6 @@ func (this *SuiteEntity) TestInitialize() {
 	assert.False(this.T(), target.Enable())
 
 	time.Sleep(testdata.Timeout * 2) // 為了給finalize執行, 需要長一點的時間
-	assert.Equal(this.T(), int64(1), closeCount.Load())
 	assert.Equal(this.T(), int64(1), module.awake.Load())
 	assert.Equal(this.T(), int64(1), module.start.Load())
 	assert.Greater(this.T(), module.update.Load(), int64(0))
