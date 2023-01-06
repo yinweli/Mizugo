@@ -70,6 +70,17 @@ func (this *SuiteNetmgr) TestAddListen() {
 	done.get().StopWait()
 }
 
+func (this *SuiteNetmgr) TestDelListen() {
+	bind := newBindTester(true, true, true, true)
+	target := NewNetmgr()
+	listenID := target.AddListen(NewTCPListen(this.hostLocal.ip, this.hostLocal.port), bind)
+	assert.Equal(this.T(), ListenID(1), listenID)
+
+	time.Sleep(testdata.Timeout)
+	target.DelListen(listenID)
+	target.Stop()
+}
+
 func (this *SuiteNetmgr) TestGetSession() {
 	bind := newBindTester(true, true, true, true)
 	target := NewNetmgr()

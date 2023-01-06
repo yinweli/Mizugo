@@ -19,9 +19,9 @@ func NewEcho() *Echo {
 
 // Echo 回音入口資料
 type Echo struct {
-	name   string        // 入口名稱
-	config EchoConfig    // 設定資料
-	listen nets.Listener // 接聽物件
+	name     string        // 入口名稱
+	config   EchoConfig    // 設定資料
+	listenID nets.ListenID // 接聽編號
 }
 
 // EchoConfig 設定資料
@@ -42,8 +42,7 @@ func (this *Echo) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	this.listen = nets.NewTCPListen(this.config.IP, this.config.Port)
-	mizugos.Netmgr().AddListen(this.listen, this)
+	this.listenID = mizugos.Netmgr().AddListen(nets.NewTCPListen(this.config.IP, this.config.Port), this)
 	mizugos.Info(this.name).Message("entry start").KV("config", this.config).End()
 	return nil
 }
@@ -51,10 +50,7 @@ func (this *Echo) Initialize() error {
 // Finalize 結束處理
 func (this *Echo) Finalize() {
 	mizugos.Info(this.name).Message("entry finalize").End()
-
-	if err := this.listen.Stop(); err != nil {
-		_ = mizugos.Error(this.name).EndError(err)
-	} // if
+	mizugos.Netmgr().DelListen(this.listenID)
 }
 
 // Bind 綁定處理

@@ -81,5 +81,8 @@ type Decode func(packet []byte) (message any, err error)
 // Receive 接收封包處理函式類型
 type Receive func(message any) error
 
+// ListenID 接聽編號
+type ListenID = int64
+
 // SessionID 會話編號
 type SessionID = int64

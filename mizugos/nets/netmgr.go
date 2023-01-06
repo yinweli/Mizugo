@@ -5,8 +5,6 @@ import (
 	"sync"
 )
 
-// TODO: 還是要讓Listen可以被單獨刪除
-
 // NewNetmgr 建立網路管理器
 func NewNetmgr() *Netmgr {
 	return &Netmgr{
@@ -40,8 +38,7 @@ func (this *Netmgr) AddConnect(connecter Connecter, binder Binder) {
 }
 
 // AddListen 新增接聽
-func (this *Netmgr) AddListen(listener Listener, binder Binder) {
-	this.listenmgr.add(listener)
+func (this *Netmgr) AddListen(listener Listener, binder Binder) ListenID {
 	listener.Listen(func(session Sessioner, err error) {
 		if err != nil {
 			binder.Error(fmt.Errorf("netmgr listen: %v: %w", listener.Address(), err))
@@ -50,6 +47,12 @@ func (this *Netmgr) AddListen(listener Listener, binder Binder) {
 
 		go session.Start(this.sessionmgr.add(session), binder)
 	})
+	return this.listenmgr.add(listener)
+}
+
+// DelListen 刪除接聽
+func (this *Netmgr) DelListen(listenID ListenID) {
+	this.listenmgr.del(listenID)
 }
 
 // GetSession 取得會話
@@ -78,21 +81,37 @@ func (this *Netmgr) Status() *Status {
 
 // newListenmgr 建立接聽管理器
 func newListenmgr() *listenmgr {
-	return &listenmgr{}
+	return &listenmgr{
+		data: map[ListenID]Listener{},
+	}
 }
 
 // listenmgr 接聽管理器
 type listenmgr struct {
-	data []Listener   // 接聽列表
-	lock sync.RWMutex // 執行緒鎖
+	listenID ListenID              // 接聽編號
+	data     map[ListenID]Listener // 接聽列表
+	lock     sync.RWMutex          // 執行緒鎖
 }
 
 // add 新增接聽
-func (this *listenmgr) add(listener Listener) {
+func (this *listenmgr) add(listen Listener) ListenID {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	this.data = append(this.data, listener)
+	this.listenID++
+	this.data[this.listenID] = listen
+	return this.listenID
+}
+
+// del 刪除接聽
+func (this *listenmgr) del(listenID ListenID) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	if listen, ok := this.data[listenID]; ok {
+		_ = listen.Stop()
+		delete(this.data, listenID)
+	} // if
 }
 
 // clear 清除接聽
@@ -104,7 +123,7 @@ func (this *listenmgr) clear() {
 		_ = itor.Stop()
 	} // for
 
-	this.data = []Listener{}
+	this.data = map[ListenID]Listener{}
 }
 
 // address 取得接聽位址列表
