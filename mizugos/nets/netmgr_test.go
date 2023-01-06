@@ -84,7 +84,11 @@ func (this *SuiteNetmgr) TestDelListen() {
 func (this *SuiteNetmgr) TestDelSession() {
 	bind := newBindTester(true, true, true, true)
 	target := NewNetmgr()
-	target.AddConnect(NewTCPConnect(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout), bind)
+	target.AddListen(NewTCPListen(this.hostLocal.ip, this.hostLocal.port), bind)
+
+	done := newDoneTester()
+	client := NewTCPConnect(this.hostLocal.ip, this.hostLocal.port, testdata.Timeout)
+	client.Connect(done.done)
 
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), bind.validSession())

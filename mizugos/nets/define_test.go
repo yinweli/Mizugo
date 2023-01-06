@@ -64,6 +64,7 @@ type bindTester struct {
 	lock    sync.Mutex
 	session Sessioner
 	message any
+	send    int
 	err     error
 }
 
@@ -79,6 +80,13 @@ func (this *bindTester) validMessage(message any) bool {
 	defer this.lock.Unlock()
 
 	return this.message == message
+}
+
+func (this *bindTester) validSend(send int) bool {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return this.send == send
 }
 
 func (this *bindTester) validError() bool {
@@ -138,6 +146,12 @@ func (this *bindTester) Bind(session Sessioner) (content Content, err error) {
 				this.message = nil
 				return fmt.Errorf("failed")
 			} // if
+		},
+		AfterSend: func() {
+			this.lock.Lock()
+			defer this.lock.Unlock()
+
+			this.send++
 		},
 	}, err
 }

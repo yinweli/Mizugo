@@ -158,6 +158,10 @@ func (this *TCPSession) sendLoop() {
 			this.binder.Error(fmt.Errorf("tcp session send loop: %w", err))
 			break
 		} // if
+
+		if this.content.AfterSend != nil {
+			this.content.AfterSend()
+		} // if
 	} // for
 
 	_ = this.conn.Close()

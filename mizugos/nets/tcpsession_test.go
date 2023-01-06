@@ -95,11 +95,13 @@ func (this *SuiteTCPSession) TestSend() {
 	time.Sleep(testdata.Timeout)
 	donel.get().Send(this.message)
 	time.Sleep(testdata.Timeout)
+	assert.True(this.T(), bindl.validSend(1))
 	assert.True(this.T(), bindc.validMessage(this.message))
 
 	time.Sleep(testdata.Timeout)
 	donel.get().Send("!?")
 	time.Sleep(testdata.Timeout)
+	assert.True(this.T(), bindl.validSend(2))
 	assert.False(this.T(), bindc.validMessage(this.message))
 
 	time.Sleep(testdata.Timeout)

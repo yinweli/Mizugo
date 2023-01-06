@@ -60,10 +60,11 @@ type Binder interface {
 
 // Content 內容資料
 type Content struct {
-	Unbind  // 解綁處理函式
-	Encode  // 封包編碼處理函式
-	Decode  // 封包解碼處理函式
-	Receive // 接收封包處理函式
+	Unbind    // 解綁處理函式
+	Encode    // 封包編碼處理函式
+	Decode    // 封包解碼處理函式
+	Receive   // 接收封包處理函式
+	AfterSend // 傳送封包後處理函式
 }
 
 // Done 完成會話函式類型
@@ -80,6 +81,9 @@ type Decode func(packet []byte) (message any, err error)
 
 // Receive 接收封包處理函式類型
 type Receive func(message any) error
+
+// AfterSend 傳送封包後處理函式類型
+type AfterSend func()
 
 // ListenID 接聽編號
 type ListenID = int64

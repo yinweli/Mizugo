@@ -21,5 +21,5 @@ type Processor interface {
 // Process 訊息處理函式類型
 type Process func(messageID MessageID, message any)
 
-// MessageID 訊息編號
-type MessageID = uint32
+// MessageID 訊息編號, 設置為int32以跟proto的列舉類型統一
+type MessageID = int32
