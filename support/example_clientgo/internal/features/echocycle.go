@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/yinweli/Mizugo/mizugos"
+	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/defines"
@@ -66,7 +67,7 @@ func (this *EchoCycle) Initialize() error {
 					} // if
 
 					this.connect.Store(true)
-					mizugos.Netmgr().AddConnect(nets.NewTCPConnect(this.config.IP, this.config.Port, this.config.Timeout), this)
+					mizugos.Netmgr().AddConnectTCP(this.config.IP, this.config.Port, this.config.Timeout, this.bind, this.unbind, this.wrong)
 				} // if
 
 			default:
@@ -87,51 +88,65 @@ func (this *EchoCycle) Finalize() {
 	mizugos.Info(this.name).Message("entry finalize").End()
 }
 
-// Bind 綁定處理
-func (this *EchoCycle) Bind(session nets.Sessioner) (content nets.Content, err error) {
-	mizugos.Info(this.name).Message("session").KV("sessionID", session.SessionID()).End()
+// bind 綁定處理
+func (this *EchoCycle) bind(session nets.Sessioner) nets.Bundle {
+	mizugos.Info(this.name).Message("bind").End()
 	entity := mizugos.Entitymgr().Add()
 
+	var wrong error
+
 	if entity == nil {
-		this.connect.Store(false)
-		return content, fmt.Errorf("bind: entity nil")
+		wrong = fmt.Errorf("bind: entity nil")
+		goto Error
 	} // if
 
 	if err := entity.SetSession(session); err != nil {
-		this.connect.Store(false)
-		return content, fmt.Errorf("bind: %w", err)
+		wrong = fmt.Errorf("bind: %w", err)
+		goto Error
 	} // if
 
 	if err := entity.SetProcess(procs.NewSimple()); err != nil {
-		this.connect.Store(false)
-		return content, fmt.Errorf("bind: %w", err)
+		wrong = fmt.Errorf("bind: %w", err)
+		goto Error
 	} // if
 
 	if err := entity.AddModule(modules.NewEchoCycle(this.config.Message, this.config.Disconnect)); err != nil {
-		this.connect.Store(false)
-		return content, fmt.Errorf("bind: %w", err)
+		wrong = fmt.Errorf("bind: %w", err)
+		goto Error
 	} // if
 
 	if err := entity.Initialize(); err != nil {
-		this.connect.Store(false)
-		return content, fmt.Errorf("bind: %w", err)
+		wrong = fmt.Errorf("bind: %w", err)
+		goto Error
 	} // if
 
 	mizugos.Labelmgr().Add(entity, defines.LabelEchoCycle)
-	content.Unbind = func() {
-		this.connect.Store(false)
-		entity.Finalize()
-		mizugos.Netmgr().DelSession(session.SessionID())
-		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.Labelmgr().Erase(entity)
+	session.SetOwner(entity)
+	return nets.Bundle{
+		Encode:  entity.GetProcess().Encode,
+		Decode:  entity.GetProcess().Decode,
+		Receive: entity.GetProcess().Process,
 	}
-	content.Encode = entity.GetProcess().Encode
-	content.Decode = entity.GetProcess().Decode
-	content.Receive = entity.GetProcess().Process
-	return content, nil
+
+Error:
+	this.connect.Store(false)
+	_ = mizugos.Error(this.name).EndError(wrong)
+	mizugos.Entitymgr().Del(entity.EntityID())
+	session.Stop()
+	return nets.Bundle{}
 }
 
-// Error 錯誤處理
-func (this *EchoCycle) Error(err error) {
+// unbind 解綁處理
+func (this *EchoCycle) unbind(session nets.Sessioner) {
+	if entity, ok := session.GetOwner().(*entitys.Entity); ok {
+		this.connect.Store(false)
+		entity.Finalize()
+		mizugos.Entitymgr().Del(entity.EntityID())
+		mizugos.Labelmgr().Erase(entity)
+	} // if
+}
+
+// wrong 錯誤處理
+func (this *EchoCycle) wrong(err error) {
 	_ = mizugos.Error(this.name).EndError(err)
 }

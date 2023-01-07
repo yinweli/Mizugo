@@ -3,8 +3,7 @@ syntax = "proto3";
 option go_package = "/messages;messages";
 
 // 要求密鑰
-message MsgReqKey {
-}
+message MsgReqKey {}
 
 // 回應密鑰
 message MsgResKey {

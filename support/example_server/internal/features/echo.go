@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/yinweli/Mizugo/mizugos"
+	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/example_server/internal/defines"
@@ -42,7 +43,7 @@ func (this *Echo) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	this.listenID = mizugos.Netmgr().AddListen(nets.NewTCPListen(this.config.IP, this.config.Port), this)
+	this.listenID = mizugos.Netmgr().AddListenTCP(this.config.IP, this.config.Port, this.bind, this.unbind, this.wrong)
 	mizugos.Info(this.name).Message("entry start").KV("config", this.config).End()
 	return nil
 }
@@ -53,46 +54,63 @@ func (this *Echo) Finalize() {
 	mizugos.Netmgr().DelListen(this.listenID)
 }
 
-// Bind 綁定處理
-func (this *Echo) Bind(session nets.Sessioner) (content nets.Content, err error) {
-	mizugos.Info(this.name).Message("session").KV("sessionID", session.SessionID()).End()
+// bind 綁定處理
+func (this *Echo) bind(session nets.Sessioner) nets.Bundle {
+	mizugos.Info(this.name).Message("bind").End()
 	entity := mizugos.Entitymgr().Add()
 
+	var wrong error
+
 	if entity == nil {
-		return content, fmt.Errorf("bind: entity nil")
+		wrong = fmt.Errorf("bind: entity nil")
+		goto Error
 	} // if
 
 	if err := entity.SetSession(session); err != nil {
-		return content, fmt.Errorf("bind: %w", err)
+		wrong = fmt.Errorf("bind: %w", err)
+		goto Error
 	} // if
 
 	if err := entity.SetProcess(procs.NewSimple()); err != nil {
-		return content, fmt.Errorf("bind: %w", err)
+		wrong = fmt.Errorf("bind: %w", err)
+		goto Error
 	} // if
 
 	if err := entity.AddModule(modules.NewEcho()); err != nil {
-		return content, fmt.Errorf("bind: %w", err)
+		wrong = fmt.Errorf("bind: %w", err)
+		goto Error
 	} // if
 
 	if err := entity.Initialize(); err != nil {
-		mizugos.Entitymgr().Del(entity.EntityID())
-		return content, fmt.Errorf("bind: %w", err)
+		wrong = fmt.Errorf("bind: %w", err)
+		goto Error
 	} // if
 
 	mizugos.Labelmgr().Add(entity, defines.LabelEcho)
-	content.Unbind = func() {
-		entity.Finalize()
-		mizugos.Netmgr().DelSession(session.SessionID())
-		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.Labelmgr().Erase(entity)
+	session.SetOwner(entity)
+	return nets.Bundle{
+		Encode:  entity.GetProcess().Encode,
+		Decode:  entity.GetProcess().Decode,
+		Receive: entity.GetProcess().Process,
 	}
-	content.Encode = entity.GetProcess().Encode
-	content.Decode = entity.GetProcess().Decode
-	content.Receive = entity.GetProcess().Process
-	return content, nil
+
+Error:
+	_ = mizugos.Error(this.name).EndError(wrong)
+	mizugos.Entitymgr().Del(entity.EntityID())
+	session.Stop()
+	return nets.Bundle{}
 }
 
-// Error 錯誤處理
-func (this *Echo) Error(err error) {
+// unbind 解綁處理
+func (this *Echo) unbind(session nets.Sessioner) {
+	if entity, ok := session.GetOwner().(*entitys.Entity); ok {
+		entity.Finalize()
+		mizugos.Entitymgr().Del(entity.EntityID())
+		mizugos.Labelmgr().Erase(entity)
+	} // if
+}
+
+// wrong 錯誤處理
+func (this *Echo) wrong(err error) {
 	_ = mizugos.Error(this.name).EndError(err)
 }

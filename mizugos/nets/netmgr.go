@@ -131,9 +131,7 @@ func (this *connectmgr) del(connectID ConnectID) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	if _, ok := this.data[connectID]; ok {
-		delete(this.data, connectID)
-	} // if
+	delete(this.data, connectID)
 }
 
 // clear 清除連接

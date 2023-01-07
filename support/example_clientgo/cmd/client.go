@@ -16,6 +16,7 @@ func main() {
 // initialize 初始化處理
 func initialize() error {
 	feature.logger = commons.NewLogger()
+	feature.metrics = commons.NewMetrics()
 	feature.echoSingle = features.NewEchoSingle()
 	feature.echoCycle = features.NewEchoCycle()
 

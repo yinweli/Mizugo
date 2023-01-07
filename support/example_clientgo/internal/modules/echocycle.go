@@ -60,5 +60,4 @@ func (this *EchoCycle) ProcMsgEcho(messageID procs.MessageID, message any) {
 // SendMsgEcho 傳送回音訊息
 func (this *EchoCycle) SendMsgEcho() {
 	this.Entity().Send(procs.NewSimpleMsg(procs.MessageID(messages.MsgID_Echo), this.message))
-
 }
