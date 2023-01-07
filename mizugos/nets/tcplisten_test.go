@@ -24,7 +24,7 @@ type SuiteTCPListen struct {
 
 func (this *SuiteTCPListen) SetupSuite() {
 	this.Change("test-nets-tcpListen")
-	this.host = host{ip: "", port: "3001"}
+	this.host = host{ip: "", port: "2001"}
 }
 
 func (this *SuiteTCPListen) TearDownSuite() {
@@ -40,32 +40,35 @@ func (this *SuiteTCPListen) TestNewTCPListen() {
 }
 
 func (this *SuiteTCPListen) TestListen() {
-	donel := newDoneTester()
-	target := NewTCPListen(this.host.ip, this.host.port)
-	target.Listen(donel.done)
+	testl := newTester(false, true, true)
+	listen := NewTCPListen(this.host.ip, this.host.port)
+	listen.Listen(testl.inform())
 
-	donec := newDoneTester()
+	testc := newTester(true, true, true)
 	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
-	client.Connect(donec.done)
+	client.Connect(testc.inform())
 
 	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), donel.valid())
-	assert.True(this.T(), donec.valid())
-	assert.Nil(this.T(), target.Stop())
-	donel.get().StopWait()
-	donec.get().StopWait()
+	assert.True(this.T(), testl.valid())
+	assert.True(this.T(), testc.valid())
 
-	done := newDoneTester()
-	target = NewTCPListen("!?", this.host.port)
-	target.Listen(done.done)
 	time.Sleep(testdata.Timeout)
-	assert.False(this.T(), done.valid())
+	testc.get().Stop()
+	assert.Nil(this.T(), listen.Stop())
 
-	done = newDoneTester()
-	target = NewTCPListen("192.168.0.1", this.host.port) // 故意要接聽錯誤位址才會引發錯誤
-	target.Listen(done.done)
+	testl = newTester(false, true, true)
+	listen = NewTCPListen("!?", this.host.port)
+	listen.Listen(testl.inform())
+
 	time.Sleep(testdata.Timeout)
-	assert.False(this.T(), done.valid())
+	assert.False(this.T(), testl.valid())
+
+	testl = newTester(false, true, true)
+	listen = NewTCPListen("192.168.0.1", this.host.port) // 故意要接聽錯誤位址才會引發錯誤
+	listen.Listen(testl.inform())
+
+	time.Sleep(testdata.Timeout)
+	assert.False(this.T(), testl.valid())
 }
 
 func (this *SuiteTCPListen) TestAddress() {

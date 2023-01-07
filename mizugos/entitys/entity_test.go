@@ -75,7 +75,6 @@ func (this *SuiteEntity) TestSession() {
 	assert.NotNil(this.T(), target.SetSession(session))
 
 	target.Send("message")
-	assert.Equal(this.T(), session.SessionID(), target.SessionID())
 	assert.Equal(this.T(), session.RemoteAddr(), target.RemoteAddr())
 	assert.Equal(this.T(), session.LocalAddr(), target.LocalAddr())
 

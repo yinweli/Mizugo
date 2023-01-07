@@ -131,11 +131,6 @@ func (this *Entity) Send(message any) {
 	this.session.Get().Send(message)
 }
 
-// SessionID 取得會話編號
-func (this *Entity) SessionID() nets.SessionID {
-	return this.session.Get().SessionID()
-}
-
 // RemoteAddr 取得遠端位址
 func (this *Entity) RemoteAddr() net.Addr {
 	return this.session.Get().RemoteAddr()

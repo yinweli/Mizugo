@@ -18,15 +18,13 @@ func TestTCPSession(t *testing.T) {
 type SuiteTCPSession struct {
 	suite.Suite
 	testdata.TestEnv
-	ip      string
-	port    string
+	host    host
 	message string
 }
 
 func (this *SuiteTCPSession) SetupSuite() {
 	this.Change("test-nets-tcpSession")
-	this.ip = ""
-	this.port = "3002"
+	this.host = host{port: "3001"}
 	this.message = "message"
 }
 
@@ -43,188 +41,174 @@ func (this *SuiteTCPSession) TestNewTCPSession() {
 }
 
 func (this *SuiteTCPSession) TestStart() {
-	donel := newDoneTester()
-	listen := NewTCPListen(this.ip, this.port)
-	listen.Listen(donel.done)
+	testl := newTester(true, true, true)
+	listen := NewTCPListen(this.host.ip, this.host.port)
+	listen.Listen(testl.inform())
 
-	donec1 := newDoneTester()
-	client1 := NewTCPConnect(this.ip, this.port, testdata.Timeout)
-	client1.Connect(donec1.done)
+	testc1 := newTester(true, true, true)
+	client1 := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
+	client1.Connect(testc1.inform())
 
-	donec2 := newDoneTester()
-	client2 := NewTCPConnect(this.ip, this.port, testdata.Timeout)
-	client2.Connect(donec2.done)
-
-	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), donel.valid())
-	assert.True(this.T(), donec1.valid())
-	assert.True(this.T(), donec2.valid())
-
-	bindl := newBindTester(true, true, true, true)
-	go donel.get().Start(SessionID(0), bindl)
-	bindc1 := newBindTester(true, true, true, true)
-	go donec1.get().Start(SessionID(1), bindc1)
-	bindc2 := newBindTester(false, true, true, true)
-	go donec2.get().Start(SessionID(1), bindc2)
+	testc2 := newTester(true, true, true)
+	client2 := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
+	client2.Connect(testc2.inform())
 
 	time.Sleep(testdata.Timeout)
+	assert.True(this.T(), testl.valid())
+	assert.True(this.T(), testl.validBind())
+	assert.True(this.T(), testc1.valid())
+	assert.True(this.T(), testc1.validBind())
+	assert.True(this.T(), testc1.validSession())
+	assert.True(this.T(), testc2.valid())
+	assert.True(this.T(), testc2.validBind())
+	assert.True(this.T(), testc2.validSession())
+
+	time.Sleep(testdata.Timeout)
+	testc1.get().Stop()
+	testc2.get().StopWait()
 	assert.Nil(this.T(), listen.Stop())
-	donel.get().Stop() // 這裡故意用一般結束來測試看看
-	donec1.get().StopWait()
-	donec2.get().StopWait()
+
+	time.Sleep(testdata.Timeout)
+	assert.True(this.T(), testc1.validUnbind())
+	assert.False(this.T(), testc1.validSession())
+	assert.True(this.T(), testc2.validUnbind())
+	assert.False(this.T(), testc2.validSession())
 }
 
 func (this *SuiteTCPSession) TestSend() {
-	donel := newDoneTester()
-	listen := NewTCPListen(this.ip, this.port)
-	listen.Listen(donel.done)
+	testl := newTester(true, true, true)
+	listen := NewTCPListen(this.host.ip, this.host.port)
+	listen.Listen(testl.inform())
 
-	donec := newDoneTester()
-	client := NewTCPConnect(this.ip, this.port, testdata.Timeout)
-	client.Connect(donec.done)
-
-	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), donel.valid())
-	assert.True(this.T(), donec.valid())
-
-	bindl := newBindTester(true, true, true, true)
-	go donel.get().Start(SessionID(0), bindl)
-	bindc := newBindTester(true, true, true, true)
-	go donec.get().Start(SessionID(1), bindc)
+	testc := newTester(true, true, true)
+	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
+	client.Connect(testc.inform())
 
 	time.Sleep(testdata.Timeout)
-	donel.get().Send(this.message)
-	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), bindl.validSend(1))
-	assert.True(this.T(), bindc.validMessage(this.message))
+	assert.True(this.T(), testl.valid())
+	assert.True(this.T(), testc.valid())
 
 	time.Sleep(testdata.Timeout)
-	donel.get().Send("!?")
+	testl.get().Send(this.message)
 	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), bindl.validSend(2))
-	assert.False(this.T(), bindc.validMessage(this.message))
+	assert.True(this.T(), testl.validEncode())
+	assert.True(this.T(), testl.validAfterSend())
+	assert.True(this.T(), testc.validDecode())
+	assert.True(this.T(), testc.validReceive())
+	assert.True(this.T(), testc.validAfterRecv())
+	assert.True(this.T(), testc.validMessage(this.message))
 
 	time.Sleep(testdata.Timeout)
+	testc.get().Send(this.message)
+	time.Sleep(testdata.Timeout)
+	assert.True(this.T(), testc.validEncode())
+	assert.True(this.T(), testc.validAfterSend())
+	assert.True(this.T(), testl.validDecode())
+	assert.True(this.T(), testl.validReceive())
+	assert.True(this.T(), testl.validAfterRecv())
+	assert.True(this.T(), testl.validMessage(this.message))
+
+	time.Sleep(testdata.Timeout)
+	testc.get().Send("")
+	time.Sleep(testdata.Timeout)
+	assert.True(this.T(), testc.valid())
+
+	time.Sleep(testdata.Timeout)
+	testl.get().Send("!?")
+	time.Sleep(testdata.Timeout)
+	assert.False(this.T(), testc.validMessage(this.message))
+
+	time.Sleep(testdata.Timeout)
+	testc.get().StopWait()
 	assert.Nil(this.T(), listen.Stop())
-	donel.get().StopWait()
-	donec.get().StopWait()
 }
 
 func (this *SuiteTCPSession) TestEncodeFailed() {
-	donel := newDoneTester()
-	listen := NewTCPListen(this.ip, this.port)
-	listen.Listen(donel.done)
+	testl := newTester(false, true, true)
+	listen := NewTCPListen(this.host.ip, this.host.port)
+	listen.Listen(testl.inform())
 
-	donec := newDoneTester()
-	client := NewTCPConnect(this.ip, this.port, testdata.Timeout)
-	client.Connect(donec.done)
-
-	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), donel.valid())
-	assert.True(this.T(), donec.valid())
-
-	bindl := newBindTester(true, false, true, true)
-	go donel.get().Start(SessionID(0), bindl)
-	bindc := newBindTester(true, true, true, true)
-	go donec.get().Start(SessionID(1), bindc)
+	testc := newTester(true, true, true)
+	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
+	client.Connect(testc.inform())
 
 	time.Sleep(testdata.Timeout)
-	donel.get().Send(this.message)
-	time.Sleep(testdata.Timeout)
-	assert.False(this.T(), bindl.validError())
+	assert.True(this.T(), testl.valid())
+	assert.True(this.T(), testc.valid())
 
 	time.Sleep(testdata.Timeout)
-	assert.Nil(this.T(), listen.Stop())
-	donel.get().StopWait()
-	donec.get().StopWait()
+	testl.get().Send(this.message)
+	time.Sleep(testdata.Timeout)
+	assert.False(this.T(), testl.valid())
+
+	time.Sleep(testdata.Timeout)
+	assert.Nil(this.T(), listen.Stop()) // 因為編碼失敗, 會直接導致連接中斷, 所以不必關閉客戶端連接
 }
 
 func (this *SuiteTCPSession) TestDecodeFailed() {
-	donel := newDoneTester()
-	listen := NewTCPListen(this.ip, this.port)
-	listen.Listen(donel.done)
+	testl := newTester(true, true, true)
+	listen := NewTCPListen(this.host.ip, this.host.port)
+	listen.Listen(testl.inform())
 
-	donec := newDoneTester()
-	client := NewTCPConnect(this.ip, this.port, testdata.Timeout)
-	client.Connect(donec.done)
-
-	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), donel.valid())
-	assert.True(this.T(), donec.valid())
-
-	bindl := newBindTester(true, true, true, true)
-	go donel.get().Start(SessionID(0), bindl)
-	bindc := newBindTester(true, true, false, true)
-	go donec.get().Start(SessionID(1), bindc)
+	testc := newTester(true, false, true)
+	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
+	client.Connect(testc.inform())
 
 	time.Sleep(testdata.Timeout)
-	donel.get().Send(this.message)
-	time.Sleep(testdata.Timeout)
-	assert.False(this.T(), bindc.validError())
+	assert.True(this.T(), testl.valid())
+	assert.True(this.T(), testc.valid())
 
 	time.Sleep(testdata.Timeout)
-	assert.Nil(this.T(), listen.Stop())
-	donel.get().StopWait()
-	donec.get().StopWait()
+	testl.get().Send(this.message)
+	time.Sleep(testdata.Timeout)
+	assert.False(this.T(), testc.valid())
+
+	time.Sleep(testdata.Timeout)
+	assert.Nil(this.T(), listen.Stop()) // 因為解碼失敗, 會直接導致連接中斷, 所以不必關閉客戶端連接
 }
 
 func (this *SuiteTCPSession) TestReceiveFailed() {
-	donel := newDoneTester()
-	listen := NewTCPListen(this.ip, this.port)
-	listen.Listen(donel.done)
+	testl := newTester(true, true, true)
+	listen := NewTCPListen(this.host.ip, this.host.port)
+	listen.Listen(testl.inform())
 
-	donec := newDoneTester()
-	client := NewTCPConnect(this.ip, this.port, testdata.Timeout)
-	client.Connect(donec.done)
-
-	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), donel.valid())
-	assert.True(this.T(), donec.valid())
-
-	bindl := newBindTester(true, true, true, true)
-	go donel.get().Start(SessionID(0), bindl)
-	bindc := newBindTester(true, true, true, false)
-	go donec.get().Start(SessionID(1), bindc)
+	testc := newTester(true, true, false)
+	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
+	client.Connect(testc.inform())
 
 	time.Sleep(testdata.Timeout)
-	donel.get().Send(this.message)
-	time.Sleep(testdata.Timeout)
-	assert.False(this.T(), bindc.validError())
+	assert.True(this.T(), testl.valid())
+	assert.True(this.T(), testc.valid())
 
 	time.Sleep(testdata.Timeout)
-	assert.Nil(this.T(), listen.Stop())
-	donel.get().StopWait()
-	donec.get().StopWait()
+	testl.get().Send(this.message)
+	time.Sleep(testdata.Timeout)
+	assert.False(this.T(), testc.valid())
+
+	time.Sleep(testdata.Timeout)
+	assert.Nil(this.T(), listen.Stop()) // 因為接收失敗, 會直接導致連接中斷, 所以不必關閉客戶端連接
 }
 
 func (this *SuiteTCPSession) TestTCPSession() {
-	donel := newDoneTester()
-	listen := NewTCPListen(this.ip, this.port)
-	listen.Listen(donel.done)
+	testl := newTester(true, true, true)
+	listen := NewTCPListen(this.host.ip, this.host.port)
+	listen.Listen(testl.inform())
 
-	donec := newDoneTester()
-	client := NewTCPConnect(this.ip, this.port, testdata.Timeout)
-	client.Connect(donec.done)
-
-	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), donel.valid())
-	assert.True(this.T(), donec.valid())
-
-	bindl := newBindTester(true, true, true, true)
-	go donel.get().Start(SessionID(0), bindl)
-	bindc := newBindTester(true, true, true, true)
-	go donec.get().Start(SessionID(1), bindc)
+	testc := newTester(true, true, false)
+	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
+	client.Connect(testc.inform())
 
 	time.Sleep(testdata.Timeout)
-	assert.Equal(this.T(), SessionID(0), donel.get().SessionID())
-	assert.NotNil(this.T(), donel.get().RemoteAddr())
-	assert.NotNil(this.T(), donel.get().LocalAddr())
-	assert.Equal(this.T(), SessionID(1), donec.get().SessionID())
-	assert.NotNil(this.T(), donec.get().RemoteAddr())
-	assert.NotNil(this.T(), donec.get().LocalAddr())
+	assert.True(this.T(), testl.valid())
+	assert.True(this.T(), testc.valid())
 
 	time.Sleep(testdata.Timeout)
+	assert.NotNil(this.T(), testl.get().RemoteAddr())
+	assert.NotNil(this.T(), testl.get().LocalAddr())
+	assert.NotNil(this.T(), testc.get().RemoteAddr())
+	assert.NotNil(this.T(), testc.get().LocalAddr())
+
+	time.Sleep(testdata.Timeout)
+	testc.get().StopWait()
 	assert.Nil(this.T(), listen.Stop())
-	donel.get().StopWait()
-	donec.get().StopWait()
 }

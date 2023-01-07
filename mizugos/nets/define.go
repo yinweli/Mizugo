@@ -7,7 +7,7 @@ import (
 // Connecter 連接介面
 type Connecter interface {
 	// Connect 啟動連接
-	Connect(done Done)
+	Connect(inform Inform)
 
 	// Address 取得位址
 	Address() string
@@ -16,7 +16,7 @@ type Connecter interface {
 // Listener 接聽介面
 type Listener interface {
 	// Listen 啟動接聽
-	Listen(done Done)
+	Listen(inform Inform)
 
 	// Stop 停止接聽
 	Stop() error
@@ -28,7 +28,7 @@ type Listener interface {
 // Sessioner 會話介面
 type Sessioner interface {
 	// Start 啟動會話, 若不是使用多執行緒啟動, 則一定被阻塞在這裡直到停止會話; 當由連接器/接聽器獲得會話器之後, 需要啟動會話才可以傳送或接收封包
-	Start(sessionID SessionID, binder Binder)
+	Start(inform Inform)
 
 	// Stop 停止會話, 不會等待會話內部循環結束
 	Stop()
@@ -39,9 +39,6 @@ type Sessioner interface {
 	// Send 傳送封包
 	Send(message any)
 
-	// SessionID 取得會話編號
-	SessionID() SessionID
-
 	// RemoteAddr 取得遠端位址
 	RemoteAddr() net.Addr
 
@@ -49,29 +46,47 @@ type Sessioner interface {
 	LocalAddr() net.Addr
 }
 
-// Binder 綁定介面
-type Binder interface {
-	// Bind 綁定處理
-	Bind(session Sessioner) (content Content, err error)
-
-	// Error 錯誤處理
-	Error(err error)
+// Inform 通知資料
+type Inform struct {
+	Error
+	Bind
+	Unbind
+	Encode
+	Decode
+	Receive
+	AfterSend
+	AfterRecv
 }
 
-// Content 內容資料
-type Content struct {
-	Unbind    // 解綁處理函式
-	Encode    // 封包編碼處理函式
-	Decode    // 封包解碼處理函式
-	Receive   // 接收封包處理函式
-	AfterSend // 傳送封包後處理函式
+// Error 錯誤處理函式類型
+type Error func(err error)
+
+// Do 執行處理
+func (this Error) Do(err error) {
+	if this != nil {
+		this(err)
+	} // if
 }
 
-// Done 完成會話函式類型
-type Done func(session Sessioner, err error)
+// Bind 綁定處理函式類型
+type Bind func(session Sessioner)
+
+// Do 執行處理
+func (this Bind) Do(session Sessioner) {
+	if this != nil {
+		this(session)
+	} // if
+}
 
 // Unbind 解綁處理函式類型
-type Unbind func()
+type Unbind func(session Sessioner)
+
+// Do 執行處理
+func (this Unbind) Do(session Sessioner) {
+	if this != nil {
+		this(session)
+	} // if
+}
 
 // Encode 封包編碼處理函式類型, 用在傳送封包時
 type Encode func(message any) (packet []byte, err error)
@@ -85,8 +100,19 @@ type Receive func(message any) error
 // AfterSend 傳送封包後處理函式類型
 type AfterSend func()
 
-// ListenID 接聽編號
-type ListenID = int64
+// Do 執行處理
+func (this AfterSend) Do() {
+	if this != nil {
+		this()
+	} // if
+}
 
-// SessionID 會話編號
-type SessionID = int64
+// AfterRecv 接收封包後處理函式類型
+type AfterRecv func()
+
+// Do 執行處理
+func (this AfterRecv) Do() {
+	if this != nil {
+		this()
+	} // if
+}
