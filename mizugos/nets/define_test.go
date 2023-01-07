@@ -122,12 +122,64 @@ func (this *tester) inform() Inform {
 
 			this.err = err
 		},
-		Bind: func(session Sessioner) {
+		Bind: func(session Sessioner) Bundle {
 			this.lock.Lock()
 			defer this.lock.Unlock()
 
 			this.bindCount++
 			this.session = session
+			return Bundle{
+				Encode: func(message any) (packet []byte, err error) {
+					this.lock.Lock()
+					defer this.lock.Unlock()
+
+					this.encodeCount++
+
+					if this.encode {
+						return []byte(message.(string)), nil
+					} else {
+						return nil, fmt.Errorf("encode failed")
+					} // if
+				},
+				Decode: func(packet []byte) (message any, err error) {
+					this.lock.Lock()
+					defer this.lock.Unlock()
+
+					this.decodeCount++
+
+					if this.decode {
+						return string(packet), nil
+					} else {
+						return nil, fmt.Errorf("decode failed")
+					} // if
+				},
+				Receive: func(message any) error {
+					this.lock.Lock()
+					defer this.lock.Unlock()
+
+					this.receiveCount++
+
+					if this.receive {
+						this.message = message
+						return nil
+					} else {
+						this.message = nil
+						return fmt.Errorf("failed")
+					} // if
+				},
+				AfterSend: func() {
+					this.lock.Lock()
+					defer this.lock.Unlock()
+
+					this.afterSendCount++
+				},
+				AfterRecv: func() {
+					this.lock.Lock()
+					defer this.lock.Unlock()
+
+					this.afterRecvCount++
+				},
+			}
 		},
 		Unbind: func(_ Sessioner) {
 			this.lock.Lock()
@@ -135,56 +187,6 @@ func (this *tester) inform() Inform {
 
 			this.unbindCount++
 			this.session = nil
-		},
-		Encode: func(message any) (packet []byte, err error) {
-			this.lock.Lock()
-			defer this.lock.Unlock()
-
-			this.encodeCount++
-
-			if this.encode {
-				return []byte(message.(string)), nil
-			} else {
-				return nil, fmt.Errorf("encode failed")
-			} // if
-		},
-		Decode: func(packet []byte) (message any, err error) {
-			this.lock.Lock()
-			defer this.lock.Unlock()
-
-			this.decodeCount++
-
-			if this.decode {
-				return string(packet), nil
-			} else {
-				return nil, fmt.Errorf("decode failed")
-			} // if
-		},
-		Receive: func(message any) error {
-			this.lock.Lock()
-			defer this.lock.Unlock()
-
-			this.receiveCount++
-
-			if this.receive {
-				this.message = message
-				return nil
-			} else {
-				this.message = nil
-				return fmt.Errorf("failed")
-			} // if
-		},
-		AfterSend: func() {
-			this.lock.Lock()
-			defer this.lock.Unlock()
-
-			this.afterSendCount++
-		},
-		AfterRecv: func() {
-			this.lock.Lock()
-			defer this.lock.Unlock()
-
-			this.afterRecvCount++
 		},
 	}
 }

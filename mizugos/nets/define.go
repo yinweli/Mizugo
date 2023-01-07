@@ -57,6 +57,10 @@ type Inform struct {
 	Error
 	Bind
 	Unbind
+}
+
+// Bundle 綁定資料
+type Bundle struct {
 	Encode
 	Decode
 	Receive
@@ -75,13 +79,15 @@ func (this Error) Do(err error) {
 }
 
 // Bind 綁定處理函式類型
-type Bind func(session Sessioner)
+type Bind func(session Sessioner) Bundle
 
 // Do 執行處理
-func (this Bind) Do(session Sessioner) {
+func (this Bind) Do(session Sessioner) Bundle {
 	if this != nil {
-		this(session)
+		return this(session)
 	} // if
+
+	return Bundle{}
 }
 
 // Unbind 解綁處理函式類型

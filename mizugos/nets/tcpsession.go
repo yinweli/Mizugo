@@ -26,7 +26,8 @@ type TCPSession struct {
 	conn    net.Conn       // 連接物件
 	message chan any       // 訊息通道
 	signal  sync.WaitGroup // 通知信號
-	inform  Inform         // 通知物件
+	inform  Inform         // 通知資料
+	bundle  Bundle         // 綁定資料
 	owner   any            // 擁有者
 }
 
@@ -38,7 +39,7 @@ func (this *TCPSession) Start(inform Inform) {
 	go this.recvLoop()
 	go this.sendLoop()
 
-	this.inform.Bind.Do(this)
+	this.bundle = this.inform.Bind.Do(this)
 	this.signal.Wait() // 如果接收循環與傳送循環結束, 就會繼續進行結束處理
 	this.inform.Unbind.Do(this)
 }
@@ -93,19 +94,19 @@ func (this *TCPSession) recvLoop() {
 			break
 		} // if
 
-		message, err := this.inform.Decode(packet)
+		message, err := this.bundle.Decode(packet)
 
 		if err != nil {
 			this.inform.Error.Do(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 
-		if err := this.inform.Receive(message); err != nil {
+		if err := this.bundle.Receive(message); err != nil {
 			this.inform.Error.Do(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 
-		this.inform.AfterRecv.Do()
+		this.bundle.AfterRecv.Do()
 	} // for
 
 	this.message <- nil // 以空訊息通知會話結束
@@ -144,7 +145,7 @@ func (this *TCPSession) sendLoop() {
 			break
 		} // if
 
-		packet, err := this.inform.Encode(message)
+		packet, err := this.bundle.Encode(message)
 
 		if err != nil {
 			this.inform.Error.Do(fmt.Errorf("tcp session send loop: %w", err))
@@ -156,7 +157,7 @@ func (this *TCPSession) sendLoop() {
 			break
 		} // if
 
-		this.inform.AfterSend.Do()
+		this.bundle.AfterSend.Do()
 	} // for
 
 	_ = this.conn.Close()

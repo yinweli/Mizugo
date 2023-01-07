@@ -90,19 +90,14 @@ func (this *Netmgr) Status() *Status {
 func (this *Netmgr) wrapperInform(inform Inform) Inform {
 	return Inform{
 		Error: inform.Error,
-		Bind: func(session Sessioner) {
+		Bind: func(session Sessioner) Bundle {
 			this.sessionmgr.add(session)
-			inform.Bind.Do(session)
+			return inform.Bind.Do(session)
 		},
 		Unbind: func(session Sessioner) {
 			inform.Unbind.Do(session)
 			this.sessionmgr.del(session)
 		},
-		Encode:    inform.Encode,
-		Decode:    inform.Decode,
-		Receive:   inform.Receive,
-		AfterSend: inform.AfterSend,
-		AfterRecv: inform.AfterRecv,
 	}
 }
 
