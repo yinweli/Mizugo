@@ -242,6 +242,13 @@ func (this *emptySession) LocalAddr() net.Addr {
 	return &net.TCPAddr{}
 }
 
+func (this *emptySession) SetOwner(owner any) {
+}
+
+func (this *emptySession) GetOwner() any {
+	return nil
+}
+
 // host 端點資料
 type host struct {
 	ip   string

@@ -44,6 +44,12 @@ type Sessioner interface {
 
 	// LocalAddr 取得本地位址
 	LocalAddr() net.Addr
+
+	// SetOwner 設定擁有者
+	SetOwner(owner any)
+
+	// GetOwner 取得擁有者
+	GetOwner() any
 }
 
 // Inform 通知資料

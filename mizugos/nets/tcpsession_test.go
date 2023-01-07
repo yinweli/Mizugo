@@ -209,6 +209,11 @@ func (this *SuiteTCPSession) TestTCPSession() {
 	assert.NotNil(this.T(), testc.get().LocalAddr())
 
 	time.Sleep(testdata.Timeout)
+	owner := "owner"
+	testc.get().SetOwner(owner)
+	assert.Equal(this.T(), owner, testc.get().GetOwner())
+
+	time.Sleep(testdata.Timeout)
 	testc.get().StopWait()
 	assert.Nil(this.T(), listen.Stop())
 }
