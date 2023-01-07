@@ -7,7 +7,7 @@ import (
 // Connecter 連接介面
 type Connecter interface {
 	// Connect 啟動連接
-	Connect(inform Inform)
+	Connect(bind Bind, unbind Unbind, wrong Wrong)
 
 	// Address 取得位址
 	Address() string
@@ -16,7 +16,7 @@ type Connecter interface {
 // Listener 接聽介面
 type Listener interface {
 	// Listen 啟動接聽
-	Listen(inform Inform)
+	Listen(bind Bind, unbind Unbind, wrong Wrong)
 
 	// Stop 停止接聽
 	Stop() error
@@ -28,7 +28,7 @@ type Listener interface {
 // Sessioner 會話介面
 type Sessioner interface {
 	// Start 啟動會話, 若不是使用多執行緒啟動, 則一定被阻塞在這裡直到停止會話; 當由連接器/接聽器獲得會話器之後, 需要啟動會話才可以傳送或接收封包
-	Start(inform Inform)
+	Start(bind Bind, unbind Unbind, wrong Wrong)
 
 	// Stop 停止會話, 不會等待會話內部循環結束
 	Stop()
@@ -52,32 +52,6 @@ type Sessioner interface {
 	GetOwner() any
 }
 
-// Inform 通知資料
-type Inform struct {
-	Error
-	Bind
-	Unbind
-}
-
-// Bundle 綁定資料
-type Bundle struct {
-	Encode
-	Decode
-	Receive
-	AfterSend
-	AfterRecv
-}
-
-// Error 錯誤處理函式類型
-type Error func(err error)
-
-// Do 執行處理
-func (this Error) Do(err error) {
-	if this != nil {
-		this(err)
-	} // if
-}
-
 // Bind 綁定處理函式類型
 type Bind func(session Sessioner) Bundle
 
@@ -98,6 +72,25 @@ func (this Unbind) Do(session Sessioner) {
 	if this != nil {
 		this(session)
 	} // if
+}
+
+// Wrong 錯誤處理函式類型
+type Wrong func(err error)
+
+// Do 執行處理
+func (this Wrong) Do(err error) {
+	if this != nil {
+		this(err)
+	} // if
+}
+
+// Bundle 綁定資料
+type Bundle struct {
+	Encode
+	Decode
+	Receive
+	AfterSend
+	AfterRecv
 }
 
 // Encode 封包編碼處理函式類型, 用在傳送封包時

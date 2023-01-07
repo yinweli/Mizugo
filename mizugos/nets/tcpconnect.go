@@ -21,17 +21,17 @@ type TCPConnect struct {
 }
 
 // Connect 啟動連接
-func (this *TCPConnect) Connect(inform Inform) {
+func (this *TCPConnect) Connect(bind Bind, unbind Unbind, wrong Wrong) {
 	go func() {
 		conn, err := net.DialTimeout("tcp", this.address, this.timeout)
 
 		if err != nil {
-			inform.Error(fmt.Errorf("tcp connect: %v: %w", this.address, err))
+			wrong.Do(fmt.Errorf("tcp connect: %v: %w", this.address, err))
 			return
 		} // if
 
 		session := NewTCPSession(conn)
-		go session.Start(inform)
+		go session.Start(bind, unbind, wrong)
 	}()
 }
 

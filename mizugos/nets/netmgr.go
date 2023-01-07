@@ -37,9 +37,9 @@ type ConnectID = int64
 type ListenID = int64
 
 // AddConnectTCP 新增連接(TCP)
-func (this *Netmgr) AddConnectTCP(ip, port string, timeout time.Duration, inform Inform) ConnectID {
+func (this *Netmgr) AddConnectTCP(ip, port string, timeout time.Duration, bind Bind, unbind Unbind, wrong Wrong) ConnectID {
 	connect := NewTCPConnect(ip, port, timeout)
-	connect.Connect(this.wrapperInform(inform))
+	connect.Connect(this.wrapperBind(bind), this.wrapperUnbind(unbind), wrong)
 	return this.connectmgr.add(connect)
 }
 
@@ -54,9 +54,9 @@ func (this *Netmgr) GetConnect(connectID ConnectID) Connecter {
 }
 
 // AddListenTCP 新增接聽(TCP)
-func (this *Netmgr) AddListenTCP(ip, port string, inform Inform) ListenID {
+func (this *Netmgr) AddListenTCP(ip, port string, bind Bind, unbind Unbind, wrong Wrong) ListenID {
 	listen := NewTCPListen(ip, port)
-	listen.Listen(this.wrapperInform(inform))
+	listen.Listen(this.wrapperBind(bind), this.wrapperUnbind(unbind), wrong)
 	return this.listenmgr.add(listen)
 }
 
@@ -86,18 +86,19 @@ func (this *Netmgr) Status() *Status {
 	}
 }
 
-// wrapperInform 包裝通知物件
-func (this *Netmgr) wrapperInform(inform Inform) Inform {
-	return Inform{
-		Error: inform.Error,
-		Bind: func(session Sessioner) Bundle {
-			this.sessionmgr.add(session)
-			return inform.Bind.Do(session)
-		},
-		Unbind: func(session Sessioner) {
-			inform.Unbind.Do(session)
-			this.sessionmgr.del(session)
-		},
+// wrapperBind 包裝綁定處理
+func (this *Netmgr) wrapperBind(bind Bind) Bind {
+	return func(session Sessioner) Bundle {
+		this.sessionmgr.add(session)
+		return bind.Do(session)
+	}
+}
+
+// wrapperUnbind 包裝解綁處理
+func (this *Netmgr) wrapperUnbind(unbind Unbind) Unbind {
+	return func(session Sessioner) {
+		unbind.Do(session)
+		this.sessionmgr.del(session)
 	}
 }
 

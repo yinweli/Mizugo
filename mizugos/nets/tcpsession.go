@@ -26,22 +26,22 @@ type TCPSession struct {
 	conn    net.Conn       // 連接物件
 	message chan any       // 訊息通道
 	signal  sync.WaitGroup // 通知信號
-	inform  Inform         // 通知資料
+	wrong   Wrong          // 錯誤處理
 	bundle  Bundle         // 綁定資料
 	owner   any            // 擁有者
 }
 
 // Start 啟動會話, 當由連接器/接聽器獲得會話器之後, 需要啟動會話才可以傳送或接收封包; 若不是使用多執行緒啟動, 則會被阻塞在這裡直到會話結束
-func (this *TCPSession) Start(inform Inform) {
-	this.inform = inform
+func (this *TCPSession) Start(bind Bind, unbind Unbind, wrong Wrong) {
+	this.wrong = wrong
 	this.signal.Add(2) // 等待接收循環與傳送循環結束
 
 	go this.recvLoop()
 	go this.sendLoop()
 
-	this.bundle = this.inform.Bind.Do(this)
+	this.bundle = bind.Do(this)
 	this.signal.Wait() // 如果接收循環與傳送循環結束, 就會繼續進行結束處理
-	this.inform.Unbind.Do(this)
+	unbind.Do(this)
 }
 
 // Stop 停止會話, 不會等待會話內部循環結束
@@ -90,19 +90,19 @@ func (this *TCPSession) recvLoop() {
 		packet, err := this.recvPacket(reader)
 
 		if err != nil {
-			this.inform.Error.Do(fmt.Errorf("tcp session recv loop: %w", err))
+			this.wrong.Do(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 
 		message, err := this.bundle.Decode(packet)
 
 		if err != nil {
-			this.inform.Error.Do(fmt.Errorf("tcp session recv loop: %w", err))
+			this.wrong.Do(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 
 		if err := this.bundle.Receive(message); err != nil {
-			this.inform.Error.Do(fmt.Errorf("tcp session recv loop: %w", err))
+			this.wrong.Do(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 
@@ -148,12 +148,12 @@ func (this *TCPSession) sendLoop() {
 		packet, err := this.bundle.Encode(message)
 
 		if err != nil {
-			this.inform.Error.Do(fmt.Errorf("tcp session send loop: %w", err))
+			this.wrong.Do(fmt.Errorf("tcp session send loop: %w", err))
 			break
 		} // if
 
 		if err := this.sendPacket(this.conn, packet); err != nil {
-			this.inform.Error.Do(fmt.Errorf("tcp session send loop: %w", err))
+			this.wrong.Do(fmt.Errorf("tcp session send loop: %w", err))
 			break
 		} // if
 

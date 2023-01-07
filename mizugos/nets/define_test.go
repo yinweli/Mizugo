@@ -114,81 +114,79 @@ func (this *tester) get() Sessioner {
 	return this.session
 }
 
-func (this *tester) inform() Inform {
-	return Inform{
-		Error: func(err error) {
+func (this *tester) bind(session Sessioner) Bundle {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.bindCount++
+	this.session = session
+	return Bundle{
+		Encode: func(message any) (packet []byte, err error) {
 			this.lock.Lock()
 			defer this.lock.Unlock()
 
-			this.err = err
+			this.encodeCount++
+
+			if this.encode {
+				return []byte(message.(string)), nil
+			} else {
+				return nil, fmt.Errorf("encode failed")
+			} // if
 		},
-		Bind: func(session Sessioner) Bundle {
+		Decode: func(packet []byte) (message any, err error) {
 			this.lock.Lock()
 			defer this.lock.Unlock()
 
-			this.bindCount++
-			this.session = session
-			return Bundle{
-				Encode: func(message any) (packet []byte, err error) {
-					this.lock.Lock()
-					defer this.lock.Unlock()
+			this.decodeCount++
 
-					this.encodeCount++
-
-					if this.encode {
-						return []byte(message.(string)), nil
-					} else {
-						return nil, fmt.Errorf("encode failed")
-					} // if
-				},
-				Decode: func(packet []byte) (message any, err error) {
-					this.lock.Lock()
-					defer this.lock.Unlock()
-
-					this.decodeCount++
-
-					if this.decode {
-						return string(packet), nil
-					} else {
-						return nil, fmt.Errorf("decode failed")
-					} // if
-				},
-				Receive: func(message any) error {
-					this.lock.Lock()
-					defer this.lock.Unlock()
-
-					this.receiveCount++
-
-					if this.receive {
-						this.message = message
-						return nil
-					} else {
-						this.message = nil
-						return fmt.Errorf("failed")
-					} // if
-				},
-				AfterSend: func() {
-					this.lock.Lock()
-					defer this.lock.Unlock()
-
-					this.afterSendCount++
-				},
-				AfterRecv: func() {
-					this.lock.Lock()
-					defer this.lock.Unlock()
-
-					this.afterRecvCount++
-				},
-			}
+			if this.decode {
+				return string(packet), nil
+			} else {
+				return nil, fmt.Errorf("decode failed")
+			} // if
 		},
-		Unbind: func(_ Sessioner) {
+		Receive: func(message any) error {
 			this.lock.Lock()
 			defer this.lock.Unlock()
 
-			this.unbindCount++
-			this.session = nil
+			this.receiveCount++
+
+			if this.receive {
+				this.message = message
+				return nil
+			} else {
+				this.message = nil
+				return fmt.Errorf("failed")
+			} // if
+		},
+		AfterSend: func() {
+			this.lock.Lock()
+			defer this.lock.Unlock()
+
+			this.afterSendCount++
+		},
+		AfterRecv: func() {
+			this.lock.Lock()
+			defer this.lock.Unlock()
+
+			this.afterRecvCount++
 		},
 	}
+}
+
+func (this *tester) unbind(session Sessioner) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.unbindCount++
+	this.session = nil
+}
+
+func (this *tester) wrong(err error) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.err = err
 }
 
 // emptyConnect 空連接
@@ -196,7 +194,7 @@ type emptyConnect struct {
 	value int // 為了防止建立空物件時使用到相同的指標, 所以弄個變數來影響他
 }
 
-func (this *emptyConnect) Connect(_ Inform) {
+func (this *emptyConnect) Connect(_ Bind, _ Unbind, _ Wrong) {
 }
 
 func (this *emptyConnect) Address() string {
@@ -208,7 +206,7 @@ type emptyListen struct {
 	value int // 為了防止建立空物件時使用到相同的指標, 所以弄個變數來影響他
 }
 
-func (this *emptyListen) Listen(_ Inform) {
+func (this *emptyListen) Listen(_ Bind, _ Unbind, _ Wrong) {
 }
 
 func (this *emptyListen) Stop() error {
@@ -224,7 +222,7 @@ type emptySession struct {
 	value int // 為了防止建立空物件時使用到相同的指標, 所以弄個變數來影響他
 }
 
-func (this *emptySession) Start(_ Inform) {
+func (this *emptySession) Start(_ Bind, _ Unbind, _ Wrong) {
 }
 
 func (this *emptySession) Stop() {
@@ -244,7 +242,7 @@ func (this *emptySession) LocalAddr() net.Addr {
 	return &net.TCPAddr{}
 }
 
-func (this *emptySession) SetOwner(owner any) {
+func (this *emptySession) SetOwner(_ any) {
 }
 
 func (this *emptySession) GetOwner() any {

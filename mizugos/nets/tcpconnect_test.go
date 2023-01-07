@@ -42,7 +42,7 @@ func (this *SuiteTCPConnect) TestNewTCPConnect() {
 func (this *SuiteTCPConnect) TestConnect() {
 	test := newTester(true, true, true)
 	target := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
-	target.Connect(test.inform())
+	target.Connect(test.bind, test.unbind, test.wrong)
 
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), test.valid())
@@ -50,14 +50,14 @@ func (this *SuiteTCPConnect) TestConnect() {
 
 	test = newTester(true, true, true)
 	target = NewTCPConnect("!?", this.host.port, testdata.Timeout)
-	target.Connect(test.inform())
+	target.Connect(test.bind, test.unbind, test.wrong)
 
 	time.Sleep(testdata.Timeout)
 	assert.False(this.T(), test.valid())
 
 	test = newTester(true, true, true)
 	target = NewTCPConnect(this.host.ip, "9999", testdata.Timeout) // 故意連線到不開放的埠號才會引發錯誤
-	target.Connect(test.inform())
+	target.Connect(test.bind, test.unbind, test.wrong)
 
 	time.Sleep(testdata.Timeout * 2) // 因為錯誤會是timeout, 所以要等待長一點
 	assert.False(this.T(), test.valid())
