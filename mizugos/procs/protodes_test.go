@@ -33,31 +33,26 @@ func (this *SuiteProtoDes) TearDownTest() {
 	goleak.VerifyNone(this.T())
 }
 
-func (this *SuiteProtoDes) TestNewProtoDesMsg() {
-	message, err := NewProtoDesMsg(0, &ProtoDesMsgTest{
-		Message: "new proto des msg",
-	})
-	assert.Nil(this.T(), err)
-	assert.NotNil(this.T(), message)
-}
-
 func (this *SuiteProtoDes) TestNewProtoDes() {
-	assert.NotNil(this.T(), NewProtoDes([]byte{}))
+	assert.NotNil(this.T(), NewProtoDes())
 }
 
 func (this *SuiteProtoDes) TestEncodeDecode() {
-	key := utils.DesKeyRand()
-	target := NewProtoDes(key)
-	msg := protoDesTestMsg("test encode/decode message")
-
-	packet, err := target.Encode(msg)
+	target := NewProtoDes()
+	target.Key(utils.DesKeyRand())
+	input, err := ProtoDesMarshal(1, &ProtoDesMsgTest{
+		Message: "test encode/decode",
+	})
 	assert.Nil(this.T(), err)
-	assert.NotNil(this.T(), packet)
 
-	result, err := target.Decode(packet)
+	encode, err := target.Encode(input)
 	assert.Nil(this.T(), err)
-	assert.NotNil(this.T(), result)
-	assert.True(this.T(), proto.Equal(msg, result.(*ProtoDesMsg)))
+	assert.NotNil(this.T(), encode)
+
+	decode, err := target.Decode(encode)
+	assert.Nil(this.T(), err)
+	assert.NotNil(this.T(), decode)
+	assert.True(this.T(), proto.Equal(input, decode.(*ProtoDesMsg)))
 
 	_, err = target.Encode(nil)
 	assert.NotNil(this.T(), err)
@@ -65,53 +60,92 @@ func (this *SuiteProtoDes) TestEncodeDecode() {
 	_, err = target.Decode(nil)
 	assert.NotNil(this.T(), err)
 
-	_, err = target.Decode([]byte("unknown packet data"))
+	_, err = target.Decode([]byte("unknown encode/decode"))
 	assert.NotNil(this.T(), err)
 }
 
 func (this *SuiteProtoDes) TestProcess() {
-	key := utils.DesKeyRand()
-	target := NewProtoDes(key)
-	msg := protoDesTestMsg("test process message")
+	target := NewProtoDes()
+	target.Key(utils.DesKeyRand())
+	input, err := ProtoDesMarshal(1, &ProtoDesMsgTest{
+		Message: "test process",
+	})
+	assert.Nil(this.T(), err)
 
 	valid := false
-	target.Add(msg.MessageID, func(messageID MessageID, message any) {
-		assert.Equal(this.T(), msg, message)
-		valid = true
+	target.Add(input.MessageID, func(message any) {
+		valid = proto.Equal(input, message.(*ProtoDesMsg))
 	})
-	assert.Nil(this.T(), target.Process(msg))
+	assert.Nil(this.T(), target.Process(input))
 	assert.True(this.T(), valid)
 
-	msg.MessageID = 2
-	assert.NotNil(this.T(), target.Process(msg))
+	input.MessageID = 2
+	assert.NotNil(this.T(), target.Process(input))
 
 	assert.NotNil(this.T(), target.Process(nil))
 }
 
+func (this *SuiteProtoDes) TestMarshal() {
+	inputID := MessageID(1)
+	input := &ProtoDesMsgTest{
+		Message: "test marshal/unmarshal",
+	}
+
+	message, err := ProtoDesMarshal(inputID, input)
+	assert.Nil(this.T(), err)
+	assert.NotNil(this.T(), message)
+
+	outputID, output, err := ProtoDesUnmarshal[*ProtoDesMsgTest](message)
+	assert.Nil(this.T(), err)
+	assert.Equal(this.T(), inputID, outputID)
+	assert.True(this.T(), proto.Equal(input, output))
+
+	_, _, err = ProtoDesUnmarshal[*ProtoDesMsgTest](nil)
+	assert.NotNil(this.T(), err)
+
+	_, _, err = ProtoDesUnmarshal[*ProtoDesMsg](message)
+	assert.NotNil(this.T(), err)
+}
+
 func BenchmarkProtoDesEncode(b *testing.B) {
-	key := utils.DesKeyRand()
-	target := NewProtoDes(key)
-	msg := protoDesTestMsg("benchmark encode message")
+	target := NewProtoDes()
+	target.Key(utils.DesKeyRand())
+	input, _ := ProtoDesMarshal(1, &ProtoDesMsgTest{
+		Message: "benchmark encode",
+	})
 
 	for i := 0; i < b.N; i++ {
-		_, _ = target.Encode(msg)
+		_, _ = target.Encode(input)
 	} // for
 }
 
 func BenchmarkProtoDesDecode(b *testing.B) {
-	key := utils.DesKeyRand()
-	target := NewProtoDes(key)
-	msg := protoDesTestMsg("benchmark decode message")
-	packet, _ := target.Encode(msg)
+	target := NewProtoDes()
+	target.Key(utils.DesKeyRand())
+	input, _ := ProtoDesMarshal(1, &ProtoDesMsgTest{
+		Message: "benchmark encode",
+	})
+	encode, _ := target.Encode(input)
 
 	for i := 0; i < b.N; i++ {
-		_, _ = target.Decode(packet)
+		_, _ = target.Decode(encode)
 	} // for
 }
 
-func protoDesTestMsg(message string) *ProtoDesMsg {
-	result, _ := NewProtoDesMsg(1, &ProtoDesMsgTest{
-		Message: message,
+func BenchmarkProtoDesMarshal(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_, _ = ProtoDesMarshal(1, &ProtoDesMsgTest{
+			Message: "benchmark marshal",
+		})
+	} // for
+}
+
+func BenchmarkProtoDesUnmarshal(b *testing.B) {
+	input, _ := ProtoDesMarshal(1, &ProtoDesMsgTest{
+		Message: "benchmark unmarshal",
 	})
-	return result
+
+	for i := 0; i < b.N; i++ {
+		_, _, _ = ProtoDesUnmarshal[*ProtoDesMsgTest](input)
+	} // for
 }

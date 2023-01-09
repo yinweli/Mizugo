@@ -38,7 +38,7 @@ func (this *SuiteProcmgr) TestNewProcmgr() {
 func (this *SuiteProcmgr) TestProcmgr() {
 	target := NewProcmgr()
 	messageID := MessageID(1)
-	target.Add(messageID, func(messageID MessageID, message any) {
+	target.Add(messageID, func(message any) {
 		// do nothing
 	})
 	assert.NotNil(this.T(), target.Get(messageID))

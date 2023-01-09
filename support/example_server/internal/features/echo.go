@@ -2,6 +2,7 @@ package features
 
 import (
 	"fmt"
+	"sync/atomic"
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
@@ -14,15 +15,16 @@ import (
 // NewEcho 建立回音入口資料
 func NewEcho() *Echo {
 	return &Echo{
-		name: defines.EntryEcho,
+		name: "entry echo",
 	}
 }
 
 // Echo 回音入口資料
 type Echo struct {
-	name     string        // 入口名稱
-	config   EchoConfig    // 設定資料
-	listenID nets.ListenID // 接聽編號
+	name      string        // 入口名稱
+	config    EchoConfig    // 設定資料
+	listenID  nets.ListenID // 接聽編號
+	echoCount atomic.Int64  // 封包計數
 }
 
 // EchoConfig 設定資料
@@ -76,7 +78,9 @@ func (this *Echo) bind(session nets.Sessioner) nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.AddModule(modules.NewEcho()); err != nil {
+	if err := entity.AddModule(modules.NewEcho(func() int64 {
+		return this.echoCount.Add(1)
+	})); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
@@ -86,7 +90,7 @@ func (this *Echo) bind(session nets.Sessioner) nets.Bundle {
 		goto Error
 	} // if
 
-	mizugos.Labelmgr().Add(entity, defines.LabelEcho)
+	mizugos.Labelmgr().Add(entity, "label echo")
 	session.SetOwner(entity)
 	return nets.Bundle{
 		Encode:  entity.GetProcess().Encode,

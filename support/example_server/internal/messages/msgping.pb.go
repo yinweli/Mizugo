@@ -21,7 +21,7 @@ const (
 )
 
 // 要求Ping
-type MsgReqPing struct {
+type MsgPingReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -29,8 +29,8 @@ type MsgReqPing struct {
 	Time int64 `protobuf:"varint,1,opt,name=time,proto3" json:"time,omitempty"` // 傳送時間
 }
 
-func (x *MsgReqPing) Reset() {
-	*x = MsgReqPing{}
+func (x *MsgPingReq) Reset() {
+	*x = MsgPingReq{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_msgping_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -38,13 +38,13 @@ func (x *MsgReqPing) Reset() {
 	}
 }
 
-func (x *MsgReqPing) String() string {
+func (x *MsgPingReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MsgReqPing) ProtoMessage() {}
+func (*MsgPingReq) ProtoMessage() {}
 
-func (x *MsgReqPing) ProtoReflect() protoreflect.Message {
+func (x *MsgPingReq) ProtoReflect() protoreflect.Message {
 	mi := &file_msgping_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -56,12 +56,12 @@ func (x *MsgReqPing) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MsgReqPing.ProtoReflect.Descriptor instead.
-func (*MsgReqPing) Descriptor() ([]byte, []int) {
+// Deprecated: Use MsgPingReq.ProtoReflect.Descriptor instead.
+func (*MsgPingReq) Descriptor() ([]byte, []int) {
 	return file_msgping_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *MsgReqPing) GetTime() int64 {
+func (x *MsgPingReq) GetTime() int64 {
 	if x != nil {
 		return x.Time
 	}
@@ -69,7 +69,7 @@ func (x *MsgReqPing) GetTime() int64 {
 }
 
 // 回應Ping
-type MsgResPing struct {
+type MsgPingRes struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -77,8 +77,8 @@ type MsgResPing struct {
 	Time int64 `protobuf:"varint,1,opt,name=time,proto3" json:"time,omitempty"` // 傳送時間
 }
 
-func (x *MsgResPing) Reset() {
-	*x = MsgResPing{}
+func (x *MsgPingRes) Reset() {
+	*x = MsgPingRes{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_msgping_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -86,13 +86,13 @@ func (x *MsgResPing) Reset() {
 	}
 }
 
-func (x *MsgResPing) String() string {
+func (x *MsgPingRes) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MsgResPing) ProtoMessage() {}
+func (*MsgPingRes) ProtoMessage() {}
 
-func (x *MsgResPing) ProtoReflect() protoreflect.Message {
+func (x *MsgPingRes) ProtoReflect() protoreflect.Message {
 	mi := &file_msgping_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -104,12 +104,12 @@ func (x *MsgResPing) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MsgResPing.ProtoReflect.Descriptor instead.
-func (*MsgResPing) Descriptor() ([]byte, []int) {
+// Deprecated: Use MsgPingRes.ProtoReflect.Descriptor instead.
+func (*MsgPingRes) Descriptor() ([]byte, []int) {
 	return file_msgping_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *MsgResPing) GetTime() int64 {
+func (x *MsgPingRes) GetTime() int64 {
 	if x != nil {
 		return x.Time
 	}
@@ -120,9 +120,9 @@ var File_msgping_proto protoreflect.FileDescriptor
 
 var file_msgping_proto_rawDesc = []byte{
 	0x0a, 0x0d, 0x6d, 0x73, 0x67, 0x70, 0x69, 0x6e, 0x67, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22,
-	0x20, 0x0a, 0x0a, 0x4d, 0x73, 0x67, 0x52, 0x65, 0x71, 0x50, 0x69, 0x6e, 0x67, 0x12, 0x12, 0x0a,
+	0x20, 0x0a, 0x0a, 0x4d, 0x73, 0x67, 0x50, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x12, 0x12, 0x0a,
 	0x04, 0x74, 0x69, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x04, 0x74, 0x69, 0x6d,
-	0x65, 0x22, 0x20, 0x0a, 0x0a, 0x4d, 0x73, 0x67, 0x52, 0x65, 0x73, 0x50, 0x69, 0x6e, 0x67, 0x12,
+	0x65, 0x22, 0x20, 0x0a, 0x0a, 0x4d, 0x73, 0x67, 0x50, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x12,
 	0x12, 0x0a, 0x04, 0x74, 0x69, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x04, 0x74,
 	0x69, 0x6d, 0x65, 0x42, 0x14, 0x5a, 0x12, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73,
 	0x3b, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
@@ -143,8 +143,8 @@ func file_msgping_proto_rawDescGZIP() []byte {
 
 var file_msgping_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_msgping_proto_goTypes = []interface{}{
-	(*MsgReqPing)(nil), // 0: MsgReqPing
-	(*MsgResPing)(nil), // 1: MsgResPing
+	(*MsgPingReq)(nil), // 0: MsgPingReq
+	(*MsgPingRes)(nil), // 1: MsgPingRes
 }
 var file_msgping_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -161,7 +161,7 @@ func file_msgping_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_msgping_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MsgReqPing); i {
+			switch v := v.(*MsgPingReq); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -173,7 +173,7 @@ func file_msgping_proto_init() {
 			}
 		}
 		file_msgping_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MsgResPing); i {
+			switch v := v.(*MsgPingRes); i {
 			case 0:
 				return &v.state
 			case 1:

@@ -3,11 +3,11 @@ syntax = "proto3";
 option go_package = "/messages;messages";
 
 // 要求Ping
-message MsgReqPing {
+message MsgPingReq {
   int64 time = 1; // 傳送時間
 }
 
 // 回應Ping
-message MsgResPing {
+message MsgPingRes {
   int64 time = 1; // 傳送時間
 }

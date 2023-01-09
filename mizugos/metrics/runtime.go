@@ -26,26 +26,29 @@ type runtime struct {
 	count60 int64         // 每60分鐘執行次數
 }
 
+// Add 新增紀錄
+func (this *Runtime) Add(delta time.Duration) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.curr.time += delta
+
+	if this.curr.max < delta {
+		this.curr.max = delta
+	} // if
+
+	this.curr.count++
+	this.curr.count1++
+	this.curr.count5++
+	this.curr.count10++
+	this.curr.count60++
+}
+
 // Rec 執行紀錄, 使用時把回傳的函式指標記錄下來, 直到執行區間結束再執行
 func (this *Runtime) Rec() func() {
 	start := time.Now()
 	return func() {
-		delta := time.Since(start)
-
-		this.lock.Lock()
-		defer this.lock.Unlock()
-
-		this.curr.time += delta
-
-		if this.curr.max < delta {
-			this.curr.max = delta
-		} // if
-
-		this.curr.count++
-		this.curr.count1++
-		this.curr.count5++
-		this.curr.count10++
-		this.curr.count60++
+		this.Add(time.Since(start))
 	}
 }
 

@@ -87,7 +87,7 @@ func (this *SuiteEntity) TestProcess() {
 
 	assert.Nil(this.T(), target.SetProcess(process))
 	assert.Equal(this.T(), process, target.GetProcess())
-	target.AddMessage(procs.MessageID(1), func(messageID procs.MessageID, message any) {
+	target.AddMessage(procs.MessageID(1), func(message any) {
 		// do nothing
 	})
 	target.DelMessage(procs.MessageID(1))

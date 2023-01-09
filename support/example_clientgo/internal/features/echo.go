@@ -13,34 +13,33 @@ import (
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/modules"
 )
 
-// NewEchoCycle 建立循環回音資料
-func NewEchoCycle() *EchoCycle {
-	return &EchoCycle{
-		name: defines.EntryEchoCycle,
+// NewEcho 建立回音入口
+func NewEcho() *Echo {
+	return &Echo{
+		name: "entry echo",
 	}
 }
 
-// EchoCycle 循環回音資料
-type EchoCycle struct {
-	name    string          // 入口名稱
-	config  EchoCycleConfig // 設定資料
-	finish  atomic.Bool     // 關閉旗標
-	connect atomic.Bool     // 連接旗標
+// Echo 回音入口
+type Echo struct {
+	name    string      // 入口名稱
+	config  EchoConfig  // 設定資料
+	finish  atomic.Bool // 關閉旗標
+	connect atomic.Bool // 連接旗標
 }
 
-// EchoCycleConfig 設定資料
-type EchoCycleConfig struct {
-	IP         string        // 位址
-	Port       string        // 埠號
-	Timeout    time.Duration // 逾期時間(秒)
-	Message    string        // 回音字串
-	Disconnect bool          // 斷線旗標
-	Reconnect  bool          // 重連旗標
-	CheckTime  time.Duration // 重連檢查時間
+// EchoConfig 設定資料
+type EchoConfig struct {
+	IP            string        // 位址
+	Port          string        // 埠號
+	Timeout       time.Duration // 逾期時間(秒)
+	Disconnect    bool          // 斷線旗標
+	Reconnect     bool          // 重連旗標
+	ReconnectTime time.Duration // 重連檢查時間
 }
 
 // Initialize 初始化處理
-func (this *EchoCycle) Initialize() error {
+func (this *Echo) Initialize() error {
 	mizugos.Info(this.name).Message("entry initialize").End()
 
 	if err := mizugos.Configmgr().ReadFile(this.name, defines.ConfigType); err != nil {
@@ -52,7 +51,7 @@ func (this *EchoCycle) Initialize() error {
 	} // if
 
 	go func() {
-		timeout := time.NewTicker(this.config.CheckTime)
+		timeout := time.NewTicker(this.config.ReconnectTime)
 
 		for {
 			select {
@@ -84,12 +83,12 @@ func (this *EchoCycle) Initialize() error {
 }
 
 // Finalize 結束處理
-func (this *EchoCycle) Finalize() {
+func (this *Echo) Finalize() {
 	mizugos.Info(this.name).Message("entry finalize").End()
 }
 
 // bind 綁定處理
-func (this *EchoCycle) bind(session nets.Sessioner) nets.Bundle {
+func (this *Echo) bind(session nets.Sessioner) nets.Bundle {
 	mizugos.Info(this.name).Message("bind").End()
 	entity := mizugos.Entitymgr().Add()
 
@@ -110,7 +109,7 @@ func (this *EchoCycle) bind(session nets.Sessioner) nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.AddModule(modules.NewEchoCycle(this.config.Message, this.config.Disconnect)); err != nil {
+	if err := entity.AddModule(modules.NewEcho(this.config.Disconnect)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
@@ -120,7 +119,7 @@ func (this *EchoCycle) bind(session nets.Sessioner) nets.Bundle {
 		goto Error
 	} // if
 
-	mizugos.Labelmgr().Add(entity, defines.LabelEchoCycle)
+	mizugos.Labelmgr().Add(entity, "label echo")
 	session.SetOwner(entity)
 	return nets.Bundle{
 		Encode:  entity.GetProcess().Encode,
@@ -137,7 +136,7 @@ Error:
 }
 
 // unbind 解綁處理
-func (this *EchoCycle) unbind(session nets.Sessioner) {
+func (this *Echo) unbind(session nets.Sessioner) {
 	if entity, ok := session.GetOwner().(*entitys.Entity); ok {
 		this.connect.Store(false)
 		entity.Finalize()
@@ -147,6 +146,6 @@ func (this *EchoCycle) unbind(session nets.Sessioner) {
 }
 
 // wrong 錯誤處理
-func (this *EchoCycle) wrong(err error) {
+func (this *Echo) wrong(err error) {
 	_ = mizugos.Error(this.name).EndError(err)
 }

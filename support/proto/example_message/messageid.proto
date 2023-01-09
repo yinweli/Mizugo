@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "/messages;messages";
+
+// 訊息編號
+enum MsgID {
+  Unknown = 0; // 不明/錯誤訊息編號, 此編號不可使用
+  EchoReq = 1; // 要求回音(用簡單封包做)
+  EchoRes = 2; // 回應回音(用簡單封包做)
+  KeyReq = 3; // 要求密鑰
+  KeyRes = 4; // 回應密鑰
+  PingReq = 5; // 要求Ping
+  PingRes = 6; // 回應Ping
+}

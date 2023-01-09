@@ -7,17 +7,6 @@ import (
 const ConfigPath = "config" // 配置路徑
 const ConfigType = "yaml"   // 配置類型
 
-const ( // 入口名稱
-	EntryEcho = "echo"
-	EntryPing = "ping"
-)
-
-const ( // 標籤名稱
-	LabelEcho = "echo"
-	LabelPing = "ping"
-)
-
 const ( // 模組編號
 	ModuleIDEcho entitys.ModuleID = iota + 1 // TODO: 考慮一下到底是人工產生模組編號, 還是用hash產生?
-	ModuleIDKey
 )

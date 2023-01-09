@@ -10,7 +10,7 @@ message ProtoDesMsg {
   google.protobuf.Any message = 2; // 訊息資料
 }
 
-// ProtoDes測試用訊息資料
+// ProtoDes訊息測試用資料
 message ProtoDesMsgTest {
   string message = 1; // 訊息內容
 }

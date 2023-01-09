@@ -77,7 +77,7 @@ func (x *ProtoDesMsg) GetMessage() *anypb.Any {
 	return nil
 }
 
-// ProtoDes測試用訊息資料
+// ProtoDes訊息測試用資料
 type ProtoDesMsgTest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
