@@ -18,7 +18,7 @@ type Runtime struct {
 // runtime 執行資料
 type runtime struct {
 	time    time.Duration // 總執行時間
-	max     time.Duration // 最大執行時間
+	timeMax time.Duration // 最大執行時間
 	count   int64         // 總執行次數
 	count1  int64         // 每分鐘執行次數
 	count5  int64         // 每5分鐘執行次數
@@ -33,8 +33,8 @@ func (this *Runtime) Add(delta time.Duration) {
 
 	this.curr.time += delta
 
-	if this.curr.max < delta {
-		this.curr.max = delta
+	if this.curr.timeMax < delta {
+		this.curr.timeMax = delta
 	} // if
 
 	this.curr.count++
@@ -58,17 +58,17 @@ func (this *Runtime) String() string {
 	stat := this.last
 	this.lock.RUnlock()
 
-	mean := "n/a"
+	timeAvg := "n/a"
 
 	if stat.count > 0 {
-		mean = (stat.time / time.Duration(stat.count)).String()
+		timeAvg = (stat.time / time.Duration(stat.count)).String()
 	} // if
 
 	builder := &strings.Builder{}
 	builder.WriteByte('{')
 	_, _ = fmt.Fprintf(builder, "\"time\": \"%v\", ", stat.time)
-	_, _ = fmt.Fprintf(builder, "\"max\": \"%v\", ", stat.max)
-	_, _ = fmt.Fprintf(builder, "\"mean\": \"%v\", ", mean)
+	_, _ = fmt.Fprintf(builder, "\"time(max)\": \"%v\", ", stat.timeMax)
+	_, _ = fmt.Fprintf(builder, "\"time(avg)\": \"%v\", ", timeAvg)
 	_, _ = fmt.Fprintf(builder, "\"count\": %v, ", stat.count)
 	_, _ = fmt.Fprintf(builder, "\"count(1m)\": %v, ", stat.count1)
 	_, _ = fmt.Fprintf(builder, "\"count(5m)\": %v, ", stat.count5)
@@ -93,7 +93,7 @@ func (this *Runtime) start() {
 				if this.finish() == false {
 					this.lock.Lock()
 					this.last.time = this.curr.time
-					this.last.max = this.curr.max
+					this.last.timeMax = this.curr.timeMax
 					this.last.count = this.curr.count
 					this.lock.Unlock()
 				} // if
