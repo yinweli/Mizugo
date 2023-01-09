@@ -61,8 +61,6 @@ func (this *Ping) Finalize() {
 func (this *Ping) bind(session nets.Sessioner) nets.Bundle {
 	mizugos.Info(this.name).Message("bind").End()
 	entity := mizugos.Entitymgr().Add()
-	process := procs.NewProtoDes()
-	process.Key([]byte(this.config.Key))
 
 	var wrong error
 
@@ -76,7 +74,12 @@ func (this *Ping) bind(session nets.Sessioner) nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.SetProcess(procs.NewProtoDes()); err != nil {
+	if err := entity.SetProcess(procs.NewProtoDes().Key([]byte(this.config.Key))); err != nil {
+		wrong = fmt.Errorf("bind: %w", err)
+		goto Error
+	} // if
+
+	if err := entity.AddModule(modules.NewKey()); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if

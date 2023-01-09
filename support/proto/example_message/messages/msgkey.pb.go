@@ -21,14 +21,14 @@ const (
 )
 
 // 要求密鑰
-type MsgKeyReq struct {
+type KeyReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 }
 
-func (x *MsgKeyReq) Reset() {
-	*x = MsgKeyReq{}
+func (x *KeyReq) Reset() {
+	*x = KeyReq{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_msgkey_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -36,13 +36,13 @@ func (x *MsgKeyReq) Reset() {
 	}
 }
 
-func (x *MsgKeyReq) String() string {
+func (x *KeyReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MsgKeyReq) ProtoMessage() {}
+func (*KeyReq) ProtoMessage() {}
 
-func (x *MsgKeyReq) ProtoReflect() protoreflect.Message {
+func (x *KeyReq) ProtoReflect() protoreflect.Message {
 	mi := &file_msgkey_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -54,13 +54,13 @@ func (x *MsgKeyReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MsgKeyReq.ProtoReflect.Descriptor instead.
-func (*MsgKeyReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use KeyReq.ProtoReflect.Descriptor instead.
+func (*KeyReq) Descriptor() ([]byte, []int) {
 	return file_msgkey_proto_rawDescGZIP(), []int{0}
 }
 
 // 回應密鑰
-type MsgKeyRes struct {
+type KeyRes struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -68,8 +68,8 @@ type MsgKeyRes struct {
 	Key string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"` // 密鑰
 }
 
-func (x *MsgKeyRes) Reset() {
-	*x = MsgKeyRes{}
+func (x *KeyRes) Reset() {
+	*x = KeyRes{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_msgkey_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -77,13 +77,13 @@ func (x *MsgKeyRes) Reset() {
 	}
 }
 
-func (x *MsgKeyRes) String() string {
+func (x *KeyRes) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MsgKeyRes) ProtoMessage() {}
+func (*KeyRes) ProtoMessage() {}
 
-func (x *MsgKeyRes) ProtoReflect() protoreflect.Message {
+func (x *KeyRes) ProtoReflect() protoreflect.Message {
 	mi := &file_msgkey_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -95,12 +95,12 @@ func (x *MsgKeyRes) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MsgKeyRes.ProtoReflect.Descriptor instead.
-func (*MsgKeyRes) Descriptor() ([]byte, []int) {
+// Deprecated: Use KeyRes.ProtoReflect.Descriptor instead.
+func (*KeyRes) Descriptor() ([]byte, []int) {
 	return file_msgkey_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *MsgKeyRes) GetKey() string {
+func (x *KeyRes) GetKey() string {
 	if x != nil {
 		return x.Key
 	}
@@ -110,12 +110,12 @@ func (x *MsgKeyRes) GetKey() string {
 var File_msgkey_proto protoreflect.FileDescriptor
 
 var file_msgkey_proto_rawDesc = []byte{
-	0x0a, 0x0c, 0x6d, 0x73, 0x67, 0x6b, 0x65, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x0b,
-	0x0a, 0x09, 0x4d, 0x73, 0x67, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x71, 0x22, 0x1d, 0x0a, 0x09, 0x4d,
-	0x73, 0x67, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x73, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x42, 0x14, 0x5a, 0x12, 0x2f, 0x6d,
-	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x3b, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73,
-	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x0a, 0x0c, 0x6d, 0x73, 0x67, 0x6b, 0x65, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x08,
+	0x0a, 0x06, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x71, 0x22, 0x1a, 0x0a, 0x06, 0x4b, 0x65, 0x79, 0x52,
+	0x65, 0x73, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x03, 0x6b, 0x65, 0x79, 0x42, 0x14, 0x5a, 0x12, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65,
+	0x73, 0x3b, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x33,
 }
 
 var (
@@ -132,8 +132,8 @@ func file_msgkey_proto_rawDescGZIP() []byte {
 
 var file_msgkey_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_msgkey_proto_goTypes = []interface{}{
-	(*MsgKeyReq)(nil), // 0: MsgKeyReq
-	(*MsgKeyRes)(nil), // 1: MsgKeyRes
+	(*KeyReq)(nil), // 0: KeyReq
+	(*KeyRes)(nil), // 1: KeyRes
 }
 var file_msgkey_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -150,7 +150,7 @@ func file_msgkey_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_msgkey_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MsgKeyReq); i {
+			switch v := v.(*KeyReq); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -162,7 +162,7 @@ func file_msgkey_proto_init() {
 			}
 		}
 		file_msgkey_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MsgKeyRes); i {
+			switch v := v.(*KeyRes); i {
 			case 0:
 				return &v.state
 			case 1:

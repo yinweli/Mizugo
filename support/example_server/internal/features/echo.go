@@ -92,11 +92,7 @@ func (this *Echo) bind(session nets.Sessioner) nets.Bundle {
 
 	mizugos.Labelmgr().Add(entity, "label echo")
 	session.SetOwner(entity)
-	return nets.Bundle{
-		Encode:  entity.GetProcess().Encode,
-		Decode:  entity.GetProcess().Decode,
-		Receive: entity.GetProcess().Process,
-	}
+	return entity.Bundle()
 
 Error:
 	_ = mizugos.Error(this.name).EndError(wrong)

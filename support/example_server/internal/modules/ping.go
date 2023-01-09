@@ -29,8 +29,9 @@ type Ping struct {
 type PingIncr func() int64
 
 // Start start事件
-func (this *Ping) Start() {
+func (this *Ping) Start() error {
 	this.Entity().AddMessage(procs.MessageID(messages.MsgID_PingReq), this.procPingReq)
+	return nil
 }
 
 // procPingReq 處理要求Ping

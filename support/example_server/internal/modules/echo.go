@@ -22,15 +22,16 @@ func NewEcho(echoIncr EchoIncr) *Echo {
 type Echo struct {
 	*entitys.Module          // 模組資料
 	name            string   // 模組名稱
-	echoIncr        EchoIncr // 增加封包計數函式
+	echoIncr        EchoIncr // 封包計數函式
 }
 
-// EchoIncr 增加封包計數函式類型
+// EchoIncr 封包計數函式類型
 type EchoIncr func() int64
 
 // Start start事件
-func (this *Echo) Start() {
+func (this *Echo) Start() error {
 	this.Entity().AddMessage(procs.MessageID(messages.MsgID_EchoReq), this.procEchoReq)
+	return nil
 }
 
 // procEchoReq 處理要求回音
