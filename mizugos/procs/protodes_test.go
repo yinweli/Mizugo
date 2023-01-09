@@ -39,7 +39,7 @@ func (this *SuiteProtoDes) TestNewProtoDes() {
 
 func (this *SuiteProtoDes) TestEncodeDecode() {
 	target := NewProtoDes()
-	target.Key(utils.DesKeyRand())
+	target.Key(utils.RandDesKey())
 	input, err := ProtoDesMarshal(1, &ProtoDesMsgTest{
 		Message: "test encode/decode",
 	})
@@ -66,7 +66,7 @@ func (this *SuiteProtoDes) TestEncodeDecode() {
 
 func (this *SuiteProtoDes) TestProcess() {
 	target := NewProtoDes()
-	target.Key(utils.DesKeyRand())
+	target.Key(utils.RandDesKey())
 	input, err := ProtoDesMarshal(1, &ProtoDesMsgTest{
 		Message: "test process",
 	})
@@ -109,7 +109,7 @@ func (this *SuiteProtoDes) TestMarshal() {
 
 func BenchmarkProtoDesEncode(b *testing.B) {
 	target := NewProtoDes()
-	target.Key(utils.DesKeyRand())
+	target.Key(utils.RandDesKey())
 	input, _ := ProtoDesMarshal(1, &ProtoDesMsgTest{
 		Message: "benchmark encode",
 	})
@@ -121,7 +121,7 @@ func BenchmarkProtoDesEncode(b *testing.B) {
 
 func BenchmarkProtoDesDecode(b *testing.B) {
 	target := NewProtoDes()
-	target.Key(utils.DesKeyRand())
+	target.Key(utils.RandDesKey())
 	input, _ := ProtoDesMarshal(1, &ProtoDesMsgTest{
 		Message: "benchmark encode",
 	})
