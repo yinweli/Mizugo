@@ -18,10 +18,12 @@ type moduleTester struct {
 	start atomic.Int64
 }
 
-func (this *moduleTester) Awake() {
+func (this *moduleTester) Awake() error {
 	this.awake.Add(1)
+	return nil
 }
 
-func (this *moduleTester) Start() {
+func (this *moduleTester) Start() error {
 	this.start.Add(1)
+	return nil
 }

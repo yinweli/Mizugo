@@ -25,11 +25,11 @@ type ModuleID int64
 // Awaker awake事件介面
 type Awaker interface {
 	// Awake 模組初始化時第一個被執行
-	Awake()
+	Awake() error
 }
 
 // Starter start事件介面
 type Starter interface {
 	// Start 模組初始化時第二個被執行
-	Start()
+	Start() error
 }

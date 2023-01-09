@@ -46,13 +46,17 @@ func (this *Entity) Initialize() error {
 
 	for _, itor := range module {
 		if awaker, ok := itor.(Awaker); ok {
-			awaker.Awake()
+			if err := awaker.Awake(); err != nil {
+				return fmt.Errorf("entity initialize: %w", err)
+			} // if
 		} // if
 	} // for
 
 	for _, itor := range module {
 		if starter, ok := itor.(Starter); ok {
-			starter.Start()
+			if err := starter.Start(); err != nil {
+				return fmt.Errorf("entity initialize: %w", err)
+			} // if
 		} // if
 	} // for
 
