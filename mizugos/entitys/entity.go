@@ -62,6 +62,16 @@ func (this *Entity) Initialize() error {
 			module.Dispose()
 		} // if
 	})
+	this.eventmgr.Sub(eventAfterSend, func(param any) {
+		if module, ok := param.(AfterSend); ok {
+			module.AfterSend()
+		} // if
+	})
+	this.eventmgr.Sub(eventAfterRecv, func(param any) {
+		if module, ok := param.(AfterRecv); ok {
+			module.AfterRecv()
+		} // if
+	})
 	this.eventmgr.Sub(eventFinalize, func(_ any) {
 		if session := this.session.Get(); session != nil {
 			session.Stop()
@@ -97,6 +107,26 @@ func (this *Entity) Finalize() {
 
 	this.eventmgr.PubOnce(eventFinalize, nil)
 	this.eventmgr.Finalize()
+}
+
+// Bundle 取得綁定資料
+func (this *Entity) Bundle() nets.Bundle {
+	module := this.modulemgr.All()
+	return nets.Bundle{
+		Encode:  this.process.Get().Encode,
+		Decode:  this.process.Get().Decode,
+		Receive: this.process.Get().Process,
+		AfterSend: func() {
+			for _, itor := range module {
+				this.eventmgr.PubOnce(eventAfterSend, itor)
+			} // for
+		},
+		AfterRecv: func() {
+			for _, itor := range module {
+				this.eventmgr.PubOnce(eventAfterRecv, itor)
+			} // for
+		},
+	}
 }
 
 // EntityID 取得實體編號

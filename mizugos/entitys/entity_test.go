@@ -63,6 +63,21 @@ func (this *SuiteEntity) TestInitialize() {
 	assert.Equal(this.T(), int64(1), module.dispose.Load())
 }
 
+func (this *SuiteEntity) TestBundle() {
+	entityID := EntityID(1)
+	target := NewEntity(entityID)
+
+	assert.Nil(this.T(), target.SetProcess(procs.NewSimple()))
+
+	bundle := target.Bundle()
+
+	assert.NotNil(this.T(), bundle.Encode)
+	assert.NotNil(this.T(), bundle.Decode)
+	assert.NotNil(this.T(), bundle.Receive)
+	assert.NotNil(this.T(), bundle.AfterSend)
+	assert.NotNil(this.T(), bundle.AfterRecv)
+}
+
 func (this *SuiteEntity) TestSession() {
 	target := NewEntity(EntityID(1))
 	conn, _ := net.Dial("tcp", net.JoinHostPort("google.com", "80"))
