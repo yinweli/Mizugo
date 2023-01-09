@@ -10,9 +10,10 @@ import (
 )
 
 // newInformTester 建立測試器
-func newTester(encode, decode, receive bool) *tester {
+func newTester(bundle, encode, decode, receive bool) *tester {
 	time.Sleep(testdata.Timeout) // 在這邊等待一下, 讓程序有機會完成
 	return &tester{
+		bundle:  bundle,
 		encode:  encode,
 		decode:  decode,
 		receive: receive,
@@ -21,6 +22,7 @@ func newTester(encode, decode, receive bool) *tester {
 
 // tester 測試器
 type tester struct {
+	bundle         bool
 	encode         bool
 	decode         bool
 	receive        bool
@@ -114,64 +116,69 @@ func (this *tester) get() Sessioner {
 	return this.session
 }
 
-func (this *tester) bind(session Sessioner) Bundle {
+func (this *tester) bind(session Sessioner) *Bundle {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.bindCount++
 	this.session = session
-	return Bundle{
-		Encode: func(message any) (packet []byte, err error) {
-			this.lock.Lock()
-			defer this.lock.Unlock()
 
-			this.encodeCount++
+	if this.bundle {
+		return &Bundle{
+			Encode: func(message any) (packet []byte, err error) {
+				this.lock.Lock()
+				defer this.lock.Unlock()
 
-			if this.encode {
-				return []byte(message.(string)), nil
-			} else {
-				return nil, fmt.Errorf("encode failed")
-			} // if
-		},
-		Decode: func(packet []byte) (message any, err error) {
-			this.lock.Lock()
-			defer this.lock.Unlock()
+				this.encodeCount++
 
-			this.decodeCount++
+				if this.encode {
+					return []byte(message.(string)), nil
+				} else {
+					return nil, fmt.Errorf("encode failed")
+				} // if
+			},
+			Decode: func(packet []byte) (message any, err error) {
+				this.lock.Lock()
+				defer this.lock.Unlock()
 
-			if this.decode {
-				return string(packet), nil
-			} else {
-				return nil, fmt.Errorf("decode failed")
-			} // if
-		},
-		Receive: func(message any) error {
-			this.lock.Lock()
-			defer this.lock.Unlock()
+				this.decodeCount++
 
-			this.receiveCount++
+				if this.decode {
+					return string(packet), nil
+				} else {
+					return nil, fmt.Errorf("decode failed")
+				} // if
+			},
+			Receive: func(message any) error {
+				this.lock.Lock()
+				defer this.lock.Unlock()
 
-			if this.receive {
-				this.message = message
-				return nil
-			} else {
-				this.message = nil
-				return fmt.Errorf("failed")
-			} // if
-		},
-		AfterSend: func() {
-			this.lock.Lock()
-			defer this.lock.Unlock()
+				this.receiveCount++
 
-			this.afterSendCount++
-		},
-		AfterRecv: func() {
-			this.lock.Lock()
-			defer this.lock.Unlock()
+				if this.receive {
+					this.message = message
+					return nil
+				} else {
+					this.message = nil
+					return fmt.Errorf("failed")
+				} // if
+			},
+			AfterSend: func() {
+				this.lock.Lock()
+				defer this.lock.Unlock()
 
-			this.afterRecvCount++
-		},
-	}
+				this.afterSendCount++
+			},
+			AfterRecv: func() {
+				this.lock.Lock()
+				defer this.lock.Unlock()
+
+				this.afterRecvCount++
+			},
+		}
+	} else {
+		return nil
+	} // if
 }
 
 func (this *tester) unbind(session Sessioner) {

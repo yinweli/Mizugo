@@ -40,11 +40,11 @@ func (this *SuiteTCPListen) TestNewTCPListen() {
 }
 
 func (this *SuiteTCPListen) TestListen() {
-	testl := newTester(false, true, true)
+	testl := newTester(true, false, true, true)
 	listen := NewTCPListen(this.host.ip, this.host.port)
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
-	testc := newTester(true, true, true)
+	testc := newTester(true, true, true, true)
 	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
 	client.Connect(testc.bind, testc.unbind, testc.wrong)
 
@@ -56,14 +56,14 @@ func (this *SuiteTCPListen) TestListen() {
 	testc.get().Stop()
 	assert.Nil(this.T(), listen.Stop())
 
-	testl = newTester(false, true, true)
+	testl = newTester(true, false, true, true)
 	listen = NewTCPListen("!?", this.host.port)
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
 	time.Sleep(testdata.Timeout)
 	assert.False(this.T(), testl.valid())
 
-	testl = newTester(false, true, true)
+	testl = newTester(true, false, true, true)
 	listen = NewTCPListen("192.168.0.1", this.host.port) // 故意要接聽錯誤位址才會引發錯誤
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 

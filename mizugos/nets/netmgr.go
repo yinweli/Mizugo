@@ -88,7 +88,7 @@ func (this *Netmgr) Status() *Status {
 
 // wrapperBind 包裝綁定處理
 func (this *Netmgr) wrapperBind(bind Bind) Bind {
-	return func(session Sessioner) Bundle {
+	return func(session Sessioner) *Bundle {
 		this.sessionmgr.add(session)
 		return bind.Do(session)
 	}

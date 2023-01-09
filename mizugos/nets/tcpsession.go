@@ -23,18 +23,34 @@ func NewTCPSession(conn net.Conn) *TCPSession {
 
 // TCPSession tcp會話器
 type TCPSession struct {
-	conn    net.Conn       // 連接物件
-	message chan any       // 訊息通道
-	signal  sync.WaitGroup // 通知信號
-	bundle  Bundle         // 綁定資料
-	wrong   Wrong          // 錯誤處理
-	owner   any            // 擁有者
+	conn      net.Conn       // 連接物件
+	message   chan any       // 訊息通道
+	signal    sync.WaitGroup // 通知信號
+	encode    Encode         // 封包編碼處理
+	decode    Decode         // 封包解碼處理
+	receive   Receive        // 接收封包處理
+	afterSend AfterSend      // 傳送封包後處理
+	afterRecv AfterRecv      // 接收封包後處理
+	wrong     Wrong          // 錯誤處理
+	owner     any            // 擁有者
 }
 
 // Start 啟動會話
 func (this *TCPSession) Start(bind Bind, unbind Unbind, wrong Wrong) {
 	go func() {
-		this.bundle = bind.Do(this)
+		bundle := bind.Do(this)
+
+		if bundle == nil {
+			unbind.Do(this)
+			_ = this.conn.Close() // 沒有綁定資料, 就要結束了
+			return
+		} // if
+
+		this.encode = bundle.Encode
+		this.decode = bundle.Decode
+		this.receive = bundle.Receive
+		this.afterSend = bundle.AfterSend
+		this.afterRecv = bundle.AfterRecv
 		this.wrong = wrong
 		this.signal.Add(2) // 等待接收循環與傳送循環結束
 
@@ -96,19 +112,19 @@ func (this *TCPSession) recvLoop() {
 			break
 		} // if
 
-		message, err := this.bundle.Decode(packet)
+		message, err := this.decode(packet)
 
 		if err != nil {
 			this.wrong.Do(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 
-		if err := this.bundle.Receive(message); err != nil {
+		if err := this.receive(message); err != nil {
 			this.wrong.Do(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 
-		this.bundle.AfterRecv.Do()
+		this.afterRecv.Do()
 	} // for
 
 	this.message <- nil // 以空訊息通知會話結束
@@ -147,7 +163,7 @@ func (this *TCPSession) sendLoop() {
 			break
 		} // if
 
-		packet, err := this.bundle.Encode(message)
+		packet, err := this.encode(message)
 
 		if err != nil {
 			this.wrong.Do(fmt.Errorf("tcp session send loop: %w", err))
@@ -159,7 +175,7 @@ func (this *TCPSession) sendLoop() {
 			break
 		} // if
 
-		this.bundle.AfterSend.Do()
+		this.afterSend.Do()
 	} // for
 
 	_ = this.conn.Close()

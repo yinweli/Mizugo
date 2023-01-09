@@ -41,15 +41,15 @@ func (this *SuiteTCPSession) TestNewTCPSession() {
 }
 
 func (this *SuiteTCPSession) TestStart() {
-	testl := newTester(true, true, true)
+	testl := newTester(true, true, true, true)
 	listen := NewTCPListen(this.host.ip, this.host.port)
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
-	testc1 := newTester(true, true, true)
+	testc1 := newTester(true, true, true, true)
 	client1 := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
 	client1.Connect(testc1.bind, testc1.unbind, testc1.wrong)
 
-	testc2 := newTester(true, true, true)
+	testc2 := newTester(true, true, true, true)
 	client2 := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
 	client2.Connect(testc2.bind, testc2.unbind, testc2.wrong)
 
@@ -77,14 +77,29 @@ func (this *SuiteTCPSession) TestStart() {
 
 func (this *SuiteTCPSession) TestStartFailed() {
 	// TODO: 要新增一個在綁定期間把會話關閉的測試, 模擬綁定失敗的狀況
-}
 
-func (this *SuiteTCPSession) TestSend() {
-	testl := newTester(true, true, true)
+	testl := newTester(false, true, true, true)
 	listen := NewTCPListen(this.host.ip, this.host.port)
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
-	testc := newTester(true, true, true)
+	testc := newTester(true, true, true, true)
+	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
+	client.Connect(testc.bind, testc.unbind, testc.wrong)
+
+	time.Sleep(testdata.Timeout)
+	assert.True(this.T(), testl.valid())
+	assert.False(this.T(), testc.valid())
+
+	time.Sleep(testdata.Timeout)
+	assert.Nil(this.T(), listen.Stop())
+}
+
+func (this *SuiteTCPSession) TestSend() {
+	testl := newTester(true, true, true, true)
+	listen := NewTCPListen(this.host.ip, this.host.port)
+	listen.Listen(testl.bind, testl.unbind, testl.wrong)
+
+	testc := newTester(true, true, true, true)
 	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
 	client.Connect(testc.bind, testc.unbind, testc.wrong)
 
@@ -128,11 +143,11 @@ func (this *SuiteTCPSession) TestSend() {
 }
 
 func (this *SuiteTCPSession) TestEncodeFailed() {
-	testl := newTester(false, true, true)
+	testl := newTester(true, false, true, true)
 	listen := NewTCPListen(this.host.ip, this.host.port)
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
-	testc := newTester(true, true, true)
+	testc := newTester(true, true, true, true)
 	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
 	client.Connect(testc.bind, testc.unbind, testc.wrong)
 
@@ -150,11 +165,11 @@ func (this *SuiteTCPSession) TestEncodeFailed() {
 }
 
 func (this *SuiteTCPSession) TestDecodeFailed() {
-	testl := newTester(true, true, true)
+	testl := newTester(true, true, true, true)
 	listen := NewTCPListen(this.host.ip, this.host.port)
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
-	testc := newTester(true, false, true)
+	testc := newTester(true, true, false, true)
 	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
 	client.Connect(testc.bind, testc.unbind, testc.wrong)
 
@@ -172,11 +187,11 @@ func (this *SuiteTCPSession) TestDecodeFailed() {
 }
 
 func (this *SuiteTCPSession) TestReceiveFailed() {
-	testl := newTester(true, true, true)
+	testl := newTester(true, true, true, true)
 	listen := NewTCPListen(this.host.ip, this.host.port)
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
-	testc := newTester(true, true, false)
+	testc := newTester(true, true, true, false)
 	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
 	client.Connect(testc.bind, testc.unbind, testc.wrong)
 
@@ -194,11 +209,11 @@ func (this *SuiteTCPSession) TestReceiveFailed() {
 }
 
 func (this *SuiteTCPSession) TestTCPSession() {
-	testl := newTester(true, true, true)
+	testl := newTester(true, true, true, true)
 	listen := NewTCPListen(this.host.ip, this.host.port)
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
-	testc := newTester(true, true, false)
+	testc := newTester(true, true, true, false)
 	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
 	client.Connect(testc.bind, testc.unbind, testc.wrong)
 
