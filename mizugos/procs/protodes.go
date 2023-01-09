@@ -30,6 +30,12 @@ type ProtoDes struct {
 	key      utils.SyncAttr[[]byte] // 密鑰
 }
 
+// Key 設定密鑰
+func (this *ProtoDes) Key(key []byte) *ProtoDes {
+	this.key.Set(key)
+	return this
+}
+
 // Encode 封包編碼
 func (this *ProtoDes) Encode(input any) (output []byte, err error) {
 	message, err := utils.CastPointer[ProtoDesMsg](input)
@@ -90,11 +96,6 @@ func (this *ProtoDes) Process(input any) error {
 
 	process(message)
 	return nil
-}
-
-// Key 設定密鑰
-func (this *ProtoDes) Key(key []byte) {
-	this.key.Set(key)
 }
 
 // ProtoDesMarshal 序列化protoDes訊息
