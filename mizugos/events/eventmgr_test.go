@@ -59,7 +59,7 @@ func (this *SuiteEventmgr) TestPubOnce() {
 	assert.True(this.T(), valid.Load())
 
 	target.Finalize()
-	target.PubOnce(name, value)
+	target.PubOnce(name, value) // 測試在結束之後發布事件
 }
 
 func (this *SuiteEventmgr) TestPubFixed() {
@@ -78,5 +78,5 @@ func (this *SuiteEventmgr) TestPubFixed() {
 	assert.True(this.T(), valid.Load())
 
 	target.Finalize()
-	target.PubFixed(name, value, testdata.Timeout)
+	target.PubFixed(name, value, testdata.Timeout) // 測試在結束之後發布事件
 }

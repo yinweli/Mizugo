@@ -145,6 +145,10 @@ func (this *Entity) LocalAddr() net.Addr {
 
 // SetProcess 設定處理物件
 func (this *Entity) SetProcess(process procs.Processor) error {
+	if this.enable.Load() {
+		return fmt.Errorf("entity set process: overdue")
+	} // if
+
 	this.process.Set(process)
 	return nil
 }

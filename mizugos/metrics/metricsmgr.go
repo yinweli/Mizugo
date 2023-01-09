@@ -26,7 +26,7 @@ import (
 // 指標管理器同時還提供執行統計工具, 只要建立 Metricsmgr.NewRuntime(統計名稱) 就可以記錄特定區段的執行數據
 // 如果要用expvarmon查看執行數據, 可以添加以下參數
 //   假設執行數據的名稱為 'echo'
-//   -vars="time:echo.time,max:echo.max,mean:echo.mean,count:echo.count,count(1m):echo.count(1m),count(5m):echo.count(5m),count(10m):echo.count(10m),count(60m):echo.count(60m)"
+//   -vars="time:echo.time,time(max):echo.time(max),time(avg):echo.time(avg),count:echo.count,count(1m):echo.count(1m),count(5m):echo.count(5m),count(10m):echo.count(10m),count(60m):echo.count(60m)"
 
 // NewMetricsmgr 建立指標管理器
 func NewMetricsmgr() *Metricsmgr {
