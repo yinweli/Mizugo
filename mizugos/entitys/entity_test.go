@@ -48,26 +48,19 @@ func (this *SuiteEntity) TestInitialize() {
 	assert.Nil(this.T(), target.AddModule(module))
 	assert.Nil(this.T(), target.Initialize())
 	assert.NotNil(this.T(), target.Initialize())
-	assert.Equal(this.T(), entityID, target.EntityID())
-	assert.True(this.T(), target.Enable())
-
-	time.Sleep(updateInterval * 2) // 為了讓update會被執行, 需要長一點的時間
-	target.Finalize()
-	target.Finalize() // 故意結束兩次, 這次應該不執行
-	assert.False(this.T(), target.Enable())
-
-	time.Sleep(testdata.Timeout * 2) // 為了給finalize執行, 需要長一點的時間
 	assert.Equal(this.T(), int64(1), module.awake.Load())
 	assert.Equal(this.T(), int64(1), module.start.Load())
-	assert.Greater(this.T(), module.update.Load(), int64(0))
-	assert.Equal(this.T(), int64(1), module.dispose.Load())
+
+	target.Finalize()
+	target.Finalize() // 故意結束兩次, 這次應該不執行
 }
 
-func (this *SuiteEntity) TestBundle() {
+func (this *SuiteEntity) TestEntity() {
 	entityID := EntityID(1)
 	target := NewEntity(entityID)
 
 	assert.Nil(this.T(), target.SetProcess(procs.NewSimple()))
+	assert.Nil(this.T(), target.Initialize())
 
 	bundle := target.Bundle()
 
@@ -76,6 +69,10 @@ func (this *SuiteEntity) TestBundle() {
 	assert.NotNil(this.T(), bundle.Receive)
 	assert.NotNil(this.T(), bundle.AfterSend)
 	assert.NotNil(this.T(), bundle.AfterRecv)
+	assert.Equal(this.T(), entityID, target.EntityID())
+	assert.True(this.T(), target.Enable())
+
+	target.Finalize()
 }
 
 func (this *SuiteEntity) TestSession() {
@@ -129,33 +126,36 @@ func (this *SuiteEntity) TestModule() {
 
 func (this *SuiteEntity) TestEvent() {
 	target := NewEntity(EntityID(1))
-	eventOnce := "eventOnce"
-	paramOnce := "paramOnce"
+	nameOnce := "event once"
+	valueOnce := "value once"
 	validOnce := atomic.Bool{}
-	eventFixed := "eventFixed"
-	paramFixed := "paramFixed"
-	validFixed := atomic.Int64{}
+	nameFixed := "event fixed"
+	valueFixed := "value fixed"
+	validFixed := atomic.Bool{}
 
-	assert.Nil(this.T(), target.SubEvent(eventOnce, func(param any) {
-		validOnce.Store(param.(string) == paramOnce)
-	}))
-	assert.Nil(this.T(), target.SubEvent(eventFixed, func(param any) {
-		if param.(string) == paramFixed {
-			validFixed.Add(1)
-		} // if
-	}))
+	eventIDOnce, err := target.SubEvent(nameOnce, func(param any) {
+		validOnce.Store(param.(string) == valueOnce)
+	})
+	assert.Nil(this.T(), err)
+
+	eventIDFixed, err := target.SubEvent(nameFixed, func(param any) {
+		validFixed.Store(param.(string) == valueFixed)
+	})
+	assert.Nil(this.T(), err)
+
+	_, err = target.SubEvent(EventFinalize, nil)
+	assert.NotNil(this.T(), err)
+
 	assert.Nil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.SubEvent(eventOnce, func(param any) {
-		// do nothing
-	}))
+	target.PubOnceEvent(nameOnce, valueOnce)
+	target.PubFixedEvent(nameFixed, valueFixed, time.Millisecond)
 
-	target.PubOnceEvent(eventOnce, paramOnce)
-	time.Sleep(testdata.Timeout)
+	time.Sleep(testdata.Timeout * 2) // 多等一下讓定時事件發生
 	assert.True(this.T(), validOnce.Load())
+	assert.True(this.T(), validFixed.Load())
 
-	target.PubFixedEvent(eventFixed, paramFixed, time.Millisecond)
-	time.Sleep(testdata.Timeout * 5) // 多等一下讓定時事件發生
-	assert.Greater(this.T(), validFixed.Load(), int64(0))
+	target.UnsubEvent(eventIDOnce)
+	target.UnsubEvent(eventIDFixed)
 
 	target.Finalize()
 }

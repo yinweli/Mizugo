@@ -46,18 +46,18 @@ func (this *SuiteEventmgr) TestEventmgr() {
 func (this *SuiteEventmgr) TestPubOnce() {
 	target := NewEventmgr(10)
 	target.Initialize()
-
 	name := "event once"
 	value := "value once"
 	valid := atomic.Bool{}
-	target.Sub(name, func(param any) {
+	eventID := target.Sub(name, func(param any) {
 		valid.Store(param.(string) == value)
 	})
-	target.PubOnce(name, value)
 
+	target.PubOnce(name, value)
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), valid.Load())
 
+	target.Unsub(eventID)
 	target.Finalize()
 	target.PubOnce(name, value) // 測試在結束之後發布事件
 }
@@ -65,18 +65,37 @@ func (this *SuiteEventmgr) TestPubOnce() {
 func (this *SuiteEventmgr) TestPubFixed() {
 	target := NewEventmgr(10)
 	target.Initialize()
-
 	name := "event fixed"
 	value := "value fixed"
 	valid := atomic.Bool{}
-	target.Sub(name, func(param any) {
+	eventID := target.Sub(name, func(param any) {
 		valid.Store(param.(string) == value)
 	})
-	target.PubFixed(name, value, testdata.Timeout)
 
-	time.Sleep(testdata.Timeout * 5) // 多等一下讓定時事件發生
+	target.PubFixed(name, value, testdata.Timeout)
+	time.Sleep(testdata.Timeout * 2) // 多等一下讓定時事件發生
 	assert.True(this.T(), valid.Load())
 
+	target.Unsub(eventID)
 	target.Finalize()
 	target.PubFixed(name, value, testdata.Timeout) // 測試在結束之後發布事件
+}
+
+func (this *SuiteEventmgr) TestPubsub() {
+	target := newPubsub()
+	name := "pubsub"
+	value := "value"
+	count := 0
+	eventID := target.sub(name, func(param any) {
+		if param.(string) == value {
+			count++
+		} // if
+	})
+
+	target.pub(name, value)
+	assert.Equal(this.T(), 1, count)
+
+	target.unsub(eventID)
+	target.pub(name, value)
+	assert.Equal(this.T(), 1, count)
 }

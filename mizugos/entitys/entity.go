@@ -42,56 +42,27 @@ func (this *Entity) Initialize() error {
 		return fmt.Errorf("entity initialize: already initialize")
 	} // if
 
-	this.eventmgr.Sub(eventAwake, func(param any) {
-		if module, ok := param.(Awaker); ok {
-			module.Awake()
+	module := this.modulemgr.All()
+
+	for _, itor := range module {
+		if awaker, ok := itor.(Awaker); ok {
+			awaker.Awake()
 		} // if
-	})
-	this.eventmgr.Sub(eventStart, func(param any) {
-		if module, ok := param.(Starter); ok {
-			module.Start()
+	} // for
+
+	for _, itor := range module {
+		if starter, ok := itor.(Starter); ok {
+			starter.Start()
 		} // if
-	})
-	this.eventmgr.Sub(eventUpdate, func(param any) {
-		if module, ok := param.(Updater); ok {
-			module.Update()
-		} // if
-	})
-	this.eventmgr.Sub(eventDispose, func(param any) {
-		if module, ok := param.(Disposer); ok {
-			module.Dispose()
-		} // if
-	})
-	this.eventmgr.Sub(eventAfterSend, func(param any) {
-		if module, ok := param.(AfterSend); ok {
-			module.AfterSend()
-		} // if
-	})
-	this.eventmgr.Sub(eventAfterRecv, func(param any) {
-		if module, ok := param.(AfterRecv); ok {
-			module.AfterRecv()
-		} // if
-	})
-	this.eventmgr.Sub(eventFinalize, func(_ any) {
+	} // for
+
+	this.eventmgr.Sub(EventFinalize, func(_ any) {
 		if session := this.session.Get(); session != nil {
 			session.Stop()
 		} // if
 	})
+	this.eventmgr.PubFixed(EventUpdate, nil, updateInterval)
 	this.eventmgr.Initialize()
-	module := this.modulemgr.All()
-
-	for _, itor := range module {
-		this.eventmgr.PubOnce(eventAwake, itor)
-	} // for
-
-	for _, itor := range module {
-		this.eventmgr.PubOnce(eventStart, itor)
-	} // for
-
-	for _, itor := range module {
-		this.eventmgr.PubFixed(eventUpdate, itor, updateInterval)
-	} // for
-
 	return nil
 }
 
@@ -101,30 +72,22 @@ func (this *Entity) Finalize() {
 		return
 	} // if
 
-	for _, itor := range this.modulemgr.All() {
-		this.eventmgr.PubOnce(eventDispose, itor)
-	} // for
-
-	this.eventmgr.PubOnce(eventFinalize, nil)
+	this.eventmgr.PubOnce(EventDispose, nil)
+	this.eventmgr.PubOnce(EventFinalize, nil)
 	this.eventmgr.Finalize()
 }
 
 // Bundle 取得綁定資料
 func (this *Entity) Bundle() nets.Bundle {
-	module := this.modulemgr.All()
 	return nets.Bundle{
 		Encode:  this.process.Get().Encode,
 		Decode:  this.process.Get().Decode,
 		Receive: this.process.Get().Process,
 		AfterSend: func() {
-			for _, itor := range module {
-				this.eventmgr.PubOnce(eventAfterSend, itor)
-			} // for
+			this.eventmgr.PubOnce(EventAfterSend, nil)
 		},
 		AfterRecv: func() {
-			for _, itor := range module {
-				this.eventmgr.PubOnce(eventAfterRecv, itor)
-			} // for
+			this.eventmgr.PubOnce(EventAfterRecv, nil)
 		},
 	}
 }
@@ -173,7 +136,7 @@ func (this *Entity) LocalAddr() net.Addr {
 
 // ===== 處理功能 =====
 
-// SetProcess 設定處理物件
+// SetProcess 設定處理物件, 初始化完成後就不能設定處理物件
 func (this *Entity) SetProcess(process procs.Processor) error {
 	if this.enable.Load() {
 		return fmt.Errorf("entity set process: overdue")
@@ -221,26 +184,18 @@ func (this *Entity) GetModule(moduleID ModuleID) Moduler {
 
 // ===== 事件功能 =====
 
-// SubEvent 訂閱事件, 初始化完成後就不能訂閱事件
-func (this *Entity) SubEvent(name string, process events.Process) error {
-	if this.enable.Load() {
-		return fmt.Errorf("entity sub event: overdue")
+// SubEvent 訂閱事件
+func (this *Entity) SubEvent(name string, process events.Process) (eventID events.EventID, err error) {
+	if name == EventFinalize {
+		return eventID, fmt.Errorf("entity sub event: can't sub finalize")
 	} // if
 
-	for _, itor := range []string{
-		eventAwake,
-		eventStart,
-		eventUpdate,
-		eventDispose,
-		eventFinalize,
-	} {
-		if name == itor {
-			return fmt.Errorf("entity sub event: keyword")
-		} // if
-	} // for
+	return this.eventmgr.Sub(name, process), nil
+}
 
-	this.eventmgr.Sub(name, process)
-	return nil
+// UnsubEvent 取消訂閱事件
+func (this *Entity) UnsubEvent(eventID events.EventID) {
+	this.eventmgr.Unsub(eventID)
 }
 
 // PubOnceEvent 發布單次事件
@@ -248,7 +203,7 @@ func (this *Entity) PubOnceEvent(name string, param any) {
 	this.eventmgr.PubOnce(name, param)
 }
 
-// PubFixedEvent 發布定時事件, 回傳用於停止定時事件的控制物件
+// PubFixedEvent 發布定時事件; 請注意! 由於不能刪除定時事件, 因此發布定時事件前請多想想
 func (this *Entity) PubFixedEvent(name string, param any, interval time.Duration) {
 	this.eventmgr.PubFixed(name, param, interval)
 }

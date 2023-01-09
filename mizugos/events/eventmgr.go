@@ -21,8 +21,27 @@ type Eventmgr struct {
 	finish atomic.Bool // 結束旗標
 }
 
+// EventID 事件編號資料
+type EventID struct {
+	name  string // 事件名稱
+	index int64  // 事件索引
+}
+
 // Process 處理函式類型
 type Process func(param any)
+
+// Do 執行處理
+func (this Process) Do(param any) {
+	if this != nil {
+		this(param)
+	} // if
+}
+
+// event 事件資料
+type event struct {
+	name  string // 事件名稱
+	param any    // 事件參數
+}
 
 // Initialize 初始化處理, 由於初始化完成後就會開始處理事件, 因此可能需要在初始化之前做完訂閱事件
 func (this *Eventmgr) Initialize() {
@@ -53,9 +72,14 @@ func (this *Eventmgr) Finalize() {
 	this.finish.Store(true)
 }
 
-// Sub 訂閱事件, 由於初始化完成後就會開始處理事件, 因此可能需要在初始化之前做完訂閱事件
-func (this *Eventmgr) Sub(name string, process Process) {
-	this.pubsub.sub(name, process)
+// Sub 訂閱事件
+func (this *Eventmgr) Sub(name string, process Process) EventID {
+	return this.pubsub.sub(name, process)
+}
+
+// Unsub 取消訂閱事件
+func (this *Eventmgr) Unsub(eventID EventID) {
+	this.pubsub.unsub(eventID)
 }
 
 // PubOnce 發布單次事件
@@ -102,22 +126,41 @@ func (this *Eventmgr) PubFixed(name string, param any, interval time.Duration) {
 // newPubsub 建立訂閱/發布資料
 func newPubsub() *pubsub {
 	return &pubsub{
-		data: map[string]Process{},
+		data: map[string]list{},
 	}
 }
 
 // pubsub 訂閱/發布資料
 type pubsub struct {
-	data map[string]Process // 處理列表
-	lock sync.RWMutex       // 執行緒鎖
+	index int64           // 事件索引
+	data  map[string]list // 處理列表
+	lock  sync.RWMutex    // 執行緒鎖
 }
 
+// list 處理列表
+type list map[int64]Process
+
 // sub 訂閱
-func (this *pubsub) sub(name string, process Process) {
+func (this *pubsub) sub(name string, process Process) EventID {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	this.data[name] = process
+	this.index++
+	cell := this.find(name)
+	cell[this.index] = process
+	return EventID{
+		name:  name,
+		index: this.index,
+	}
+}
+
+// unsub 取消訂閱
+func (this *pubsub) unsub(eventID EventID) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	cell := this.find(eventID.name)
+	delete(cell, eventID.index)
 }
 
 // pub 發布
@@ -125,13 +168,19 @@ func (this *pubsub) pub(name string, param any) {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 
-	if process, ok := this.data[name]; ok {
-		process(param)
-	} // if
+	for _, itor := range this.find(name) {
+		itor.Do(param)
+	} // for
 }
 
-// event 事件資料
-type event struct {
-	name  string // 事件名稱
-	param any    // 事件參數
+// find 尋找處理列表
+func (this *pubsub) find(name string) list {
+	result, ok := this.data[name]
+
+	if ok == false {
+		result = list{}
+		this.data[name] = result
+	} // if
+
+	return result
 }
