@@ -45,9 +45,9 @@ func (this *Echo) procEchoRes(message any) {
 		return
 	} // if
 
-	commons.Echo.Add(currentTime() - msg.From.Time)
+	commons.Echo.Add(time.Duration(time.Now().UnixNano() - msg.From.Time))
 	mizugos.Info(this.name).Message("procEchoRes").
-		KV("equal", this.echo != msg.From.Echo).
+		KV("equal", this.echo == msg.From.Echo).
 		KV("count", msg.Count).
 		End()
 
@@ -59,7 +59,7 @@ func (this *Echo) procEchoRes(message any) {
 // SendMsgEcho 傳送要求回音
 func (this *Echo) sendEchoReq(echo string) {
 	msg, err := procs.SimpleMarshal(procs.MessageID(messages.MsgID_EchoReq), &messages.EchoReq{
-		Time: currentTime(),
+		Time: time.Now().UnixNano(),
 		Echo: echo,
 	})
 
@@ -69,9 +69,4 @@ func (this *Echo) sendEchoReq(echo string) {
 	} // if
 
 	this.Entity().Send(msg)
-}
-
-// currentTime 取得現在時間
-func currentTime() time.Duration {
-	return time.Since(time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC))
 }

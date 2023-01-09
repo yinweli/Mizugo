@@ -15,7 +15,7 @@ import (
 // NewEcho 建立回音入口資料
 func NewEcho() *Echo {
 	return &Echo{
-		name: "entry echo",
+		name: "echos",
 	}
 }
 

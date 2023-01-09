@@ -1,13 +1,9 @@
 package messages
 
-import (
-	"time"
-)
-
 // EchoReq 要求回音
 type EchoReq struct {
-	Time time.Duration `json:"time"` // 傳送時間
-	Echo string        `json:"echo"` // 回音字串
+	Time int64  `json:"time"` // 傳送時間
+	Echo string `json:"echo"` // 回音字串
 }
 
 // EchoRes 回應回音
