@@ -31,24 +31,23 @@ type Key struct {
 
 // Start start事件
 func (this *Key) Start() error {
-	index, err := this.Entity().SubEvent(entitys.EventAfterSend, this.afterSend)
+	var err error
 
-	if err != nil {
+	if this.event, err = this.Entity().SubEvent(entitys.EventAfterSend, this.eventAfterSend); err != nil {
 		return fmt.Errorf("%v start: %w", this.name, err)
 	} // if
 
-	this.event = index
 	this.key = utils.RandDesKeyString()
-	this.Entity().AddMessage(procs.MessageID(messages.MsgID_KeyReq), this.procKeyReq)
+	this.Entity().AddMessage(procs.MessageID(messages.MsgID_KeyReq), this.procMsgKeyReq)
 	return nil
 }
 
-// afterSend afterSend事件
-func (this *Key) afterSend(_ any) {
+// eventAfterSend afterSend事件
+func (this *Key) eventAfterSend(_ any) {
 	process, err := utils.CastPointer[procs.ProtoDes](this.Entity().GetProcess())
 
 	if err != nil {
-		_ = mizugos.Error(this.name).Message("afterSend").EndError(err)
+		_ = mizugos.Error(this.name).Message("eventAfterSend").EndError(err)
 		return
 	} // if
 
@@ -56,30 +55,30 @@ func (this *Key) afterSend(_ any) {
 	this.Entity().UnsubEvent(this.event)
 }
 
-// procPingReq 處理要求密鑰
-func (this *Key) procKeyReq(message any) {
+// procMsgPingReq 處理要求密鑰
+func (this *Key) procMsgKeyReq(message any) {
 	rec := commons.Key.Rec()
 	defer rec()
 
-	_, _, err := procs.ProtoDesUnmarshal[*messages.KeyReq](message)
+	_, _, err := procs.ProtoDesUnmarshal[*messages.MsgKeyReq](message)
 
 	if err != nil {
-		_ = mizugos.Error(this.name).Message("procKeyReq").EndError(err)
+		_ = mizugos.Error(this.name).Message("procMsgKeyReq").EndError(err)
 		return
 	} // if
 
-	this.sendKeyRes()
-	mizugos.Info(this.name).Message("procKeyReq receive").KV("key", this.key).End()
+	this.sendMsgKeyRes()
+	mizugos.Info(this.name).Message("procMsgKeyReq receive").KV("key", this.key).End()
 }
 
-// sendKeyRes 傳送回應密鑰
-func (this *Key) sendKeyRes() {
-	msg, err := procs.ProtoDesMarshal(procs.MessageID(messages.MsgID_KeyRes), &messages.KeyRes{
+// sendMsgKeyRes 傳送回應密鑰
+func (this *Key) sendMsgKeyRes() {
+	msg, err := procs.ProtoDesMarshal(procs.MessageID(messages.MsgID_KeyRes), &messages.MsgKeyRes{
 		Key: this.key,
 	})
 
 	if err != nil {
-		_ = mizugos.Error(this.name).Message("sendKeyRes").EndError(err)
+		_ = mizugos.Error(this.name).Message("sendMsgKeyRes").EndError(err)
 		return
 	} // if
 

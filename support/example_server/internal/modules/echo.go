@@ -30,36 +30,36 @@ type EchoIncr func() int64
 
 // Start start事件
 func (this *Echo) Start() error {
-	this.Entity().AddMessage(procs.MessageID(messages.MsgID_EchoReq), this.procEchoReq)
+	this.Entity().AddMessage(procs.MessageID(messages.MsgID_EchoReq), this.procMsgEchoReq)
 	return nil
 }
 
-// procEchoReq 處理要求回音
-func (this *Echo) procEchoReq(message any) {
+// procMsgEchoReq 處理要求回音
+func (this *Echo) procMsgEchoReq(message any) {
 	rec := commons.Echo.Rec()
 	defer rec()
 
-	_, msg, err := procs.SimpleUnmarshal[messages.EchoReq](message)
+	_, msg, err := procs.SimpleUnmarshal[messages.MsgEchoReq](message)
 
 	if err != nil {
-		_ = mizugos.Error(this.name).Message("procEchoReq").EndError(err)
+		_ = mizugos.Error(this.name).Message("procMsgEchoReq").EndError(err)
 		return
 	} // if
 
 	count := this.echoIncr()
-	this.sendEchoRes(msg, count)
-	mizugos.Info(this.name).Message("procEchoReq receive").KV("count", count).End()
+	this.sendMsgEchoRes(msg, count)
+	mizugos.Info(this.name).Message("procMsgEchoReq receive").KV("count", count).End()
 }
 
-// sendEchoRes 傳送回應回音
-func (this *Echo) sendEchoRes(from *messages.EchoReq, count int64) {
-	msg, err := procs.SimpleMarshal(procs.MessageID(messages.MsgID_EchoRes), &messages.EchoRes{
+// sendMsgEchoRes 傳送回應回音
+func (this *Echo) sendMsgEchoRes(from *messages.MsgEchoReq, count int64) {
+	msg, err := procs.SimpleMarshal(procs.MessageID(messages.MsgID_EchoRes), &messages.MsgEchoRes{
 		From:  *from,
 		Count: count,
 	})
 
 	if err != nil {
-		_ = mizugos.Error(this.name).Message("sendEchoRes").EndError(err)
+		_ = mizugos.Error(this.name).Message("sendMsgEchoRes").EndError(err)
 		return
 	} // if
 

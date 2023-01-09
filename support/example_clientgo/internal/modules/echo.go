@@ -30,23 +30,24 @@ type Echo struct {
 }
 
 // Start start事件
-func (this *Echo) Start() {
+func (this *Echo) Start() error {
 	this.echo = utils.RandString(defines.EchoCount)
-	this.Entity().AddMessage(procs.MessageID(messages.MsgID_EchoRes), this.procEchoRes)
-	this.sendEchoReq(this.echo)
+	this.Entity().AddMessage(procs.MessageID(messages.MsgID_EchoRes), this.procMsgEchoRes)
+	this.sendMsgEchoReq(this.echo)
+	return nil
 }
 
-// procEchoRes 處理回應回音
-func (this *Echo) procEchoRes(message any) {
-	_, msg, err := procs.SimpleUnmarshal[messages.EchoRes](message)
+// procMsgEchoRes 處理回應回音
+func (this *Echo) procMsgEchoRes(message any) {
+	_, msg, err := procs.SimpleUnmarshal[messages.MsgEchoRes](message)
 
 	if err != nil {
-		_ = mizugos.Error(this.name).Message("procEchoRes").EndError(err)
+		_ = mizugos.Error(this.name).Message("procMsgEchoRes").EndError(err)
 		return
 	} // if
 
 	commons.Echo.Add(time.Duration(time.Now().UnixNano() - msg.From.Time))
-	mizugos.Info(this.name).Message("procEchoRes").
+	mizugos.Info(this.name).Message("procMsgEchoRes").
 		KV("equal", this.echo == msg.From.Echo).
 		KV("count", msg.Count).
 		End()
@@ -56,15 +57,15 @@ func (this *Echo) procEchoRes(message any) {
 	} // if
 }
 
-// SendMsgEcho 傳送要求回音
-func (this *Echo) sendEchoReq(echo string) {
-	msg, err := procs.SimpleMarshal(procs.MessageID(messages.MsgID_EchoReq), &messages.EchoReq{
+// sendMsgEchoReq 傳送要求回音
+func (this *Echo) sendMsgEchoReq(echo string) {
+	msg, err := procs.SimpleMarshal(procs.MessageID(messages.MsgID_EchoReq), &messages.MsgEchoReq{
 		Time: time.Now().UnixNano(),
 		Echo: echo,
 	})
 
 	if err != nil {
-		_ = mizugos.Error(this.name).Message("sendEchoReq").EndError(err)
+		_ = mizugos.Error(this.name).Message("sendMsgEchoReq").EndError(err)
 		return
 	} // if
 

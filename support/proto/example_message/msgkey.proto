@@ -3,9 +3,9 @@ syntax = "proto3";
 option go_package = "/messages;messages";
 
 // 要求密鑰
-message KeyReq {}
+message MsgKeyReq {}
 
 // 回應密鑰
-message KeyRes {
+message MsgKeyRes {
   string key = 1; // 密鑰
 }

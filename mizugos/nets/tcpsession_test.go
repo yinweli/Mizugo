@@ -76,8 +76,6 @@ func (this *SuiteTCPSession) TestStart() {
 }
 
 func (this *SuiteTCPSession) TestStartFailed() {
-	// TODO: 要新增一個在綁定期間把會話關閉的測試, 模擬綁定失敗的狀況
-
 	testl := newTester(false, true, true, true)
 	listen := NewTCPListen(this.host.ip, this.host.port)
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)

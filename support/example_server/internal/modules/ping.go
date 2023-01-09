@@ -30,36 +30,36 @@ type PingIncr func() int64
 
 // Start start事件
 func (this *Ping) Start() error {
-	this.Entity().AddMessage(procs.MessageID(messages.MsgID_PingReq), this.procPingReq)
+	this.Entity().AddMessage(procs.MessageID(messages.MsgID_PingReq), this.procMsgPingReq)
 	return nil
 }
 
-// procPingReq 處理要求Ping
-func (this *Ping) procPingReq(message any) {
+// procMsgPingReq 處理要求Ping
+func (this *Ping) procMsgPingReq(message any) {
 	rec := commons.Ping.Rec()
 	defer rec()
 
-	_, msg, err := procs.ProtoDesUnmarshal[*messages.PingReq](message)
+	_, msg, err := procs.ProtoDesUnmarshal[*messages.MsgPingReq](message)
 
 	if err != nil {
-		_ = mizugos.Error(this.name).Message("procPingReq").EndError(err)
+		_ = mizugos.Error(this.name).Message("procMsgPingReq").EndError(err)
 		return
 	} // if
 
 	count := this.pingIncr()
-	this.sendPingRes(msg, count)
-	mizugos.Info(this.name).Message("procPingReq receive").KV("count", count).End()
+	this.sendMsgPingRes(msg, count)
+	mizugos.Info(this.name).Message("procMsgPingReq receive").KV("count", count).End()
 }
 
-// sendPingRes 傳送回應Ping
-func (this *Ping) sendPingRes(from *messages.PingReq, count int64) {
-	msg, err := procs.ProtoDesMarshal(procs.MessageID(messages.MsgID_PingRes), &messages.PingRes{
+// sendMsgPingRes 傳送回應Ping
+func (this *Ping) sendMsgPingRes(from *messages.MsgPingReq, count int64) {
+	msg, err := procs.ProtoDesMarshal(procs.MessageID(messages.MsgID_PingRes), &messages.MsgPingRes{
 		From:  from,
 		Count: count,
 	})
 
 	if err != nil {
-		_ = mizugos.Error(this.name).Message("sendPingRes").EndError(err)
+		_ = mizugos.Error(this.name).Message("sendMsgPingRes").EndError(err)
 		return
 	} // if
 

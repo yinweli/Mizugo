@@ -2,7 +2,7 @@ syntax = "proto3";
 
 option go_package = "/messages;messages";
 
-// 訊息編號
+// 訊息編號 // TODO: 訊息編號名稱看來不能跟訊息結構名稱一樣
 enum MsgID {
   Unknown = 0; // 不明/錯誤訊息編號, 此編號不可使用
   EchoReq = 1; // 要求回音(用簡單封包做)

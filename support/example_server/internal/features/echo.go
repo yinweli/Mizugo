@@ -57,7 +57,7 @@ func (this *Echo) Finalize() {
 }
 
 // bind 綁定處理
-func (this *Echo) bind(session nets.Sessioner) nets.Bundle {
+func (this *Echo) bind(session nets.Sessioner) *nets.Bundle {
 	mizugos.Info(this.name).Message("bind").End()
 	entity := mizugos.Entitymgr().Add()
 
@@ -98,7 +98,7 @@ Error:
 	_ = mizugos.Error(this.name).EndError(wrong)
 	mizugos.Entitymgr().Del(entity.EntityID())
 	session.Stop()
-	return nets.Bundle{}
+	return nil
 }
 
 // unbind 解綁處理

@@ -21,7 +21,7 @@ const (
 )
 
 // 要求Ping
-type PingReq struct {
+type MsgPingReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -29,8 +29,8 @@ type PingReq struct {
 	Time int64 `protobuf:"varint,1,opt,name=time,proto3" json:"time,omitempty"` // 傳送時間
 }
 
-func (x *PingReq) Reset() {
-	*x = PingReq{}
+func (x *MsgPingReq) Reset() {
+	*x = MsgPingReq{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_msgping_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -38,13 +38,13 @@ func (x *PingReq) Reset() {
 	}
 }
 
-func (x *PingReq) String() string {
+func (x *MsgPingReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*PingReq) ProtoMessage() {}
+func (*MsgPingReq) ProtoMessage() {}
 
-func (x *PingReq) ProtoReflect() protoreflect.Message {
+func (x *MsgPingReq) ProtoReflect() protoreflect.Message {
 	mi := &file_msgping_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -56,12 +56,12 @@ func (x *PingReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PingReq.ProtoReflect.Descriptor instead.
-func (*PingReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use MsgPingReq.ProtoReflect.Descriptor instead.
+func (*MsgPingReq) Descriptor() ([]byte, []int) {
 	return file_msgping_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *PingReq) GetTime() int64 {
+func (x *MsgPingReq) GetTime() int64 {
 	if x != nil {
 		return x.Time
 	}
@@ -69,17 +69,17 @@ func (x *PingReq) GetTime() int64 {
 }
 
 // 回應Ping
-type PingRes struct {
+type MsgPingRes struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	From  *PingReq `protobuf:"bytes,1,opt,name=from,proto3" json:"from,omitempty"`    // 來源訊息
-	Count int64    `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"` // 封包計數
+	From  *MsgPingReq `protobuf:"bytes,1,opt,name=from,proto3" json:"from,omitempty"`    // 來源訊息
+	Count int64       `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"` // 封包計數
 }
 
-func (x *PingRes) Reset() {
-	*x = PingRes{}
+func (x *MsgPingRes) Reset() {
+	*x = MsgPingRes{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_msgping_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -87,13 +87,13 @@ func (x *PingRes) Reset() {
 	}
 }
 
-func (x *PingRes) String() string {
+func (x *MsgPingRes) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*PingRes) ProtoMessage() {}
+func (*MsgPingRes) ProtoMessage() {}
 
-func (x *PingRes) ProtoReflect() protoreflect.Message {
+func (x *MsgPingRes) ProtoReflect() protoreflect.Message {
 	mi := &file_msgping_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -105,19 +105,19 @@ func (x *PingRes) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PingRes.ProtoReflect.Descriptor instead.
-func (*PingRes) Descriptor() ([]byte, []int) {
+// Deprecated: Use MsgPingRes.ProtoReflect.Descriptor instead.
+func (*MsgPingRes) Descriptor() ([]byte, []int) {
 	return file_msgping_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *PingRes) GetFrom() *PingReq {
+func (x *MsgPingRes) GetFrom() *MsgPingReq {
 	if x != nil {
 		return x.From
 	}
 	return nil
 }
 
-func (x *PingRes) GetCount() int64 {
+func (x *MsgPingRes) GetCount() int64 {
 	if x != nil {
 		return x.Count
 	}
@@ -128,14 +128,15 @@ var File_msgping_proto protoreflect.FileDescriptor
 
 var file_msgping_proto_rawDesc = []byte{
 	0x0a, 0x0d, 0x6d, 0x73, 0x67, 0x70, 0x69, 0x6e, 0x67, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22,
-	0x1d, 0x0a, 0x07, 0x50, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x69,
-	0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x04, 0x74, 0x69, 0x6d, 0x65, 0x22, 0x3d,
-	0x0a, 0x07, 0x50, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x12, 0x1c, 0x0a, 0x04, 0x66, 0x72, 0x6f,
-	0x6d, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x08, 0x2e, 0x50, 0x69, 0x6e, 0x67, 0x52, 0x65,
-	0x71, 0x52, 0x04, 0x66, 0x72, 0x6f, 0x6d, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74,
-	0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x42, 0x14, 0x5a,
-	0x12, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x3b, 0x6d, 0x65, 0x73, 0x73, 0x61,
-	0x67, 0x65, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x20, 0x0a, 0x0a, 0x4d, 0x73, 0x67, 0x50, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x12, 0x12, 0x0a,
+	0x04, 0x74, 0x69, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x04, 0x74, 0x69, 0x6d,
+	0x65, 0x22, 0x43, 0x0a, 0x0a, 0x4d, 0x73, 0x67, 0x50, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x12,
+	0x1f, 0x0a, 0x04, 0x66, 0x72, 0x6f, 0x6d, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0b, 0x2e,
+	0x4d, 0x73, 0x67, 0x50, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x52, 0x04, 0x66, 0x72, 0x6f, 0x6d,
+	0x12, 0x14, 0x0a, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52,
+	0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x42, 0x14, 0x5a, 0x12, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61,
+	0x67, 0x65, 0x73, 0x3b, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x62, 0x06, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -152,11 +153,11 @@ func file_msgping_proto_rawDescGZIP() []byte {
 
 var file_msgping_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_msgping_proto_goTypes = []interface{}{
-	(*PingReq)(nil), // 0: PingReq
-	(*PingRes)(nil), // 1: PingRes
+	(*MsgPingReq)(nil), // 0: MsgPingReq
+	(*MsgPingRes)(nil), // 1: MsgPingRes
 }
 var file_msgping_proto_depIdxs = []int32{
-	0, // 0: PingRes.from:type_name -> PingReq
+	0, // 0: MsgPingRes.from:type_name -> MsgPingReq
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -171,7 +172,7 @@ func file_msgping_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_msgping_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PingReq); i {
+			switch v := v.(*MsgPingReq); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -183,7 +184,7 @@ func file_msgping_proto_init() {
 			}
 		}
 		file_msgping_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PingRes); i {
+			switch v := v.(*MsgPingRes); i {
 			case 0:
 				return &v.state
 			case 1:
