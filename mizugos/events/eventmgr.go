@@ -21,8 +21,8 @@ type Eventmgr struct {
 	finish atomic.Bool // 結束旗標
 }
 
-// EventID 事件編號資料
-type EventID struct {
+// Index 事件編號資料
+type Index struct {
 	name  string // 事件名稱
 	index int64  // 事件索引
 }
@@ -73,13 +73,13 @@ func (this *Eventmgr) Finalize() {
 }
 
 // Sub 訂閱事件
-func (this *Eventmgr) Sub(name string, process Process) EventID {
+func (this *Eventmgr) Sub(name string, process Process) Index {
 	return this.pubsub.sub(name, process)
 }
 
 // Unsub 取消訂閱事件
-func (this *Eventmgr) Unsub(eventID EventID) {
-	this.pubsub.unsub(eventID)
+func (this *Eventmgr) Unsub(index Index) {
+	this.pubsub.unsub(index)
 }
 
 // PubOnce 發布單次事件
@@ -141,26 +141,26 @@ type pubsub struct {
 type list map[int64]Process
 
 // sub 訂閱
-func (this *pubsub) sub(name string, process Process) EventID {
+func (this *pubsub) sub(name string, process Process) Index {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.index++
 	cell := this.find(name)
 	cell[this.index] = process
-	return EventID{
+	return Index{
 		name:  name,
 		index: this.index,
 	}
 }
 
 // unsub 取消訂閱
-func (this *pubsub) unsub(eventID EventID) {
+func (this *pubsub) unsub(index Index) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	cell := this.find(eventID.name)
-	delete(cell, eventID.index)
+	cell := this.find(index.name)
+	delete(cell, index.index)
 }
 
 // pub 發布

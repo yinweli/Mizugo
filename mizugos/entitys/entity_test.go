@@ -133,12 +133,12 @@ func (this *SuiteEntity) TestEvent() {
 	valueFixed := "value fixed"
 	validFixed := atomic.Bool{}
 
-	eventIDOnce, err := target.SubEvent(nameOnce, func(param any) {
+	indexOnce, err := target.SubEvent(nameOnce, func(param any) {
 		validOnce.Store(param.(string) == valueOnce)
 	})
 	assert.Nil(this.T(), err)
 
-	eventIDFixed, err := target.SubEvent(nameFixed, func(param any) {
+	indexFixed, err := target.SubEvent(nameFixed, func(param any) {
 		validFixed.Store(param.(string) == valueFixed)
 	})
 	assert.Nil(this.T(), err)
@@ -154,8 +154,8 @@ func (this *SuiteEntity) TestEvent() {
 	assert.True(this.T(), validOnce.Load())
 	assert.True(this.T(), validFixed.Load())
 
-	target.UnsubEvent(eventIDOnce)
-	target.UnsubEvent(eventIDFixed)
+	target.UnsubEvent(indexOnce)
+	target.UnsubEvent(indexFixed)
 
 	target.Finalize()
 }
