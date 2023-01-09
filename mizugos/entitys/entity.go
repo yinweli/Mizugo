@@ -82,8 +82,8 @@ func (this *Entity) Finalize() {
 }
 
 // Bundle 取得綁定資料
-func (this *Entity) Bundle() nets.Bundle {
-	return nets.Bundle{
+func (this *Entity) Bundle() *nets.Bundle {
+	return &nets.Bundle{
 		Encode:  this.process.Get().Encode,
 		Decode:  this.process.Get().Decode,
 		Receive: this.process.Get().Process,
@@ -170,11 +170,11 @@ func (this *Entity) DelMessage(messageID procs.MessageID) {
 // AddModule 新增模組, 初始化完成後就不能新增模組
 func (this *Entity) AddModule(module Moduler) error {
 	if this.enable.Load() {
-		return fmt.Errorf("entity add module: overdue")
+		return fmt.Errorf("entity add module: overdue") // TODO: 如果模組介面有名稱, 錯誤時要顯示一下
 	} // if
 
 	if err := this.modulemgr.Add(module); err != nil {
-		return fmt.Errorf("entity add module: %w", err)
+		return fmt.Errorf("entity add module: %w", err) // TODO: 如果模組介面有名稱, 錯誤時要顯示一下
 	} // if
 
 	module.setup(this)
@@ -191,7 +191,7 @@ func (this *Entity) GetModule(moduleID ModuleID) Moduler {
 // SubEvent 訂閱事件
 func (this *Entity) SubEvent(name string, process events.Process) (index events.Index, err error) {
 	if name == EventFinalize {
-		return index, fmt.Errorf("entity sub event: can't sub finalize")
+		return index, fmt.Errorf("entity sub event: %v: can't sub finalize", name)
 	} // if
 
 	return this.eventmgr.Sub(name, process), nil
