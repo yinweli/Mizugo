@@ -31,7 +31,7 @@ func (this *TCPConnect) Connect(bind Bind, unbind Unbind, wrong Wrong) {
 		} // if
 
 		session := NewTCPSession(conn)
-		go session.Start(bind, unbind, wrong)
+		session.Start(bind, unbind, wrong)
 	}()
 }
 

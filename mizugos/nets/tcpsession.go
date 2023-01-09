@@ -31,17 +31,19 @@ type TCPSession struct {
 	owner   any            // 擁有者
 }
 
-// Start 啟動會話, 當由連接器/接聽器獲得會話器之後, 需要啟動會話才可以傳送或接收封包; 若不是使用多執行緒啟動, 則會被阻塞在這裡直到會話結束
+// Start 啟動會話
 func (this *TCPSession) Start(bind Bind, unbind Unbind, wrong Wrong) {
-	this.bundle = bind.Do(this)
-	this.wrong = wrong
-	this.signal.Add(2) // 等待接收循環與傳送循環結束
+	go func() {
+		this.bundle = bind.Do(this)
+		this.wrong = wrong
+		this.signal.Add(2) // 等待接收循環與傳送循環結束
 
-	go this.recvLoop()
-	go this.sendLoop()
+		go this.recvLoop()
+		go this.sendLoop()
 
-	this.signal.Wait() // 如果接收循環與傳送循環結束, 就會繼續進行結束處理
-	unbind.Do(this)
+		this.signal.Wait() // 如果接收循環與傳送循環結束, 就會繼續進行結束處理
+		unbind.Do(this)
+	}()
 }
 
 // Stop 停止會話, 不會等待會話內部循環結束
