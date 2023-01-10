@@ -1,11 +1,11 @@
 package metrics
 
 import (
+	"context"
 	"expvar"
 	"fmt"
 	"net/http"
 	"net/http/pprof"
-	"sync/atomic"
 )
 
 // 指標管理器, 其中包括兩部分
@@ -35,12 +35,15 @@ func NewMetricsmgr() *Metricsmgr {
 
 // Metricsmgr 指標管理器
 type Metricsmgr struct {
-	stop   atomic.Bool  // 結束旗標
-	server *http.Server // http伺服器物件
+	ctx    context.Context    // ctx物件
+	cancel context.CancelFunc // 取消物件
+	server *http.Server       // http伺服器物件
 }
 
 // Initialize 初始化處理
 func (this *Metricsmgr) Initialize(port int) {
+	this.ctx, this.cancel = context.WithCancel(context.Background())
+
 	handler := http.NewServeMux()
 	handler.HandleFunc("/debug/pprof/", pprof.Index)
 	handler.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
@@ -62,7 +65,7 @@ func (this *Metricsmgr) Initialize(port int) {
 
 // Finalize 結束處理
 func (this *Metricsmgr) Finalize() {
-	this.stop.Store(true)
+	this.cancel()
 	_ = this.server.Close()
 }
 
@@ -88,12 +91,8 @@ func (this *Metricsmgr) NewMap(name string) *expvar.Map {
 
 // NewRuntime 建立執行統計
 func (this *Metricsmgr) NewRuntime(name string) *Runtime {
-	v := &Runtime{
-		finish: func() bool {
-			return this.stop.Load()
-		},
-	}
-	v.start()
+	v := &Runtime{}
+	v.start(this.ctx)
 	expvar.Publish(name, v)
 	return v
 }

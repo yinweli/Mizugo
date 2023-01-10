@@ -6,6 +6,8 @@ import (
 	"sync/atomic"
 )
 
+// TODO: 研究一下怎麼改用context
+
 // NewTCPListen 建立tcp接聽器
 func NewTCPListen(ip, port string) *TCPListen {
 	return &TCPListen{

@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"sync"
@@ -9,10 +10,9 @@ import (
 
 // Runtime 執行統計
 type Runtime struct {
-	finish func() bool  // 終止檢驗函式
-	curr   runtime      // 當前資料
-	last   runtime      // 上次資料
-	lock   sync.RWMutex // 執行緒鎖
+	curr runtime      // 當前資料
+	last runtime      // 上次資料
+	lock sync.RWMutex // 執行緒鎖
 }
 
 // runtime 執行資料
@@ -79,7 +79,7 @@ func (this *Runtime) String() string {
 }
 
 // start 開始統計
-func (this *Runtime) start() {
+func (this *Runtime) start(ctx context.Context) {
 	go func() {
 		timeout := time.NewTicker(time.Second)
 		timeout1 := time.NewTicker(time.Second * interval1)
@@ -90,55 +90,43 @@ func (this *Runtime) start() {
 		for {
 			select {
 			case <-timeout.C:
-				if this.finish() == false {
-					this.lock.Lock()
-					this.last.time = this.curr.time
-					this.last.timeMax = this.curr.timeMax
-					this.last.count = this.curr.count
-					this.lock.Unlock()
-				} // if
+				this.lock.Lock()
+				this.last.time = this.curr.time
+				this.last.timeMax = this.curr.timeMax
+				this.last.count = this.curr.count
+				this.lock.Unlock()
 
 			case <-timeout1.C:
-				if this.finish() == false {
-					this.lock.Lock()
-					this.last.count1 = this.curr.count1
-					this.curr.count1 = 0
-					this.lock.Unlock()
-				} // if
+				this.lock.Lock()
+				this.last.count1 = this.curr.count1
+				this.curr.count1 = 0
+				this.lock.Unlock()
 
 			case <-timeout5.C:
-				if this.finish() == false {
-					this.lock.Lock()
-					this.last.count5 = this.curr.count5
-					this.curr.count5 = 0
-					this.lock.Unlock()
-				} // if
+				this.lock.Lock()
+				this.last.count5 = this.curr.count5
+				this.curr.count5 = 0
+				this.lock.Unlock()
 
 			case <-timeout10.C:
-				if this.finish() == false {
-					this.lock.Lock()
-					this.last.count10 = this.curr.count10
-					this.curr.count10 = 0
-					this.lock.Unlock()
-				} // if
+				this.lock.Lock()
+				this.last.count10 = this.curr.count10
+				this.curr.count10 = 0
+				this.lock.Unlock()
 
 			case <-timeout60.C:
-				if this.finish() == false {
-					this.lock.Lock()
-					this.last.count60 = this.curr.count60
-					this.curr.count60 = 0
-					this.lock.Unlock()
-				} // if
+				this.lock.Lock()
+				this.last.count60 = this.curr.count60
+				this.curr.count60 = 0
+				this.lock.Unlock()
 
-			default:
-				if this.finish() {
-					timeout.Stop()
-					timeout1.Stop()
-					timeout5.Stop()
-					timeout10.Stop()
-					timeout60.Stop()
-					return
-				} // if
+			case <-ctx.Done():
+				timeout.Stop()
+				timeout1.Stop()
+				timeout5.Stop()
+				timeout10.Stop()
+				timeout60.Stop()
+				return
 			} // select
 		} // for
 	}()

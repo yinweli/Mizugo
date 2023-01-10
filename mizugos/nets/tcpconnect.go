@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+// TODO: 研究一下怎麼改用context
+
 // NewTCPConnect 建立tcp連接器
 func NewTCPConnect(ip, port string, timeout time.Duration) *TCPConnect {
 	return &TCPConnect{

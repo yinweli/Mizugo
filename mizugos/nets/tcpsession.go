@@ -9,6 +9,8 @@ import (
 	"sync"
 )
 
+// TODO: 研究一下怎麼改用context
+
 const tcpHeaderSize = 2               // 標頭長度
 const tcpPacketSize = int(^uint16(0)) // 封包長度
 const tcpMessageSize = 1000           // 訊息通道大小設為1000, 避免因為爆滿而卡住

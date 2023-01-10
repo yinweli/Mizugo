@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+// TODO: 研究一下怎麼改用context
+
 const separateSubID = "@" // 訂閱索引分隔字串
 
 // NewEventmgr 建立事件管理器
@@ -107,7 +109,7 @@ func (this *Eventmgr) PubOnce(name string, param any) {
 	}
 }
 
-// PubFixed 發布定時事件
+// PubFixed 發布定時事件; 請注意! 由於不能刪除定時事件, 因此發布定時事件前請多想想
 func (this *Eventmgr) PubFixed(name string, param any, interval time.Duration) {
 	if this.finish.Load() {
 		return
