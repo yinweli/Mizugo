@@ -29,8 +29,8 @@ type Echo struct {
 
 // EchoConfig 設定資料
 type EchoConfig struct {
-	IP   string // 位址
-	Port string // 埠號
+	IP   string `yaml:"ip"`   // 位址
+	Port string `yaml:"port"` // 埠號
 }
 
 // Initialize 初始化處理
@@ -95,9 +95,14 @@ func (this *Echo) bind(session nets.Sessioner) *nets.Bundle {
 	return entity.Bundle()
 
 Error:
-	_ = mizugos.Error(this.name).EndError(wrong)
-	mizugos.Entitymgr().Del(entity.EntityID())
+	if entity != nil {
+		entity.Finalize()
+		mizugos.Entitymgr().Del(entity.EntityID())
+		mizugos.Labelmgr().Erase(entity)
+	} // if
+
 	session.Stop()
+	_ = mizugos.Error(this.name).EndError(wrong)
 	return nil
 }
 

@@ -91,7 +91,7 @@ func (this *ProtoDes) Process(input any) error {
 	process := this.Get(message.MessageID)
 
 	if process == nil {
-		return fmt.Errorf("protodes process: messageID not found")
+		return fmt.Errorf("protodes process: messageID not found: %v", message.MessageID)
 	} // if
 
 	process(message)

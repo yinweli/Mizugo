@@ -70,7 +70,7 @@ func (this *Ping) procMsgPingRes(message any) {
 
 // sendMsgPingReq 傳送要求Ping
 func (this *Ping) sendMsgPingReq() {
-	msg, err := procs.SimpleMarshal(procs.MessageID(messages.MsgID_PingReq), &messages.MsgPingReq{
+	msg, err := procs.ProtoDesMarshal(procs.MessageID(messages.MsgID_PingReq), &messages.MsgPingReq{
 		Time: time.Now().UnixNano(),
 	})
 

@@ -71,7 +71,7 @@ func (this *Simple) Process(input any) error {
 	process := this.Get(message.MessageID)
 
 	if process == nil {
-		return fmt.Errorf("simple process: messageID not found")
+		return fmt.Errorf("simple process: messageID not found: %v", message.MessageID)
 	} // if
 
 	process(message)

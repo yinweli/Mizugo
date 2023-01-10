@@ -24,14 +24,14 @@ type Ping struct {
 	name      string        // 入口名稱
 	config    PingConfig    // 設定資料
 	listenID  nets.ListenID // 接聽編號
-	PingCount atomic.Int64  // 封包計數
+	pingCount atomic.Int64  // 封包計數
 }
 
 // PingConfig 設定資料
 type PingConfig struct {
-	IP   string // 位址
-	Port string // 埠號
-	Key  string // 密鑰
+	IP   string `yaml:"ip"`   // 位址
+	Port string `yaml:"port"` // 埠號
+	Key  string `yaml:"key"`  // 密鑰
 }
 
 // Initialize 初始化處理
@@ -85,7 +85,7 @@ func (this *Ping) bind(session nets.Sessioner) *nets.Bundle {
 	} // if
 
 	if err := entity.AddModule(modules.NewPing(func() int64 {
-		return this.PingCount.Add(1)
+		return this.pingCount.Add(1)
 	})); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
@@ -101,9 +101,14 @@ func (this *Ping) bind(session nets.Sessioner) *nets.Bundle {
 	return entity.Bundle()
 
 Error:
-	_ = mizugos.Error(this.name).EndError(wrong)
-	mizugos.Entitymgr().Del(entity.EntityID())
+	if entity != nil {
+		entity.Finalize()
+		mizugos.Entitymgr().Del(entity.EntityID())
+		mizugos.Labelmgr().Erase(entity)
+	} // if
+
 	session.Stop()
+	_ = mizugos.Error(this.name).EndError(wrong)
 	return nil
 }
 

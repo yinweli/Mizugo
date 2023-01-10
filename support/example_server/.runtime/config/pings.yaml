@@ -1,4 +1,4 @@
 pings:
   ip:
   port: 10002
-  initkey: firstkey
+  key: firstkey

@@ -4,4 +4,4 @@ echoc:
   timeout: 1s
   disconnect: true
   reconnect: true
-  reconnecttime: 20ms
+  reconnecttime: 50ms

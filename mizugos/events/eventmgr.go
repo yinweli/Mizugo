@@ -9,22 +9,22 @@ import (
 // NewEventmgr 建立事件管理器
 func NewEventmgr(capacity int) *Eventmgr {
 	return &Eventmgr{
-		event:  make(chan event, capacity),
+		notify: make(chan notify, capacity),
 		pubsub: newPubsub(),
 	}
 }
 
 // Eventmgr 事件管理器
 type Eventmgr struct {
-	event  chan event  // 事件通道
+	notify chan notify // 通知通道
 	pubsub *pubsub     // 訂閱/發布資料
 	finish atomic.Bool // 結束旗標
 }
 
-// Index 事件編號資料
+// Index 事件索引
 type Index struct {
 	name  string // 事件名稱
-	index int64  // 事件索引
+	index int64  // 事件編號
 }
 
 // Process 處理函式類型
@@ -37,10 +37,11 @@ func (this Process) Do(param any) {
 	} // if
 }
 
-// event 事件資料
-type event struct {
+// notify 通知資料
+type notify struct {
+	pub   bool   // 發布旗標, true表示為發布事件, false則為取消訂閱
 	name  string // 事件名稱
-	param any    // 事件參數
+	param any    // 事件參數/事件索引
 }
 
 // Initialize 初始化處理, 由於初始化完成後就會開始處理事件, 因此可能需要在初始化之前做完訂閱事件
@@ -48,8 +49,12 @@ func (this *Eventmgr) Initialize() {
 	go func() {
 		for {
 			select {
-			case e := <-this.event:
-				this.pubsub.pub(e.name, e.param)
+			case n := <-this.notify:
+				if n.pub {
+					this.pubsub.pub(n.name, n.param)
+				} else {
+					this.pubsub.unsub(n.param)
+				} // if
 
 			default:
 				if this.finish.Load() {
@@ -59,10 +64,12 @@ func (this *Eventmgr) Initialize() {
 		} // for
 
 	Finish:
-		close(this.event)
+		close(this.notify)
 
-		for e := range this.event { // 把剩餘的事件都做完
-			this.pubsub.pub(e.name, e.param)
+		for n := range this.notify { // 把剩餘的事件都做完
+			if n.pub {
+				this.pubsub.pub(n.name, n.param)
+			} // if
 		} // for
 	}()
 }
@@ -79,7 +86,14 @@ func (this *Eventmgr) Sub(name string, process Process) Index {
 
 // Unsub 取消訂閱事件
 func (this *Eventmgr) Unsub(index Index) {
-	this.pubsub.unsub(index)
+	if this.finish.Load() {
+		return
+	} // if
+
+	this.notify <- notify{
+		pub:   false,
+		param: index,
+	}
 }
 
 // PubOnce 發布單次事件
@@ -88,7 +102,8 @@ func (this *Eventmgr) PubOnce(name string, param any) {
 		return
 	} // if
 
-	this.event <- event{
+	this.notify <- notify{
+		pub:   true,
 		name:  name,
 		param: param,
 	}
@@ -107,7 +122,8 @@ func (this *Eventmgr) PubFixed(name string, param any, interval time.Duration) {
 			select {
 			case <-timeout.C:
 				if this.finish.Load() == false {
-					this.event <- event{
+					this.notify <- notify{
+						pub:   true,
 						name:  name,
 						param: param,
 					}
@@ -146,8 +162,13 @@ func (this *pubsub) sub(name string, process Process) Index {
 	defer this.lock.Unlock()
 
 	this.index++
-	cell := this.find(name)
-	cell[this.index] = process
+
+	if cell, ok := this.data[name]; ok {
+		cell[this.index] = process
+	} else {
+		this.data[name] = list{this.index: process}
+	} // if
+
 	return Index{
 		name:  name,
 		index: this.index,
@@ -155,12 +176,15 @@ func (this *pubsub) sub(name string, process Process) Index {
 }
 
 // unsub 取消訂閱
-func (this *pubsub) unsub(index Index) {
+func (this *pubsub) unsub(index any) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	cell := this.find(index.name)
-	delete(cell, index.index)
+	if index_, ok := index.(Index); ok {
+		if cell, ok := this.data[index_.name]; ok {
+			delete(cell, index_.index)
+		} // if
+	} // if
 }
 
 // pub 發布
@@ -168,19 +192,9 @@ func (this *pubsub) pub(name string, param any) {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 
-	for _, itor := range this.find(name) {
-		itor.Do(param)
-	} // for
-}
-
-// find 尋找處理列表
-func (this *pubsub) find(name string) list {
-	result, ok := this.data[name]
-
-	if ok == false {
-		result = list{}
-		this.data[name] = result
+	if cell, ok := this.data[name]; ok {
+		for _, itor := range cell {
+			itor.Do(param)
+		} // for
 	} // if
-
-	return result
 }

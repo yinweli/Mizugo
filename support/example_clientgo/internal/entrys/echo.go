@@ -30,12 +30,12 @@ type Echo struct {
 
 // EchoConfig 設定資料
 type EchoConfig struct {
-	IP            string        // 位址
-	Port          string        // 埠號
-	Timeout       time.Duration // 逾期時間(秒)
-	Disconnect    bool          // 斷線旗標
-	Reconnect     bool          // 重連旗標
-	ReconnectTime time.Duration // 重連檢查時間
+	IP            string        `yaml:"ip"`            // 位址
+	Port          string        `yaml:"port"`          // 埠號
+	Timeout       time.Duration `yaml:"timeout"`       // 逾期時間(秒)
+	Disconnect    bool          `yaml:"disconnect"`    // 斷線旗標
+	Reconnect     bool          `yaml:"reconnect"`     // 重連旗標
+	ReconnectTime time.Duration `yaml:"reconnectTime"` // 重連檢查時間
 }
 
 // Initialize 初始化處理
@@ -124,10 +124,15 @@ func (this *Echo) bind(session nets.Sessioner) *nets.Bundle {
 	return entity.Bundle()
 
 Error:
+	if entity != nil {
+		entity.Finalize()
+		mizugos.Entitymgr().Del(entity.EntityID())
+		mizugos.Labelmgr().Erase(entity)
+	} // if
+
 	this.connect.Store(false)
-	_ = mizugos.Error(this.name).EndError(wrong)
-	mizugos.Entitymgr().Del(entity.EntityID())
 	session.Stop()
+	_ = mizugos.Error(this.name).EndError(wrong)
 	return nil
 }
 

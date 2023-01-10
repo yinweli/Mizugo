@@ -26,7 +26,7 @@ type Key struct {
 
 // Awake awake事件
 func (this *Key) Awake() error {
-	this.Entity().AddMessage(procs.MessageID(messages.MsgID_KeyReq), this.procMsgKeyRes)
+	this.Entity().AddMessage(procs.MessageID(messages.MsgID_KeyRes), this.procMsgKeyRes)
 	return nil
 }
 
@@ -62,7 +62,7 @@ func (this *Key) procMsgKeyRes(message any) {
 
 // sendMsgKeyReq 傳送要求密鑰
 func (this *Key) sendMsgKeyReq() {
-	msg, err := procs.ProtoDesMarshal(procs.MessageID(messages.MsgID_KeyRes), &messages.MsgKeyReq{})
+	msg, err := procs.ProtoDesMarshal(procs.MessageID(messages.MsgID_KeyReq), &messages.MsgKeyReq{})
 
 	if err != nil {
 		_ = mizugos.Error(this.name).Message("sendMsgKeyReq").EndError(err)
