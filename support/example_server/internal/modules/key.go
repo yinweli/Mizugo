@@ -5,7 +5,6 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/events"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/mizugos/utils"
 	"github.com/yinweli/Mizugo/support/example_server/internal/commons"
@@ -23,17 +22,15 @@ func NewKey() *Key {
 
 // Key 密鑰模組
 type Key struct {
-	*entitys.Module              // 模組資料
-	name            string       // 模組名稱
-	event           events.Index // 事件編號
-	key             string       // 密鑰
+	*entitys.Module        // 模組資料
+	name            string // 模組名稱
+	subID           string // 訂閱索引
+	key             string // 密鑰
 }
 
 // Awake awake事件
-func (this *Key) Awake() error {
-	var err error
-
-	if this.event, err = this.Entity().SubEvent(entitys.EventAfterSend, this.eventAfterSend); err != nil {
+func (this *Key) Awake() (err error) {
+	if this.subID, err = this.Entity().SubEvent(entitys.EventAfterSend, this.eventAfterSend); err != nil {
 		return fmt.Errorf("%v awake: %w", this.name, err)
 	} // if
 
@@ -52,7 +49,7 @@ func (this *Key) eventAfterSend(_ any) {
 	} // if
 
 	process.Key([]byte(this.key))
-	this.Entity().UnsubEvent(this.event)
+	this.Entity().UnsubEvent(this.subID)
 }
 
 // procMsgKeyReq 處理要求密鑰

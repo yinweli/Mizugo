@@ -6,7 +6,6 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/events"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/commons"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/defines"
@@ -24,17 +23,14 @@ func NewPing(disconnect bool) *Ping {
 
 // Ping Ping模組
 type Ping struct {
-	*entitys.Module              // 模組資料
-	name            string       // 模組名稱
-	disconnect      bool         // 斷線旗標
-	event           events.Index // 事件編號
+	*entitys.Module        // 模組資料
+	name            string // 模組名稱
+	disconnect      bool   // 斷線旗標
 }
 
 // Awake awake事件
 func (this *Ping) Awake() error {
-	var err error
-
-	if this.event, err = this.Entity().SubEvent(defines.EventCompleteKey, this.eventCompleteKey); err != nil {
+	if _, err := this.Entity().SubEvent(defines.EventCompleteKey, this.eventCompleteKey); err != nil {
 		return fmt.Errorf("%v awake: %w", this.name, err)
 	} // if
 

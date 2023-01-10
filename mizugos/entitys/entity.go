@@ -189,17 +189,17 @@ func (this *Entity) GetModule(moduleID ModuleID) Moduler {
 // ===== 事件功能 =====
 
 // SubEvent 訂閱事件
-func (this *Entity) SubEvent(name string, process events.Process) (index events.Index, err error) {
+func (this *Entity) SubEvent(name string, process events.Process) (subID string, err error) {
 	if name == EventFinalize {
-		return index, fmt.Errorf("entity sub event: %v: can't sub finalize", name)
+		return subID, fmt.Errorf("entity sub event: %v: can't sub finalize", name)
 	} // if
 
 	return this.eventmgr.Sub(name, process), nil
 }
 
 // UnsubEvent 取消訂閱事件
-func (this *Entity) UnsubEvent(index events.Index) {
-	this.eventmgr.Unsub(index)
+func (this *Entity) UnsubEvent(subID string) {
+	this.eventmgr.Unsub(subID)
 }
 
 // PubOnceEvent 發布單次事件

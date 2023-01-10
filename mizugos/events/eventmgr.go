@@ -1,10 +1,14 @@
 package events
 
 import (
+	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 )
+
+const separateSubID = "@" // 訂閱索引分隔字串
 
 // NewEventmgr 建立事件管理器
 func NewEventmgr(capacity int) *Eventmgr {
@@ -19,12 +23,6 @@ type Eventmgr struct {
 	notify chan notify // 通知通道
 	pubsub *pubsub     // 訂閱/發布資料
 	finish atomic.Bool // 結束旗標
-}
-
-// Index 事件索引
-type Index struct {
-	name  string // 事件名稱
-	index int64  // 事件編號
 }
 
 // Process 處理函式類型
@@ -53,7 +51,7 @@ func (this *Eventmgr) Initialize() {
 				if n.pub {
 					this.pubsub.pub(n.name, n.param)
 				} else {
-					this.pubsub.unsub(n.param)
+					this.pubsub.unsub(n.name)
 				} // if
 
 			default:
@@ -80,19 +78,19 @@ func (this *Eventmgr) Finalize() {
 }
 
 // Sub 訂閱事件
-func (this *Eventmgr) Sub(name string, process Process) Index {
+func (this *Eventmgr) Sub(name string, process Process) string {
 	return this.pubsub.sub(name, process)
 }
 
 // Unsub 取消訂閱事件
-func (this *Eventmgr) Unsub(index Index) {
+func (this *Eventmgr) Unsub(subID string) {
 	if this.finish.Load() {
 		return
 	} // if
 
 	this.notify <- notify{
-		pub:   false,
-		param: index,
+		pub:  false,
+		name: subID,
 	}
 }
 
@@ -148,41 +146,38 @@ func newPubsub() *pubsub {
 
 // pubsub 訂閱/發布資料
 type pubsub struct {
-	index int64           // 事件索引
-	data  map[string]list // 處理列表
-	lock  sync.RWMutex    // 執行緒鎖
+	serial int64           // 事件序號
+	data   map[string]list // 處理列表
+	lock   sync.RWMutex    // 執行緒鎖
 }
 
 // list 處理列表
 type list map[int64]Process
 
 // sub 訂閱
-func (this *pubsub) sub(name string, process Process) Index {
+func (this *pubsub) sub(name string, process Process) string {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	this.index++
+	this.serial++
 
 	if cell, ok := this.data[name]; ok {
-		cell[this.index] = process
+		cell[this.serial] = process
 	} else {
-		this.data[name] = list{this.index: process}
+		this.data[name] = list{this.serial: process}
 	} // if
 
-	return Index{
-		name:  name,
-		index: this.index,
-	}
+	return subIDEncode(name, this.serial)
 }
 
 // unsub 取消訂閱
-func (this *pubsub) unsub(index any) {
+func (this *pubsub) unsub(subID string) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	if index_, ok := index.(Index); ok {
-		if cell, ok := this.data[index_.name]; ok {
-			delete(cell, index_.index)
+	if name, serial, ok := subIDDecode(subID); ok {
+		if cell, ok := this.data[name]; ok {
+			delete(cell, serial)
 		} // if
 	} // if
 }
@@ -197,4 +192,24 @@ func (this *pubsub) pub(name string, param any) {
 			itor.Do(param)
 		} // for
 	} // if
+}
+
+// subIDEncode 編碼訂閱索引
+func subIDEncode(name string, serial int64) string {
+	builder := strings.Builder{}
+	builder.WriteString(name)
+	builder.WriteString(separateSubID)
+	builder.WriteString(strconv.FormatInt(serial, 10))
+	return builder.String()
+}
+
+// subIDDecode 解碼訂閱索引
+func subIDDecode(subID string) (name string, serial int64, ok bool) {
+	if before, after, ok := strings.Cut(subID, separateSubID); ok {
+		if serial, err := strconv.ParseInt(after, 10, 64); err == nil {
+			return before, serial, true
+		} // if
+	} // if
+
+	return "", 0, false
 }

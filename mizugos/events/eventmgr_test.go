@@ -49,15 +49,16 @@ func (this *SuiteEventmgr) TestPubOnce() {
 	name := "event once"
 	value := "value once"
 	valid := atomic.Bool{}
-	index := target.Sub(name, func(param any) {
+	subID := ""
+	subID = target.Sub(name, func(param any) {
 		valid.Store(param.(string) == value)
+		target.Unsub(subID)
 	})
 
 	target.PubOnce(name, value)
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), valid.Load())
 
-	target.Unsub(index)
 	target.Finalize()
 	target.PubOnce(name, value) // 測試在結束之後發布事件
 }
@@ -68,15 +69,16 @@ func (this *SuiteEventmgr) TestPubFixed() {
 	name := "event fixed"
 	value := "value fixed"
 	valid := atomic.Bool{}
-	index := target.Sub(name, func(param any) {
+	subID := ""
+	subID = target.Sub(name, func(param any) {
 		valid.Store(param.(string) == value)
+		target.Unsub(subID)
 	})
 
 	target.PubFixed(name, value, testdata.Timeout)
 	time.Sleep(testdata.Timeout * 2) // 多等一下讓定時事件發生
 	assert.True(this.T(), valid.Load())
 
-	target.Unsub(index)
 	target.Finalize()
 	target.PubFixed(name, value, testdata.Timeout) // 測試在結束之後發布事件
 }
@@ -86,7 +88,7 @@ func (this *SuiteEventmgr) TestPubsub() {
 	name := "pubsub"
 	value := "value"
 	count := 0
-	index := target.sub(name, func(param any) {
+	subID := target.sub(name, func(param any) {
 		if param.(string) == value {
 			count++
 		} // if
@@ -95,7 +97,19 @@ func (this *SuiteEventmgr) TestPubsub() {
 	target.pub(name, value)
 	assert.Equal(this.T(), 1, count)
 
-	target.unsub(index)
+	target.unsub(subID)
 	target.pub(name, value)
 	assert.Equal(this.T(), 1, count)
+}
+
+func (this *SuiteEventmgr) TestSubID() {
+	name1 := "subID"
+	serial1 := int64(1)
+	name2, serial2, ok := subIDDecode(subIDEncode(name1, serial1))
+	assert.True(this.T(), ok)
+	assert.Equal(this.T(), name1, name2)
+	assert.Equal(this.T(), serial1, serial2)
+
+	_, _, ok = subIDDecode("!?")
+	assert.False(this.T(), ok)
 }
