@@ -4,45 +4,50 @@ import (
 	"expvar"
 	"fmt"
 	"net/http"
+	"net/http/pprof"
 	"sync/atomic"
 )
 
-// NewMetricsmgr 建立統計管理器
+// 指標管理器, 其中包括兩部分
+//   效能指標(來自pprof)
+//   自訂指標或統計數據(來自expvar)
+// 如果想查看效能指標, 可以參考以下網址
+//   https://blog.csdn.net/skh2015java/article/details/102748222
+//   http://www.zyiz.net/tech/detail-112761.html
+//   https://www.iargs.cn/?p=62
+//   https://www.readfog.com/a/1635446409103773696
+// 如果想查看自訂指標或統計數據, 可以通過以下工具
+//   https://github.com/divan/expvarmon
+// 此工具同時也可以查看記憶體使用情況, 可使用以下參數
+//   -ports="http://網址:埠號"
+//   -i 間隔時間
+//   範例: expvarmon -ports="http://localhost:8080" -i 1s
+//   範例: expvarmon -ports="http://localhost:8080" -vars="...自訂指標..." -i 1s
+// 指標管理器同時還提供執行統計工具, 只要建立 Metricsmgr.NewRuntime(統計名稱) 就可以記錄特定區段的執行數據
+// 如果要用expvarmon查看執行數據, 可以添加以下參數
+//   假設執行數據的名稱為 'echo'
+//   -vars="time:echo.time,time(max):echo.time(max),time(avg):echo.time(avg),count:echo.count,count(1m):echo.count(1m),count(5m):echo.count(5m),count(10m):echo.count(10m),count(60m):echo.count(60m)"
+
+// NewMetricsmgr 建立指標管理器
 func NewMetricsmgr() *Metricsmgr {
 	return &Metricsmgr{}
 }
 
-// Metricsmgr 統計管理器
+// Metricsmgr 指標管理器
 type Metricsmgr struct {
 	stop   atomic.Bool  // 結束旗標
-	server *http.Server // 監控伺服器物件
+	server *http.Server // http伺服器物件
 }
 
-// Auth 認證資料
-type Auth struct {
-	Username string // 帳號
-	Password string // 密碼
-}
-
-// Initialize 初始化處理, 如果有提供auth資料, 則會為監控伺服器添加帳號密碼認證
-func (this *Metricsmgr) Initialize(port int, auth *Auth) {
+// Initialize 初始化處理
+func (this *Metricsmgr) Initialize(port int) {
 	handler := http.NewServeMux()
-
-	if auth != nil {
-		handler.Handle(pattern, func(next http.Handler) http.Handler {
-			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				if username, password, ok := r.BasicAuth(); ok == false || username != auth.Username || password != auth.Password {
-					w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
-					http.Error(w, "Unauthorized", http.StatusUnauthorized)
-					return
-				} // if
-
-				next.ServeHTTP(w, r)
-			})
-		}(expvar.Handler()))
-	} else {
-		handler.Handle(pattern, expvar.Handler())
-	} // if
+	handler.HandleFunc("/debug/pprof/", pprof.Index)
+	handler.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	handler.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	handler.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	handler.HandleFunc("/debug/pprof/trace", pprof.Trace)
+	handler.Handle("/debug/vars", expvar.Handler())
 
 	this.server = &http.Server{
 		Addr:              fmt.Sprintf(":%v", port),

@@ -1,15 +1,16 @@
 package nets
 
 import (
-	"fmt"
 	"sync"
-)
+	"time"
 
-// TODO: 還是要讓Listen可以被單獨刪除
+	"github.com/emirpasic/gods/sets/hashset"
+)
 
 // NewNetmgr 建立網路管理器
 func NewNetmgr() *Netmgr {
 	return &Netmgr{
+		connectmgr: newConnectmgr(),
 		listenmgr:  newListenmgr(),
 		sessionmgr: newSessionmgr(),
 	}
@@ -17,53 +18,61 @@ func NewNetmgr() *Netmgr {
 
 // Netmgr 網路管理器
 type Netmgr struct {
+	connectmgr *connectmgr // 連接管理器
 	listenmgr  *listenmgr  // 接聽管理器
 	sessionmgr *sessionmgr // 會話管理器
 }
 
 // Status 狀態資料
 type Status struct {
-	Listen  []string // 接聽列表
-	Session int      // 會話數量
+	Connect int // 連接數量
+	Listen  int // 接聽數量
+	Session int // 會話數量
 }
 
-// AddConnect 新增連接
-func (this *Netmgr) AddConnect(connecter Connecter, binder Binder) {
-	connecter.Connect(func(session Sessioner, err error) {
-		if err != nil {
-			binder.Error(fmt.Errorf("netmgr connect: %v: %w", connecter.Address(), err))
-			return
-		} // if
+// ConnectID 連接編號
+type ConnectID = int64
 
-		go session.Start(this.sessionmgr.add(session), binder)
-	})
+// ListenID 接聽編號
+type ListenID = int64
+
+// AddConnectTCP 新增連接(TCP)
+func (this *Netmgr) AddConnectTCP(ip, port string, timeout time.Duration, bind Bind, unbind Unbind, wrong Wrong) ConnectID {
+	connect := NewTCPConnect(ip, port, timeout)
+	connect.Connect(this.wrapperBind(bind), this.wrapperUnbind(unbind), wrong)
+	return this.connectmgr.add(connect)
 }
 
-// AddListen 新增接聽
-func (this *Netmgr) AddListen(listener Listener, binder Binder) {
-	this.listenmgr.add(listener)
-	listener.Listen(func(session Sessioner, err error) {
-		if err != nil {
-			binder.Error(fmt.Errorf("netmgr listen: %v: %w", listener.Address(), err))
-			return
-		} // if
-
-		go session.Start(this.sessionmgr.add(session), binder)
-	})
+// DelConnect 刪除連接
+func (this *Netmgr) DelConnect(connectID ConnectID) {
+	this.connectmgr.del(connectID)
 }
 
-// GetSession 取得會話
-func (this *Netmgr) GetSession(sessionID SessionID) Sessioner {
-	return this.sessionmgr.get(sessionID)
+// GetConnect 取得連接
+func (this *Netmgr) GetConnect(connectID ConnectID) Connecter {
+	return this.connectmgr.get(connectID)
 }
 
-// StopSession 停止會話
-func (this *Netmgr) StopSession(sessionID SessionID) {
-	this.sessionmgr.del(sessionID)
+// AddListenTCP 新增接聽(TCP)
+func (this *Netmgr) AddListenTCP(ip, port string, bind Bind, unbind Unbind, wrong Wrong) ListenID {
+	listen := NewTCPListen(ip, port)
+	listen.Listen(this.wrapperBind(bind), this.wrapperUnbind(unbind), wrong)
+	return this.listenmgr.add(listen)
+}
+
+// DelListen 刪除連接
+func (this *Netmgr) DelListen(listenID ListenID) {
+	this.listenmgr.del(listenID)
+}
+
+// GetListen 取得連接
+func (this *Netmgr) GetListen(listenID ListenID) Listener {
+	return this.listenmgr.get(listenID)
 }
 
 // Stop 停止網路
 func (this *Netmgr) Stop() {
+	this.connectmgr.clear()
 	this.listenmgr.clear()
 	this.sessionmgr.clear()
 }
@@ -71,28 +80,117 @@ func (this *Netmgr) Stop() {
 // Status 取得狀態資料
 func (this *Netmgr) Status() *Status {
 	return &Status{
-		Listen:  this.listenmgr.address(),
+		Connect: this.connectmgr.count(),
+		Listen:  this.listenmgr.count(),
 		Session: this.sessionmgr.count(),
 	}
 }
 
+// wrapperBind 包裝綁定處理
+func (this *Netmgr) wrapperBind(bind Bind) Bind {
+	return func(session Sessioner) *Bundle {
+		this.sessionmgr.add(session)
+		return bind.Do(session)
+	}
+}
+
+// wrapperUnbind 包裝解綁處理
+func (this *Netmgr) wrapperUnbind(unbind Unbind) Unbind {
+	return func(session Sessioner) {
+		unbind.Do(session)
+		this.sessionmgr.del(session)
+	}
+}
+
+// newConnectmgr 建立連接管理器
+func newConnectmgr() *connectmgr {
+	return &connectmgr{
+		data: map[ConnectID]Connecter{},
+	}
+}
+
+// connectmgr 連接管理器
+type connectmgr struct {
+	connectID ConnectID               // 連接編號
+	data      map[ConnectID]Connecter // 資料列表
+	lock      sync.RWMutex            // 執行緒鎖
+}
+
+// add 新增連接
+func (this *connectmgr) add(connect Connecter) ConnectID {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.connectID++
+	this.data[this.connectID] = connect
+	return this.connectID
+}
+
+// del 刪除連接
+func (this *connectmgr) del(connectID ConnectID) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	delete(this.data, connectID)
+}
+
+// clear 清除連接
+func (this *connectmgr) clear() {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.data = map[ConnectID]Connecter{}
+}
+
+// get 取得連接
+func (this *connectmgr) get(connectID ConnectID) Connecter {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+
+	return this.data[connectID]
+}
+
+// count 取得連接數量
+func (this *connectmgr) count() int {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+
+	return len(this.data)
+}
+
 // newListenmgr 建立接聽管理器
 func newListenmgr() *listenmgr {
-	return &listenmgr{}
+	return &listenmgr{
+		data: map[ListenID]Listener{},
+	}
 }
 
 // listenmgr 接聽管理器
 type listenmgr struct {
-	data []Listener   // 接聽列表
-	lock sync.RWMutex // 執行緒鎖
+	listenID ListenID              // 接聽編號
+	data     map[ListenID]Listener // 資料列表
+	lock     sync.RWMutex          // 執行緒鎖
 }
 
 // add 新增接聽
-func (this *listenmgr) add(listener Listener) {
+func (this *listenmgr) add(listen Listener) ListenID {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	this.data = append(this.data, listener)
+	this.listenID++
+	this.data[this.listenID] = listen
+	return this.listenID
+}
+
+// del 刪除接聽
+func (this *listenmgr) del(listenID ListenID) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	if listen, ok := this.data[listenID]; ok {
+		_ = listen.Stop()
+		delete(this.data, listenID)
+	} // if
 }
 
 // clear 清除接聽
@@ -104,56 +202,53 @@ func (this *listenmgr) clear() {
 		_ = itor.Stop()
 	} // for
 
-	this.data = []Listener{}
+	this.data = map[ListenID]Listener{}
 }
 
-// address 取得接聽位址列表
-func (this *listenmgr) address() []string {
+// get 取得接聽
+func (this *listenmgr) get(listenID ListenID) Listener {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 
-	result := []string{}
+	return this.data[listenID]
+}
 
-	for _, itor := range this.data {
-		result = append(result, itor.Address())
-	} // for
+// count 取得接聽數量
+func (this *listenmgr) count() int {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
 
-	return result
+	return len(this.data)
 }
 
 // newSessionmgr 建立會話管理器
 func newSessionmgr() *sessionmgr {
 	return &sessionmgr{
-		data: map[SessionID]Sessioner{},
+		data: hashset.New(),
 	}
 }
 
 // sessionmgr 會話管理器
 type sessionmgr struct {
-	sessionID SessionID               // 會話編號
-	data      map[SessionID]Sessioner // 會話列表
-	lock      sync.RWMutex            // 執行緒鎖
+	data *hashset.Set // 資料列表
+	lock sync.RWMutex // 執行緒鎖
 }
 
 // add 新增會話
-func (this *sessionmgr) add(session Sessioner) SessionID {
+func (this *sessionmgr) add(session Sessioner) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	this.sessionID++
-	this.data[this.sessionID] = session
-	return this.sessionID
+	this.data.Add(session)
 }
 
 // del 刪除會話
-func (this *sessionmgr) del(sessionID SessionID) {
+func (this *sessionmgr) del(session Sessioner) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	if session, ok := this.data[sessionID]; ok {
-		session.Stop()
-		delete(this.data, sessionID)
-	} // if
+	session.Stop()
+	this.data.Remove(session)
 }
 
 // clear 清除會話
@@ -161,19 +256,11 @@ func (this *sessionmgr) clear() {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	for _, itor := range this.data {
-		itor.Stop()
+	for _, itor := range this.data.Values() {
+		itor.(Sessioner).Stop()
 	} // for
 
-	this.data = map[SessionID]Sessioner{}
-}
-
-// get 取得會話
-func (this *sessionmgr) get(sessionID SessionID) Sessioner {
-	this.lock.RLock()
-	defer this.lock.RUnlock()
-
-	return this.data[sessionID]
+	this.data = hashset.New()
 }
 
 // count 取得會話數量
@@ -181,5 +268,5 @@ func (this *sessionmgr) count() int {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 
-	return len(this.data)
+	return this.data.Size()
 }

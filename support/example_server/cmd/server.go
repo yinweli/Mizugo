@@ -6,7 +6,7 @@ import (
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/support/example_server/internal/commons"
 	"github.com/yinweli/Mizugo/support/example_server/internal/defines"
-	"github.com/yinweli/Mizugo/support/example_server/internal/features"
+	"github.com/yinweli/Mizugo/support/example_server/internal/entrys"
 )
 
 func main() {
@@ -15,21 +15,26 @@ func main() {
 
 // initialize 初始化處理
 func initialize() error {
-	feature.logger = commons.NewLogger()
-	feature.metrics = commons.NewMetrics()
-	feature.echo = features.NewEcho()
+	server.logger = commons.NewLogger()
+	server.metrics = commons.NewMetrics()
+	server.echo = entrys.NewEcho()
+	server.ping = entrys.NewPing()
 
 	mizugos.Configmgr().AddPath(defines.ConfigPath)
 
-	if err := feature.logger.Initialize(); err != nil {
+	if err := server.logger.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := feature.metrics.Initialize(); err != nil {
+	if err := server.metrics.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := feature.echo.Initialize(); err != nil {
+	if err := server.echo.Initialize(); err != nil {
+		return fmt.Errorf("initialize: %w", err)
+	} // if
+
+	if err := server.ping.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
@@ -38,14 +43,16 @@ func initialize() error {
 
 // finalize 結束處理
 func finalize() {
-	feature.echo.Finalize()
-	feature.metrics.Finalize()
-	feature.logger.Finalize() // 日誌必須最後結束
+	server.echo.Finalize()
+	server.ping.Finalize()
+	server.metrics.Finalize()
+	server.logger.Finalize() // 日誌必須最後結束
 }
 
-// feature 功能資料
-var feature struct {
+// server 伺服器資料
+var server struct {
 	logger  *commons.Logger  // 日誌資料
 	metrics *commons.Metrics // 統計資料
-	echo    *features.Echo   // 回音入口
+	echo    *entrys.Echo     // 回音入口
+	ping    *entrys.Ping     // Ping入口
 }

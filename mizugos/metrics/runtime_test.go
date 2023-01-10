@@ -36,15 +36,16 @@ func (this *SuiteRuntime) TearDownTest() {
 
 func (this *SuiteRuntime) TestRuntime() {
 	metricsmgr := NewMetricsmgr()
-	metricsmgr.Initialize(8080, nil)
+	metricsmgr.Initialize(8080)
 
 	target := metricsmgr.NewRuntime("test")
 	assert.NotNil(this.T(), target)
 	assert.NotNil(this.T(), target.String())
+	target.Add(time.Second)
 	target.Rec()()
+	target.Add(time.Second)
 	target.Rec()()
-	target.Rec()()
-	target.Rec()()
+	target.Add(time.Second)
 	target.Rec()()
 	time.Sleep(time.Second * 2)
 	assert.NotNil(this.T(), target.String())
@@ -55,7 +56,7 @@ func (this *SuiteRuntime) TestRuntime() {
 
 func BenchmarkRuntimeRec(b *testing.B) {
 	metricsmgr := NewMetricsmgr()
-	metricsmgr.Initialize(8080, nil)
+	metricsmgr.Initialize(8080)
 
 	target := metricsmgr.NewRuntime(utils.RandString(10))
 
@@ -68,7 +69,7 @@ func BenchmarkRuntimeRec(b *testing.B) {
 
 func BenchmarkRuntimeString(b *testing.B) {
 	metricsmgr := NewMetricsmgr()
-	metricsmgr.Initialize(8080, nil)
+	metricsmgr.Initialize(8080)
 
 	target := metricsmgr.NewRuntime(utils.RandString(10))
 	target.Rec()()

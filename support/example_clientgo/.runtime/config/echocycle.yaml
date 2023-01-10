@@ -1,8 +1,0 @@
-echocycle:
-  ip:
-  port: 4001
-  timeout: 1s
-  message: echo strong
-  disconnect: true
-  reconnect: true
-  waittime: 100ms

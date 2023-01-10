@@ -9,168 +9,236 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-// newDoneTester 建立完成會話測試器
-func newDoneTester() *doneTester {
+// newInformTester 建立測試器
+func newTester(bundle, encode, decode, receive bool) *tester {
 	time.Sleep(testdata.Timeout) // 在這邊等待一下, 讓程序有機會完成
-	return &doneTester{}
-}
-
-// doneTester 完成會話測試器
-type doneTester struct {
-	lock    sync.Mutex
-	session Sessioner
-	err     error
-}
-
-func (this *doneTester) valid() bool {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	return this.session != nil && this.err == nil
-}
-
-func (this *doneTester) get() Sessioner {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	return this.session
-}
-
-func (this *doneTester) done(session Sessioner, err error) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	this.session = session
-	this.err = err
-}
-
-// newBindTester 建立綁定處理測試器
-func newBindTester(bind, encode, decode, receive bool) *bindTester {
-	time.Sleep(testdata.Timeout) // 在這邊等待一下, 讓程序有機會完成
-	return &bindTester{
-		bind:    bind,
+	return &tester{
+		bundle:  bundle,
 		encode:  encode,
 		decode:  decode,
 		receive: receive,
 	}
 }
 
-// bindTester 綁定處理測試器
-type bindTester struct {
-	bind    bool
-	encode  bool
-	decode  bool
-	receive bool
-	lock    sync.Mutex
-	session Sessioner
-	message any
-	err     error
+// tester 測試器
+type tester struct {
+	bundle         bool
+	encode         bool
+	decode         bool
+	receive        bool
+	err            error
+	bindCount      int
+	unbindCount    int
+	encodeCount    int
+	decodeCount    int
+	receiveCount   int
+	afterSendCount int
+	afterRecvCount int
+	session        Sessioner
+	message        any
+	lock           sync.RWMutex
 }
 
-func (this *bindTester) validSession() bool {
+func (this *tester) valid() bool {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+
+	return this.err == nil
+}
+
+func (this *tester) validBind() bool {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+
+	return this.bindCount > 0
+}
+
+func (this *tester) validUnbind() bool {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+
+	return this.unbindCount > 0
+}
+
+func (this *tester) validEncode() bool {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+
+	return this.encodeCount > 0
+}
+
+func (this *tester) validDecode() bool {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+
+	return this.decodeCount > 0
+}
+
+func (this *tester) validReceive() bool {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+
+	return this.receiveCount > 0
+}
+
+func (this *tester) validAfterSend() bool {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+
+	return this.afterSendCount > 0
+}
+
+func (this *tester) validAfterRecv() bool {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+
+	return this.afterRecvCount > 0
+}
+
+func (this *tester) validSession() bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.session != nil
 }
 
-func (this *bindTester) validMessage(message any) bool {
+func (this *tester) validMessage(message any) bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.message == message
 }
 
-func (this *bindTester) validError() bool {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	return this.err == nil
-}
-
-func (this *bindTester) get() Sessioner {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (this *tester) get() Sessioner {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
 
 	return this.session
 }
 
-func (this *bindTester) Bind(session Sessioner) (content Content, err error) {
+func (this *tester) bind(session Sessioner) *Bundle {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
+	this.bindCount++
 	this.session = session
 
-	if this.bind == false {
-		err = fmt.Errorf("bind failed")
+	if this.bundle {
+		return &Bundle{
+			Encode: func(message any) (packet []byte, err error) {
+				this.lock.Lock()
+				defer this.lock.Unlock()
+
+				this.encodeCount++
+
+				if this.encode {
+					return []byte(message.(string)), nil
+				} else {
+					return nil, fmt.Errorf("encode failed")
+				} // if
+			},
+			Decode: func(packet []byte) (message any, err error) {
+				this.lock.Lock()
+				defer this.lock.Unlock()
+
+				this.decodeCount++
+
+				if this.decode {
+					return string(packet), nil
+				} else {
+					return nil, fmt.Errorf("decode failed")
+				} // if
+			},
+			Receive: func(message any) error {
+				this.lock.Lock()
+				defer this.lock.Unlock()
+
+				this.receiveCount++
+
+				if this.receive {
+					this.message = message
+					return nil
+				} else {
+					this.message = nil
+					return fmt.Errorf("failed")
+				} // if
+			},
+			AfterSend: func() {
+				this.lock.Lock()
+				defer this.lock.Unlock()
+
+				this.afterSendCount++
+			},
+			AfterRecv: func() {
+				this.lock.Lock()
+				defer this.lock.Unlock()
+
+				this.afterRecvCount++
+			},
+		}
+	} else {
+		return nil
 	} // if
-
-	return Content{
-		Unbind: func() {
-			this.lock.Lock()
-			defer this.lock.Unlock()
-
-			this.session = nil
-			this.message = nil
-		},
-		Encode: func(message any) (packet []byte, err error) {
-			if this.encode == false {
-				return nil, fmt.Errorf("encode failed")
-			} // if
-
-			return []byte(message.(string)), nil
-		},
-		Decode: func(packet []byte) (message any, err error) {
-			if this.decode == false {
-				return nil, fmt.Errorf("decode failed")
-			} // if
-
-			return string(packet), nil
-		},
-		Receive: func(message any) error {
-			this.lock.Lock()
-			defer this.lock.Unlock()
-
-			if this.receive {
-				this.message = message
-				return nil
-			} else {
-				this.message = nil
-				return fmt.Errorf("failed")
-			} // if
-		},
-	}, err
 }
 
-func (this *bindTester) Error(err error) {
+func (this *tester) unbind(session Sessioner) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.unbindCount++
+	this.session = nil
+}
+
+func (this *tester) wrong(err error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.err = err
 }
 
-// emptySession 空會話
-type emptySession struct {
+// emptyConnect 空連接
+type emptyConnect struct {
+	value int // 為了防止建立空物件時使用到相同的指標, 所以弄個變數來影響他
 }
 
-func (this *emptySession) Start(_ SessionID, _ Binder) {
-	// do nothing...
+func (this *emptyConnect) Connect(_ Bind, _ Unbind, _ Wrong) {
+}
+
+func (this *emptyConnect) Address() string {
+	return ""
+}
+
+// emptyListen 空接聽
+type emptyListen struct {
+	value int // 為了防止建立空物件時使用到相同的指標, 所以弄個變數來影響他
+}
+
+func (this *emptyListen) Listen(_ Bind, _ Unbind, _ Wrong) {
+}
+
+func (this *emptyListen) Stop() error {
+	return nil
+}
+
+func (this *emptyListen) Address() string {
+	return ""
+}
+
+// emptySession 空會話
+type emptySession struct {
+	value int // 為了防止建立空物件時使用到相同的指標, 所以弄個變數來影響他
+}
+
+func (this *emptySession) Start(_ Bind, _ Unbind, _ Wrong) {
 }
 
 func (this *emptySession) Stop() {
-	// do nothing...
 }
 
 func (this *emptySession) StopWait() {
-	// do nothing...
 }
 
 func (this *emptySession) Send(_ any) {
-	// do nothing...
-}
-
-func (this *emptySession) SessionID() SessionID {
-	return 0
 }
 
 func (this *emptySession) RemoteAddr() net.Addr {
@@ -179,6 +247,13 @@ func (this *emptySession) RemoteAddr() net.Addr {
 
 func (this *emptySession) LocalAddr() net.Addr {
 	return &net.TCPAddr{}
+}
+
+func (this *emptySession) SetOwner(_ any) {
+}
+
+func (this *emptySession) GetOwner() any {
+	return nil
 }
 
 // host 端點資料

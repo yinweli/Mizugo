@@ -77,7 +77,12 @@ func DesDecrypt(key, input []byte) (result []byte, err error) {
 	return out, nil
 }
 
-// DesKeyRand 產生隨機Des密鑰
-func DesKeyRand() []byte {
+// RandDesKey 產生隨機Des密鑰
+func RandDesKey() []byte {
 	return []byte(RandString(DesKeySize))
+}
+
+// RandDesKeyString 產生隨機Des密鑰字串
+func RandDesKeyString() string {
+	return string(RandDesKey())
 }

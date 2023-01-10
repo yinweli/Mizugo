@@ -35,7 +35,7 @@ func (this *SuiteCrypt) TearDownTest() {
 
 func (this *SuiteCrypt) TestDesEncryptDecrypt() {
 	for size := 16; size <= 64; size++ {
-		key := DesKeyRand()
+		key := RandDesKey()
 		input := []byte(RandString(size))
 		crypt, err := DesEncrypt(key, input)
 		assert.Nil(this.T(), err)
@@ -60,14 +60,18 @@ func (this *SuiteCrypt) TestDesEncryptDecrypt() {
 	assert.NotNil(this.T(), err)
 }
 
-func (this *SuiteCrypt) TestDesKeyRand() {
-	key := DesKeyRand()
-	assert.NotNil(this.T(), key)
-	assert.Len(this.T(), key, DesKeySize)
+func (this *SuiteCrypt) TestRandDesKey() {
+	key1 := RandDesKey()
+	assert.NotNil(this.T(), key1)
+	assert.Len(this.T(), key1, DesKeySize)
+
+	key2 := RandDesKeyString()
+	assert.NotNil(this.T(), key2)
+	assert.Len(this.T(), key2, DesKeySize)
 }
 
 func BenchmarkDesEncrypt1024(b *testing.B) {
-	key := DesKeyRand()
+	key := RandDesKey()
 	input := []byte(RandString(1024))
 
 	for i := 0; i < b.N; i++ {
@@ -76,7 +80,7 @@ func BenchmarkDesEncrypt1024(b *testing.B) {
 }
 
 func BenchmarkDesEncrypt2048(b *testing.B) {
-	key := DesKeyRand()
+	key := RandDesKey()
 	input := []byte(RandString(2048))
 
 	for i := 0; i < b.N; i++ {
@@ -85,7 +89,7 @@ func BenchmarkDesEncrypt2048(b *testing.B) {
 }
 
 func BenchmarkDesEncrypt4096(b *testing.B) {
-	key := DesKeyRand()
+	key := RandDesKey()
 	input := []byte(RandString(4096))
 
 	for i := 0; i < b.N; i++ {
@@ -94,7 +98,7 @@ func BenchmarkDesEncrypt4096(b *testing.B) {
 }
 
 func BenchmarkDesDecrypt1024(b *testing.B) {
-	key := DesKeyRand()
+	key := RandDesKey()
 	input := []byte(RandString(1024))
 
 	for i := 0; i < b.N; i++ {
@@ -103,7 +107,7 @@ func BenchmarkDesDecrypt1024(b *testing.B) {
 }
 
 func BenchmarkDesDecrypt2048(b *testing.B) {
-	key := DesKeyRand()
+	key := RandDesKey()
 	input := []byte(RandString(2048))
 
 	for i := 0; i < b.N; i++ {
@@ -112,7 +116,7 @@ func BenchmarkDesDecrypt2048(b *testing.B) {
 }
 
 func BenchmarkDesDecrypt4096(b *testing.B) {
-	key := DesKeyRand()
+	key := RandDesKey()
 	input := []byte(RandString(4096))
 
 	for i := 0; i < b.N; i++ {

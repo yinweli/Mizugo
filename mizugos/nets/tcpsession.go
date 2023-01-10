@@ -7,7 +7,6 @@ import (
 	"io"
 	"net"
 	"sync"
-	"sync/atomic"
 )
 
 const tcpHeaderSize = 2               // 標頭長度
@@ -26,31 +25,41 @@ func NewTCPSession(conn net.Conn) *TCPSession {
 type TCPSession struct {
 	conn      net.Conn       // 連接物件
 	message   chan any       // 訊息通道
-	sessionID atomic.Int64   // 會話編號
-	binder    Binder         // 綁定物件
-	content   Content        // 內容物件
 	signal    sync.WaitGroup // 通知信號
+	encode    Encode         // 封包編碼處理
+	decode    Decode         // 封包解碼處理
+	receive   Receive        // 接收封包處理
+	afterSend AfterSend      // 傳送封包後處理
+	afterRecv AfterRecv      // 接收封包後處理
+	wrong     Wrong          // 錯誤處理
+	owner     any            // 擁有者
 }
 
-// Start 啟動會話, 當由連接器/接聽器獲得會話器之後, 需要啟動會話才可以傳送或接收封包; 若不是使用多執行緒啟動, 則會被阻塞在這裡直到會話結束
-func (this *TCPSession) Start(sessionID SessionID, binder Binder) {
-	this.sessionID.Store(sessionID)
-	content, err := binder.Bind(this)
+// Start 啟動會話
+func (this *TCPSession) Start(bind Bind, unbind Unbind, wrong Wrong) {
+	go func() {
+		bundle := bind.Do(this)
 
-	if err != nil { // bind錯誤, 直接結束
-		binder.Error(fmt.Errorf("tcp session start: %w", err))
-		return
-	} // if
+		if bundle == nil {
+			unbind.Do(this)
+			_ = this.conn.Close() // 沒有綁定資料, 就要結束了
+			return
+		} // if
 
-	this.binder = binder
-	this.content = content
-	this.signal.Add(2) // 等待接收循環與傳送循環結束
+		this.encode = bundle.Encode
+		this.decode = bundle.Decode
+		this.receive = bundle.Receive
+		this.afterSend = bundle.AfterSend
+		this.afterRecv = bundle.AfterRecv
+		this.wrong = wrong
+		this.signal.Add(2) // 等待接收循環與傳送循環結束
 
-	go this.recvLoop()
-	go this.sendLoop()
+		go this.recvLoop()
+		go this.sendLoop()
 
-	this.signal.Wait() // 如果接收循環與傳送循環結束, 就會繼續進行結束處理
-	this.content.Unbind()
+		this.signal.Wait() // 如果接收循環與傳送循環結束, 就會繼續進行結束處理
+		unbind.Do(this)
+	}()
 }
 
 // Stop 停止會話, 不會等待會話內部循環結束
@@ -71,11 +80,6 @@ func (this *TCPSession) Send(message any) {
 	} // if
 }
 
-// SessionID 取得會話編號
-func (this *TCPSession) SessionID() SessionID {
-	return this.sessionID.Load()
-}
-
 // RemoteAddr 取得遠端位址
 func (this *TCPSession) RemoteAddr() net.Addr {
 	return this.conn.RemoteAddr()
@@ -86,6 +90,16 @@ func (this *TCPSession) LocalAddr() net.Addr {
 	return this.conn.LocalAddr()
 }
 
+// SetOwner 設定擁有者
+func (this *TCPSession) SetOwner(owner any) {
+	this.owner = owner
+}
+
+// GetOwner 取得擁有者
+func (this *TCPSession) GetOwner() any {
+	return this.owner
+}
+
 // recvLoop 接收循環
 func (this *TCPSession) recvLoop() {
 	reader := bufio.NewReader(this.conn)
@@ -94,21 +108,23 @@ func (this *TCPSession) recvLoop() {
 		packet, err := this.recvPacket(reader)
 
 		if err != nil {
-			this.binder.Error(fmt.Errorf("tcp session recv loop: %w", err))
+			this.wrong.Do(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 
-		message, err := this.content.Decode(packet)
+		message, err := this.decode(packet)
 
 		if err != nil {
-			this.binder.Error(fmt.Errorf("tcp session recv loop: %w", err))
+			this.wrong.Do(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 
-		if err := this.content.Receive(message); err != nil {
-			this.binder.Error(fmt.Errorf("tcp session recv loop: %w", err))
+		if err := this.receive(message); err != nil {
+			this.wrong.Do(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
+
+		this.afterRecv.Do()
 	} // for
 
 	this.message <- nil // 以空訊息通知會話結束
@@ -147,17 +163,19 @@ func (this *TCPSession) sendLoop() {
 			break
 		} // if
 
-		packet, err := this.content.Encode(message)
+		packet, err := this.encode(message)
 
 		if err != nil {
-			this.binder.Error(fmt.Errorf("tcp session send loop: %w", err))
+			this.wrong.Do(fmt.Errorf("tcp session send loop: %w", err))
 			break
 		} // if
 
 		if err := this.sendPacket(this.conn, packet); err != nil {
-			this.binder.Error(fmt.Errorf("tcp session send loop: %w", err))
+			this.wrong.Do(fmt.Errorf("tcp session send loop: %w", err))
 			break
 		} // if
+
+		this.afterSend.Do()
 	} // for
 
 	_ = this.conn.Close()

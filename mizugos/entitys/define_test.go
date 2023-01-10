@@ -14,24 +14,16 @@ func newModuleTester(moduleID ModuleID) *moduleTester {
 // moduleTester 模組測試器
 type moduleTester struct {
 	*Module
-	awake   atomic.Int64
-	start   atomic.Int64
-	dispose atomic.Int64
-	update  atomic.Int64
+	awake atomic.Int64
+	start atomic.Int64
 }
 
-func (this *moduleTester) Awake() {
+func (this *moduleTester) Awake() error {
 	this.awake.Add(1)
+	return nil
 }
 
-func (this *moduleTester) Start() {
+func (this *moduleTester) Start() error {
 	this.start.Add(1)
-}
-
-func (this *moduleTester) Update() {
-	this.update.Add(1)
-}
-
-func (this *moduleTester) Dispose() {
-	this.dispose.Add(1)
+	return nil
 }

@@ -27,7 +27,6 @@ func NewEntity(entityID EntityID) *Entity {
 type Entity struct {
 	entityID  EntityID                        // 實體編號
 	enable    atomic.Bool                     // 啟用旗標
-	close     []func()                        // 結束處理列表
 	session   utils.SyncAttr[nets.Sessioner]  // 會話物件
 	process   utils.SyncAttr[procs.Processor] // 處理物件
 	modulemgr *Modulemgr                      // 模組管理器
@@ -38,56 +37,36 @@ type Entity struct {
 // ===== 基礎功能 =====
 
 // Initialize 初始化處理
-func (this *Entity) Initialize(closes ...func()) error {
+func (this *Entity) Initialize() error {
 	if this.enable.CompareAndSwap(false, true) == false {
 		return fmt.Errorf("entity initialize: already initialize")
 	} // if
 
-	this.close = closes
-	this.eventmgr.Sub(eventAwake, func(param any) {
-		if module, ok := param.(Awaker); ok {
-			module.Awake()
-		} // if
-	})
-	this.eventmgr.Sub(eventStart, func(param any) {
-		if module, ok := param.(Starter); ok {
-			module.Start()
-		} // if
-	})
-	this.eventmgr.Sub(eventUpdate, func(param any) {
-		if module, ok := param.(Updater); ok {
-			module.Update()
-		} // if
-	})
-	this.eventmgr.Sub(eventDispose, func(param any) {
-		if module, ok := param.(Disposer); ok {
-			module.Dispose()
-		} // if
-	})
-	this.eventmgr.Sub(eventFinalize, func(_ any) {
-		for _, itor := range this.close {
-			itor()
-		} // for
+	module := this.modulemgr.All()
 
+	for _, itor := range module {
+		if awaker, ok := itor.(Awaker); ok {
+			if err := awaker.Awake(); err != nil {
+				return fmt.Errorf("entity initialize: %w", err)
+			} // if
+		} // if
+	} // for
+
+	for _, itor := range module {
+		if starter, ok := itor.(Starter); ok {
+			if err := starter.Start(); err != nil {
+				return fmt.Errorf("entity initialize: %w", err)
+			} // if
+		} // if
+	} // for
+
+	this.eventmgr.Sub(EventFinalize, func(_ any) {
 		if session := this.session.Get(); session != nil {
 			session.Stop()
 		} // if
 	})
+	this.eventmgr.PubFixed(EventUpdate, nil, updateInterval)
 	this.eventmgr.Initialize()
-	module := this.modulemgr.All()
-
-	for _, itor := range module {
-		this.eventmgr.PubOnce(eventAwake, itor)
-	} // for
-
-	for _, itor := range module {
-		this.eventmgr.PubOnce(eventStart, itor)
-	} // for
-
-	for _, itor := range module {
-		this.eventmgr.PubFixed(eventUpdate, itor, updateInterval)
-	} // for
-
 	return nil
 }
 
@@ -97,12 +76,24 @@ func (this *Entity) Finalize() {
 		return
 	} // if
 
-	for _, itor := range this.modulemgr.All() {
-		this.eventmgr.PubOnce(eventDispose, itor)
-	} // for
-
-	this.eventmgr.PubOnce(eventFinalize, nil)
+	this.eventmgr.PubOnce(EventDispose, nil)
+	this.eventmgr.PubOnce(EventFinalize, nil)
 	this.eventmgr.Finalize()
+}
+
+// Bundle 取得綁定資料
+func (this *Entity) Bundle() *nets.Bundle {
+	return &nets.Bundle{
+		Encode:  this.process.Get().Encode,
+		Decode:  this.process.Get().Decode,
+		Receive: this.process.Get().Process,
+		AfterSend: func() {
+			this.eventmgr.PubOnce(EventAfterSend, nil)
+		},
+		AfterRecv: func() {
+			this.eventmgr.PubOnce(EventAfterRecv, nil)
+		},
+	}
 }
 
 // EntityID 取得實體編號
@@ -137,11 +128,6 @@ func (this *Entity) Send(message any) {
 	this.session.Get().Send(message)
 }
 
-// SessionID 取得會話編號
-func (this *Entity) SessionID() nets.SessionID {
-	return this.session.Get().SessionID()
-}
-
 // RemoteAddr 取得遠端位址
 func (this *Entity) RemoteAddr() net.Addr {
 	return this.session.Get().RemoteAddr()
@@ -154,8 +140,12 @@ func (this *Entity) LocalAddr() net.Addr {
 
 // ===== 處理功能 =====
 
-// SetProcess 設定處理物件
+// SetProcess 設定處理物件, 初始化完成後就不能設定處理物件
 func (this *Entity) SetProcess(process procs.Processor) error {
+	if this.enable.Load() {
+		return fmt.Errorf("entity set process: overdue")
+	} // if
+
 	this.process.Set(process)
 	return nil
 }
@@ -180,11 +170,11 @@ func (this *Entity) DelMessage(messageID procs.MessageID) {
 // AddModule 新增模組, 初始化完成後就不能新增模組
 func (this *Entity) AddModule(module Moduler) error {
 	if this.enable.Load() {
-		return fmt.Errorf("entity add module: overdue")
+		return fmt.Errorf("entity add module: overdue") // TODO: 如果模組介面有名稱, 錯誤時要顯示一下
 	} // if
 
 	if err := this.modulemgr.Add(module); err != nil {
-		return fmt.Errorf("entity add module: %w", err)
+		return fmt.Errorf("entity add module: %w", err) // TODO: 如果模組介面有名稱, 錯誤時要顯示一下
 	} // if
 
 	module.setup(this)
@@ -198,26 +188,18 @@ func (this *Entity) GetModule(moduleID ModuleID) Moduler {
 
 // ===== 事件功能 =====
 
-// SubEvent 訂閱事件, 初始化完成後就不能訂閱事件
-func (this *Entity) SubEvent(name string, process events.Process) error {
-	if this.enable.Load() {
-		return fmt.Errorf("entity sub event: overdue")
+// SubEvent 訂閱事件
+func (this *Entity) SubEvent(name string, process events.Process) (subID string, err error) {
+	if name == EventFinalize {
+		return subID, fmt.Errorf("entity sub event: %v: can't sub finalize", name)
 	} // if
 
-	for _, itor := range []string{
-		eventAwake,
-		eventStart,
-		eventUpdate,
-		eventDispose,
-		eventFinalize,
-	} {
-		if name == itor {
-			return fmt.Errorf("entity sub event: keyword")
-		} // if
-	} // for
+	return this.eventmgr.Sub(name, process), nil
+}
 
-	this.eventmgr.Sub(name, process)
-	return nil
+// UnsubEvent 取消訂閱事件
+func (this *Entity) UnsubEvent(subID string) {
+	this.eventmgr.Unsub(subID)
 }
 
 // PubOnceEvent 發布單次事件
@@ -225,7 +207,7 @@ func (this *Entity) PubOnceEvent(name string, param any) {
 	this.eventmgr.PubOnce(name, param)
 }
 
-// PubFixedEvent 發布定時事件, 回傳用於停止定時事件的控制物件
+// PubFixedEvent 發布定時事件; 請注意! 由於不能刪除定時事件, 因此發布定時事件前請多想想
 func (this *Entity) PubFixedEvent(name string, param any, interval time.Duration) {
 	this.eventmgr.PubFixed(name, param, interval)
 }

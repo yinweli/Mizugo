@@ -1,0 +1,8 @@
+pingc:
+  ip:
+  port: 10002
+  timeout: 1s
+  disconnect: true
+  reconnect: true
+  reconnecttime: 50ms
+  key: firstkey
