@@ -28,8 +28,8 @@ type Ping struct {
 // PingIncr 封包計數函式類型
 type PingIncr func() int64
 
-// Start start事件
-func (this *Ping) Start() error {
+// Awake awake事件
+func (this *Ping) Awake() error {
 	this.Entity().AddMessage(procs.MessageID(messages.MsgID_PingReq), this.procMsgPingReq)
 	return nil
 }

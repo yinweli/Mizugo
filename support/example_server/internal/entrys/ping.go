@@ -1,4 +1,4 @@
-package features
+package entrys
 
 import (
 	"fmt"
@@ -12,29 +12,30 @@ import (
 	"github.com/yinweli/Mizugo/support/example_server/internal/modules"
 )
 
-// NewEcho 建立回音入口資料
-func NewEcho() *Echo {
-	return &Echo{
-		name: "echos",
+// NewPing 建立Ping入口資料
+func NewPing() *Ping {
+	return &Ping{
+		name: "pings",
 	}
 }
 
-// Echo 回音入口資料
-type Echo struct {
+// Ping Ping入口資料
+type Ping struct {
 	name      string        // 入口名稱
-	config    EchoConfig    // 設定資料
+	config    PingConfig    // 設定資料
 	listenID  nets.ListenID // 接聽編號
-	echoCount atomic.Int64  // 封包計數
+	PingCount atomic.Int64  // 封包計數
 }
 
-// EchoConfig 設定資料
-type EchoConfig struct {
+// PingConfig 設定資料
+type PingConfig struct {
 	IP   string // 位址
 	Port string // 埠號
+	Key  string // 密鑰
 }
 
 // Initialize 初始化處理
-func (this *Echo) Initialize() error {
+func (this *Ping) Initialize() error {
 	mizugos.Info(this.name).Message("entry initialize").End()
 
 	if err := mizugos.Configmgr().ReadFile(this.name, defines.ConfigType); err != nil {
@@ -51,13 +52,13 @@ func (this *Echo) Initialize() error {
 }
 
 // Finalize 結束處理
-func (this *Echo) Finalize() {
+func (this *Ping) Finalize() {
 	mizugos.Info(this.name).Message("entry finalize").End()
 	mizugos.Netmgr().DelListen(this.listenID)
 }
 
 // bind 綁定處理
-func (this *Echo) bind(session nets.Sessioner) *nets.Bundle {
+func (this *Ping) bind(session nets.Sessioner) *nets.Bundle {
 	mizugos.Info(this.name).Message("bind").End()
 	entity := mizugos.Entitymgr().Add()
 
@@ -73,13 +74,18 @@ func (this *Echo) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.SetProcess(procs.NewSimple()); err != nil {
+	if err := entity.SetProcess(procs.NewProtoDes().Key([]byte(this.config.Key))); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
-	if err := entity.AddModule(modules.NewEcho(func() int64 {
-		return this.echoCount.Add(1)
+	if err := entity.AddModule(modules.NewKey()); err != nil {
+		wrong = fmt.Errorf("bind: %w", err)
+		goto Error
+	} // if
+
+	if err := entity.AddModule(modules.NewPing(func() int64 {
+		return this.PingCount.Add(1)
 	})); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
@@ -90,7 +96,7 @@ func (this *Echo) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	mizugos.Labelmgr().Add(entity, "label echo")
+	mizugos.Labelmgr().Add(entity, "label ping")
 	session.SetOwner(entity)
 	return entity.Bundle()
 
@@ -102,7 +108,7 @@ Error:
 }
 
 // unbind 解綁處理
-func (this *Echo) unbind(session nets.Sessioner) {
+func (this *Ping) unbind(session nets.Sessioner) {
 	if entity, ok := session.GetOwner().(*entitys.Entity); ok {
 		entity.Finalize()
 		mizugos.Entitymgr().Del(entity.EntityID())
@@ -111,6 +117,6 @@ func (this *Echo) unbind(session nets.Sessioner) {
 }
 
 // wrong 錯誤處理
-func (this *Echo) wrong(err error) {
+func (this *Ping) wrong(err error) {
 	_ = mizugos.Error(this.name).EndError(err)
 }

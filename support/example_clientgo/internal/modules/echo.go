@@ -15,9 +15,10 @@ import (
 // NewEcho 建立回音模組
 func NewEcho(disconnect bool) *Echo {
 	return &Echo{
-		Module:     entitys.NewModule(1),
-		name:       "module echo",
+		Module:     entitys.NewModule(defines.ModuleIDEcho),
+		name:       "module echo(client)",
 		disconnect: disconnect,
+		echo:       utils.RandString(defines.EchoCount),
 	}
 }
 
@@ -29,10 +30,14 @@ type Echo struct {
 	echo            string // 回音字串
 }
 
+// Awake awake事件
+func (this *Echo) Awake() error {
+	this.Entity().AddMessage(procs.MessageID(messages.MsgID_EchoRes), this.procMsgEchoRes)
+	return nil
+}
+
 // Start start事件
 func (this *Echo) Start() error {
-	this.echo = utils.RandString(defines.EchoCount)
-	this.Entity().AddMessage(procs.MessageID(messages.MsgID_EchoRes), this.procMsgEchoRes)
 	this.sendMsgEchoReq(this.echo)
 	return nil
 }
@@ -46,10 +51,12 @@ func (this *Echo) procMsgEchoRes(message any) {
 		return
 	} // if
 
-	commons.Echo.Add(time.Duration(time.Now().UnixNano() - msg.From.Time))
+	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
+	commons.Echo.Add(duration)
 	mizugos.Info(this.name).Message("procMsgEchoRes").
 		KV("equal", this.echo == msg.From.Echo).
 		KV("count", msg.Count).
+		KV("duration", duration).
 		End()
 
 	if this.disconnect {

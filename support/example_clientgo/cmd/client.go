@@ -6,7 +6,7 @@ import (
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/commons"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/defines"
-	"github.com/yinweli/Mizugo/support/example_clientgo/internal/features"
+	"github.com/yinweli/Mizugo/support/example_clientgo/internal/entrys"
 )
 
 func main() {
@@ -15,21 +15,26 @@ func main() {
 
 // initialize 初始化處理
 func initialize() error {
-	feature.logger = commons.NewLogger()
-	feature.metrics = commons.NewMetrics()
-	feature.echo = features.NewEcho()
+	client.logger = commons.NewLogger()
+	client.metrics = commons.NewMetrics()
+	client.echo = entrys.NewEcho()
+	client.ping = entrys.NewPing()
 
 	mizugos.Configmgr().AddPath(defines.ConfigPath)
 
-	if err := feature.logger.Initialize(); err != nil {
+	if err := client.logger.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := feature.metrics.Initialize(); err != nil {
+	if err := client.metrics.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := feature.echo.Initialize(); err != nil {
+	if err := client.echo.Initialize(); err != nil {
+		return fmt.Errorf("initialize: %w", err)
+	} // if
+
+	if err := client.ping.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
@@ -38,14 +43,16 @@ func initialize() error {
 
 // finalize 結束處理
 func finalize() {
-	feature.echo.Finalize()
-	feature.metrics.Finalize()
-	feature.logger.Finalize() // 日誌必須最後結束
+	client.echo.Finalize()
+	client.ping.Finalize()
+	client.metrics.Finalize()
+	client.logger.Finalize() // 日誌必須最後結束
 }
 
-// feature 功能資料
-var feature struct {
+// client 客戶端資料
+var client struct {
 	logger  *commons.Logger  // 日誌資料
 	metrics *commons.Metrics // 統計資料
-	echo    *features.Echo   // 回音入口
+	echo    *entrys.Echo     // 回音入口
+	ping    *entrys.Ping     // Ping入口
 }

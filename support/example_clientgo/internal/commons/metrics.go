@@ -39,6 +39,8 @@ func (this *Metrics) Initialize() error {
 	mizugos.Metricsmgr().Initialize(this.config.Port)
 	mizugos.Info(this.name).Message("initialize").KV("config", this.config).End()
 	Echo = mizugos.Metricsmgr().NewRuntime("echo")
+	Key = mizugos.Metricsmgr().NewRuntime("key")
+	Ping = mizugos.Metricsmgr().NewRuntime("ping")
 	return nil
 }
 
@@ -47,5 +49,6 @@ func (this *Metrics) Finalize() {
 	mizugos.Metricsmgr().Finalize()
 }
 
-// Echo 回音統計物件
-var Echo *metrics.Runtime
+var Echo *metrics.Runtime // 回音統計物件
+var Key *metrics.Runtime  // 密鑰統計物件
+var Ping *metrics.Runtime // Ping統計物件

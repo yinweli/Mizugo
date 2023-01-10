@@ -29,16 +29,16 @@ type Key struct {
 	key             string       // 密鑰
 }
 
-// Start start事件
-func (this *Key) Start() error {
+// Awake awake事件
+func (this *Key) Awake() error {
 	var err error
 
 	if this.event, err = this.Entity().SubEvent(entitys.EventAfterSend, this.eventAfterSend); err != nil {
-		return fmt.Errorf("%v start: %w", this.name, err)
+		return fmt.Errorf("%v awake: %w", this.name, err)
 	} // if
 
-	this.key = utils.RandDesKeyString()
 	this.Entity().AddMessage(procs.MessageID(messages.MsgID_KeyReq), this.procMsgKeyReq)
+	this.key = utils.RandDesKeyString()
 	return nil
 }
 
@@ -55,7 +55,7 @@ func (this *Key) eventAfterSend(_ any) {
 	this.Entity().UnsubEvent(this.event)
 }
 
-// procMsgPingReq 處理要求密鑰
+// procMsgKeyReq 處理要求密鑰
 func (this *Key) procMsgKeyReq(message any) {
 	rec := commons.Key.Rec()
 	defer rec()

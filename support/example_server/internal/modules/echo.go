@@ -28,8 +28,8 @@ type Echo struct {
 // EchoIncr 封包計數函式類型
 type EchoIncr func() int64
 
-// Start start事件
-func (this *Echo) Start() error {
+// Awake awake事件
+func (this *Echo) Awake() error {
 	this.Entity().AddMessage(procs.MessageID(messages.MsgID_EchoReq), this.procMsgEchoReq)
 	return nil
 }
