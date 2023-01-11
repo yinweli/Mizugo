@@ -46,60 +46,65 @@ func (this *SuiteEventmgr) TestEventmgr() {
 func (this *SuiteEventmgr) TestPubOnce() {
 	target := NewEventmgr(10)
 	target.Initialize()
-	name := "event once"
 	value := "value once"
 	valid := atomic.Bool{}
 	subID := ""
-	subID = target.Sub(name, func(param any) {
+	subID = target.Sub(value, func(param any) {
 		valid.Store(param.(string) == value)
 		target.Unsub(subID)
 	})
 
-	target.PubOnce(name, value)
+	target.PubOnce(value, value)
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), valid.Load())
 
 	target.Finalize()
-	target.PubOnce(name, value) // 測試在結束之後發布事件
+	target.PubOnce(value, value) // 測試在結束之後發布事件
+	target.Unsub("")             // 測試在結束之後取消訂閱
 }
 
 func (this *SuiteEventmgr) TestPubFixed() {
 	target := NewEventmgr(10)
 	target.Initialize()
-	name := "event fixed"
 	value := "value fixed"
 	valid := atomic.Bool{}
 	subID := ""
-	subID = target.Sub(name, func(param any) {
+	subID = target.Sub(value, func(param any) {
 		valid.Store(param.(string) == value)
 		target.Unsub(subID)
 	})
 
-	target.PubFixed(name, value, testdata.Timeout)
+	target.PubFixed(value, value, testdata.Timeout)
 	time.Sleep(testdata.Timeout * 2) // 多等一下讓定時事件發生
 	assert.True(this.T(), valid.Load())
 
 	target.Finalize()
-	target.PubFixed(name, value, testdata.Timeout) // 測試在結束之後發布事件
+	target.PubFixed(value, value, testdata.Timeout) // 測試在結束之後發布事件
+	target.Unsub("")                                // 測試在結束之後取消訂閱
 }
 
 func (this *SuiteEventmgr) TestPubsub() {
 	target := newPubsub()
-	name := "pubsub"
-	value := "value"
-	count := 0
-	subID := target.sub(name, func(param any) {
+	value := "value pubsub"
+	valid := 0
+	validFunc := func(param any) {
 		if param.(string) == value {
-			count++
+			valid++
 		} // if
-	})
+	}
+	subID1 := target.sub(value, validFunc)
+	subID2 := target.sub(value, validFunc)
 
-	target.pub(name, value)
-	assert.Equal(this.T(), 1, count)
+	target.pub(value, value)
+	assert.Equal(this.T(), 2, valid)
 
-	target.unsub(subID)
-	target.pub(name, value)
-	assert.Equal(this.T(), 1, count)
+	target.unsub(subID1)
+	target.pub(value, value)
+	assert.Equal(this.T(), 3, valid)
+
+	target.unsub(subID2)
+	target.pub(value, value)
+	assert.Equal(this.T(), 3, valid)
 }
 
 func (this *SuiteEventmgr) TestSubID() {

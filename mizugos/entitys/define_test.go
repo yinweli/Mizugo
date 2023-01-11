@@ -1,29 +1,44 @@
 package entitys
 
 import (
+	"fmt"
 	"sync/atomic"
 )
 
 // newModuleTester 建立模組測試器
-func newModuleTester(moduleID ModuleID) *moduleTester {
+func newModuleTester(awake, start bool, moduleID ModuleID) *moduleTester {
 	return &moduleTester{
+		awake:  awake,
+		start:  start,
 		Module: NewModule(moduleID),
 	}
 }
 
 // moduleTester 模組測試器
 type moduleTester struct {
+	awake bool
+	start bool
 	*Module
-	awake atomic.Int64
-	start atomic.Int64
+	awakeCount atomic.Int64
+	startCount atomic.Int64
 }
 
 func (this *moduleTester) Awake() error {
-	this.awake.Add(1)
-	return nil
+	this.awakeCount.Add(1)
+
+	if this.awake {
+		return nil
+	} else {
+		return fmt.Errorf("awake failed")
+	} // if
 }
 
 func (this *moduleTester) Start() error {
-	this.start.Add(1)
-	return nil
+	this.startCount.Add(1)
+
+	if this.start {
+		return nil
+	} else {
+		return fmt.Errorf("start failed")
+	} // if
 }

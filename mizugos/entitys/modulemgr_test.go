@@ -36,7 +36,7 @@ func (this *SuiteModulemgr) TestNewModulemgr() {
 }
 
 func (this *SuiteModulemgr) TestAdd() {
-	module := newModuleTester(ModuleID(1))
+	module := newModuleTester(true, true, ModuleID(1))
 	target := NewModulemgr()
 
 	assert.Nil(this.T(), target.Add(module))
@@ -45,7 +45,7 @@ func (this *SuiteModulemgr) TestAdd() {
 }
 
 func (this *SuiteModulemgr) TestDel() {
-	module := newModuleTester(ModuleID(1))
+	module := newModuleTester(true, true, ModuleID(1))
 	target := NewModulemgr()
 
 	assert.Nil(this.T(), target.Add(module))
@@ -55,7 +55,7 @@ func (this *SuiteModulemgr) TestDel() {
 }
 
 func (this *SuiteModulemgr) TestGet() {
-	module := newModuleTester(ModuleID(1))
+	module := newModuleTester(true, true, ModuleID(1))
 	target := NewModulemgr()
 
 	assert.Nil(this.T(), target.Add(module))
@@ -64,8 +64,8 @@ func (this *SuiteModulemgr) TestGet() {
 }
 
 func (this *SuiteModulemgr) TestAll() {
-	module1 := newModuleTester(ModuleID(1))
-	module2 := newModuleTester(ModuleID(2))
+	module1 := newModuleTester(true, true, ModuleID(1))
+	module2 := newModuleTester(true, true, ModuleID(2))
 	target := NewModulemgr()
 
 	assert.Nil(this.T(), target.Add(module1))
@@ -76,7 +76,7 @@ func (this *SuiteModulemgr) TestAll() {
 func (this *SuiteModulemgr) TestCount() {
 	target := NewModulemgr()
 
-	assert.Nil(this.T(), target.Add(newModuleTester(ModuleID(1))))
-	assert.Nil(this.T(), target.Add(newModuleTester(ModuleID(2))))
+	assert.Nil(this.T(), target.Add(newModuleTester(true, true, ModuleID(1))))
+	assert.Nil(this.T(), target.Add(newModuleTester(true, true, ModuleID(2))))
 	assert.Equal(this.T(), 2, target.Count())
 }

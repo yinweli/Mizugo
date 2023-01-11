@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/pprof"
+
+	"github.com/yinweli/Mizugo/mizugos/contexts"
 )
 
 // 指標管理器, 其中包括兩部分
@@ -30,7 +32,11 @@ import (
 
 // NewMetricsmgr 建立指標管理器
 func NewMetricsmgr() *Metricsmgr {
-	return &Metricsmgr{}
+	ctx, cancel := context.WithCancel(contexts.Ctx())
+	return &Metricsmgr{
+		ctx:    ctx,
+		cancel: cancel,
+	}
 }
 
 // Metricsmgr 指標管理器
@@ -42,8 +48,6 @@ type Metricsmgr struct {
 
 // Initialize 初始化處理
 func (this *Metricsmgr) Initialize(port int) {
-	this.ctx, this.cancel = context.WithCancel(context.Background())
-
 	handler := http.NewServeMux()
 	handler.HandleFunc("/debug/pprof/", pprof.Index)
 	handler.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
@@ -65,8 +69,11 @@ func (this *Metricsmgr) Initialize(port int) {
 
 // Finalize 結束處理
 func (this *Metricsmgr) Finalize() {
+	if this.server != nil {
+		_ = this.server.Close()
+	} // if
+
 	this.cancel()
-	_ = this.server.Close()
 }
 
 // NewInt 建立整數統計

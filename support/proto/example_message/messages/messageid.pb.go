@@ -20,7 +20,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// 訊息編號 // TODO: 訊息編號名稱看來不能跟訊息結構名稱一樣
+// 訊息編號
 type MsgID int32
 
 const (

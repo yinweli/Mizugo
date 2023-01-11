@@ -36,70 +36,65 @@ func (this *SuiteMizugo) TearDownTest() {
 
 func (this *SuiteMizugo) TestMizugo() {
 	name := "mizugo"
-	validInitialize := atomic.Bool{}
-	validFinalize := atomic.Bool{}
 
-	go Start(name,
-		func() error {
-			validInitialize.Store(true)
-			return nil
-		},
-		func() {
-			validFinalize.Store(true)
-		})
-
+	tester := &mizugoTester{}
 	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), validInitialize.Load())
+	go Start(name, tester.initialize, tester.finalize)
+	time.Sleep(testdata.Timeout)
 	assert.Equal(this.T(), name, Name())
 	assert.NotNil(this.T(), Configmgr())
+	assert.NotNil(this.T(), Metricsmgr())
+	assert.NotNil(this.T(), Logmgr())
 	assert.NotNil(this.T(), Netmgr())
 	assert.NotNil(this.T(), Entitymgr())
 	assert.NotNil(this.T(), Labelmgr())
-	assert.NotNil(this.T(), Logmgr())
-	assert.NotNil(this.T(), Metricsmgr())
 	assert.NotNil(this.T(), Debug(""))
 	assert.NotNil(this.T(), Info(""))
 	assert.NotNil(this.T(), Warn(""))
 	assert.NotNil(this.T(), Error(""))
+	go Close()
+	time.Sleep(testdata.Timeout)
+	assert.True(this.T(), tester.validInit())
+	assert.True(this.T(), tester.validFinal())
 
+	tester = &mizugoTester{}
+	time.Sleep(testdata.Timeout)
+	go Start(name, tester.initialize, tester.finalize)
+	go Start(name, tester.initialize, tester.finalize)
+	time.Sleep(testdata.Timeout)
+	go Close()
+	assert.True(this.T(), tester.validInit())
+	assert.True(this.T(), tester.validFinal())
+
+	time.Sleep(testdata.Timeout)
+	go Start("nil", nil, nil)
+	time.Sleep(testdata.Timeout)
 	go Close()
 
 	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), validFinalize.Load())
-}
-
-func (this *SuiteMizugo) TestTwice() {
-	valid := atomic.Int64{}
-
-	go Start("twice",
-		func() error {
-			valid.Add(1)
-			return nil
-		},
-		func() {
-		})
-
+	go Start("failed", func() error { return fmt.Errorf("failed") }, nil)
 	time.Sleep(testdata.Timeout)
-
-	go Start("!?",
-		func() error {
-			valid.Add(1)
-			return nil
-		},
-		func() {
-		})
-
-	time.Sleep(testdata.Timeout)
-	assert.Equal(this.T(), int64(1), valid.Load())
-
 	go Close()
 }
 
-func (this *SuiteMizugo) TestFailed() {
-	go Start("failed",
-		func() error {
-			return fmt.Errorf("failed")
-		},
-		func() {
-		})
+type mizugoTester struct {
+	initCount  atomic.Int64
+	finalCount atomic.Int64
+}
+
+func (this *mizugoTester) initialize() error {
+	this.initCount.Add(1)
+	return nil
+}
+
+func (this *mizugoTester) finalize() {
+	this.finalCount.Add(1)
+}
+
+func (this *mizugoTester) validInit() bool {
+	return this.initCount.Load() == 1
+}
+
+func (this *mizugoTester) validFinal() bool {
+	return this.finalCount.Load() == 1
 }
