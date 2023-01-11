@@ -6,8 +6,6 @@ import (
 	"sync/atomic"
 )
 
-// TODO: 研究一下怎麼改用context
-
 // NewTCPListen 建立tcp接聽器
 func NewTCPListen(ip, port string) *TCPListen {
 	return &TCPListen{
@@ -34,6 +32,8 @@ func (this *TCPListen) Listen(bind Bind, unbind Unbind, wrong Wrong) {
 	this.listen = listen
 
 	go func() {
+		// 由於listen.Accept的執行方式, 所以不需要用context方式監控終止方式
+
 		for {
 			conn, err := this.listen.Accept()
 

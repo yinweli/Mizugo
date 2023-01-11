@@ -56,7 +56,7 @@ func (this *Key) procMsgKeyRes(message any) {
 	} // if
 
 	process.Key([]byte(msg.Key))
-	this.Entity().PubOnceEvent(defines.EventCompleteKey, nil)
+	this.Entity().PublishOnce(defines.EventCompleteKey, nil)
 	mizugos.Info(this.name).Message("procMsgKeyRes receive").KV("key", msg.Key).End()
 }
 

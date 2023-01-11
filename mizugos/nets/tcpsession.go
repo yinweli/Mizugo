@@ -104,6 +104,8 @@ func (this *TCPSession) GetOwner() any {
 
 // recvLoop 接收循環
 func (this *TCPSession) recvLoop() {
+	// 由於recvLoop的執行方式, 所以不需要用context方式監控終止方式
+
 	reader := bufio.NewReader(this.conn)
 
 	for {
@@ -158,6 +160,8 @@ func (this *TCPSession) recvPacket(reader io.Reader) (packet []byte, err error) 
 
 // sendLoop 傳送循環
 func (this *TCPSession) sendLoop() {
+	// 由於sendLoop的執行方式, 所以不需要用context方式監控終止方式
+
 	for {
 		message := <-this.message
 

@@ -1,4 +1,5 @@
 pings:
   ip:
   port: 10002
+  event: 1000
   key: firstkey

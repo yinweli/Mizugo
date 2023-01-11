@@ -6,6 +6,7 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
+	"github.com/yinweli/Mizugo/mizugos/events"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/example_server/internal/defines"
@@ -29,9 +30,10 @@ type Ping struct {
 
 // PingConfig 設定資料
 type PingConfig struct {
-	IP   string `yaml:"ip"`   // 位址
-	Port string `yaml:"port"` // 埠號
-	Key  string `yaml:"key"`  // 密鑰
+	IP    string `yaml:"ip"`    // 位址
+	Port  string `yaml:"port"`  // 埠號
+	Event int    `yaml:"event"` // 事件通道大小
+	Key   string `yaml:"key"`   // 密鑰
 }
 
 // Initialize 初始化處理
@@ -69,12 +71,22 @@ func (this *Ping) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.SetSession(session); err != nil {
+	if err := entity.SetModulemgr(entitys.NewModulemgr()); err != nil {
+		wrong = fmt.Errorf("bind: %w", err)
+		goto Error
+	} // if
+
+	if err := entity.SetEventmgr(events.NewEventmgr(this.config.Event)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
 	if err := entity.SetProcess(procs.NewProtoDes().Key([]byte(this.config.Key))); err != nil {
+		wrong = fmt.Errorf("bind: %w", err)
+		goto Error
+	} // if
+
+	if err := entity.SetSession(session); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if

@@ -150,6 +150,23 @@ func (this *SuiteEntity) TestEvent() {
 	target.Finalize()
 }
 
+func (this *SuiteEntity) TestProcess() {
+	target := NewEntity(this.entityID)
+	assert.Nil(this.T(), target.SetModulemgr(NewModulemgr()))
+	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
+
+	process := procs.NewSimple()
+	assert.Nil(this.T(), target.SetProcess(process))
+	assert.Equal(this.T(), process, target.GetProcess())
+	assert.Nil(this.T(), target.Initialize())
+	assert.NotNil(this.T(), target.SetProcess(process))
+
+	target.AddMessage(procs.MessageID(1), func(message any) {})
+	target.DelMessage(procs.MessageID(1))
+
+	target.Finalize()
+}
+
 func (this *SuiteEntity) TestSession() {
 	target := NewEntity(this.entityID)
 	assert.Nil(this.T(), target.SetModulemgr(NewModulemgr()))
@@ -165,23 +182,6 @@ func (this *SuiteEntity) TestSession() {
 	target.Send("message")
 	assert.Equal(this.T(), session.RemoteAddr(), target.RemoteAddr())
 	assert.Equal(this.T(), session.LocalAddr(), target.LocalAddr())
-
-	target.Finalize()
-}
-
-func (this *SuiteEntity) TestProcess() {
-	target := NewEntity(this.entityID)
-	assert.Nil(this.T(), target.SetModulemgr(NewModulemgr()))
-	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
-
-	process := procs.NewSimple()
-	assert.Nil(this.T(), target.SetProcess(process))
-	assert.Equal(this.T(), process, target.GetProcess())
-	assert.Nil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.SetProcess(process))
-
-	target.AddMessage(procs.MessageID(1), func(message any) {})
-	target.DelMessage(procs.MessageID(1))
 
 	target.Finalize()
 }

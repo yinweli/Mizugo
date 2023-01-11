@@ -1,12 +1,15 @@
 package entrys
 
 import (
+	"context"
 	"fmt"
 	"sync/atomic"
 	"time"
 
 	"github.com/yinweli/Mizugo/mizugos"
+	"github.com/yinweli/Mizugo/mizugos/contexts"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
+	"github.com/yinweli/Mizugo/mizugos/events"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/defines"
@@ -15,23 +18,28 @@ import (
 
 // NewEcho 建立回音入口
 func NewEcho() *Echo {
+	ctx, cancel := context.WithCancel(contexts.Ctx())
 	return &Echo{
-		name: "echoc",
+		ctx:    ctx,
+		cancel: cancel,
+		name:   "echoc",
 	}
 }
 
 // Echo 回音入口
 type Echo struct {
-	name    string      // 入口名稱
-	config  EchoConfig  // 設定資料
-	finish  atomic.Bool // 關閉旗標
-	connect atomic.Bool // 連接旗標
+	ctx     context.Context    // ctx物件
+	cancel  context.CancelFunc // 取消物件
+	name    string             // 入口名稱
+	config  EchoConfig         // 設定資料
+	connect atomic.Bool        // 連接旗標
 }
 
 // EchoConfig 設定資料
 type EchoConfig struct {
 	IP            string        `yaml:"ip"`            // 位址
 	Port          string        `yaml:"port"`          // 埠號
+	Event         int           `yaml:"event"`         // 事件通道大小
 	Timeout       time.Duration `yaml:"timeout"`       // 逾期時間(秒)
 	Disconnect    bool          `yaml:"disconnect"`    // 斷線旗標
 	Reconnect     bool          `yaml:"reconnect"`     // 重連旗標
@@ -56,24 +64,20 @@ func (this *Echo) Initialize() error {
 		for {
 			select {
 			case <-timeout.C:
-				if this.finish.Load() == false {
-					if this.connect.Load() {
-						continue
-					} // if
-
-					if this.config.Reconnect == false {
-						continue
-					} // if
-
-					this.connect.Store(true)
-					mizugos.Netmgr().AddConnectTCP(this.config.IP, this.config.Port, this.config.Timeout, this.bind, this.unbind, this.wrong)
+				if this.connect.Load() {
+					continue
 				} // if
 
-			default:
-				if this.finish.Load() {
-					timeout.Stop()
-					return
+				if this.config.Reconnect == false {
+					continue
 				} // if
+
+				this.connect.Store(true)
+				mizugos.Netmgr().AddConnectTCP(this.config.IP, this.config.Port, this.config.Timeout, this.bind, this.unbind, this.wrong)
+
+			case <-this.ctx.Done():
+				timeout.Stop()
+				return
 			} // select
 		} // for
 	}()
@@ -85,6 +89,7 @@ func (this *Echo) Initialize() error {
 // Finalize 結束處理
 func (this *Echo) Finalize() {
 	mizugos.Info(this.name).Message("entry finalize").End()
+	this.cancel()
 }
 
 // bind 綁定處理
@@ -99,12 +104,22 @@ func (this *Echo) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.SetSession(session); err != nil {
+	if err := entity.SetModulemgr(entitys.NewModulemgr()); err != nil {
+		wrong = fmt.Errorf("bind: %w", err)
+		goto Error
+	} // if
+
+	if err := entity.SetEventmgr(events.NewEventmgr(this.config.Event)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
 	if err := entity.SetProcess(procs.NewSimple()); err != nil {
+		wrong = fmt.Errorf("bind: %w", err)
+		goto Error
+	} // if
+
+	if err := entity.SetSession(session); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if

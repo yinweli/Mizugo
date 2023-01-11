@@ -14,7 +14,7 @@ func Cancel() {
 	cancel()
 }
 
-func init() {
+func init() { //nolint
 	ctx, cancel = context.WithCancel(context.Background())
 }
 

@@ -28,8 +28,8 @@ type Entity struct {
 	enable           atomic.Bool                      // 啟用旗標
 	modulemgr        utils.SyncAttr[*Modulemgr]       // 模組管理器
 	eventmgr         utils.SyncAttr[*events.Eventmgr] // 事件管理器
-	session          utils.SyncAttr[nets.Sessioner]   // 會話物件
 	process          utils.SyncAttr[procs.Processor]  // 處理物件
+	session          utils.SyncAttr[nets.Sessioner]   // 會話物件
 }
 
 // ===== 基礎功能 =====
@@ -195,6 +195,33 @@ func (this *Entity) PublishFixed(name string, param any, interval time.Duration)
 	this.eventmgr.Get().PubFixed(name, param, interval)
 }
 
+// ===== 處理功能 =====
+
+// SetProcess 設定處理物件, 初始化完成後就不能設定處理物件
+func (this *Entity) SetProcess(process procs.Processor) error {
+	if this.enable.Load() {
+		return fmt.Errorf("entity set process: overdue")
+	} // if
+
+	this.process.Set(process)
+	return nil
+}
+
+// GetProcess 取得處理物件
+func (this *Entity) GetProcess() procs.Processor {
+	return this.process.Get()
+}
+
+// AddMessage 新增訊息處理
+func (this *Entity) AddMessage(messageID procs.MessageID, process procs.Process) {
+	this.process.Get().Add(messageID, process)
+}
+
+// DelMessage 刪除訊息處理
+func (this *Entity) DelMessage(messageID procs.MessageID) {
+	this.process.Get().Del(messageID)
+}
+
 // ===== 會話功能 =====
 
 // SetSession 設定會話物件, 初始化完成後就不能設定會話物件
@@ -225,31 +252,4 @@ func (this *Entity) RemoteAddr() net.Addr {
 // LocalAddr 取得本地位址
 func (this *Entity) LocalAddr() net.Addr {
 	return this.session.Get().LocalAddr()
-}
-
-// ===== 處理功能 =====
-
-// SetProcess 設定處理物件, 初始化完成後就不能設定處理物件
-func (this *Entity) SetProcess(process procs.Processor) error {
-	if this.enable.Load() {
-		return fmt.Errorf("entity set process: overdue")
-	} // if
-
-	this.process.Set(process)
-	return nil
-}
-
-// GetProcess 取得處理物件
-func (this *Entity) GetProcess() procs.Processor {
-	return this.process.Get()
-}
-
-// AddMessage 新增訊息處理
-func (this *Entity) AddMessage(messageID procs.MessageID, process procs.Process) {
-	this.process.Get().Add(messageID, process)
-}
-
-// DelMessage 刪除訊息處理
-func (this *Entity) DelMessage(messageID procs.MessageID) {
-	this.process.Get().Del(messageID)
 }
