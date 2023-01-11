@@ -2,10 +2,10 @@ package metrics
 
 import (
 	"context"
-	"fmt"
-	"strings"
 	"sync"
 	"time"
+
+	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
 // Runtime 執行統計
@@ -52,7 +52,7 @@ func (this *Runtime) Rec() func() {
 	}
 }
 
-// String 取得統計字串
+// String 取得字串
 func (this *Runtime) String() string {
 	this.lock.RLock()
 	stat := this.last
@@ -64,18 +64,16 @@ func (this *Runtime) String() string {
 		timeAvg = (stat.time / time.Duration(stat.count)).String()
 	} // if
 
-	builder := &strings.Builder{}
-	builder.WriteByte('{')
-	_, _ = fmt.Fprintf(builder, "\"time\": \"%v\", ", stat.time)
-	_, _ = fmt.Fprintf(builder, "\"time(max)\": \"%v\", ", stat.timeMax)
-	_, _ = fmt.Fprintf(builder, "\"time(avg)\": \"%v\", ", timeAvg)
-	_, _ = fmt.Fprintf(builder, "\"count\": %v, ", stat.count)
-	_, _ = fmt.Fprintf(builder, "\"count(1m)\": %v, ", stat.count1)
-	_, _ = fmt.Fprintf(builder, "\"count(5m)\": %v, ", stat.count5)
-	_, _ = fmt.Fprintf(builder, "\"count(10m)\": %v, ", stat.count10)
-	_, _ = fmt.Fprintf(builder, "\"count(60m)\": %v", stat.count60)
-	builder.WriteByte('}')
-	return builder.String()
+	return utils.ExpvarStr([]utils.ExpvarStat{
+		{Name: "time", Data: stat.time},
+		{Name: "time(max)", Data: stat.timeMax},
+		{Name: "time(avg)", Data: timeAvg},
+		{Name: "count", Data: stat.count},
+		{Name: "count(1m)", Data: stat.count1},
+		{Name: "count(5m)", Data: stat.count5},
+		{Name: "count(10m)", Data: stat.count10},
+		{Name: "count(60m)", Data: stat.count60},
+	})
 }
 
 // start 開始統計
