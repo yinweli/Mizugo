@@ -54,12 +54,12 @@ func (this *TCPSession) Start(bind Bind, unbind Unbind, wrong Wrong) {
 		this.afterSend = bundle.AfterSend
 		this.afterRecv = bundle.AfterRecv
 		this.wrong = wrong
-		this.signal.Add(2) // 等待接收循環與傳送循環結束
 
 		go this.recvLoop()
 		go this.sendLoop()
 
-		this.signal.Wait() // 如果接收循環與傳送循環結束, 就會繼續進行結束處理
+		this.signal.Add(2)
+		this.signal.Wait() // 等待接收循環與傳送循環結束, 如果接收循環與傳送循環結束, 就會繼續進行結束處理
 		unbind.Do(this)
 	}()
 }

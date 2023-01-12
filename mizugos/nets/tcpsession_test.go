@@ -6,7 +6,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"go.uber.org/goleak"
 
 	"github.com/yinweli/Mizugo/testdata"
 )
@@ -18,6 +17,7 @@ func TestTCPSession(t *testing.T) {
 type SuiteTCPSession struct {
 	suite.Suite
 	testdata.TestEnv
+	testdata.TestLeak
 	host    host
 	message string
 }
@@ -33,7 +33,7 @@ func (this *SuiteTCPSession) TearDownSuite() {
 }
 
 func (this *SuiteTCPSession) TearDownTest() {
-	goleak.VerifyNone(this.T())
+	this.GoLeak(this.T(), true)
 }
 
 func (this *SuiteTCPSession) TestNewTCPSession() {

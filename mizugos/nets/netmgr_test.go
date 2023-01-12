@@ -6,7 +6,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"go.uber.org/goleak"
 
 	"github.com/yinweli/Mizugo/testdata"
 )
@@ -18,6 +17,7 @@ func TestNetmgr(t *testing.T) {
 type SuiteNetmgr struct {
 	suite.Suite
 	testdata.TestEnv
+	testdata.TestLeak
 	hostGoogle host
 	hostLocal  host
 }
@@ -33,7 +33,7 @@ func (this *SuiteNetmgr) TearDownSuite() {
 }
 
 func (this *SuiteNetmgr) TearDownTest() {
-	goleak.VerifyNone(this.T())
+	this.GoLeak(this.T(), true)
 }
 
 func (this *SuiteNetmgr) TestNewNetmgr() {

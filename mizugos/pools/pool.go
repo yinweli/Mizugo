@@ -15,11 +15,12 @@ func Initialize(config Config) error {
 		return fmt.Errorf("pool initialize: already initialize")
 	} // if
 
+	ants.Release() // 關閉預設的執行緒池
 	p, err := ants.NewPool(config.Capacity,
-		ants.WithExpiryDuration(config.Expire),
+		ants.WithExpiryDuration(config.ExpireDuration),
 		ants.WithPreAlloc(config.PreAlloc),
-		ants.WithMaxBlockingTasks(config.MaxBlockingTasks),
 		ants.WithNonblocking(config.Nonblocking),
+		ants.WithMaxBlockingTasks(config.MaxBlocking),
 		ants.WithPanicHandler(config.PanicHandler),
 		ants.WithLogger(config.Logger),
 	)
@@ -29,19 +30,19 @@ func Initialize(config Config) error {
 	} // if
 
 	pool = p
-
-	if config.Logger != nil {
-		config.Logger.Printf("pool start: %v", config)
-	} // if
-
+	poolConfig = config
+	logf("pool start: %v", config)
 	return nil
 }
 
 // Finalize 結束處理
 func Finalize() {
+	logf("pool stop")
+
 	if pool != nil {
-		pool.Release()
+		_ = pool.ReleaseTimeout(poolConfig.ReleaseDuration)
 		pool = nil
+		poolConfig = Config{}
 	} // if
 }
 
@@ -70,25 +71,27 @@ func Status() Stat {
 	return Stat{}
 }
 
-// Config 選項資料
+// Config 設置資料
 type Config struct {
-	Capacity         int               // 執行緒池容量, 0表示容量無限
-	Expire           time.Duration     // 執行緒逾時時間, 詳細說明請查看ants.Options.ExpiryDuration的說明
-	PreAlloc         bool              // 是否預先分配記憶體, 詳細說明請查看ants.Options.PreAlloc的說明
-	MaxBlockingTasks int               // 最大阻塞執行緒數量, 0表示無限制, 詳細說明請查看ants.Options.MaxBlockingTasks的說明
-	Nonblocking      bool              // 是否在執行緒耗盡時阻塞Submit的執行, 詳細說明請查看ants.Options.Nonblocking的說明
-	PanicHandler     func(interface{}) // 失敗處理函式, 詳細說明請查看ants.Options.PanicHandler的說明
-	Logger           ants.Logger       // 日誌物件, 詳細說明請查看ants.Options.Logger的說明
+	Capacity        int               // 執行緒池容量, 0表示容量無限
+	ExpireDuration  time.Duration     // 執行緒逾時時間, 詳細說明請查看ants.Options.ExpiryDuration的說明
+	ReleaseDuration time.Duration     // 關閉逾時時間, 當執行緒池結束時會等待此時間後開始關閉
+	PreAlloc        bool              // 是否預先分配記憶體, 詳細說明請查看ants.Options.PreAlloc的說明
+	Nonblocking     bool              // 是否在執行緒耗盡時阻塞Submit的執行, 詳細說明請查看ants.Options.Nonblocking的說明
+	MaxBlocking     int               // 最大阻塞執行緒數量, 0表示無限制, 詳細說明請查看ants.Options.MaxBlockingTasks的說明
+	PanicHandler    func(interface{}) // 失敗處理函式, 詳細說明請查看ants.Options.PanicHandler的說明
+	Logger          ants.Logger       // 日誌物件, 詳細說明請查看ants.Options.Logger的說明
 }
 
 // String 取得字串
 func (this Config) String() string {
 	return utils.ExpvarStr([]utils.ExpvarStat{
 		{Name: "capacity", Data: this.Capacity},
-		{Name: "expire", Data: this.Expire},
+		{Name: "expireDuration", Data: this.ExpireDuration},
+		{Name: "releaseDuration", Data: this.ReleaseDuration},
 		{Name: "preAlloc", Data: this.PreAlloc},
-		{Name: "maxBlockingTasks", Data: this.MaxBlockingTasks},
 		{Name: "nonblocking", Data: this.Nonblocking},
+		{Name: "maxBlocking", Data: this.MaxBlocking},
 	})
 }
 
@@ -108,4 +111,12 @@ func (this Stat) String() string {
 	})
 }
 
-var pool *ants.Pool // 執行緒池
+// logf 記錄日誌
+func logf(format string, args ...interface{}) {
+	if poolConfig.Logger != nil {
+		poolConfig.Logger.Printf(format, args...)
+	} // if
+}
+
+var pool *ants.Pool   // 執行緒池
+var poolConfig Config // 執行緒池設置

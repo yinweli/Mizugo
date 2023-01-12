@@ -5,7 +5,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"go.uber.org/goleak"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/yinweli/Mizugo/mizugos/utils"
@@ -19,6 +18,7 @@ func TestProtoDes(t *testing.T) {
 type SuiteProtoDes struct {
 	suite.Suite
 	testdata.TestEnv
+	testdata.TestLeak
 }
 
 func (this *SuiteProtoDes) SetupSuite() {
@@ -30,7 +30,7 @@ func (this *SuiteProtoDes) TearDownSuite() {
 }
 
 func (this *SuiteProtoDes) TearDownTest() {
-	goleak.VerifyNone(this.T())
+	this.GoLeak(this.T(), true)
 }
 
 func (this *SuiteProtoDes) TestNewProtoDes() {

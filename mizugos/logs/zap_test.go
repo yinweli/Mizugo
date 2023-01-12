@@ -18,6 +18,7 @@ func TestZap(t *testing.T) {
 type SuiteZap struct {
 	suite.Suite
 	testdata.TestEnv
+	testdata.TestLeak
 }
 
 func (this *SuiteZap) SetupSuite() {
@@ -29,8 +30,7 @@ func (this *SuiteZap) TearDownSuite() {
 }
 
 func (this *SuiteZap) TearDownTest() {
-	// 由於不清楚(或是沒辦法)優雅的關閉zap的執行緒, 所以只好把這裡的執行緒洩漏檢查關閉
-	// goleak.VerifyNone(this.T())
+	this.GoLeak(this.T(), false) // 由於不清楚(或是沒辦法)優雅的關閉zap的執行緒, 所以只好把這裡的執行緒洩漏檢查關閉
 }
 
 func (this *SuiteZap) TestZapLogger() {

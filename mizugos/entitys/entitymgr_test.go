@@ -5,7 +5,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"go.uber.org/goleak"
 
 	"github.com/yinweli/Mizugo/testdata"
 )
@@ -17,6 +16,7 @@ func TestEntitymgr(t *testing.T) {
 type SuiteEntitymgr struct {
 	suite.Suite
 	testdata.TestEnv
+	testdata.TestLeak
 }
 
 func (this *SuiteEntitymgr) SetupSuite() {
@@ -28,7 +28,7 @@ func (this *SuiteEntitymgr) TearDownSuite() {
 }
 
 func (this *SuiteEntitymgr) TearDownTest() {
-	goleak.VerifyNone(this.T())
+	this.GoLeak(this.T(), true)
 }
 
 func (this *SuiteEntitymgr) TestNewEntitymgr() {

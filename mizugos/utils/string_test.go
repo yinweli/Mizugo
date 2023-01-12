@@ -6,7 +6,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"go.uber.org/goleak"
 
 	"github.com/yinweli/Mizugo/testdata"
 )
@@ -18,6 +17,7 @@ func TestString(t *testing.T) {
 type SuiteString struct {
 	suite.Suite
 	testdata.TestEnv
+	testdata.TestLeak
 }
 
 func (this *SuiteString) SetupSuite() {
@@ -29,7 +29,7 @@ func (this *SuiteString) TearDownSuite() {
 }
 
 func (this *SuiteString) TearDownTest() {
-	goleak.VerifyNone(this.T())
+	this.GoLeak(this.T(), true)
 }
 
 func (this *SuiteString) TestExpvarStr() {

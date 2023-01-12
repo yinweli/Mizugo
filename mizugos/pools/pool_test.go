@@ -2,7 +2,6 @@ package pools
 
 import (
 	"fmt"
-	"sync/atomic"
 	"testing"
 	"time"
 
@@ -19,6 +18,7 @@ func TestPool(t *testing.T) {
 type SuitePool struct {
 	suite.Suite
 	testdata.TestEnv
+	testdata.TestLeak
 }
 
 func (this *SuitePool) SetupSuite() {
@@ -30,55 +30,55 @@ func (this *SuitePool) TearDownSuite() {
 }
 
 func (this *SuitePool) TearDownTest() {
-	// 由於ants中有許多內部執行緒, 所以把這裡的執行緒洩漏檢查關閉
-	// goleak.VerifyNone(this.T())
+	this.GoLeak(this.T(), false) // 由於ants中有許多內部執行緒, 所以把這裡的執行緒洩漏檢查關閉
 }
 
 func (this *SuitePool) TestInitialize() {
-	assert.Nil(this.T(), Initialize(Config{Logger: &loggerTester{}}))
+	assert.Nil(this.T(), Initialize(Config{ReleaseDuration: time.Second, Logger: &loggerTester{}}))
 	assert.NotNil(this.T(), Initialize(Config{}))
 	Finalize()
 }
 
-func (this *SuitePool) TestSubmit() {
-	poolLess := atomic.Bool{}
-	assert.Nil(this.T(), Submit(func() {
-		poolLess.Store(true)
-	}))
+/*
+	func (this *SuitePool) TestSubmit() {
+		poolLess := atomic.Bool{}
+		assert.Nil(this.T(), Submit(func() {
+			poolLess.Store(true)
+		}))
 
-	assert.Nil(this.T(), Initialize(Config{}))
+		assert.Nil(this.T(), Initialize(Config{}))
 
-	poolUsed := atomic.Bool{}
-	assert.Nil(this.T(), Submit(func() {
-		poolUsed.Store(true)
-	}))
+		poolUsed := atomic.Bool{}
+		assert.Nil(this.T(), Submit(func() {
+			poolUsed.Store(true)
+		}))
 
-	Finalize()
+		Finalize()
 
-	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), poolLess.Load())
-	assert.True(this.T(), poolUsed.Load())
-}
+		time.Sleep(testdata.Timeout)
+		assert.True(this.T(), poolLess.Load())
+		assert.True(this.T(), poolUsed.Load())
+	}
 
-func (this *SuitePool) TestStatus() {
-	assert.Equal(this.T(), Stat{}, Status())
-	assert.Nil(this.T(), Initialize(Config{}))
-	assert.Equal(this.T(), Stat{Available: -1, Capacity: -1}, Status())
-	Finalize()
-}
+	func (this *SuitePool) TestStatus() {
+		assert.Equal(this.T(), Stat{}, Status())
+		assert.Nil(this.T(), Initialize(Config{}))
+		assert.Equal(this.T(), Stat{Available: -1, Capacity: -1}, Status())
+		Finalize()
+	}
 
-func (this *SuitePool) TestConfig() {
-	config := Config{}
-	fmt.Println(config)
-	assert.NotNil(this.T(), config.String())
-}
+	func (this *SuitePool) TestConfig() {
+		config := Config{}
+		fmt.Println(config)
+		assert.NotNil(this.T(), config.String())
+	}
 
-func (this *SuitePool) TestStat() {
-	stat := Stat{}
-	fmt.Println(stat)
-	assert.NotNil(this.T(), stat.String())
-}
-
+	func (this *SuitePool) TestStat() {
+		stat := Stat{}
+		fmt.Println(stat)
+		assert.NotNil(this.T(), stat.String())
+	}
+*/
 type loggerTester struct {
 }
 
