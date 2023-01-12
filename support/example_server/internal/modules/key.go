@@ -30,7 +30,7 @@ type Key struct {
 
 // Awake awake事件
 func (this *Key) Awake() (err error) {
-	if this.subID, err = this.Entity().SubEvent(entitys.EventAfterSend, this.eventAfterSend); err != nil {
+	if this.subID, err = this.Entity().Subscribe(entitys.EventAfterSend, this.eventAfterSend); err != nil {
 		return fmt.Errorf("%v awake: %w", this.name, err)
 	} // if
 
@@ -49,7 +49,7 @@ func (this *Key) eventAfterSend(_ any) {
 	} // if
 
 	process.Key([]byte(this.key))
-	this.Entity().UnsubEvent(this.subID)
+	this.Entity().Unsubscribe(this.subID)
 }
 
 // procMsgKeyReq 處理要求密鑰

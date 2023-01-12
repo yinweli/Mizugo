@@ -1,18 +1,24 @@
 package events
 
 import (
+	"context"
 	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/yinweli/Mizugo/mizugos/contexts"
 )
 
 const separateSubID = "@" // 訂閱索引分隔字串
 
 // NewEventmgr 建立事件管理器
 func NewEventmgr(capacity int) *Eventmgr {
+	ctx, cancel := context.WithCancel(contexts.Ctx())
 	return &Eventmgr{
+		ctx:    ctx,
+		cancel: cancel,
 		notify: make(chan notify, capacity),
 		pubsub: newPubsub(),
 	}
@@ -20,9 +26,11 @@ func NewEventmgr(capacity int) *Eventmgr {
 
 // Eventmgr 事件管理器
 type Eventmgr struct {
-	notify chan notify // 通知通道
-	pubsub *pubsub     // 訂閱/發布資料
-	finish atomic.Bool // 結束旗標
+	ctx    context.Context    // ctx物件
+	cancel context.CancelFunc // 取消物件
+	notify chan notify        // 通知通道
+	pubsub *pubsub            // 訂閱/發布資料
+	close  atomic.Bool        // 關閉旗標
 }
 
 // Process 處理函式類型
@@ -54,16 +62,12 @@ func (this *Eventmgr) Initialize() {
 					this.pubsub.unsub(n.name)
 				} // if
 
-			default:
-				if this.finish.Load() {
-					goto Finish
-				} // if
+			case <-this.ctx.Done():
+				goto Finish
 			} // select
 		} // for
 
 	Finish:
-		close(this.notify)
-
 		for n := range this.notify { // 把剩餘的事件都做完
 			if n.pub {
 				this.pubsub.pub(n.name, n.param)
@@ -74,7 +78,8 @@ func (this *Eventmgr) Initialize() {
 
 // Finalize 結束處理
 func (this *Eventmgr) Finalize() {
-	this.finish.Store(true)
+	this.close.Store(true)
+	this.cancel()
 }
 
 // Sub 訂閱事件
@@ -84,7 +89,7 @@ func (this *Eventmgr) Sub(name string, process Process) string {
 
 // Unsub 取消訂閱事件
 func (this *Eventmgr) Unsub(subID string) {
-	if this.finish.Load() {
+	if this.close.Load() {
 		return
 	} // if
 
@@ -96,7 +101,7 @@ func (this *Eventmgr) Unsub(subID string) {
 
 // PubOnce 發布單次事件
 func (this *Eventmgr) PubOnce(name string, param any) {
-	if this.finish.Load() {
+	if this.close.Load() {
 		return
 	} // if
 
@@ -107,9 +112,9 @@ func (this *Eventmgr) PubOnce(name string, param any) {
 	}
 }
 
-// PubFixed 發布定時事件
+// PubFixed 發布定時事件; 請注意! 由於不能刪除定時事件, 因此發布定時事件前請多想想
 func (this *Eventmgr) PubFixed(name string, param any, interval time.Duration) {
-	if this.finish.Load() {
+	if this.close.Load() {
 		return
 	} // if
 
@@ -119,19 +124,15 @@ func (this *Eventmgr) PubFixed(name string, param any, interval time.Duration) {
 		for {
 			select {
 			case <-timeout.C:
-				if this.finish.Load() == false {
-					this.notify <- notify{
-						pub:   true,
-						name:  name,
-						param: param,
-					}
-				} // if
+				this.notify <- notify{
+					pub:   true,
+					name:  name,
+					param: param,
+				}
 
-			default:
-				if this.finish.Load() {
-					timeout.Stop()
-					return
-				} // if
+			case <-this.ctx.Done():
+				timeout.Stop()
+				return
 			} // select
 		} // for
 	}()

@@ -6,6 +6,7 @@ require (
 	github.com/emirpasic/gods v1.18.1
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/otiai10/copy v1.9.0
+	github.com/panjf2000/ants/v2 v2.7.1
 	github.com/spf13/viper v1.14.0
 	github.com/stretchr/testify v1.8.1
 	go.uber.org/goleak v1.2.0

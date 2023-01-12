@@ -5,7 +5,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"go.uber.org/goleak"
 
 	"github.com/yinweli/Mizugo/testdata"
 )
@@ -17,6 +16,7 @@ func TestSyncAttr(t *testing.T) {
 type SuiteSyncAttr struct {
 	suite.Suite
 	testdata.TestEnv
+	testdata.TestLeak
 }
 
 func (this *SuiteSyncAttr) SetupSuite() {
@@ -28,7 +28,7 @@ func (this *SuiteSyncAttr) TearDownSuite() {
 }
 
 func (this *SuiteSyncAttr) TearDownTest() {
-	goleak.VerifyNone(this.T())
+	this.GoLeak(this.T(), true)
 }
 
 func (this *SuiteSyncAttr) TestSetGet() {

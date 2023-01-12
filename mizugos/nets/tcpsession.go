@@ -9,6 +9,8 @@ import (
 	"sync"
 )
 
+// TODO: 研究一下怎麼改用context
+
 const tcpHeaderSize = 2               // 標頭長度
 const tcpPacketSize = int(^uint16(0)) // 封包長度
 const tcpMessageSize = 1000           // 訊息通道大小設為1000, 避免因為爆滿而卡住
@@ -52,12 +54,12 @@ func (this *TCPSession) Start(bind Bind, unbind Unbind, wrong Wrong) {
 		this.afterSend = bundle.AfterSend
 		this.afterRecv = bundle.AfterRecv
 		this.wrong = wrong
-		this.signal.Add(2) // 等待接收循環與傳送循環結束
 
 		go this.recvLoop()
 		go this.sendLoop()
 
-		this.signal.Wait() // 如果接收循環與傳送循環結束, 就會繼續進行結束處理
+		this.signal.Add(2)
+		this.signal.Wait() // 等待接收循環與傳送循環結束, 如果接收循環與傳送循環結束, 就會繼續進行結束處理
 		unbind.Do(this)
 	}()
 }
@@ -102,6 +104,8 @@ func (this *TCPSession) GetOwner() any {
 
 // recvLoop 接收循環
 func (this *TCPSession) recvLoop() {
+	// 由於recvLoop的執行方式, 所以不需要用context方式監控終止方式
+
 	reader := bufio.NewReader(this.conn)
 
 	for {
@@ -156,6 +160,8 @@ func (this *TCPSession) recvPacket(reader io.Reader) (packet []byte, err error) 
 
 // sendLoop 傳送循環
 func (this *TCPSession) sendLoop() {
+	// 由於sendLoop的執行方式, 所以不需要用context方式監控終止方式
+
 	for {
 		message := <-this.message
 

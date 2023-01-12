@@ -1,12 +1,15 @@
 package entrys
 
 import (
+	"context"
 	"fmt"
 	"sync/atomic"
 	"time"
 
 	"github.com/yinweli/Mizugo/mizugos"
+	"github.com/yinweli/Mizugo/mizugos/contexts"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
+	"github.com/yinweli/Mizugo/mizugos/events"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/defines"
@@ -15,23 +18,28 @@ import (
 
 // NewPing 建立Ping入口資料
 func NewPing() *Ping {
+	ctx, cancel := context.WithCancel(contexts.Ctx())
 	return &Ping{
-		name: "pingc",
+		ctx:    ctx,
+		cancel: cancel,
+		name:   "pingc",
 	}
 }
 
 // Ping Ping入口資料
 type Ping struct {
-	name    string      // 入口名稱
-	config  PingConfig  // 設定資料
-	finish  atomic.Bool // 關閉旗標
-	connect atomic.Bool // 連接旗標
+	ctx     context.Context    // ctx物件
+	cancel  context.CancelFunc // 取消物件
+	name    string             // 入口名稱
+	config  PingConfig         // 設定資料
+	connect atomic.Bool        // 連接旗標
 }
 
 // PingConfig 設定資料
 type PingConfig struct {
 	IP            string        `yaml:"ip"`            // 位址
 	Port          string        `yaml:"port"`          // 埠號
+	Event         int           `yaml:"event"`         // 事件通道大小
 	Timeout       time.Duration `yaml:"timeout"`       // 逾期時間(秒)
 	Disconnect    bool          `yaml:"disconnect"`    // 斷線旗標
 	Reconnect     bool          `yaml:"reconnect"`     // 重連旗標
@@ -57,24 +65,20 @@ func (this *Ping) Initialize() error {
 		for {
 			select {
 			case <-timeout.C:
-				if this.finish.Load() == false {
-					if this.connect.Load() {
-						continue
-					} // if
-
-					if this.config.Reconnect == false {
-						continue
-					} // if
-
-					this.connect.Store(true)
-					mizugos.Netmgr().AddConnectTCP(this.config.IP, this.config.Port, this.config.Timeout, this.bind, this.unbind, this.wrong)
+				if this.connect.Load() {
+					continue
 				} // if
 
-			default:
-				if this.finish.Load() {
-					timeout.Stop()
-					return
+				if this.config.Reconnect == false {
+					continue
 				} // if
+
+				this.connect.Store(true)
+				mizugos.Netmgr().AddConnectTCP(this.config.IP, this.config.Port, this.config.Timeout, this.bind, this.unbind, this.wrong)
+
+			case <-this.ctx.Done():
+				timeout.Stop()
+				return
 			} // select
 		} // for
 	}()
@@ -86,6 +90,7 @@ func (this *Ping) Initialize() error {
 // Finalize 結束處理
 func (this *Ping) Finalize() {
 	mizugos.Info(this.name).Message("entry finalize").End()
+	this.cancel()
 }
 
 // bind 綁定處理
@@ -100,12 +105,22 @@ func (this *Ping) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.SetSession(session); err != nil {
+	if err := entity.SetModulemgr(entitys.NewModulemgr()); err != nil {
+		wrong = fmt.Errorf("bind: %w", err)
+		goto Error
+	} // if
+
+	if err := entity.SetEventmgr(events.NewEventmgr(this.config.Event)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
 	if err := entity.SetProcess(procs.NewProtoDes().Key([]byte(this.config.Key))); err != nil {
+		wrong = fmt.Errorf("bind: %w", err)
+		goto Error
+	} // if
+
+	if err := entity.SetSession(session); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if

@@ -8,24 +8,6 @@ import (
 	copyfolder "github.com/otiai10/copy"
 )
 
-func init() {
-	_, file, _, ok := runtime.Caller(0)
-
-	if ok == false {
-		panic("get rootpath failed")
-	} // if
-
-	rootpath = filepath.Dir(file)
-	envpath = filepath.Join(rootpath, "env")
-
-	// 如果env資料夾不存在, 就建立一個, 免得後測試測試時拋出錯誤
-	if _, err := os.Stat(envpath); os.IsNotExist(err) {
-		if err = os.MkdirAll(envpath, os.ModePerm); err != nil {
-			panic(err)
-		} // if
-	} // if
-}
-
 // TestEnv 測試環境
 type TestEnv struct {
 	original string // 原始路徑
@@ -66,6 +48,24 @@ func (this *TestEnv) Restore() {
 
 	if err := os.RemoveAll(this.workpath); err != nil {
 		panic(err)
+	} // if
+}
+
+func init() {
+	_, file, _, ok := runtime.Caller(0)
+
+	if ok == false {
+		panic("get rootpath failed")
+	} // if
+
+	rootpath = filepath.Dir(file)
+	envpath = filepath.Join(rootpath, "env")
+
+	// 如果env資料夾不存在, 就建立一個, 免得後測試測試時拋出錯誤
+	if _, err := os.Stat(envpath); os.IsNotExist(err) {
+		if err = os.MkdirAll(envpath, os.ModePerm); err != nil {
+			panic(err)
+		} // if
 	} // if
 }
 

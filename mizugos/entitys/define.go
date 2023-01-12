@@ -4,7 +4,6 @@ import (
 	"time"
 )
 
-const eventSize = 1000             // 事件通道大小設為1000, 避免因為爆滿而卡住
 const updateInterval = time.Second // update事件間隔時間
 
 // 預設事件名稱

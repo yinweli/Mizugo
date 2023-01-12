@@ -1,7 +1,8 @@
 echoc:
   ip:
   port: 10001
+  event: 1000
   timeout: 1s
   disconnect: true
   reconnect: true
-  reconnecttime: 50ms
+  reconnecttime: 20ms

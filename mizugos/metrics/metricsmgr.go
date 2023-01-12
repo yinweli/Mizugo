@@ -1,11 +1,13 @@
 package metrics
 
 import (
+	"context"
 	"expvar"
 	"fmt"
 	"net/http"
 	"net/http/pprof"
-	"sync/atomic"
+
+	"github.com/yinweli/Mizugo/mizugos/contexts"
 )
 
 // 指標管理器, 其中包括兩部分
@@ -30,13 +32,18 @@ import (
 
 // NewMetricsmgr 建立指標管理器
 func NewMetricsmgr() *Metricsmgr {
-	return &Metricsmgr{}
+	ctx, cancel := context.WithCancel(contexts.Ctx())
+	return &Metricsmgr{
+		ctx:    ctx,
+		cancel: cancel,
+	}
 }
 
 // Metricsmgr 指標管理器
 type Metricsmgr struct {
-	stop   atomic.Bool  // 結束旗標
-	server *http.Server // http伺服器物件
+	ctx    context.Context    // ctx物件
+	cancel context.CancelFunc // 取消物件
+	server *http.Server       // http伺服器物件
 }
 
 // Initialize 初始化處理
@@ -62,8 +69,11 @@ func (this *Metricsmgr) Initialize(port int) {
 
 // Finalize 結束處理
 func (this *Metricsmgr) Finalize() {
-	this.stop.Store(true)
-	_ = this.server.Close()
+	if this.server != nil {
+		_ = this.server.Close()
+	} // if
+
+	this.cancel()
 }
 
 // NewInt 建立整數統計
@@ -88,12 +98,8 @@ func (this *Metricsmgr) NewMap(name string) *expvar.Map {
 
 // NewRuntime 建立執行統計
 func (this *Metricsmgr) NewRuntime(name string) *Runtime {
-	v := &Runtime{
-		finish: func() bool {
-			return this.stop.Load()
-		},
-	}
-	v.start()
+	v := &Runtime{}
+	v.start(this.ctx)
 	expvar.Publish(name, v)
 	return v
 }

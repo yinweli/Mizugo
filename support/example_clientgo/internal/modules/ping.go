@@ -30,7 +30,7 @@ type Ping struct {
 
 // Awake awake事件
 func (this *Ping) Awake() error {
-	if _, err := this.Entity().SubEvent(defines.EventCompleteKey, this.eventCompleteKey); err != nil {
+	if _, err := this.Entity().Subscribe(defines.EventCompleteKey, this.eventCompleteKey); err != nil {
 		return fmt.Errorf("%v awake: %w", this.name, err)
 	} // if
 

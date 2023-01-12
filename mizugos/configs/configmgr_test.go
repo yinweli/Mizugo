@@ -8,7 +8,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"go.uber.org/goleak"
 
 	"github.com/yinweli/Mizugo/testdata"
 )
@@ -20,6 +19,7 @@ func TestConfigmgr(t *testing.T) {
 type SuiteConfigmgr struct {
 	suite.Suite
 	testdata.TestEnv
+	testdata.TestLeak
 	name1   string
 	name2   string
 	value1  string
@@ -53,7 +53,7 @@ func (this *SuiteConfigmgr) TearDownSuite() {
 }
 
 func (this *SuiteConfigmgr) TearDownTest() {
-	goleak.VerifyNone(this.T())
+	this.GoLeak(this.T(), true)
 }
 
 func (this *SuiteConfigmgr) TestNewConfigmgr() {
