@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"sync"
-	"sync/atomic"
 
 	"github.com/yinweli/Mizugo/mizugos/configs"
 	"github.com/yinweli/Mizugo/mizugos/contexts"
@@ -37,12 +36,8 @@ func (this Finalize) Do() {
 	} // if
 }
 
-// Start 啟動伺服器, 為了讓程式持續執行, 此函式不能用執行緒執行
+// Start 啟動伺服器, 為了讓程式持續執行, 此函式不能用執行緒執行; 也請不要執行此函式兩次
 func Start(name string, initialize Initialize, finalize Finalize) {
-	if server.start.CompareAndSwap(false, true) == false {
-		return
-	} // if
-
 	server.lock.Lock()
 	server.name = name
 	server.ctx, server.cancel = context.WithCancel(contexts.Ctx())
@@ -82,12 +77,11 @@ Finalize: // 結束處理
 	server.logmgr = nil
 	server.metricsmgr = nil
 	server.lock.Unlock()
-	server.start.Store(false)
 	contexts.Cancel() // 用來保證由contexts.Ctx()衍生出來的執行緒最後都能被終止, 避免goroutine洩漏
 }
 
-// Close 關閉伺服器
-func Close() {
+// Stop 關閉伺服器
+func Stop() {
 	server.lock.RLock()
 	defer server.lock.RUnlock()
 
@@ -196,5 +190,4 @@ var server struct {
 	entitymgr  *entitys.Entitymgr  // 實體管理器
 	labelmgr   *labels.Labelmgr    // 標籤管理器
 	lock       sync.RWMutex        // 執行緒鎖
-	start      atomic.Bool         // 啟動旗標
 }
