@@ -68,8 +68,6 @@ func (this *Eventmgr) Initialize() {
 		} // for
 
 	Finish:
-		close(this.notify)
-
 		for n := range this.notify { // 把剩餘的事件都做完
 			if n.pub {
 				this.pubsub.pub(n.name, n.param)
