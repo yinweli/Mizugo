@@ -87,8 +87,3 @@ func (this *mizugoTester) validInit() bool {
 func (this *mizugoTester) validFinal() bool {
 	return this.countFin.Load() == 1
 }
-
-func (this *mizugoTester) reset() {
-	this.countInit.Store(0)
-	this.countFin.Store(0)
-}
