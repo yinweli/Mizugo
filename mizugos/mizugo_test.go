@@ -36,9 +36,8 @@ func (this *SuiteMizugo) TearDownTest() {
 
 func (this *SuiteMizugo) TestMizugo() {
 	name := "mizugo"
-
 	tester := &mizugoTester{}
-	time.Sleep(testdata.Timeout)
+
 	go Start(name, tester.initialize, tester.finalize)
 	time.Sleep(testdata.Timeout)
 	assert.Equal(this.T(), name, Name())
@@ -52,17 +51,19 @@ func (this *SuiteMizugo) TestMizugo() {
 	assert.NotNil(this.T(), Info(""))
 	assert.NotNil(this.T(), Warn(""))
 	assert.NotNil(this.T(), Error(""))
+	time.Sleep(testdata.Timeout)
 	go Close()
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), tester.validInit())
 	assert.True(this.T(), tester.validFinal())
 
-	tester = &mizugoTester{}
 	time.Sleep(testdata.Timeout)
+	tester.reset()
 	go Start(name, tester.initialize, tester.finalize)
 	go Start(name, tester.initialize, tester.finalize)
 	time.Sleep(testdata.Timeout)
 	go Close()
+	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), tester.validInit())
 	assert.True(this.T(), tester.validFinal())
 
@@ -97,4 +98,9 @@ func (this *mizugoTester) validInit() bool {
 
 func (this *mizugoTester) validFinal() bool {
 	return this.finalCount.Load() == 1
+}
+
+func (this *mizugoTester) reset() {
+	this.initCount.Store(0)
+	this.finalCount.Store(0)
 }
