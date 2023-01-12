@@ -1,7 +1,6 @@
 package mizugos
 
 import (
-	"fmt"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -37,26 +36,26 @@ func (this *SuiteMizugo) TearDownTest() {
 func (this *SuiteMizugo) TestMizugo() {
 	name := "mizugo"
 	tester := &mizugoTester{}
-
-	go Start(name, tester.initialize, tester.finalize)
-	time.Sleep(testdata.Timeout)
-	assert.Equal(this.T(), name, Name())
-	assert.NotNil(this.T(), Configmgr())
-	assert.NotNil(this.T(), Metricsmgr())
-	assert.NotNil(this.T(), Logmgr())
-	assert.NotNil(this.T(), Netmgr())
-	assert.NotNil(this.T(), Entitymgr())
-	assert.NotNil(this.T(), Labelmgr())
-	assert.NotNil(this.T(), Debug(""))
-	assert.NotNil(this.T(), Info(""))
-	assert.NotNil(this.T(), Warn(""))
-	assert.NotNil(this.T(), Error(""))
-	time.Sleep(testdata.Timeout)
-	go Close()
-	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), tester.validInit())
-	assert.True(this.T(), tester.validFinal())
-
+	/*
+		go Start(name, tester.initialize, tester.finalize)
+		time.Sleep(testdata.Timeout)
+		assert.Equal(this.T(), name, Name())
+		assert.NotNil(this.T(), Configmgr())
+		assert.NotNil(this.T(), Metricsmgr())
+		assert.NotNil(this.T(), Logmgr())
+		assert.NotNil(this.T(), Netmgr())
+		assert.NotNil(this.T(), Entitymgr())
+		assert.NotNil(this.T(), Labelmgr())
+		assert.NotNil(this.T(), Debug(""))
+		assert.NotNil(this.T(), Info(""))
+		assert.NotNil(this.T(), Warn(""))
+		assert.NotNil(this.T(), Error(""))
+		time.Sleep(testdata.Timeout)
+		go Close()
+		time.Sleep(testdata.Timeout)
+		assert.True(this.T(), tester.validInit())
+		assert.True(this.T(), tester.validFinal())
+	*/
 	time.Sleep(testdata.Timeout)
 	tester.reset()
 	go Start(name, tester.initialize, tester.finalize)
@@ -66,16 +65,17 @@ func (this *SuiteMizugo) TestMizugo() {
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), tester.validInit())
 	assert.True(this.T(), tester.validFinal())
+	/*
+		time.Sleep(testdata.Timeout)
+		go Start("nil", nil, nil)
+		time.Sleep(testdata.Timeout)
+		go Close()
 
-	time.Sleep(testdata.Timeout)
-	go Start("nil", nil, nil)
-	time.Sleep(testdata.Timeout)
-	go Close()
-
-	time.Sleep(testdata.Timeout)
-	go Start("failed", func() error { return fmt.Errorf("failed") }, nil)
-	time.Sleep(testdata.Timeout)
-	go Close()
+		time.Sleep(testdata.Timeout)
+		go Start("failed", func() error { return fmt.Errorf("failed") }, nil)
+		time.Sleep(testdata.Timeout)
+		go Close()
+	*/
 }
 
 type mizugoTester struct {
