@@ -11,6 +11,11 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/contexts"
 )
 
+// 事件管理器, 提供了事件相關功能, 在mizugo中作為實體的附屬功能提供
+// * 事件執行緒
+//   所有要觸發的事件都會加入事件管理器中的通知通道
+//   因此事件會在單一的事件執行緒中被執行, 以此保證了事件有序執行
+
 const separateSubID = "@" // 訂閱索引分隔字串
 
 // NewEventmgr 建立事件管理器
@@ -31,23 +36,6 @@ type Eventmgr struct {
 	notify chan notify        // 通知通道
 	pubsub *pubsub            // 訂閱/發布資料
 	close  atomic.Bool        // 關閉旗標
-}
-
-// Process 處理函式類型
-type Process func(param any)
-
-// Do 執行處理
-func (this Process) Do(param any) {
-	if this != nil {
-		this(param)
-	} // if
-}
-
-// notify 通知資料
-type notify struct {
-	pub   bool   // 發布旗標, true表示為發布事件, false則為取消訂閱
-	name  string // 事件名稱
-	param any    // 事件參數/事件索引
 }
 
 // Initialize 初始化處理, 由於初始化完成後就會開始處理事件, 因此可能需要在初始化之前做完訂閱事件
@@ -136,6 +124,23 @@ func (this *Eventmgr) PubFixed(name string, param any, interval time.Duration) {
 			} // select
 		} // for
 	}()
+}
+
+// Process 處理函式類型
+type Process func(param any)
+
+// Do 執行處理
+func (this Process) Do(param any) {
+	if this != nil {
+		this(param)
+	} // if
+}
+
+// notify 通知資料
+type notify struct {
+	pub   bool   // 發布旗標, true表示為發布事件, false則為取消訂閱
+	name  string // 事件名稱
+	param any    // 事件參數/事件索引
 }
 
 // newPubsub 建立訂閱/發布資料

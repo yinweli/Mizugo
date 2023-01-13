@@ -13,7 +13,7 @@ import (
 // 當需要取得錯誤訊息時(例如要輸出日誌時), 可以用err.Error()取得
 //     err := errors.Errorf(1001, otherError)
 //     message := err.Error()
-// 通常會在封包接收層使用此錯誤工具
+// 通常會在訊息處理時使用此錯誤工具
 
 // ErrorID 錯誤編號類型
 type ErrorID = int64

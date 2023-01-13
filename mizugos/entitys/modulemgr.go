@@ -6,6 +6,8 @@ import (
 	"sync"
 )
 
+// 模組管理器, 用於管理模組
+
 // NewModulemgr 建立模組管理器
 func NewModulemgr() *Modulemgr {
 	return &Modulemgr{
