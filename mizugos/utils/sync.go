@@ -4,6 +4,25 @@ import (
 	"sync"
 )
 
+// SyncOnce 單次執行器
+type SyncOnce struct {
+	once sync.Once // 單次執行物件
+	done bool      // 執行旗標
+}
+
+// Do 單次執行
+func (this *SyncOnce) Do(f func()) {
+	this.once.Do(func() {
+		f()
+		this.done = true
+	})
+}
+
+// Done 取得執行旗標
+func (this *SyncOnce) Done() bool {
+	return this.done
+}
+
 // SyncAttr 同步屬性器
 type SyncAttr[T any] struct {
 	attr T            // 屬性物件
