@@ -10,6 +10,9 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+// zap日誌, uber實現的高效能日誌功能
+// 使用前必須填寫好ZapLogger中的公開成員, 可以選擇從yaml格式的配置檔案來填寫ZapLogger結構
+
 // ZapLogger zap日誌
 type ZapLogger struct {
 	Name       string `yaml:"name"`       // 日誌名稱, 會被用到日誌檔案名稱上

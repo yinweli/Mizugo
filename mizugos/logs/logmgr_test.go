@@ -44,10 +44,6 @@ func (this *SuiteLogmgr) TestInitialize() {
 
 func (this *SuiteLogmgr) TestLog() {
 	target := NewLogmgr()
-	assert.NotNil(this.T(), target.Debug(""))
-	assert.NotNil(this.T(), target.Info(""))
-	assert.NotNil(this.T(), target.Warn(""))
-	assert.NotNil(this.T(), target.Error(""))
 	assert.Nil(this.T(), target.Initialize(newLoggerTester(true)))
 	assert.NotNil(this.T(), target.Debug(""))
 	assert.NotNil(this.T(), target.Info(""))

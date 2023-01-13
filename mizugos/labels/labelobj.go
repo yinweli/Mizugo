@@ -4,14 +4,23 @@ import (
 	"github.com/emirpasic/gods/sets/hashset"
 )
 
-// NewLabelobj 建立標籤物件
+// 標籤資料, 用於讓物件可以被標籤管理器管理, 可以如下來使用
+//   type SomeData struct {
+//       Labelobj
+//   }
+// 或是
+//   type SomeData struct {
+//       *Labelobj
+//   }
+
+// NewLabelobj 建立標籤資料
 func NewLabelobj() *Labelobj {
 	return &Labelobj{
 		data: hashset.New(),
 	}
 }
 
-// Labelobj 標籤物件
+// Labelobj 標籤資料
 type Labelobj struct {
 	data *hashset.Set // 標籤列表
 }

@@ -73,6 +73,7 @@ type mizugoTester struct {
 
 func (this *mizugoTester) initialize() error {
 	this.countInit.Add(1)
+	_ = Logmgr().Initialize(nil)
 	return nil
 }
 
