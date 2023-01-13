@@ -4,20 +4,44 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"sync/atomic"
+	"sync"
 	"time"
 
 	"github.com/spf13/viper"
 )
+
+// 配置管理器, 其實是對viper配置函式庫的包裝, 有以下幾種讀取配置的模式
+// * 從檔案讀取配置
+//   從設定好的路徑中讀取符合檔名與副檔名的檔案內容作為配置資料
+//   首先用AddPath函式設置路徑, 可多次設置來指定多個路徑來源
+//   接著用ReadFile函式設置檔案名稱與副檔名來嘗試讀取配置
+// * 從字串讀取配置
+//   從外部提供字串作為配置來源, 由於內部仍然用讀取檔案的方式來處理字串, 所以必須提供來源使用的檔案格式的副檔名
+//   用ReadString函式設置字串與副檔名來嘗試讀取配置
+// * 從讀取器讀取配置
+//   從外部提供讀取器作為配置來源, 由於內部仍然用讀取檔案的方式來處理字串, 所以必須提供來源使用的檔案格式的副檔名
+// * 支援的副檔名如下(可以參考viper.SupportedExts陣列)
+//   - dotenv
+//   - env
+//   - hcl
+//   - ini
+//   - json
+//   - prop
+//   - properties
+//   - props
+//   - tfvars
+//   - toml
+//   - yaml
+//   - yml
 
 // NewConfigmgr 建立配置管理器
 func NewConfigmgr() *Configmgr {
 	return &Configmgr{}
 }
 
-// Configmgr 配置管理器, 其實是對viper配置函式庫的包裝
+// Configmgr 配置管理器
 type Configmgr struct {
-	merge atomic.Bool // 合併旗標, 用來判斷從檔案讀取配置時, 要使用ReadInConfig還是MergeInConfig
+	once sync.Once // 單次執行鎖
 }
 
 // Reset 重置配置管理器
@@ -37,9 +61,14 @@ func (this *Configmgr) ReadFile(name, ext string) (err error) {
 	viper.SetConfigName(name)
 	viper.SetConfigType(ext)
 
-	if this.merge.CompareAndSwap(false, true) {
+	first := false // 首次旗標, 用來判斷是否首次讀取配置, 決定要用ReadInConfig還是MergeInConfig
+
+	this.once.Do(func() {
+		first = true
 		err = viper.ReadInConfig()
-	} else {
+	})
+
+	if first == false {
 		err = viper.MergeInConfig()
 	} // if
 
@@ -55,9 +84,14 @@ func (this *Configmgr) ReadString(value, ext string) (err error) {
 	reader := bytes.NewBuffer([]byte(value))
 	viper.SetConfigType(ext)
 
-	if this.merge.CompareAndSwap(false, true) {
+	first := false // 首次旗標, 用來判斷是否首次讀取配置, 決定要用ReadConfig還是MergeConfig
+
+	this.once.Do(func() {
+		first = true
 		err = viper.ReadConfig(reader)
-	} else {
+	})
+
+	if first == false {
 		err = viper.MergeConfig(reader)
 	} // if
 
@@ -72,9 +106,14 @@ func (this *Configmgr) ReadString(value, ext string) (err error) {
 func (this *Configmgr) ReadBuffer(reader io.Reader, ext string) (err error) {
 	viper.SetConfigType(ext)
 
-	if this.merge.CompareAndSwap(false, true) {
+	first := false // 首次旗標, 用來判斷是否首次讀取配置, 決定要用ReadConfig還是MergeConfig
+
+	this.once.Do(func() {
+		first = true
 		err = viper.ReadConfig(reader)
-	} else {
+	})
+
+	if first == false {
 		err = viper.MergeConfig(reader)
 	} // if
 
