@@ -18,21 +18,18 @@ import (
 
 // NewEcho 建立回音入口
 func NewEcho() *Echo {
-	ctx, cancel := context.WithCancel(contexts.Ctx()) // TODO: 重構
 	return &Echo{
-		ctx:    ctx,
-		cancel: cancel,
-		name:   "echoc",
+		name: "echoc",
 	}
 }
 
 // Echo 回音入口
 type Echo struct {
-	ctx     context.Context    // ctx物件
-	cancel  context.CancelFunc // 取消物件
 	name    string             // 入口名稱
 	config  EchoConfig         // 設定資料
 	connect atomic.Bool        // 連接旗標
+	ctx     context.Context    // ctx物件
+	cancel  context.CancelFunc // 取消物件
 }
 
 // EchoConfig 設定資料
@@ -56,6 +53,8 @@ func (this *Echo) Initialize() error {
 	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
+
+	this.ctx, this.cancel = context.WithCancel(contexts.Ctx())
 
 	go func() {
 		timeout := time.NewTicker(this.config.ReconnectTime)

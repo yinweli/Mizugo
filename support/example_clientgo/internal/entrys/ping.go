@@ -18,21 +18,18 @@ import (
 
 // NewPing 建立Ping入口資料
 func NewPing() *Ping {
-	ctx, cancel := context.WithCancel(contexts.Ctx()) // TODO: 重構
 	return &Ping{
-		ctx:    ctx,
-		cancel: cancel,
-		name:   "pingc",
+		name: "pingc",
 	}
 }
 
 // Ping Ping入口資料
 type Ping struct {
-	ctx     context.Context    // ctx物件
-	cancel  context.CancelFunc // 取消物件
 	name    string             // 入口名稱
 	config  PingConfig         // 設定資料
 	connect atomic.Bool        // 連接旗標
+	ctx     context.Context    // ctx物件
+	cancel  context.CancelFunc // 取消物件
 }
 
 // PingConfig 設定資料
@@ -57,6 +54,8 @@ func (this *Ping) Initialize() error {
 	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
+
+	this.ctx, this.cancel = context.WithCancel(contexts.Ctx())
 
 	go func() {
 		timeout := time.NewTicker(this.config.ReconnectTime)
