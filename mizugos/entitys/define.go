@@ -6,13 +6,14 @@ import (
 
 const updateInterval = time.Second // update事件間隔時間
 
-// 預設事件名稱
+// 內部事件
 const (
-	EventUpdate    = "update"    // update事件, 模組定時事件
-	EventDispose   = "dispose"   // dispose事件, 模組結束時執行
+	EventUpdate    = "update"    // update事件, 每updateInterval觸發一次
+	EventDispose   = "dispose"   // dispose事件, 實體結束時執行
 	EventAfterSend = "afterSend" // afterSend事件, 傳送訊息結束後執行
 	EventAfterRecv = "afterRecv" // afterRecv事件, 接收訊息結束後執行
-	EventFinalize  = "finalize"  // finalize事件, 實體結束時執行; 這個事件只能實體內部使用
+	EventReceive   = "receive"   // receive事件, 接收訊息時執行, 這個事件無法訂閱
+	EventFinalize  = "finalize"  // finalize事件, 實體結束時執行, 這個事件無法訂閱
 )
 
 // EntityID 實體編號
@@ -31,4 +32,14 @@ type Awaker interface {
 type Starter interface {
 	// Start 模組初始化時第二個被執行
 	Start() error
+}
+
+// Wrong 錯誤處理函式類型
+type Wrong func(err error)
+
+// Do 執行處理
+func (this Wrong) Do(err error) {
+	if this != nil {
+		this(err)
+	} // if
 }

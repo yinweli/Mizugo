@@ -129,7 +129,7 @@ func (this *Echo) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.Initialize(); err != nil {
+	if err := entity.Initialize(this.wrong); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if

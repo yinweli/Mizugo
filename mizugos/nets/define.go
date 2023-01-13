@@ -100,7 +100,7 @@ type Encode func(message any) (packet []byte, err error)
 type Decode func(packet []byte) (message any, err error)
 
 // Receive 接收封包處理函式類型
-type Receive func(message any) error
+type Receive func(message any)
 
 // AfterSend 傳送封包後處理函式類型
 type AfterSend func()

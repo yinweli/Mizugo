@@ -3,7 +3,6 @@ package entitys
 import (
 	"fmt"
 	"net"
-	"sync/atomic"
 	"time"
 
 	"github.com/yinweli/Mizugo/mizugos/events"
@@ -12,6 +11,34 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
+
+// 實體, mizugo中用於儲存對象的基礎物件, 對象可以是個連線, 也可以用於表示遊戲物件
+// * 建立實體流程
+//   從實體管理器新增實體, 取得實體物件
+//   如果實體需要使用模組相關功能, 則設置模組管理器
+//   如果實體需要使用事件相關功能, 則設置事件管理器
+//   如果實體將要代表某個連線, 則要繼續以下設置
+//   - 設置處理物件
+//   - 設置會話物件
+//   新增模組到實體中
+//   執行實體的初始化處理
+// * 結束實體流程
+//   執行實體的結束處理
+// * 模組功能
+//   使用者可以新增模組到實體上, 但是必須在實體初始化之前完成
+// * 事件功能
+//   使用者可以訂閱或是取消訂閱事件, 發布只執行一次的事件, 或是發布會定時觸發的事件(由於不能刪除定時事件, 因此發布定時事件前請多想想)
+//   事件可以被訂閱多次, 發布事件時會每個訂閱者都會執行一次
+// * 內部事件
+//   實體提供了以下內部事件可供訂閱
+//   - update: 每updateInterval觸發一次
+//   - dispose: 實體結束時執行
+//   - afterSend: 傳送訊息結束後執行
+//   - afterRecv: 接收訊息結束後執行
+// * 處理功能
+//   當實體設置了處理物件與會話物件後, 可以通過處理功能來新增或是刪除訊息處理函式
+// * 會話功能
+//   當實體設置了處理物件與會話物件後, 可以通過會話功能來傳送封包到遠端
 
 // NewEntity 建立實體資料
 func NewEntity(entityID EntityID) *Entity {
@@ -25,7 +52,7 @@ func NewEntity(entityID EntityID) *Entity {
 type Entity struct {
 	*labels.Labelobj                                  // 標籤物件
 	entityID         EntityID                         // 實體編號
-	enable           atomic.Bool                      // 啟用旗標
+	once             utils.SyncOnce                   // 單次執行物件
 	modulemgr        utils.SyncAttr[*Modulemgr]       // 模組管理器
 	eventmgr         utils.SyncAttr[*events.Eventmgr] // 事件管理器
 	process          utils.SyncAttr[procs.Processor]  // 處理物件
@@ -35,54 +62,66 @@ type Entity struct {
 // ===== 基礎功能 =====
 
 // Initialize 初始化處理
-func (this *Entity) Initialize() error {
-	if this.enable.CompareAndSwap(false, true) == false {
+func (this *Entity) Initialize(wrong Wrong) (err error) {
+	if this.once.Done() {
 		return fmt.Errorf("entity initialize: already initialize")
 	} // if
 
-	modulemgr := this.modulemgr.Get()
+	this.once.Do(func() {
+		modulemgr := this.modulemgr.Get()
 
-	if modulemgr == nil {
-		return fmt.Errorf("entity initialize: modulemgr nil")
-	} // if
+		if modulemgr == nil {
+			err = fmt.Errorf("entity initialize: modulemgr nil")
+			return
+		} // if
 
-	eventmgr := this.eventmgr.Get()
+		eventmgr := this.eventmgr.Get()
 
-	if eventmgr == nil {
-		return fmt.Errorf("entity initialize: eventmgr nil")
-	} // if
+		if eventmgr == nil {
+			err = fmt.Errorf("entity initialize: eventmgr nil")
+			return
+		} // if
 
-	module := modulemgr.All()
+		module := modulemgr.All()
 
-	for _, itor := range module {
-		if awaker, ok := itor.(Awaker); ok {
-			if err := awaker.Awake(); err != nil {
-				return fmt.Errorf("entity initialize: %w", err)
+		for _, itor := range module {
+			if awaker, ok := itor.(Awaker); ok {
+				if err = awaker.Awake(); err != nil {
+					err = fmt.Errorf("entity initialize: %w", err)
+					return
+				} // if
 			} // if
-		} // if
-	} // for
+		} // for
 
-	for _, itor := range module {
-		if starter, ok := itor.(Starter); ok {
-			if err := starter.Start(); err != nil {
-				return fmt.Errorf("entity initialize: %w", err)
+		for _, itor := range module {
+			if starter, ok := itor.(Starter); ok {
+				if err = starter.Start(); err != nil {
+					err = fmt.Errorf("entity initialize: %w", err)
+					return
+				} // if
 			} // if
-		} // if
-	} // for
+		} // for
 
-	eventmgr.Sub(EventFinalize, func(_ any) {
-		if session := this.session.Get(); session != nil {
-			session.Stop()
-		} // if
+		eventmgr.Sub(EventReceive, func(message any) {
+			if err := this.process.Get().Process(message); err != nil {
+				wrong.Do(fmt.Errorf("entity receive: %w", err))
+			} // if
+		})
+		eventmgr.Sub(EventFinalize, func(_ any) {
+			if session := this.session.Get(); session != nil {
+				session.Stop()
+			} // if
+		})
+		eventmgr.PubFixed(EventUpdate, nil, updateInterval)
+		eventmgr.Initialize()
 	})
-	eventmgr.PubFixed(EventUpdate, nil, updateInterval)
-	eventmgr.Initialize()
-	return nil
+
+	return err
 }
 
 // Finalize 結束處理
 func (this *Entity) Finalize() {
-	if this.enable.CompareAndSwap(true, false) == false {
+	if this.once.Done() == false {
 		return
 	} // if
 
@@ -96,9 +135,11 @@ func (this *Entity) Finalize() {
 // Bundle 取得綁定資料
 func (this *Entity) Bundle() *nets.Bundle {
 	return &nets.Bundle{
-		Encode:  this.process.Get().Encode,
-		Decode:  this.process.Get().Decode,
-		Receive: this.process.Get().Process,
+		Encode: this.process.Get().Encode,
+		Decode: this.process.Get().Decode,
+		Receive: func(message any) {
+			this.eventmgr.Get().PubOnce(EventReceive, message)
+		},
 		AfterSend: func() {
 			this.eventmgr.Get().PubOnce(EventAfterSend, nil)
 		},
@@ -115,14 +156,14 @@ func (this *Entity) EntityID() EntityID {
 
 // Enable 取得啟用旗標
 func (this *Entity) Enable() bool {
-	return this.enable.Load()
+	return this.once.Done()
 }
 
 // ===== 模組功能 =====
 
 // SetModulemgr 設定模組管理器, 初始化完成後就不能設定模組物件
 func (this *Entity) SetModulemgr(modulemgr *Modulemgr) error {
-	if this.enable.Load() {
+	if this.once.Done() {
 		return fmt.Errorf("entity set modulemgr: overdue")
 	} // if
 
@@ -137,7 +178,7 @@ func (this *Entity) GetModulemgr() *Modulemgr {
 
 // AddModule 新增模組, 初始化完成後就不能新增模組
 func (this *Entity) AddModule(module Moduler) error {
-	if this.enable.Load() {
+	if this.once.Done() {
 		return fmt.Errorf("entity add module: overdue") // TODO: 如果模組介面有名稱, 錯誤時要顯示一下
 	} // if
 
@@ -158,7 +199,7 @@ func (this *Entity) GetModule(moduleID ModuleID) Moduler {
 
 // SetEventmgr 設定事件管理器, 初始化完成後就不能設定事件物件
 func (this *Entity) SetEventmgr(eventmgr *events.Eventmgr) error {
-	if this.enable.Load() {
+	if this.once.Done() {
 		return fmt.Errorf("entity set eventmgr: overdue")
 	} // if
 
@@ -173,8 +214,8 @@ func (this *Entity) GetEventmgr() *events.Eventmgr {
 
 // Subscribe 訂閱事件
 func (this *Entity) Subscribe(name string, process events.Process) (subID string, err error) {
-	if name == EventFinalize {
-		return subID, fmt.Errorf("entity subscribe: %v: can't sub finalize", name)
+	if name == EventFinalize || name == EventReceive {
+		return subID, fmt.Errorf("entity subscribe: %v: can't subscribe internal event", name)
 	} // if
 
 	return this.eventmgr.Get().Sub(name, process), nil
@@ -199,7 +240,7 @@ func (this *Entity) PublishFixed(name string, param any, interval time.Duration)
 
 // SetProcess 設定處理物件, 初始化完成後就不能設定處理物件
 func (this *Entity) SetProcess(process procs.Processor) error {
-	if this.enable.Load() {
+	if this.once.Done() {
 		return fmt.Errorf("entity set process: overdue")
 	} // if
 
@@ -226,7 +267,7 @@ func (this *Entity) DelMessage(messageID procs.MessageID) {
 
 // SetSession 設定會話物件, 初始化完成後就不能設定會話物件
 func (this *Entity) SetSession(session nets.Sessioner) error {
-	if this.enable.Load() {
+	if this.once.Done() {
 		return fmt.Errorf("entity set session: overdue")
 	} // if
 

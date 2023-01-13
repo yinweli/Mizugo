@@ -10,13 +10,12 @@ import (
 )
 
 // newInformTester 建立測試器
-func newTester(bundle, encode, decode, receive bool) *tester {
+func newTester(bundle, encode, decode bool) *tester {
 	time.Sleep(testdata.Timeout) // 在這邊等待一下, 讓程序有機會完成
 	return &tester{
-		bundle:  bundle,
-		encode:  encode,
-		decode:  decode,
-		receive: receive,
+		bundle: bundle,
+		encode: encode,
+		decode: decode,
 	}
 }
 
@@ -25,7 +24,6 @@ type tester struct {
 	bundle         bool
 	encode         bool
 	decode         bool
-	receive        bool
 	err            error
 	bindCount      int
 	unbindCount    int
@@ -149,19 +147,12 @@ func (this *tester) bind(session Sessioner) *Bundle {
 					return nil, fmt.Errorf("decode failed")
 				} // if
 			},
-			Receive: func(message any) error {
+			Receive: func(message any) {
 				this.lock.Lock()
 				defer this.lock.Unlock()
 
 				this.receiveCount++
-
-				if this.receive {
-					this.message = message
-					return nil
-				} else {
-					this.message = nil
-					return fmt.Errorf("failed")
-				} // if
+				this.message = message
 			},
 			AfterSend: func() {
 				this.lock.Lock()

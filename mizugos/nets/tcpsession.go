@@ -121,11 +121,7 @@ func (this *TCPSession) recvLoop() {
 			break
 		} // if
 
-		if err := this.receive(message); err != nil {
-			this.wrong.Do(fmt.Errorf("tcp session recv loop: %w", err))
-			break
-		} // if
-
+		this.receive(message)
 		this.afterRecv.Do()
 	} // for
 

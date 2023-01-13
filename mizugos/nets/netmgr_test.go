@@ -41,7 +41,7 @@ func (this *SuiteNetmgr) TestNewNetmgr() {
 }
 
 func (this *SuiteNetmgr) TestAddConnectTCP() {
-	test := newTester(true, true, true, true)
+	test := newTester(true, true, true)
 	target := NewNetmgr()
 	connectID := target.AddConnectTCP(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout, test.bind, test.unbind, test.wrong)
 
@@ -56,7 +56,7 @@ func (this *SuiteNetmgr) TestAddConnectTCP() {
 }
 
 func (this *SuiteNetmgr) TestAddListenTCP() {
-	test := newTester(true, true, true, true)
+	test := newTester(true, true, true)
 	target := NewNetmgr()
 	listenID := target.AddListenTCP(this.hostLocal.ip, this.hostLocal.port, test.bind, test.unbind, test.wrong)
 
@@ -71,7 +71,7 @@ func (this *SuiteNetmgr) TestAddListenTCP() {
 }
 
 func (this *SuiteNetmgr) TestStop() {
-	test := newTester(true, true, true, true)
+	test := newTester(true, true, true)
 	target := NewNetmgr()
 	target.AddConnectTCP(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout, test.bind, test.unbind, test.wrong)
 
@@ -88,10 +88,10 @@ func (this *SuiteNetmgr) TestStop() {
 func (this *SuiteNetmgr) TestStatus() {
 	target := NewNetmgr()
 
-	testl := newTester(true, true, true, true)
+	testl := newTester(true, true, true)
 	target.AddListenTCP(this.hostLocal.ip, this.hostLocal.port, testl.bind, testl.unbind, testl.wrong)
 
-	testc := newTester(true, true, true, true)
+	testc := newTester(true, true, true)
 	target.AddConnectTCP(this.hostLocal.ip, this.hostLocal.port, testdata.Timeout, testc.bind, testc.unbind, testc.wrong)
 
 	time.Sleep(testdata.Timeout)
