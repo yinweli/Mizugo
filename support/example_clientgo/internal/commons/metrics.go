@@ -36,7 +36,10 @@ func (this *Metrics) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	mizugos.Metricsmgr().Initialize(this.config.Port)
+	if err := mizugos.Metricsmgr().Initialize(this.config.Port); err != nil {
+		return fmt.Errorf("%v initialize: %w", this.name, err)
+	} // if
+
 	mizugos.Info(this.name).Message("initialize").KV("config", this.config).End()
 	Echo = mizugos.Metricsmgr().NewRuntime("echo")
 	Key = mizugos.Metricsmgr().NewRuntime("key")

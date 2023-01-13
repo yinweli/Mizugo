@@ -18,7 +18,7 @@ import (
 
 // NewPing 建立Ping入口資料
 func NewPing() *Ping {
-	ctx, cancel := context.WithCancel(contexts.Ctx())
+	ctx, cancel := context.WithCancel(contexts.Ctx()) // TODO: 重構
 	return &Ping{
 		ctx:    ctx,
 		cancel: cancel,
@@ -39,7 +39,6 @@ type Ping struct {
 type PingConfig struct {
 	IP            string        `yaml:"ip"`            // 位址
 	Port          string        `yaml:"port"`          // 埠號
-	Event         int           `yaml:"event"`         // 事件通道大小
 	Timeout       time.Duration `yaml:"timeout"`       // 逾期時間(秒)
 	Disconnect    bool          `yaml:"disconnect"`    // 斷線旗標
 	Reconnect     bool          `yaml:"reconnect"`     // 重連旗標
@@ -110,7 +109,7 @@ func (this *Ping) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.SetEventmgr(events.NewEventmgr(this.config.Event)); err != nil {
+	if err := entity.SetEventmgr(events.NewEventmgr(defines.EventCapacity)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if

@@ -30,9 +30,8 @@ type Echo struct {
 
 // EchoConfig 設定資料
 type EchoConfig struct {
-	IP    string `yaml:"ip"`    // 位址
-	Port  string `yaml:"port"`  // 埠號
-	Event int    `yaml:"event"` // 事件通道大小
+	IP   string `yaml:"ip"`   // 位址
+	Port string `yaml:"port"` // 埠號
 }
 
 // Initialize 初始化處理
@@ -75,7 +74,7 @@ func (this *Echo) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.SetEventmgr(events.NewEventmgr(this.config.Event)); err != nil {
+	if err := entity.SetEventmgr(events.NewEventmgr(defines.EventCapacity)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if

@@ -17,10 +17,12 @@ type SuiteMetricsmgr struct {
 	suite.Suite
 	testdata.TestEnv
 	testdata.TestLeak
+	port int
 }
 
 func (this *SuiteMetricsmgr) SetupSuite() {
 	this.Change("test-metrics-metricsmgr")
+	this.port = 8080
 }
 
 func (this *SuiteMetricsmgr) TearDownSuite() {
@@ -33,13 +35,16 @@ func (this *SuiteMetricsmgr) TearDownTest() {
 
 func (this *SuiteMetricsmgr) TestInitialize() {
 	target := NewMetricsmgr()
-	target.Initialize(8080)
+	target.Finalize() // 初始化前執行, 這次應該不執行
+	assert.Nil(this.T(), target.Initialize(this.port))
+	assert.NotNil(this.T(), target.Initialize(this.port)) // 故意啟動兩次, 這次應該失敗
 	target.Finalize()
+	target.Finalize() // 故意結束兩次, 這次應該不執行
 }
 
 func (this *SuiteMetricsmgr) TestNew() {
 	target := NewMetricsmgr()
-	target.Initialize(8080)
+	assert.Nil(this.T(), target.Initialize(this.port))
 
 	assert.NotNil(this.T(), target.NewInt("int"))
 	assert.NotNil(this.T(), target.NewFloat("float"))

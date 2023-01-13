@@ -30,10 +30,9 @@ type Ping struct {
 
 // PingConfig 設定資料
 type PingConfig struct {
-	IP    string `yaml:"ip"`    // 位址
-	Port  string `yaml:"port"`  // 埠號
-	Event int    `yaml:"event"` // 事件通道大小
-	Key   string `yaml:"key"`   // 密鑰
+	IP   string `yaml:"ip"`   // 位址
+	Port string `yaml:"port"` // 埠號
+	Key  string `yaml:"key"`  // 密鑰
 }
 
 // Initialize 初始化處理
@@ -76,7 +75,7 @@ func (this *Ping) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.SetEventmgr(events.NewEventmgr(this.config.Event)); err != nil {
+	if err := entity.SetEventmgr(events.NewEventmgr(defines.EventCapacity)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if

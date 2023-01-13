@@ -1,7 +1,6 @@
 pingc:
   ip:
   port: 10002
-  event: 1000
   timeout: 1s
   disconnect: true
   reconnect: true

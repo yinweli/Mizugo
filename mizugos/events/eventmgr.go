@@ -2,6 +2,7 @@ package events
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/yinweli/Mizugo/mizugos/contexts"
+	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
 // 事件管理器, 提供了事件相關功能, 在mizugo中作為實體的附屬功能提供
@@ -20,10 +22,7 @@ const separateSubID = "@" // 訂閱索引分隔字串
 
 // NewEventmgr 建立事件管理器
 func NewEventmgr(capacity int) *Eventmgr {
-	ctx, cancel := context.WithCancel(contexts.Ctx())
 	return &Eventmgr{
-		ctx:    ctx,
-		cancel: cancel,
 		notify: make(chan notify, capacity),
 		pubsub: newPubsub(),
 	}
@@ -31,41 +30,56 @@ func NewEventmgr(capacity int) *Eventmgr {
 
 // Eventmgr 事件管理器
 type Eventmgr struct {
-	ctx    context.Context    // ctx物件
-	cancel context.CancelFunc // 取消物件
 	notify chan notify        // 通知通道
 	pubsub *pubsub            // 訂閱/發布資料
+	once   utils.SyncOnce     // 單次執行物件
+	ctx    context.Context    // ctx物件
+	cancel context.CancelFunc // 取消物件
 	close  atomic.Bool        // 關閉旗標
 }
 
-// Initialize 初始化處理, 由於初始化完成後就會開始處理事件, 因此可能需要在初始化之前做完訂閱事件
-func (this *Eventmgr) Initialize() {
-	go func() {
-		for {
-			select {
-			case n := <-this.notify:
+// Initialize 初始化處理
+func (this *Eventmgr) Initialize() error {
+	if this.once.Done() {
+		return fmt.Errorf("eventmgr initialize: already initialize")
+	} // if
+
+	this.once.Do(func() {
+		this.ctx, this.cancel = context.WithCancel(contexts.Ctx())
+
+		go func() {
+			for {
+				select {
+				case n := <-this.notify:
+					if n.pub {
+						this.pubsub.pub(n.name, n.param)
+					} else {
+						this.pubsub.unsub(n.name)
+					} // if
+
+				case <-this.ctx.Done():
+					goto Finish
+				} // select
+			} // for
+
+		Finish:
+			for n := range this.notify { // 把剩餘的事件都做完
 				if n.pub {
 					this.pubsub.pub(n.name, n.param)
-				} else {
-					this.pubsub.unsub(n.name)
 				} // if
+			} // for
+		}()
+	})
 
-			case <-this.ctx.Done():
-				goto Finish
-			} // select
-		} // for
-
-	Finish:
-		for n := range this.notify { // 把剩餘的事件都做完
-			if n.pub {
-				this.pubsub.pub(n.name, n.param)
-			} // if
-		} // for
-	}()
+	return nil
 }
 
 // Finalize 結束處理
 func (this *Eventmgr) Finalize() {
+	if this.once.Done() == false {
+		return
+	} // if
+
 	this.close.Store(true)
 	this.cancel()
 }

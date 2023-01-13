@@ -8,6 +8,8 @@ import (
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
 // zap日誌, uber實現的高效能日誌功能
@@ -26,23 +28,37 @@ type ZapLogger struct {
 	MaxBackups int    `yaml:"maxBackups"` // 日誌保留數量, 當日誌檔案數量超過此數量時會刪除舊檔案, 預設不會刪除檔案
 	Compress   bool   `yaml:"compress"`   // 是否壓縮日誌檔案, 預設不會壓縮
 
-	logger *zap.Logger // zap日誌物件
+	once   utils.SyncOnce // 單次執行物件
+	logger *zap.Logger    // zap日誌物件
 }
 
 // Initialize 初始化處理
 func (this *ZapLogger) Initialize() error {
-	core := zapcore.NewCore(
-		this.encoder(),
-		this.writeSyncer(),
-		zap.NewAtomicLevelAt(zapLevel(this.Level)),
-	)
-	this.logger = zap.New(core, zap.AddCallerSkip(1))
+	if this.once.Done() {
+		return fmt.Errorf("zaplogger initialize: already initialize")
+	} // if
+
+	this.once.Do(func() {
+		core := zapcore.NewCore(
+			this.encoder(),
+			this.writeSyncer(),
+			zap.NewAtomicLevelAt(zapLevel(this.Level)),
+		)
+		this.logger = zap.New(core, zap.AddCallerSkip(1))
+	})
+
 	return nil
 }
 
 // Finalize 結束處理
 func (this *ZapLogger) Finalize() {
-	_ = this.logger.Sync()
+	if this.once.Done() == false {
+		return
+	} // if
+
+	if this.logger != nil {
+		_ = this.logger.Sync()
+	} // if
 }
 
 // New 建立日誌

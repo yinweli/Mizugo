@@ -4,7 +4,9 @@ import (
 	"time"
 )
 
-const updateInterval = time.Second // update事件間隔時間
+const (
+	updateInterval = time.Second // update事件間隔時間
+)
 
 // 內部事件
 const (

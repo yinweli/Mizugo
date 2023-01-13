@@ -82,6 +82,11 @@ func (this *Entity) Initialize(wrong Wrong) (err error) {
 			return
 		} // if
 
+		if err = eventmgr.Initialize(); err != nil {
+			err = fmt.Errorf("entity initialize: %w", err)
+			return
+		} // if
+
 		module := modulemgr.All()
 
 		for _, itor := range module {
@@ -113,7 +118,6 @@ func (this *Entity) Initialize(wrong Wrong) (err error) {
 			} // if
 		})
 		eventmgr.PubFixed(EventUpdate, nil, updateInterval)
-		eventmgr.Initialize()
 	})
 
 	return err

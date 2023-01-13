@@ -19,10 +19,12 @@ type SuiteEventmgr struct {
 	suite.Suite
 	testdata.TestEnv
 	testdata.TestLeak
+	capacity int
 }
 
 func (this *SuiteEventmgr) SetupSuite() {
 	this.Change("test-events-eventmgr")
+	this.capacity = 100
 }
 
 func (this *SuiteEventmgr) TearDownSuite() {
@@ -34,18 +36,22 @@ func (this *SuiteEventmgr) TearDownTest() {
 }
 
 func (this *SuiteEventmgr) TestNewEventmgr() {
-	assert.NotNil(this.T(), NewEventmgr(1))
+	assert.NotNil(this.T(), NewEventmgr(this.capacity))
 }
 
-func (this *SuiteEventmgr) TestEventmgr() {
-	target := NewEventmgr(10)
-	target.Initialize()
+func (this *SuiteEventmgr) TestInitialize() {
+	target := NewEventmgr(this.capacity)
+	target.Finalize() // 初始化前執行, 這次應該不執行
+	assert.Nil(this.T(), target.Initialize())
+	assert.NotNil(this.T(), target.Initialize()) // 故意啟動兩次, 這次應該失敗
 	target.Finalize()
+	target.Finalize() // 故意結束兩次, 這次應該不執行
 }
 
 func (this *SuiteEventmgr) TestPubOnce() {
-	target := NewEventmgr(10)
-	target.Initialize()
+	target := NewEventmgr(this.capacity)
+	assert.Nil(this.T(), target.Initialize())
+
 	value := "value once"
 	valid := atomic.Bool{}
 	subID := ""
@@ -64,8 +70,9 @@ func (this *SuiteEventmgr) TestPubOnce() {
 }
 
 func (this *SuiteEventmgr) TestPubFixed() {
-	target := NewEventmgr(10)
-	target.Initialize()
+	target := NewEventmgr(this.capacity)
+	assert.Nil(this.T(), target.Initialize())
+
 	value := "value fixed"
 	valid := atomic.Bool{}
 	subID := ""

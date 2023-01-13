@@ -42,9 +42,12 @@ func (this *SuiteZap) TestZapLogger() {
 		File:    true,
 		Level:   LevelDebug,
 	}
+	target.Finalize() // 初始化前執行, 這次應該不執行
 	assert.Nil(this.T(), target.Initialize())
+	assert.NotNil(this.T(), target.Initialize()) // 故意啟動兩次, 這次應該失敗
 	assert.NotNil(this.T(), target.New("", LevelDebug))
 	target.Finalize()
+	target.Finalize() // 故意結束兩次, 這次應該不執行
 
 	target = &ZapLogger{
 		Name:    "zapLogger",
