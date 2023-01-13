@@ -2,6 +2,7 @@ package pools
 
 import (
 	"fmt"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -39,14 +40,76 @@ func (this *SuitePoolmgr) TestNewPoolmgr() {
 
 func (this *SuitePoolmgr) TestInitialize() {
 	target := NewPoolmgr()
-	config := &Config{
-		ReleaseDuration: time.Second,
-		Logger:          &loggerTester{},
-	}
-
-	assert.Nil(this.T(), target.Initialize(config))
-	assert.NotNil(this.T(), target.Initialize(config))
+	target.Finalize() // 初始化前執行, 這次應該不執行
+	assert.Nil(this.T(), target.Initialize(nil))
+	assert.NotNil(this.T(), target.Initialize(nil)) // 故意啟動兩次, 這次應該失敗
 	target.Finalize()
+	target.Finalize() // 故意結束兩次, 這次應該不執行
+
+	target = NewPoolmgr()
+	assert.Nil(this.T(), target.Initialize(&Config{
+		Logger: &loggerTester{},
+	}))
+	target.Finalize()
+}
+
+func (this *SuitePoolmgr) TestSubmit() {
+	target := NewPoolmgr()
+	validNil := atomic.Bool{}
+	validNilFunc := func() {
+		validNil.Store(true)
+	}
+	assert.Nil(this.T(), target.Initialize(nil))
+	assert.Nil(this.T(), target.Submit(validNilFunc))
+	target.Finalize()
+	time.Sleep(testdata.Timeout)
+	assert.True(this.T(), validNil.Load())
+
+	target = NewPoolmgr()
+	validPool := atomic.Bool{}
+	validPoolFunc := func() {
+		validPool.Store(true)
+	}
+	assert.Nil(this.T(), target.Initialize(&Config{
+		Logger: &loggerTester{},
+	}))
+	assert.Nil(this.T(), target.Submit(validPoolFunc))
+	target.Finalize()
+	time.Sleep(testdata.Timeout)
+	assert.True(this.T(), validPool.Load())
+
+	target = NewPoolmgr()
+	assert.NotNil(this.T(), target.Submit(func() {}))
+}
+
+func (this *SuitePoolmgr) TestStatus() {
+	target := NewPoolmgr()
+	assert.Equal(this.T(), Stat{}, target.Status())
+	target.Finalize()
+
+	target = NewPoolmgr()
+	assert.Nil(this.T(), target.Initialize(nil))
+	assert.Equal(this.T(), Stat{}, target.Status())
+	target.Finalize()
+
+	target = NewPoolmgr()
+	assert.Nil(this.T(), target.Initialize(&Config{
+		Logger: &loggerTester{},
+	}))
+	assert.Equal(this.T(), Stat{Available: -1, Capacity: -1}, target.Status())
+	target.Finalize()
+}
+
+func (this *SuitePoolmgr) TestConfig() {
+	config := Config{}
+	fmt.Println(config)
+	assert.NotNil(this.T(), config.String())
+}
+
+func (this *SuitePoolmgr) TestStat() {
+	stat := Stat{}
+	fmt.Println(stat)
+	assert.NotNil(this.T(), stat.String())
 }
 
 type loggerTester struct {
