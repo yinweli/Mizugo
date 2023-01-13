@@ -7,6 +7,13 @@ import (
 	"github.com/emirpasic/gods/sets/hashset"
 )
 
+// 網路管理器, 用於管理接聽或是連接, 管理器也會儲存使用中的會話, 但是不開放給外部使用
+// * TCP
+//   - AddConnectTCP: 新增TCP連接
+//   - AddListenTCP: 新增TCP接聽
+// * 停止網路
+//   執行停止網路後, 會釋放所有的接聽/連接/會話
+
 // NewNetmgr 建立網路管理器
 func NewNetmgr() *Netmgr {
 	return &Netmgr{

@@ -4,6 +4,8 @@ import (
 	"sync"
 )
 
+// 處理管理器, 負責管理訊息處理函式
+
 // NewProcmgr 建立處理管理器
 func NewProcmgr() *Procmgr {
 	return &Procmgr{

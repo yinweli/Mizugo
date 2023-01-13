@@ -9,11 +9,13 @@ import (
 	"sync"
 )
 
+// TCP會話器, 負責傳送/接收訊息等相關的功能
+
 const tcpHeaderSize = 2               // 標頭長度
 const tcpPacketSize = int(^uint16(0)) // 封包長度
 const tcpMessageSize = 1000           // 訊息通道大小設為1000, 避免因為爆滿而卡住
 
-// NewTCPSession 建立tcp會話器
+// NewTCPSession 建立TCP會話器
 func NewTCPSession(conn net.Conn) *TCPSession {
 	return &TCPSession{
 		conn:    conn,
@@ -21,7 +23,7 @@ func NewTCPSession(conn net.Conn) *TCPSession {
 	}
 }
 
-// TCPSession tcp會話器
+// TCPSession TCP會話器
 type TCPSession struct {
 	conn      net.Conn       // 連接物件
 	message   chan any       // 訊息通道

@@ -6,7 +6,9 @@ import (
 	"time"
 )
 
-// NewTCPConnect 建立tcp連接器
+// TCP連接器, 負責用TCP協議建立連接以取得會話物件
+
+// NewTCPConnect 建立TCP連接器
 func NewTCPConnect(ip, port string, timeout time.Duration) *TCPConnect {
 	return &TCPConnect{
 		address: net.JoinHostPort(ip, port),
@@ -14,7 +16,7 @@ func NewTCPConnect(ip, port string, timeout time.Duration) *TCPConnect {
 	}
 }
 
-// TCPConnect tcp連接器
+// TCPConnect TCP連接器
 type TCPConnect struct {
 	address string        // 位址字串
 	timeout time.Duration // 逾時時間

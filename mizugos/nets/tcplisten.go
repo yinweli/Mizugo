@@ -6,14 +6,16 @@ import (
 	"sync/atomic"
 )
 
-// NewTCPListen 建立tcp接聽器
+// TCP接聽器, 負責用TCP協議建立接聽, 並等待客戶端連接以取得會話物件
+
+// NewTCPListen 建立TCP接聽器
 func NewTCPListen(ip, port string) *TCPListen {
 	return &TCPListen{
 		address: net.JoinHostPort(ip, port),
 	}
 }
 
-// TCPListen tcp接聽器
+// TCPListen TCP接聽器
 type TCPListen struct {
 	address string       // 位址字串
 	listen  net.Listener // 接聽物件
