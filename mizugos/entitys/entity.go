@@ -75,18 +75,6 @@ func (this *Entity) Initialize(wrong Wrong) (err error) {
 			return
 		} // if
 
-		eventmgr := this.eventmgr.Get()
-
-		if eventmgr == nil {
-			err = fmt.Errorf("entity initialize: eventmgr nil")
-			return
-		} // if
-
-		if err = eventmgr.Initialize(); err != nil {
-			err = fmt.Errorf("entity initialize: %w", err)
-			return
-		} // if
-
 		module := modulemgr.All()
 
 		for _, itor := range module {
@@ -107,6 +95,13 @@ func (this *Entity) Initialize(wrong Wrong) (err error) {
 			} // if
 		} // for
 
+		eventmgr := this.eventmgr.Get()
+
+		if eventmgr == nil {
+			err = fmt.Errorf("entity initialize: eventmgr nil")
+			return
+		} // if
+
 		eventmgr.Sub(EventReceive, func(message any) {
 			if err := this.process.Get().Process(message); err != nil {
 				wrong.Do(fmt.Errorf("entity receive: %w", err))
@@ -118,6 +113,11 @@ func (this *Entity) Initialize(wrong Wrong) (err error) {
 			} // if
 		})
 		eventmgr.PubFixed(EventUpdate, nil, updateInterval)
+
+		if err = eventmgr.Initialize(); err != nil {
+			err = fmt.Errorf("entity initialize: %w", err)
+			return
+		} // if
 	})
 
 	return err

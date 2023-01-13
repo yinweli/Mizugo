@@ -40,6 +40,7 @@ func (this *Ping) Awake() error {
 
 // eventCompleteKey completeKey事件
 func (this *Ping) eventCompleteKey(_ any) {
+	time.Sleep(defines.PingWaitTime)
 	this.sendMsgPingReq()
 }
 
