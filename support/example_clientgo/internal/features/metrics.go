@@ -1,11 +1,11 @@
-package commons
+package features
 
 import (
 	"fmt"
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/metrics"
-	"github.com/yinweli/Mizugo/support/example_server/internal/defines"
+	"github.com/yinweli/Mizugo/support/example_clientgo/internal/defines"
 )
 
 // NewMetrics 建立統計資料
@@ -18,10 +18,10 @@ func NewMetrics() *Metrics {
 // Metrics 統計資料
 type Metrics struct {
 	name   string        // 統計名稱
-	config MetricsConfig // 設定資料
+	config MetricsConfig // 配置資料
 }
 
-// MetricsConfig 設定資料
+// MetricsConfig 配置資料
 type MetricsConfig struct {
 	Port int // 埠號
 }

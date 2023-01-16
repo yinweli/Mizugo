@@ -7,8 +7,8 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/mizugos/utils"
-	"github.com/yinweli/Mizugo/support/example_clientgo/internal/commons"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/defines"
+	"github.com/yinweli/Mizugo/support/example_clientgo/internal/features"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/messages"
 )
 
@@ -52,7 +52,7 @@ func (this *Echo) procMsgEchoRes(message any) {
 	} // if
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
-	commons.Echo.Add(duration)
+	features.Echo.Add(duration)
 	mizugos.Info(this.name).Message("procMsgEchoRes").
 		KV("equal", this.echo == msg.From.Echo).
 		KV("count", msg.Count).

@@ -26,13 +26,13 @@ func NewEcho() *Echo {
 // Echo 回音入口
 type Echo struct {
 	name    string             // 入口名稱
-	config  EchoConfig         // 設定資料
+	config  EchoConfig         // 配置資料
 	connect atomic.Bool        // 連接旗標
 	ctx     context.Context    // ctx物件
 	cancel  context.CancelFunc // 取消物件
 }
 
-// EchoConfig 設定資料
+// EchoConfig 配置資料
 type EchoConfig struct {
 	IP            string        `yaml:"ip"`            // 位址
 	Port          string        `yaml:"port"`          // 埠號

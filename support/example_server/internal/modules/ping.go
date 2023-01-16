@@ -4,8 +4,8 @@ import (
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/support/example_server/internal/commons"
 	"github.com/yinweli/Mizugo/support/example_server/internal/defines"
+	"github.com/yinweli/Mizugo/support/example_server/internal/features"
 	"github.com/yinweli/Mizugo/support/example_server/internal/messages"
 )
 
@@ -36,7 +36,7 @@ func (this *Ping) Awake() error {
 
 // procMsgPingReq 處理要求Ping
 func (this *Ping) procMsgPingReq(message any) {
-	rec := commons.Ping.Rec()
+	rec := features.Ping.Rec()
 	defer rec()
 
 	_, msg, err := procs.ProtoDesUnmarshal[*messages.MsgPingReq](message)

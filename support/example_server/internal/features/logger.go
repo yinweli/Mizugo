@@ -1,4 +1,4 @@
-package commons
+package features
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ func NewLogger() *Logger {
 // Logger 日誌資料
 type Logger struct {
 	name   string         // 日誌名稱
-	config logs.ZapLogger // 設定資料
+	config logs.ZapLogger // 配置資料
 }
 
 // Initialize 初始化處理

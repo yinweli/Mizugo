@@ -7,8 +7,8 @@ import (
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/support/example_clientgo/internal/commons"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/defines"
+	"github.com/yinweli/Mizugo/support/example_clientgo/internal/features"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/messages"
 )
 
@@ -54,7 +54,7 @@ func (this *Ping) procMsgPingRes(message any) {
 	} // if
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
-	commons.Ping.Add(duration)
+	features.Ping.Add(duration)
 	mizugos.Info(this.name).Message("procMsgPingRes").
 		KV("count", msg.Count).
 		KV("duration", duration).

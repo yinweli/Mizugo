@@ -1,28 +1,28 @@
-package commons
+package features
 
 import (
 	"fmt"
 
 	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/mizugos/logs"
+	"github.com/yinweli/Mizugo/mizugos/pools"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/defines"
 )
 
-// NewLogger 建立日誌資料
-func NewLogger() *Logger {
-	return &Logger{
-		name: "logger",
+// NewPool 建立執行緒池資料
+func NewPool() *Pool {
+	return &Pool{
+		name: "pool",
 	}
 }
 
-// Logger 日誌資料
-type Logger struct {
-	name   string         // 日誌名稱
-	config logs.ZapLogger // 設定資料
+// Pool 執行緒池資料
+type Pool struct {
+	name   string       // 特性名稱
+	config pools.Config // 配置資料
 }
 
 // Initialize 初始化處理
-func (this *Logger) Initialize() error {
+func (this *Pool) Initialize() error {
 	if err := mizugos.Configmgr().ReadFile(this.name, defines.ConfigType); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
@@ -31,7 +31,9 @@ func (this *Logger) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	if err := mizugos.Logmgr().Initialize(&this.config); err != nil {
+	this.config.Logger = &poolLogger{}
+
+	if err := mizugos.Poolmgr().Initialize(&this.config); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
@@ -40,6 +42,15 @@ func (this *Logger) Initialize() error {
 }
 
 // Finalize 結束處理
-func (this *Logger) Finalize() {
+func (this *Pool) Finalize() {
 	mizugos.Logmgr().Finalize()
+}
+
+// poolLogger 執行緒日誌
+type poolLogger struct {
+}
+
+// Printf 輸出日誌
+func (this *poolLogger) Printf(format string, args ...interface{}) {
+	mizugos.Logmgr().Error("pool").Message(format, args...).End()
 }

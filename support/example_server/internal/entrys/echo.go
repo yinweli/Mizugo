@@ -13,22 +13,22 @@ import (
 	"github.com/yinweli/Mizugo/support/example_server/internal/modules"
 )
 
-// NewEcho 建立回音入口資料
+// NewEcho 建立回音入口
 func NewEcho() *Echo {
 	return &Echo{
 		name: "echos",
 	}
 }
 
-// Echo 回音入口資料
+// Echo 回音入口
 type Echo struct {
 	name      string        // 入口名稱
-	config    EchoConfig    // 設定資料
+	config    EchoConfig    // 配置資料
 	listenID  nets.ListenID // 接聽編號
 	echoCount atomic.Int64  // 封包計數
 }
 
-// EchoConfig 設定資料
+// EchoConfig 配置資料
 type EchoConfig struct {
 	IP   string `yaml:"ip"`   // 位址
 	Port string `yaml:"port"` // 埠號

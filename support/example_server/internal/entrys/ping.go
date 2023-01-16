@@ -13,22 +13,22 @@ import (
 	"github.com/yinweli/Mizugo/support/example_server/internal/modules"
 )
 
-// NewPing 建立Ping入口資料
+// NewPing 建立Ping入口
 func NewPing() *Ping {
 	return &Ping{
 		name: "pings",
 	}
 }
 
-// Ping Ping入口資料
+// Ping Ping入口
 type Ping struct {
 	name      string        // 入口名稱
-	config    PingConfig    // 設定資料
+	config    PingConfig    // 配置資料
 	listenID  nets.ListenID // 接聽編號
 	pingCount atomic.Int64  // 封包計數
 }
 
-// PingConfig 設定資料
+// PingConfig 配置資料
 type PingConfig struct {
 	IP   string `yaml:"ip"`   // 位址
 	Port string `yaml:"port"` // 埠號
