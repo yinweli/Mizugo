@@ -7,15 +7,17 @@ import (
 	"io"
 	"net"
 	"sync"
+
+	"github.com/yinweli/Mizugo/mizugos/pools"
 )
 
-// TODO: 研究一下怎麼改用context
+// TCP會話器, 負責傳送/接收訊息等相關的功能
 
 const tcpHeaderSize = 2               // 標頭長度
 const tcpPacketSize = int(^uint16(0)) // 封包長度
 const tcpMessageSize = 1000           // 訊息通道大小設為1000, 避免因為爆滿而卡住
 
-// NewTCPSession 建立tcp會話器
+// NewTCPSession 建立TCP會話器
 func NewTCPSession(conn net.Conn) *TCPSession {
 	return &TCPSession{
 		conn:    conn,
@@ -23,7 +25,7 @@ func NewTCPSession(conn net.Conn) *TCPSession {
 	}
 }
 
-// TCPSession tcp會話器
+// TCPSession TCP會話器
 type TCPSession struct {
 	conn      net.Conn       // 連接物件
 	message   chan any       // 訊息通道
@@ -39,7 +41,7 @@ type TCPSession struct {
 
 // Start 啟動會話
 func (this *TCPSession) Start(bind Bind, unbind Unbind, wrong Wrong) {
-	go func() {
+	pools.DefaultPool.Submit(func() {
 		bundle := bind.Do(this)
 
 		if bundle == nil {
@@ -55,13 +57,13 @@ func (this *TCPSession) Start(bind Bind, unbind Unbind, wrong Wrong) {
 		this.afterRecv = bundle.AfterRecv
 		this.wrong = wrong
 
-		go this.recvLoop()
-		go this.sendLoop()
+		pools.DefaultPool.Submit(this.recvLoop)
+		pools.DefaultPool.Submit(this.sendLoop)
 
 		this.signal.Add(2)
 		this.signal.Wait() // 等待接收循環與傳送循環結束, 如果接收循環與傳送循環結束, 就會繼續進行結束處理
 		unbind.Do(this)
-	}()
+	})
 }
 
 // Stop 停止會話, 不會等待會話內部循環結束
@@ -123,11 +125,7 @@ func (this *TCPSession) recvLoop() {
 			break
 		} // if
 
-		if err := this.receive(message); err != nil {
-			this.wrong.Do(fmt.Errorf("tcp session recv loop: %w", err))
-			break
-		} // if
-
+		this.receive(message)
 		this.afterRecv.Do()
 	} // for
 

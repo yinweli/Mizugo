@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/yinweli/Mizugo/mizugos/pools"
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
@@ -78,7 +79,7 @@ func (this *Runtime) String() string {
 
 // start 開始統計
 func (this *Runtime) start(ctx context.Context) {
-	go func() {
+	pools.DefaultPool.Submit(func() {
 		timeout := time.NewTicker(time.Second)
 		timeout1 := time.NewTicker(time.Second * interval1)
 		timeout5 := time.NewTicker(time.Second * interval5)
@@ -127,5 +128,5 @@ func (this *Runtime) start(ctx context.Context) {
 				return
 			} // select
 		} // for
-	}()
+	})
 }

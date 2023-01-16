@@ -1,4 +1,4 @@
-package commons
+package features
 
 import (
 	"fmt"
@@ -18,10 +18,10 @@ func NewMetrics() *Metrics {
 // Metrics 統計資料
 type Metrics struct {
 	name   string        // 統計名稱
-	config MetricsConfig // 設定資料
+	config MetricsConfig // 配置資料
 }
 
-// MetricsConfig 設定資料
+// MetricsConfig 配置資料
 type MetricsConfig struct {
 	Port int // 埠號
 }
@@ -36,7 +36,10 @@ func (this *Metrics) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	mizugos.Metricsmgr().Initialize(this.config.Port)
+	if err := mizugos.Metricsmgr().Initialize(this.config.Port); err != nil {
+		return fmt.Errorf("%v initialize: %w", this.name, err)
+	} // if
+
 	mizugos.Info(this.name).Message("initialize").KV("config", this.config).End()
 	Echo = mizugos.Metricsmgr().NewRuntime("echo")
 	Key = mizugos.Metricsmgr().NewRuntime("key")

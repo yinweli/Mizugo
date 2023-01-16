@@ -7,8 +7,8 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/mizugos/utils"
-	"github.com/yinweli/Mizugo/support/example_server/internal/commons"
 	"github.com/yinweli/Mizugo/support/example_server/internal/defines"
+	"github.com/yinweli/Mizugo/support/example_server/internal/features"
 	"github.com/yinweli/Mizugo/support/example_server/internal/messages"
 )
 
@@ -54,7 +54,7 @@ func (this *Key) eventAfterSend(_ any) {
 
 // procMsgKeyReq 處理要求密鑰
 func (this *Key) procMsgKeyReq(message any) {
-	rec := commons.Key.Rec()
+	rec := features.Key.Rec()
 	defer rec()
 
 	_, _, err := procs.ProtoDesUnmarshal[*messages.MsgKeyReq](message)

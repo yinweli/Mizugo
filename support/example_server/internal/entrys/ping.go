@@ -13,27 +13,26 @@ import (
 	"github.com/yinweli/Mizugo/support/example_server/internal/modules"
 )
 
-// NewPing 建立Ping入口資料
+// NewPing 建立Ping入口
 func NewPing() *Ping {
 	return &Ping{
 		name: "pings",
 	}
 }
 
-// Ping Ping入口資料
+// Ping Ping入口
 type Ping struct {
 	name      string        // 入口名稱
-	config    PingConfig    // 設定資料
+	config    PingConfig    // 配置資料
 	listenID  nets.ListenID // 接聽編號
 	pingCount atomic.Int64  // 封包計數
 }
 
-// PingConfig 設定資料
+// PingConfig 配置資料
 type PingConfig struct {
-	IP    string `yaml:"ip"`    // 位址
-	Port  string `yaml:"port"`  // 埠號
-	Event int    `yaml:"event"` // 事件通道大小
-	Key   string `yaml:"key"`   // 密鑰
+	IP   string `yaml:"ip"`   // 位址
+	Port string `yaml:"port"` // 埠號
+	Key  string `yaml:"key"`  // 密鑰
 }
 
 // Initialize 初始化處理
@@ -76,7 +75,7 @@ func (this *Ping) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.SetEventmgr(events.NewEventmgr(this.config.Event)); err != nil {
+	if err := entity.SetEventmgr(events.NewEventmgr(defines.EventCapacity)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
@@ -103,7 +102,7 @@ func (this *Ping) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.Initialize(); err != nil {
+	if err := entity.Initialize(this.wrong); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if

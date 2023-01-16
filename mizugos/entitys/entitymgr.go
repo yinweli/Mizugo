@@ -5,6 +5,8 @@ import (
 	"sync"
 )
 
+// 實體管理器, 用於管理實體
+
 // NewEntitymgr 建立實體管理器
 func NewEntitymgr() *Entitymgr {
 	return &Entitymgr{

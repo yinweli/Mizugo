@@ -6,6 +6,13 @@ import (
 	"github.com/emirpasic/gods/sets/hashset"
 )
 
+// 標籤管理器, 用來關聯標籤與物件
+// * 標籤
+//   標籤一律為字串, 一個標籤可以關連到多個物件, 而物件也可以擁有多個標籤
+// * 物件
+//   物件必須符合Labeler介面
+//   物件可以選擇包含Labelobj或*Labelobj來符合Labeler介面
+
 // NewLabelmgr 建立標籤管理器
 func NewLabelmgr() *Labelmgr {
 	return &Labelmgr{

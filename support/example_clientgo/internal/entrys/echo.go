@@ -18,28 +18,24 @@ import (
 
 // NewEcho 建立回音入口
 func NewEcho() *Echo {
-	ctx, cancel := context.WithCancel(contexts.Ctx())
 	return &Echo{
-		ctx:    ctx,
-		cancel: cancel,
-		name:   "echoc",
+		name: "echoc",
 	}
 }
 
 // Echo 回音入口
 type Echo struct {
+	name    string             // 入口名稱
+	config  EchoConfig         // 配置資料
+	connect atomic.Bool        // 連接旗標
 	ctx     context.Context    // ctx物件
 	cancel  context.CancelFunc // 取消物件
-	name    string             // 入口名稱
-	config  EchoConfig         // 設定資料
-	connect atomic.Bool        // 連接旗標
 }
 
-// EchoConfig 設定資料
+// EchoConfig 配置資料
 type EchoConfig struct {
 	IP            string        `yaml:"ip"`            // 位址
 	Port          string        `yaml:"port"`          // 埠號
-	Event         int           `yaml:"event"`         // 事件通道大小
 	Timeout       time.Duration `yaml:"timeout"`       // 逾期時間(秒)
 	Disconnect    bool          `yaml:"disconnect"`    // 斷線旗標
 	Reconnect     bool          `yaml:"reconnect"`     // 重連旗標
@@ -57,6 +53,8 @@ func (this *Echo) Initialize() error {
 	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
+
+	this.ctx, this.cancel = context.WithCancel(contexts.Ctx())
 
 	go func() {
 		timeout := time.NewTicker(this.config.ReconnectTime)
@@ -109,7 +107,7 @@ func (this *Echo) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.SetEventmgr(events.NewEventmgr(this.config.Event)); err != nil {
+	if err := entity.SetEventmgr(events.NewEventmgr(defines.EventCapacity)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
@@ -129,7 +127,7 @@ func (this *Echo) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.Initialize(); err != nil {
+	if err := entity.Initialize(this.wrong); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if

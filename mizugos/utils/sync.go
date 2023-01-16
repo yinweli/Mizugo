@@ -2,7 +2,33 @@ package utils
 
 import (
 	"sync"
+	"sync/atomic"
 )
+
+// SyncOnce 單次執行器
+type SyncOnce struct {
+	once sync.Once   // 單次執行物件
+	done atomic.Bool // 執行旗標
+}
+
+// Do 單次執行
+func (this *SyncOnce) Do(f func()) (do bool) {
+	this.once.Do(func() {
+		do = true
+		this.done.Store(true)
+
+		if f != nil {
+			f()
+		} // if
+	})
+
+	return do
+}
+
+// Done 取得執行旗標
+func (this *SyncOnce) Done() bool {
+	return this.done.Load()
+}
 
 // SyncAttr 同步屬性器
 type SyncAttr[T any] struct {

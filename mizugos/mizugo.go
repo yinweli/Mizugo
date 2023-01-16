@@ -12,6 +12,7 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/logs"
 	"github.com/yinweli/Mizugo/mizugos/metrics"
 	"github.com/yinweli/Mizugo/mizugos/nets"
+	"github.com/yinweli/Mizugo/mizugos/pools"
 )
 
 // Initialize 初始化處理函式類型
@@ -42,11 +43,12 @@ func Start(name string, initialize Initialize, finalize Finalize) {
 	server.name = name
 	server.ctx, server.cancel = context.WithCancel(contexts.Ctx())
 	server.configmgr = configs.NewConfigmgr()
+	server.metricsmgr = metrics.NewMetricsmgr()
+	server.logmgr = logs.NewLogmgr()
 	server.netmgr = nets.NewNetmgr()
 	server.entitymgr = entitys.NewEntitymgr()
 	server.labelmgr = labels.NewLabelmgr()
-	server.logmgr = logs.NewLogmgr()
-	server.metricsmgr = metrics.NewMetricsmgr()
+	server.poolmgr = pools.DefaultPool // 執行緒池管理器直接用預設的
 	server.lock.Unlock()
 
 	fmt.Printf("%v initialize\n", name)
@@ -71,11 +73,12 @@ Finalize: // 結束處理
 	server.name = ""
 	server.cancel()
 	server.configmgr = nil
+	server.metricsmgr = nil
+	server.logmgr = nil
 	server.netmgr = nil
 	server.entitymgr = nil
 	server.labelmgr = nil
-	server.logmgr = nil
-	server.metricsmgr = nil
+	server.poolmgr = nil
 	server.lock.Unlock()
 	contexts.Cancel() // 用來保證由contexts.Ctx()衍生出來的執行緒最後都能被終止, 避免goroutine洩漏
 }
@@ -146,6 +149,14 @@ func Labelmgr() *labels.Labelmgr {
 	return server.labelmgr
 }
 
+// Poolmgr 執行緒池管理器
+func Poolmgr() *pools.Poolmgr {
+	server.lock.RLock()
+	defer server.lock.RUnlock()
+
+	return server.poolmgr
+}
+
 // Debug 記錄除錯訊息
 func Debug(label string) logs.Stream {
 	server.lock.RLock()
@@ -189,5 +200,6 @@ var server struct {
 	netmgr     *nets.Netmgr        // 網路管理器
 	entitymgr  *entitys.Entitymgr  // 實體管理器
 	labelmgr   *labels.Labelmgr    // 標籤管理器
+	poolmgr    *pools.Poolmgr      // 執行緒池管理器
 	lock       sync.RWMutex        // 執行緒鎖
 }

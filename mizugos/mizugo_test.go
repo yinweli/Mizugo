@@ -47,6 +47,7 @@ func (this *SuiteMizugo) TestMizugo() {
 	assert.NotNil(this.T(), Netmgr())
 	assert.NotNil(this.T(), Entitymgr())
 	assert.NotNil(this.T(), Labelmgr())
+	assert.NotNil(this.T(), Poolmgr())
 	assert.NotNil(this.T(), Debug(""))
 	assert.NotNil(this.T(), Info(""))
 	assert.NotNil(this.T(), Warn(""))
@@ -57,7 +58,9 @@ func (this *SuiteMizugo) TestMizugo() {
 	assert.True(this.T(), tester.validInit())
 	assert.True(this.T(), tester.validFinal())
 
-	go Start(name, func() error { return fmt.Errorf("failed") }, nil)
+	go Start(name, func() error {
+		return fmt.Errorf("failed")
+	}, nil)
 	time.Sleep(testdata.Timeout)
 	Stop()
 
@@ -73,6 +76,7 @@ type mizugoTester struct {
 
 func (this *mizugoTester) initialize() error {
 	this.countInit.Add(1)
+	_ = Logmgr().Initialize(nil)
 	return nil
 }
 

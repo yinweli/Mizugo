@@ -2,6 +2,7 @@ package events
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -9,13 +10,20 @@ import (
 	"time"
 
 	"github.com/yinweli/Mizugo/mizugos/contexts"
+	"github.com/yinweli/Mizugo/mizugos/pools"
+	"github.com/yinweli/Mizugo/mizugos/utils"
 )
+
+// 事件管理器, 提供了事件相關功能, 在mizugo中作為實體的附屬功能提供
+// * 事件執行緒
+//   所有要觸發的事件都會加入事件管理器中的通知通道
+//   因此事件會在單一的事件執行緒中被執行, 以此保證了事件有序執行
 
 const separateSubID = "@" // 訂閱索引分隔字串
 
 // NewEventmgr 建立事件管理器
 func NewEventmgr(capacity int) *Eventmgr {
-	ctx, cancel := context.WithCancel(contexts.Ctx())
+	ctx, cancel := context.WithCancel(contexts.Ctx()) // 由於可能會在初始化前就先發布事件, 所以ctx, cancel必須在此產生並設值
 	return &Eventmgr{
 		ctx:    ctx,
 		cancel: cancel,
@@ -30,54 +38,52 @@ type Eventmgr struct {
 	cancel context.CancelFunc // 取消物件
 	notify chan notify        // 通知通道
 	pubsub *pubsub            // 訂閱/發布資料
+	once   utils.SyncOnce     // 單次執行物件
 	close  atomic.Bool        // 關閉旗標
 }
 
-// Process 處理函式類型
-type Process func(param any)
-
-// Do 執行處理
-func (this Process) Do(param any) {
-	if this != nil {
-		this(param)
+// Initialize 初始化處理
+func (this *Eventmgr) Initialize() error {
+	if this.once.Done() {
+		return fmt.Errorf("eventmgr initialize: already initialize")
 	} // if
-}
 
-// notify 通知資料
-type notify struct {
-	pub   bool   // 發布旗標, true表示為發布事件, false則為取消訂閱
-	name  string // 事件名稱
-	param any    // 事件參數/事件索引
-}
+	this.once.Do(func() {
+		pools.DefaultPool.Submit(func() {
+			for {
+				select {
+				case n := <-this.notify:
+					if n.pub {
+						this.pubsub.pub(n.name, n.param)
+					} else {
+						this.pubsub.unsub(n.name)
+					} // if
 
-// Initialize 初始化處理, 由於初始化完成後就會開始處理事件, 因此可能需要在初始化之前做完訂閱事件
-func (this *Eventmgr) Initialize() {
-	go func() {
-		for {
-			select {
-			case n := <-this.notify:
+				case <-this.ctx.Done():
+					goto Finish
+				} // select
+			} // for
+
+		Finish:
+			close(this.notify)
+
+			for n := range this.notify { // 把剩餘的事件都做完
 				if n.pub {
 					this.pubsub.pub(n.name, n.param)
-				} else {
-					this.pubsub.unsub(n.name)
 				} // if
+			} // for
+		})
+	})
 
-			case <-this.ctx.Done():
-				goto Finish
-			} // select
-		} // for
-
-	Finish:
-		for n := range this.notify { // 把剩餘的事件都做完
-			if n.pub {
-				this.pubsub.pub(n.name, n.param)
-			} // if
-		} // for
-	}()
+	return nil
 }
 
 // Finalize 結束處理
 func (this *Eventmgr) Finalize() {
+	if this.once.Done() == false {
+		return
+	} // if
+
 	this.close.Store(true)
 	this.cancel()
 }
@@ -118,24 +124,43 @@ func (this *Eventmgr) PubFixed(name string, param any, interval time.Duration) {
 		return
 	} // if
 
-	go func() {
+	pools.DefaultPool.Submit(func() {
 		timeout := time.NewTicker(interval)
 
 		for {
 			select {
 			case <-timeout.C:
-				this.notify <- notify{
-					pub:   true,
-					name:  name,
-					param: param,
-				}
+				if this.close.Load() == false {
+					this.notify <- notify{
+						pub:   true,
+						name:  name,
+						param: param,
+					}
+				} // if
 
 			case <-this.ctx.Done():
 				timeout.Stop()
 				return
 			} // select
 		} // for
-	}()
+	})
+}
+
+// Process 處理函式類型
+type Process func(param any)
+
+// Do 執行處理
+func (this Process) Do(param any) {
+	if this != nil {
+		this(param)
+	} // if
+}
+
+// notify 通知資料
+type notify struct {
+	pub   bool   // 發布旗標, true表示為發布事件, false則為取消訂閱
+	name  string // 事件名稱
+	param any    // 事件參數/事件索引
 }
 
 // newPubsub 建立訂閱/發布資料

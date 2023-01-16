@@ -4,8 +4,8 @@ import (
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/support/example_server/internal/commons"
 	"github.com/yinweli/Mizugo/support/example_server/internal/defines"
+	"github.com/yinweli/Mizugo/support/example_server/internal/features"
 	"github.com/yinweli/Mizugo/support/example_server/internal/messages"
 )
 
@@ -36,7 +36,7 @@ func (this *Echo) Awake() error {
 
 // procMsgEchoReq 處理要求回音
 func (this *Echo) procMsgEchoReq(message any) {
-	rec := commons.Echo.Rec()
+	rec := features.Echo.Rec()
 	defer rec()
 
 	_, msg, err := procs.SimpleUnmarshal[messages.MsgEchoReq](message)

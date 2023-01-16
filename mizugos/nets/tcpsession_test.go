@@ -41,15 +41,15 @@ func (this *SuiteTCPSession) TestNewTCPSession() {
 }
 
 func (this *SuiteTCPSession) TestStart() {
-	testl := newTester(true, true, true, true)
+	testl := newTester(true, true, true)
 	listen := NewTCPListen(this.host.ip, this.host.port)
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
-	testc1 := newTester(true, true, true, true)
+	testc1 := newTester(true, true, true)
 	client1 := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
 	client1.Connect(testc1.bind, testc1.unbind, testc1.wrong)
 
-	testc2 := newTester(true, true, true, true)
+	testc2 := newTester(true, true, true)
 	client2 := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
 	client2.Connect(testc2.bind, testc2.unbind, testc2.wrong)
 
@@ -76,11 +76,11 @@ func (this *SuiteTCPSession) TestStart() {
 }
 
 func (this *SuiteTCPSession) TestStartFailed() {
-	testl := newTester(false, true, true, true)
+	testl := newTester(false, true, true)
 	listen := NewTCPListen(this.host.ip, this.host.port)
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
-	testc := newTester(true, true, true, true)
+	testc := newTester(true, true, true)
 	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
 	client.Connect(testc.bind, testc.unbind, testc.wrong)
 
@@ -93,11 +93,11 @@ func (this *SuiteTCPSession) TestStartFailed() {
 }
 
 func (this *SuiteTCPSession) TestSend() {
-	testl := newTester(true, true, true, true)
+	testl := newTester(true, true, true)
 	listen := NewTCPListen(this.host.ip, this.host.port)
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
-	testc := newTester(true, true, true, true)
+	testc := newTester(true, true, true)
 	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
 	client.Connect(testc.bind, testc.unbind, testc.wrong)
 
@@ -141,11 +141,11 @@ func (this *SuiteTCPSession) TestSend() {
 }
 
 func (this *SuiteTCPSession) TestEncodeFailed() {
-	testl := newTester(true, false, true, true)
+	testl := newTester(true, false, true)
 	listen := NewTCPListen(this.host.ip, this.host.port)
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
-	testc := newTester(true, true, true, true)
+	testc := newTester(true, true, true)
 	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
 	client.Connect(testc.bind, testc.unbind, testc.wrong)
 
@@ -163,11 +163,11 @@ func (this *SuiteTCPSession) TestEncodeFailed() {
 }
 
 func (this *SuiteTCPSession) TestDecodeFailed() {
-	testl := newTester(true, true, true, true)
+	testl := newTester(true, true, true)
 	listen := NewTCPListen(this.host.ip, this.host.port)
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
-	testc := newTester(true, true, false, true)
+	testc := newTester(true, true, false)
 	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
 	client.Connect(testc.bind, testc.unbind, testc.wrong)
 
@@ -184,34 +184,12 @@ func (this *SuiteTCPSession) TestDecodeFailed() {
 	assert.Nil(this.T(), listen.Stop()) // 因為解碼失敗, 會直接導致連接中斷, 所以不必關閉客戶端連接
 }
 
-func (this *SuiteTCPSession) TestReceiveFailed() {
-	testl := newTester(true, true, true, true)
-	listen := NewTCPListen(this.host.ip, this.host.port)
-	listen.Listen(testl.bind, testl.unbind, testl.wrong)
-
-	testc := newTester(true, true, true, false)
-	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
-	client.Connect(testc.bind, testc.unbind, testc.wrong)
-
-	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), testl.valid())
-	assert.True(this.T(), testc.valid())
-
-	time.Sleep(testdata.Timeout)
-	testl.get().Send(this.message)
-	time.Sleep(testdata.Timeout)
-	assert.False(this.T(), testc.valid())
-
-	time.Sleep(testdata.Timeout)
-	assert.Nil(this.T(), listen.Stop()) // 因為接收失敗, 會直接導致連接中斷, 所以不必關閉客戶端連接
-}
-
 func (this *SuiteTCPSession) TestTCPSession() {
-	testl := newTester(true, true, true, true)
+	testl := newTester(true, true, true)
 	listen := NewTCPListen(this.host.ip, this.host.port)
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
-	testc := newTester(true, true, true, false)
+	testc := newTester(true, true, true)
 	client := NewTCPConnect(this.host.ip, this.host.port, testdata.Timeout)
 	client.Connect(testc.bind, testc.unbind, testc.wrong)
 

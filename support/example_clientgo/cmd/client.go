@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/support/example_clientgo/internal/commons"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/defines"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/entrys"
+	"github.com/yinweli/Mizugo/support/example_clientgo/internal/features"
 )
 
 func main() {
@@ -15,14 +15,19 @@ func main() {
 
 // initialize 初始化處理
 func initialize() error {
-	client.logger = commons.NewLogger()
-	client.metrics = commons.NewMetrics()
+	client.logger = features.NewLogger()
+	client.pool = features.NewPool()
+	client.metrics = features.NewMetrics()
 	client.echo = entrys.NewEcho()
 	client.ping = entrys.NewPing()
 
 	mizugos.Configmgr().AddPath(defines.ConfigPath)
 
 	if err := client.logger.Initialize(); err != nil {
+		return fmt.Errorf("initialize: %w", err)
+	} // if
+
+	if err := client.pool.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
@@ -46,13 +51,15 @@ func finalize() {
 	client.echo.Finalize()
 	client.ping.Finalize()
 	client.metrics.Finalize()
-	client.logger.Finalize() // 日誌必須最後結束
+	client.pool.Finalize()
+	client.logger.Finalize()
 }
 
 // client 客戶端資料
 var client struct {
-	logger  *commons.Logger  // 日誌資料
-	metrics *commons.Metrics // 統計資料
-	echo    *entrys.Echo     // 回音入口
-	ping    *entrys.Ping     // Ping入口
+	logger  *features.Logger  // 日誌資料
+	pool    *features.Pool    // 執行緒池資料
+	metrics *features.Metrics // 統計資料
+	echo    *entrys.Echo      // 回音入口
+	ping    *entrys.Ping      // Ping入口
 }

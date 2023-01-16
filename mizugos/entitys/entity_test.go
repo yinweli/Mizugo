@@ -24,11 +24,13 @@ type SuiteEntity struct {
 	testdata.TestEnv
 	testdata.TestLeak
 	entityID EntityID
+	capacity int
 }
 
 func (this *SuiteEntity) SetupSuite() {
 	this.Change("test-entitys-entity")
 	this.entityID = EntityID(1)
+	this.capacity = 1
 }
 
 func (this *SuiteEntity) TearDownSuite() {
@@ -46,41 +48,49 @@ func (this *SuiteEntity) TestNewEntity() {
 func (this *SuiteEntity) TestInitialize() {
 	target := NewEntity(this.entityID)
 	assert.Nil(this.T(), target.SetModulemgr(NewModulemgr()))
-	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
-	assert.Nil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.Initialize()) // 故意啟動兩次, 這次應該失敗
+	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(this.capacity)))
+	target.Finalize() // 初始化前執行, 這次應該不執行
+	assert.Nil(this.T(), target.Initialize(nil))
+	assert.NotNil(this.T(), target.Initialize(nil)) // 故意啟動兩次, 這次應該失敗
 	target.Finalize()
 	target.Finalize() // 故意結束兩次, 這次應該不執行
 
 	target = NewEntity(this.entityID)
 	assert.Nil(this.T(), target.SetModulemgr(NewModulemgr()))
-	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
+	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(this.capacity)))
 	module := newModuleTester(true, true, ModuleID(1))
 	assert.Nil(this.T(), target.AddModule(module))
-	assert.Nil(this.T(), target.Initialize())
+	assert.Nil(this.T(), target.Initialize(nil))
 	assert.Equal(this.T(), int64(1), module.awakeCount.Load())
 	assert.Equal(this.T(), int64(1), module.startCount.Load())
 	target.Finalize()
 
 	target = NewEntity(this.entityID)
 	assert.Nil(this.T(), target.SetModulemgr(NewModulemgr()))
-	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
+	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(this.capacity)))
 	assert.Nil(this.T(), target.AddModule(newModuleTester(false, true, ModuleID(1))))
-	assert.NotNil(this.T(), target.Initialize())
+	assert.NotNil(this.T(), target.Initialize(nil))
 
 	target = NewEntity(this.entityID)
 	assert.Nil(this.T(), target.SetModulemgr(NewModulemgr()))
-	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
+	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(this.capacity)))
 	assert.Nil(this.T(), target.AddModule(newModuleTester(true, false, ModuleID(1))))
-	assert.NotNil(this.T(), target.Initialize())
+	assert.NotNil(this.T(), target.Initialize(nil))
+
+	target = NewEntity(this.entityID)
+	assert.NotNil(this.T(), target.Initialize(nil))
+
+	target = NewEntity(this.entityID)
+	assert.Nil(this.T(), target.SetModulemgr(NewModulemgr()))
+	assert.NotNil(this.T(), target.Initialize(nil))
 }
 
 func (this *SuiteEntity) TestEntity() {
 	target := NewEntity(this.entityID)
 	assert.Nil(this.T(), target.SetModulemgr(NewModulemgr()))
-	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
+	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(this.capacity)))
 	assert.Nil(this.T(), target.SetProcess(procs.NewSimple()))
-	assert.Nil(this.T(), target.Initialize())
+	assert.Nil(this.T(), target.Initialize(nil))
 
 	bundle := target.Bundle()
 	assert.NotNil(this.T(), bundle.Encode)
@@ -97,7 +107,7 @@ func (this *SuiteEntity) TestEntity() {
 func (this *SuiteEntity) TestModule() {
 	target := NewEntity(this.entityID)
 	assert.Nil(this.T(), target.SetModulemgr(NewModulemgr()))
-	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
+	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(this.capacity)))
 
 	assert.NotNil(this.T(), target.GetModulemgr())
 
@@ -105,7 +115,7 @@ func (this *SuiteEntity) TestModule() {
 	module2 := newModuleTester(true, true, ModuleID(2))
 	assert.Nil(this.T(), target.AddModule(module1))
 	assert.NotNil(this.T(), target.GetModule(module1.ModuleID()))
-	assert.Nil(this.T(), target.Initialize())
+	assert.Nil(this.T(), target.Initialize(nil))
 	assert.NotNil(this.T(), target.AddModule(module2))
 
 	target.Finalize()
@@ -114,8 +124,8 @@ func (this *SuiteEntity) TestModule() {
 func (this *SuiteEntity) TestEvent() {
 	target := NewEntity(this.entityID)
 	assert.Nil(this.T(), target.SetModulemgr(NewModulemgr()))
-	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
-	assert.Nil(this.T(), target.Initialize())
+	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(this.capacity)))
+	assert.Nil(this.T(), target.Initialize(nil))
 
 	assert.NotNil(this.T(), target.GetEventmgr())
 
@@ -153,12 +163,12 @@ func (this *SuiteEntity) TestEvent() {
 func (this *SuiteEntity) TestProcess() {
 	target := NewEntity(this.entityID)
 	assert.Nil(this.T(), target.SetModulemgr(NewModulemgr()))
-	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
+	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(this.capacity)))
 
 	process := procs.NewSimple()
 	assert.Nil(this.T(), target.SetProcess(process))
 	assert.Equal(this.T(), process, target.GetProcess())
-	assert.Nil(this.T(), target.Initialize())
+	assert.Nil(this.T(), target.Initialize(nil))
 	assert.NotNil(this.T(), target.SetProcess(process))
 
 	target.AddMessage(procs.MessageID(1), func(message any) {})
@@ -170,13 +180,13 @@ func (this *SuiteEntity) TestProcess() {
 func (this *SuiteEntity) TestSession() {
 	target := NewEntity(this.entityID)
 	assert.Nil(this.T(), target.SetModulemgr(NewModulemgr()))
-	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
+	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(this.capacity)))
 
 	conn, _ := net.Dial("tcp", net.JoinHostPort("google.com", "80"))
 	session := nets.NewTCPSession(conn)
 	assert.Nil(this.T(), target.SetSession(session))
 	assert.Equal(this.T(), session, target.GetSession())
-	assert.Nil(this.T(), target.Initialize())
+	assert.Nil(this.T(), target.Initialize(nil))
 	assert.NotNil(this.T(), target.SetSession(session))
 
 	target.Send("message")

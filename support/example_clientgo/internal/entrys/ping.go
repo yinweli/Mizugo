@@ -16,30 +16,26 @@ import (
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/modules"
 )
 
-// NewPing 建立Ping入口資料
+// NewPing 建立Ping入口
 func NewPing() *Ping {
-	ctx, cancel := context.WithCancel(contexts.Ctx())
 	return &Ping{
-		ctx:    ctx,
-		cancel: cancel,
-		name:   "pingc",
+		name: "pingc",
 	}
 }
 
-// Ping Ping入口資料
+// Ping Ping入口
 type Ping struct {
+	name    string             // 入口名稱
+	config  PingConfig         // 配置資料
+	connect atomic.Bool        // 連接旗標
 	ctx     context.Context    // ctx物件
 	cancel  context.CancelFunc // 取消物件
-	name    string             // 入口名稱
-	config  PingConfig         // 設定資料
-	connect atomic.Bool        // 連接旗標
 }
 
-// PingConfig 設定資料
+// PingConfig 配置資料
 type PingConfig struct {
 	IP            string        `yaml:"ip"`            // 位址
 	Port          string        `yaml:"port"`          // 埠號
-	Event         int           `yaml:"event"`         // 事件通道大小
 	Timeout       time.Duration `yaml:"timeout"`       // 逾期時間(秒)
 	Disconnect    bool          `yaml:"disconnect"`    // 斷線旗標
 	Reconnect     bool          `yaml:"reconnect"`     // 重連旗標
@@ -59,7 +55,9 @@ func (this *Ping) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	go func() {
+	this.ctx, this.cancel = context.WithCancel(contexts.Ctx())
+
+	go func() { // TODO: 考慮改成用bind/unbind來觸發channel信號來取代定時監測
 		timeout := time.NewTicker(this.config.ReconnectTime)
 
 		for {
@@ -110,7 +108,7 @@ func (this *Ping) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.SetEventmgr(events.NewEventmgr(this.config.Event)); err != nil {
+	if err := entity.SetEventmgr(events.NewEventmgr(defines.EventCapacity)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
@@ -135,7 +133,7 @@ func (this *Ping) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.Initialize(); err != nil {
+	if err := entity.Initialize(this.wrong); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if

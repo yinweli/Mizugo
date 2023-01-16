@@ -8,6 +8,8 @@ import (
 	"net/http/pprof"
 
 	"github.com/yinweli/Mizugo/mizugos/contexts"
+	"github.com/yinweli/Mizugo/mizugos/pools"
+	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
 // 指標管理器, 其中包括兩部分
@@ -32,43 +34,53 @@ import (
 
 // NewMetricsmgr 建立指標管理器
 func NewMetricsmgr() *Metricsmgr {
-	ctx, cancel := context.WithCancel(contexts.Ctx())
-	return &Metricsmgr{
-		ctx:    ctx,
-		cancel: cancel,
-	}
+	return &Metricsmgr{}
 }
 
 // Metricsmgr 指標管理器
 type Metricsmgr struct {
+	once   utils.SyncOnce     // 單次執行物件
 	ctx    context.Context    // ctx物件
 	cancel context.CancelFunc // 取消物件
 	server *http.Server       // http伺服器物件
 }
 
 // Initialize 初始化處理
-func (this *Metricsmgr) Initialize(port int) {
-	handler := http.NewServeMux()
-	handler.HandleFunc("/debug/pprof/", pprof.Index)
-	handler.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-	handler.HandleFunc("/debug/pprof/profile", pprof.Profile)
-	handler.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-	handler.HandleFunc("/debug/pprof/trace", pprof.Trace)
-	handler.Handle("/debug/vars", expvar.Handler())
+func (this *Metricsmgr) Initialize(port int) error {
+	if this.once.Done() {
+		return fmt.Errorf("metricsmgr initialize: already initialize")
+	} // if
 
-	this.server = &http.Server{
-		Addr:              fmt.Sprintf(":%v", port),
-		ReadHeaderTimeout: serverTimeout,
-		Handler:           handler,
-	}
+	this.once.Do(func() {
+		handler := http.NewServeMux()
+		handler.HandleFunc("/debug/pprof/", pprof.Index)
+		handler.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+		handler.HandleFunc("/debug/pprof/profile", pprof.Profile)
+		handler.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+		handler.HandleFunc("/debug/pprof/trace", pprof.Trace)
+		handler.Handle("/debug/vars", expvar.Handler())
 
-	go func() {
-		_ = this.server.ListenAndServe()
-	}()
+		this.ctx, this.cancel = context.WithCancel(contexts.Ctx())
+		this.server = &http.Server{
+			Addr:              fmt.Sprintf(":%v", port),
+			ReadHeaderTimeout: serverTimeout,
+			Handler:           handler,
+		}
+
+		pools.DefaultPool.Submit(func() {
+			_ = this.server.ListenAndServe()
+		})
+	})
+
+	return nil
 }
 
 // Finalize 結束處理
 func (this *Metricsmgr) Finalize() {
+	if this.once.Done() == false {
+		return
+	} // if
+
 	if this.server != nil {
 		_ = this.server.Close()
 	} // if
