@@ -60,7 +60,7 @@ func (this *SuitePoolmgr) TestSubmit() {
 		validNil.Store(true)
 	}
 	assert.Nil(this.T(), target.Initialize(nil))
-	assert.Nil(this.T(), target.Submit(validNilFunc))
+	target.Submit(validNilFunc)
 	target.Finalize()
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), validNil.Load())
@@ -73,13 +73,19 @@ func (this *SuitePoolmgr) TestSubmit() {
 	assert.Nil(this.T(), target.Initialize(&Config{
 		Logger: &loggerTester{},
 	}))
-	assert.Nil(this.T(), target.Submit(validPoolFunc))
+	target.Submit(validPoolFunc)
 	target.Finalize()
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), validPool.Load())
 
 	target = NewPoolmgr()
-	assert.NotNil(this.T(), target.Submit(func() {}))
+	validFailed := atomic.Bool{}
+	validFailedFunc := func() {
+		validFailed.Store(true)
+	}
+	target.Submit(validFailedFunc)
+	time.Sleep(testdata.Timeout)
+	assert.False(this.T(), validFailed.Load())
 }
 
 func (this *SuitePoolmgr) TestStatus() {

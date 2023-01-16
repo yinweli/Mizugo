@@ -19,8 +19,9 @@ func NewPoolmgr() *Poolmgr {
 
 // Poolmgr 執行緒池管理器
 type Poolmgr struct {
-	pool *ants.Pool     // 執行緒池
-	once utils.SyncOnce // 單次執行物件
+	pool   *ants.Pool     // 執行緒池
+	logger ants.Logger    // 日誌物件
+	once   utils.SyncOnce // 單次執行物件
 }
 
 // Initialize 初始化處理
@@ -43,6 +44,7 @@ func (this *Poolmgr) Initialize(config *Config) (err error) {
 			ants.WithPanicHandler(config.PanicHandler),
 			ants.WithLogger(config.Logger),
 		)
+		this.logger = config.Logger
 
 		if err != nil {
 			err = fmt.Errorf("poolmgr initialize: %w", err)
@@ -64,21 +66,21 @@ func (this *Poolmgr) Finalize() {
 }
 
 // Submit 啟動執行緒
-func (this *Poolmgr) Submit(task func()) error {
+func (this *Poolmgr) Submit(task func()) {
 	if this.once.Done() == false {
-		return fmt.Errorf("poolmgr submit: not initialize")
+		this.logf("poolmgr submit: not initialize")
+		return
 	} // if
 
 	if this.pool == nil {
 		go task()
-		return nil
+		return
 	} // if
 
 	if err := this.pool.Submit(task); err != nil {
-		return fmt.Errorf("poolmgr submit: %w", err)
+		this.logf("poolmgr submit: %w", err)
+		return
 	} // if
-
-	return nil
 }
 
 // Status 獲得狀態資料
@@ -96,6 +98,13 @@ func (this *Poolmgr) Status() Stat {
 		Available: this.pool.Free(),
 		Capacity:  this.pool.Cap(),
 	}
+}
+
+// logf 記錄日誌
+func (this *Poolmgr) logf(format string, args ...interface{}) {
+	if this.logger != nil {
+		this.logger.Printf(format, args...)
+	} // if
 }
 
 // Config 設置資料
@@ -134,6 +143,9 @@ func (this Stat) String() string {
 		{Name: "available", Data: this.Available},
 		{Name: "capacity", Data: this.Capacity},
 	})
+}
+
+type Logger interface {
 }
 
 func init() { //nolint
