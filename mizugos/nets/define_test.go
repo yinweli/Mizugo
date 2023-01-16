@@ -21,20 +21,19 @@ func newTester(bundle, encode, decode bool) *tester {
 
 // tester 測試器
 type tester struct {
-	bundle         bool
-	encode         bool
-	decode         bool
-	err            error
-	bindCount      int
-	unbindCount    int
-	encodeCount    int
-	decodeCount    int
-	receiveCount   int
-	afterSendCount int
-	afterRecvCount int
-	session        Sessioner
-	message        any
-	lock           sync.RWMutex
+	bundle      bool
+	encode      bool
+	decode      bool
+	err         error
+	bindCount   int
+	unbindCount int
+	encodeCount int
+	decodeCount int
+	recvCount   int
+	sendCount   int
+	session     Sessioner
+	message     any
+	lock        sync.RWMutex
 }
 
 func (this *tester) valid() bool {
@@ -72,25 +71,18 @@ func (this *tester) validDecode() bool {
 	return this.decodeCount > 0
 }
 
-func (this *tester) validReceive() bool {
+func (this *tester) validRecv() bool {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 
-	return this.receiveCount > 0
+	return this.recvCount > 0
 }
 
-func (this *tester) validAfterSend() bool {
+func (this *tester) validSend() bool {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 
-	return this.afterSendCount > 0
-}
-
-func (this *tester) validAfterRecv() bool {
-	this.lock.RLock()
-	defer this.lock.RUnlock()
-
-	return this.afterRecvCount > 0
+	return this.sendCount > 0
 }
 
 func (this *tester) validSession() bool {
@@ -147,24 +139,18 @@ func (this *tester) bind(session Sessioner) *Bundle {
 					return nil, fmt.Errorf("decode failed")
 				} // if
 			},
-			Receive: func(message any) {
+			Publish: func(name string, param any) {
 				this.lock.Lock()
 				defer this.lock.Unlock()
 
-				this.receiveCount++
-				this.message = message
-			},
-			AfterSend: func() {
-				this.lock.Lock()
-				defer this.lock.Unlock()
+				if name == EventRecv {
+					this.recvCount++
+					this.message = param
+				} // if
 
-				this.afterSendCount++
-			},
-			AfterRecv: func() {
-				this.lock.Lock()
-				defer this.lock.Unlock()
-
-				this.afterRecvCount++
+				if name == EventSend {
+					this.sendCount++
+				} // if
 			},
 		}
 	} else {
@@ -172,7 +158,7 @@ func (this *tester) bind(session Sessioner) *Bundle {
 	} // if
 }
 
-func (this *tester) unbind(session Sessioner) {
+func (this *tester) unbind(_ Sessioner) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 

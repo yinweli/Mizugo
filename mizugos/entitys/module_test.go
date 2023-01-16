@@ -32,13 +32,13 @@ func (this *SuiteModule) TearDownTest() {
 }
 
 func (this *SuiteModule) TestNewModule() {
-	assert.NotNil(this.T(), NewModule(0))
+	assert.NotNil(this.T(), NewModule(ModuleID(0)))
 }
 
 func (this *SuiteModule) TestModule() {
 	target := NewModule(ModuleID(1))
 	entity := NewEntity(EntityID(1))
-	target.setup(entity)
+	target.initialize(entity)
 
 	assert.Equal(this.T(), ModuleID(1), target.ModuleID())
 	assert.Equal(this.T(), entity, target.Entity())

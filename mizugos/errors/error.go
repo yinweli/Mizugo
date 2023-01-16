@@ -18,8 +18,7 @@ import (
 // ErrorID 錯誤編號類型
 type ErrorID = int64
 
-// 錯誤編號列表
-const (
+const ( // 錯誤編號
 	Success ErrorID  = iota // 成功
 	Unknown                 // 不明錯誤
 	Max     = 100000        // 最大錯誤編號, 外部系統由此編號之後編制自己的錯誤編號

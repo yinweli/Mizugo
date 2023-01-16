@@ -8,17 +8,17 @@ import (
 // newModuleTester 建立模組測試器
 func newModuleTester(awake, start bool, moduleID ModuleID) *moduleTester {
 	return &moduleTester{
+		Module: NewModule(moduleID),
 		awake:  awake,
 		start:  start,
-		Module: NewModule(moduleID),
 	}
 }
 
 // moduleTester 模組測試器
 type moduleTester struct {
-	awake bool
-	start bool
 	*Module
+	awake      bool
+	start      bool
 	awakeCount atomic.Int64
 	startCount atomic.Int64
 }

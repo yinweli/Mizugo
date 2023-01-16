@@ -27,16 +27,14 @@ func NewTCPSession(conn net.Conn) *TCPSession {
 
 // TCPSession TCP會話器
 type TCPSession struct {
-	conn      net.Conn       // 連接物件
-	message   chan any       // 訊息通道
-	signal    sync.WaitGroup // 通知信號
-	encode    Encode         // 封包編碼處理
-	decode    Decode         // 封包解碼處理
-	receive   Receive        // 接收封包處理
-	afterSend AfterSend      // 傳送封包後處理
-	afterRecv AfterRecv      // 接收封包後處理
-	wrong     Wrong          // 錯誤處理
-	owner     any            // 擁有者
+	conn    net.Conn       // 連接物件
+	message chan any       // 訊息通道
+	signal  sync.WaitGroup // 通知信號
+	encode  Encode         // 封包編碼處理
+	decode  Decode         // 封包解碼處理
+	publish Publish        // 發布事件處理
+	wrong   Wrong          // 錯誤處理
+	owner   any            // 擁有者
 }
 
 // Start 啟動會話
@@ -52,9 +50,7 @@ func (this *TCPSession) Start(bind Bind, unbind Unbind, wrong Wrong) {
 
 		this.encode = bundle.Encode
 		this.decode = bundle.Decode
-		this.receive = bundle.Receive
-		this.afterSend = bundle.AfterSend
-		this.afterRecv = bundle.AfterRecv
+		this.publish = bundle.Publish
 		this.wrong = wrong
 
 		pools.DefaultPool.Submit(this.recvLoop)
@@ -125,8 +121,7 @@ func (this *TCPSession) recvLoop() {
 			break
 		} // if
 
-		this.receive(message)
-		this.afterRecv.Do()
+		this.publish.Do(EventRecv, message)
 	} // for
 
 	this.message <- nil // 以空訊息通知會話結束
@@ -179,7 +174,7 @@ func (this *TCPSession) sendLoop() {
 			break
 		} // if
 
-		this.afterSend.Do()
+		this.publish.Do(EventSend, message)
 	} // for
 
 	_ = this.conn.Close()
