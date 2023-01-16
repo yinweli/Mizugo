@@ -9,9 +9,6 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
-// TODO: 把執行緒換成由ants執行
-// TODO: 由於ants會有錯誤, 所以函式回傳值可能得要改改
-
 // NewPoolmgr 建立執行緒池管理器
 func NewPoolmgr() *Poolmgr {
 	return &Poolmgr{}
@@ -26,15 +23,15 @@ type Poolmgr struct {
 
 // Initialize 初始化處理
 func (this *Poolmgr) Initialize(config *Config) (err error) {
+	if config == nil {
+		return fmt.Errorf("poolmgr initialize: config nil")
+	} // if
+
 	if this.once.Done() {
 		return fmt.Errorf("poolmgr initialize: already initialize")
 	} // if
 
 	this.once.Do(func() {
-		if config == nil {
-			return
-		} // if
-
 		this.pool, err = ants.NewPool(
 			config.Capacity,
 			ants.WithExpiryDuration(config.Expire),
@@ -67,29 +64,20 @@ func (this *Poolmgr) Finalize() {
 
 // Submit 啟動執行緒
 func (this *Poolmgr) Submit(task func()) {
-	if this.once.Done() == false {
-		this.logf("poolmgr submit: not initialize")
-		return
-	} // if
-
-	if this.pool == nil {
+	if this.once.Done() {
+		if err := this.pool.Submit(task); err != nil {
+			if this.logger != nil {
+				this.logger.Printf("poolmgr submit: %w", err)
+			} // if
+		} // if
+	} else {
 		go task()
-		return
-	} // if
-
-	if err := this.pool.Submit(task); err != nil {
-		this.logf("poolmgr submit: %w", err)
-		return
 	} // if
 }
 
 // Status 獲得狀態資料
 func (this *Poolmgr) Status() Stat {
-	if this.once.Done() == false {
-		return Stat{}
-	} // if
-
-	if this.pool == nil {
+	if this.once.Done() == false || this.pool == nil {
 		return Stat{}
 	} // if
 
@@ -100,22 +88,15 @@ func (this *Poolmgr) Status() Stat {
 	}
 }
 
-// logf 記錄日誌
-func (this *Poolmgr) logf(format string, args ...interface{}) {
-	if this.logger != nil {
-		this.logger.Printf(format, args...)
-	} // if
-}
-
-// Config 設置資料
+// Config 配置資料
 type Config struct {
 	Capacity     int               `yaml:"capacity"`    // 執行緒池容量, 0表示容量無限
 	Expire       time.Duration     `yaml:"expire"`      // 執行緒逾時時間, 詳細說明請查看ants.Options.ExpiryDuration的說明
 	PreAlloc     bool              `yaml:"preAlloc"`    // 是否預先分配記憶體, 詳細說明請查看ants.Options.PreAlloc的說明
 	Nonblocking  bool              `yaml:"nonblocking"` // 是否在執行緒耗盡時阻塞Submit的執行, 詳細說明請查看ants.Options.Nonblocking的說明
 	MaxBlocking  int               `yaml:"maxBlocking"` // 最大阻塞執行緒數量, 0表示無限制, 詳細說明請查看ants.Options.MaxBlockingTasks的說明
-	PanicHandler func(interface{}) `yaml:"-"`           // 失敗處理函式, 詳細說明請查看ants.Options.PanicHandler的說明
-	Logger       ants.Logger       `yaml:"-"`           // 日誌物件, 詳細說明請查看ants.Options.Logger的說明
+	PanicHandler func(interface{}) `yaml:"-" json:"-"`  // 失敗處理函式, 詳細說明請查看ants.Options.PanicHandler的說明
+	Logger       ants.Logger       `yaml:"-" json:"-"`  // 日誌物件, 詳細說明請查看ants.Options.Logger的說明
 }
 
 // String 取得字串

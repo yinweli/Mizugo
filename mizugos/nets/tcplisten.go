@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net"
 	"sync/atomic"
+
+	"github.com/yinweli/Mizugo/mizugos/pools"
 )
 
 // TCP接聽器, 負責用TCP協議建立接聽, 並等待客戶端連接以取得會話物件
@@ -33,7 +35,7 @@ func (this *TCPListen) Listen(bind Bind, unbind Unbind, wrong Wrong) {
 
 	this.listen = listen
 
-	go func() {
+	pools.DefaultPool.Submit(func() {
 		// 由於listen.Accept的執行方式, 所以不需要用context方式監控終止方式
 
 		for {
@@ -51,7 +53,7 @@ func (this *TCPListen) Listen(bind Bind, unbind Unbind, wrong Wrong) {
 			session := NewTCPSession(conn)
 			session.Start(bind, unbind, wrong)
 		} // for
-	}()
+	})
 }
 
 // Stop 停止接聽

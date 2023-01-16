@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/yinweli/Mizugo/mizugos/contexts"
+	"github.com/yinweli/Mizugo/mizugos/pools"
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
@@ -48,7 +49,7 @@ func (this *Eventmgr) Initialize() error {
 	} // if
 
 	this.once.Do(func() {
-		go func() {
+		pools.DefaultPool.Submit(func() {
 			for {
 				select {
 				case n := <-this.notify:
@@ -71,7 +72,7 @@ func (this *Eventmgr) Initialize() error {
 					this.pubsub.pub(n.name, n.param)
 				} // if
 			} // for
-		}()
+		})
 	})
 
 	return nil
@@ -123,7 +124,7 @@ func (this *Eventmgr) PubFixed(name string, param any, interval time.Duration) {
 		return
 	} // if
 
-	go func() {
+	pools.DefaultPool.Submit(func() {
 		timeout := time.NewTicker(interval)
 
 		for {
@@ -142,7 +143,7 @@ func (this *Eventmgr) PubFixed(name string, param any, interval time.Duration) {
 				return
 			} // select
 		} // for
-	}()
+	})
 }
 
 // Process 處理函式類型

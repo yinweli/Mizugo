@@ -40,52 +40,40 @@ func (this *SuitePoolmgr) TestNewPoolmgr() {
 
 func (this *SuitePoolmgr) TestInitialize() {
 	target := NewPoolmgr()
+	config := &Config{
+		Logger: &loggerTester{},
+	}
+
 	target.Finalize() // 初始化前執行, 這次應該不執行
-	assert.Nil(this.T(), target.Initialize(nil))
-	assert.NotNil(this.T(), target.Initialize(nil)) // 故意啟動兩次, 這次應該失敗
+	assert.Nil(this.T(), target.Initialize(config))
+	assert.NotNil(this.T(), target.Initialize(config)) // 故意啟動兩次, 這次應該失敗
+	assert.NotNil(this.T(), target.Initialize(nil))
 	target.Finalize()
 	target.Finalize() // 故意結束兩次, 這次應該不執行
-
-	target = NewPoolmgr()
-	assert.Nil(this.T(), target.Initialize(&Config{
-		Logger: &loggerTester{},
-	}))
-	target.Finalize()
 }
 
 func (this *SuitePoolmgr) TestSubmit() {
 	target := NewPoolmgr()
-	validNil := atomic.Bool{}
-	validNilFunc := func() {
-		validNil.Store(true)
-	}
-	assert.Nil(this.T(), target.Initialize(nil))
-	target.Submit(validNilFunc)
-	target.Finalize()
-	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), validNil.Load())
-
-	target = NewPoolmgr()
-	validPool := atomic.Bool{}
-	validPoolFunc := func() {
-		validPool.Store(true)
-	}
-	assert.Nil(this.T(), target.Initialize(&Config{
+	config := &Config{
 		Logger: &loggerTester{},
-	}))
-	target.Submit(validPoolFunc)
+	}
+	valid := atomic.Int64{}
+	validFunc := func() {
+		valid.Add(1)
+	}
+
+	time.Sleep(testdata.Timeout)
+	target.Submit(validFunc)
+	time.Sleep(testdata.Timeout)
+	assert.Equal(this.T(), int64(1), valid.Load())
+
+	assert.Nil(this.T(), target.Initialize(config))
+	time.Sleep(testdata.Timeout)
+	target.Submit(validFunc)
+	time.Sleep(testdata.Timeout)
 	target.Finalize()
 	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), validPool.Load())
-
-	target = NewPoolmgr()
-	validFailed := atomic.Bool{}
-	validFailedFunc := func() {
-		validFailed.Store(true)
-	}
-	target.Submit(validFailedFunc)
-	time.Sleep(testdata.Timeout)
-	assert.False(this.T(), validFailed.Load())
+	assert.Equal(this.T(), int64(2), valid.Load())
 }
 
 func (this *SuitePoolmgr) TestStatus() {
@@ -94,7 +82,7 @@ func (this *SuitePoolmgr) TestStatus() {
 	target.Finalize()
 
 	target = NewPoolmgr()
-	assert.Nil(this.T(), target.Initialize(nil))
+	assert.NotNil(this.T(), target.Initialize(nil))
 	assert.Equal(this.T(), Stat{}, target.Status())
 	target.Finalize()
 

@@ -8,6 +8,7 @@ import (
 	"net/http/pprof"
 
 	"github.com/yinweli/Mizugo/mizugos/contexts"
+	"github.com/yinweli/Mizugo/mizugos/pools"
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
@@ -66,9 +67,9 @@ func (this *Metricsmgr) Initialize(port int) error {
 			Handler:           handler,
 		}
 
-		go func() {
+		pools.DefaultPool.Submit(func() {
 			_ = this.server.ListenAndServe()
-		}()
+		})
 	})
 
 	return nil

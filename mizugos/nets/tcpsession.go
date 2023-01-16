@@ -7,6 +7,8 @@ import (
 	"io"
 	"net"
 	"sync"
+
+	"github.com/yinweli/Mizugo/mizugos/pools"
 )
 
 // TCP會話器, 負責傳送/接收訊息等相關的功能
@@ -39,7 +41,7 @@ type TCPSession struct {
 
 // Start 啟動會話
 func (this *TCPSession) Start(bind Bind, unbind Unbind, wrong Wrong) {
-	go func() {
+	pools.DefaultPool.Submit(func() {
 		bundle := bind.Do(this)
 
 		if bundle == nil {
@@ -55,13 +57,13 @@ func (this *TCPSession) Start(bind Bind, unbind Unbind, wrong Wrong) {
 		this.afterRecv = bundle.AfterRecv
 		this.wrong = wrong
 
-		go this.recvLoop()
-		go this.sendLoop()
+		pools.DefaultPool.Submit(this.recvLoop)
+		pools.DefaultPool.Submit(this.sendLoop)
 
 		this.signal.Add(2)
 		this.signal.Wait() // 等待接收循環與傳送循環結束, 如果接收循環與傳送循環結束, 就會繼續進行結束處理
 		unbind.Do(this)
-	}()
+	})
 }
 
 // Stop 停止會話, 不會等待會話內部循環結束
