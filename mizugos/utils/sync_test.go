@@ -39,12 +39,16 @@ func (this *SuiteSync) TestSyncOnce() {
 	validFunc := func() {
 		valid.Add(1)
 	}
-
-	assert.False(this.T(), target.Done())
 	go target.Do(validFunc)
 	go target.Do(validFunc)
 	time.Sleep(testdata.Timeout)
 	assert.Equal(this.T(), int64(1), valid.Load())
+	assert.True(this.T(), target.Done())
+
+	target = SyncOnce{}
+	assert.False(this.T(), target.Done())
+	assert.True(this.T(), target.Do(nil))
+	assert.False(this.T(), target.Do(nil))
 	assert.True(this.T(), target.Done())
 }
 

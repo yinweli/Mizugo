@@ -12,11 +12,17 @@ type SyncOnce struct {
 }
 
 // Do 單次執行
-func (this *SyncOnce) Do(f func()) {
+func (this *SyncOnce) Do(f func()) (do bool) {
 	this.once.Do(func() {
+		do = true
 		this.done.Store(true)
-		f()
+
+		if f != nil {
+			f()
+		} // if
 	})
+
+	return do
 }
 
 // Done 取得執行旗標

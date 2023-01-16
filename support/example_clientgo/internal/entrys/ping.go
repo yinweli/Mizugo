@@ -57,7 +57,7 @@ func (this *Ping) Initialize() error {
 
 	this.ctx, this.cancel = context.WithCancel(contexts.Ctx())
 
-	go func() {
+	go func() { // TODO: 考慮改成用bind/unbind來觸發channel信號來取代定時監測
 		timeout := time.NewTicker(this.config.ReconnectTime)
 
 		for {

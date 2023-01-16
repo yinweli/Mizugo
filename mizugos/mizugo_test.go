@@ -58,7 +58,9 @@ func (this *SuiteMizugo) TestMizugo() {
 	assert.True(this.T(), tester.validInit())
 	assert.True(this.T(), tester.validFinal())
 
-	go Start(name, func() error { return fmt.Errorf("failed") }, nil)
+	go Start(name, func() error {
+		return fmt.Errorf("failed")
+	}, nil)
 	time.Sleep(testdata.Timeout)
 	Stop()
 

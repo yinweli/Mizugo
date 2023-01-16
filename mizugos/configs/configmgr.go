@@ -62,11 +62,9 @@ func (this *Configmgr) ReadFile(name, ext string) (err error) {
 	viper.SetConfigName(name)
 	viper.SetConfigType(ext)
 
-	this.once.Do(func() {
+	if this.once.Do(func() {
 		err = viper.ReadInConfig()
-	})
-
-	if this.once.Done() {
+	}) == false {
 		err = viper.MergeInConfig()
 	} // if
 
@@ -82,11 +80,9 @@ func (this *Configmgr) ReadString(value, ext string) (err error) {
 	reader := bytes.NewBuffer([]byte(value))
 	viper.SetConfigType(ext)
 
-	this.once.Do(func() {
+	if this.once.Do(func() {
 		err = viper.ReadConfig(reader)
-	})
-
-	if this.once.Done() {
+	}) == false {
 		err = viper.MergeConfig(reader)
 	} // if
 
@@ -101,11 +97,9 @@ func (this *Configmgr) ReadString(value, ext string) (err error) {
 func (this *Configmgr) ReadBuffer(reader io.Reader, ext string) (err error) {
 	viper.SetConfigType(ext)
 
-	this.once.Do(func() {
+	if this.once.Do(func() {
 		err = viper.ReadConfig(reader)
-	})
-
-	if this.once.Done() {
+	}) == false {
 		err = viper.MergeConfig(reader)
 	} // if
 
