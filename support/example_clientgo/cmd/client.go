@@ -18,7 +18,6 @@ func initialize() error {
 	client.logger = features.NewLogger()
 	client.pool = features.NewPool()
 	client.metrics = features.NewMetrics()
-	client.echo = entrys.NewEcho()
 	client.ping = entrys.NewPing()
 
 	mizugos.Configmgr().AddPath(defines.ConfigPath)
@@ -35,10 +34,6 @@ func initialize() error {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := client.echo.Initialize(); err != nil {
-		return fmt.Errorf("initialize: %w", err)
-	} // if
-
 	if err := client.ping.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
@@ -48,7 +43,6 @@ func initialize() error {
 
 // finalize 結束處理
 func finalize() {
-	client.echo.Finalize()
 	client.ping.Finalize()
 	client.metrics.Finalize()
 	client.pool.Finalize()
@@ -60,6 +54,5 @@ var client struct {
 	logger  *features.Logger  // 日誌資料
 	pool    *features.Pool    // 執行緒池資料
 	metrics *features.Metrics // 統計資料
-	echo    *entrys.Echo      // 回音入口
 	ping    *entrys.Ping      // Ping入口
 }
