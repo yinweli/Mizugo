@@ -33,15 +33,10 @@ type Ping struct {
 type Incr func() int64
 
 // Awake awake事件
-func (this *Ping) Awake() error { // TODO: Awake跟Start還是弄成介面可選比較好
+func (this *Ping) Awake() error {
 	this.subID = this.Entity().Subscribe(entitys.EventSend, this.eventSend)
 	this.Entity().AddMessage(procs.MessageID(messages.MsgID_KeyReq), this.procMsgKeyReq)
 	this.Entity().AddMessage(procs.MessageID(messages.MsgID_PingReq), this.procMsgPingReq)
-	return nil
-}
-
-// Start start事件
-func (this *Ping) Start() error {
 	return nil
 }
 

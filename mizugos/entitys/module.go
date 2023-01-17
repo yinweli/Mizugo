@@ -3,8 +3,8 @@ package entitys
 // 模組, mizugo中用於存放遊戲功能的資料或是處理函式
 // * 建立模組流程
 //   建立模組結構, 並且把Module作為模組的第一個成員
-//   建立Awake函式, 填入初始化步驟到Awake函式中
-//   建立Start函式, 填入初始化步驟到Start函式中
+//   (可選)建立Awake函式, 填入初始化步驟到Awake函式中
+//   (可選)建立Start函式, 填入初始化步驟到Start函式中; 執行的順序必定是先Awake, 再Start
 //   以此模組結構宣告模組物件, 並加入到實體中
 // * 內部事件
 //   實體提供了內部事件可供訂閱, 內部事件請參考define.go中的說明
@@ -32,11 +32,17 @@ type Moduler interface {
 
 	// Entity 取得實體物件
 	Entity() *Entity
+}
 
-	// Awake 模組初始化時第一個被執行
+// Awaker 模組喚醒介面
+type Awaker interface {
+	// Awake 喚醒處理, 模組初始化時第一個被執行
 	Awake() error
+}
 
-	// Start 模組初始化時第二個被執行
+// Starter 模組啟動介面
+type Starter interface {
+	// Start 啟動處理, 模組初始化時第二個被執行
 	Start() error
 }
 

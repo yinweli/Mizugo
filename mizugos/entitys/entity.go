@@ -74,16 +74,20 @@ func (this *Entity) Initialize(wrong Wrong) (err error) {
 		module := modulemgr.All()
 
 		for _, itor := range module {
-			if err = itor.Awake(); err != nil {
-				err = fmt.Errorf("entity initialize: %w", err)
-				return
+			if awaker, ok := itor.(Awaker); ok {
+				if err = awaker.Awake(); err != nil {
+					err = fmt.Errorf("entity initialize: %w", err)
+					return
+				} // if
 			} // if
 		} // for
 
 		for _, itor := range module {
-			if err = itor.Start(); err != nil {
-				err = fmt.Errorf("entity initialize: %w", err)
-				return
+			if starter, ok := itor.(Starter); ok {
+				if err = starter.Start(); err != nil {
+					err = fmt.Errorf("entity initialize: %w", err)
+					return
+				} // if
 			} // if
 		} // for
 
@@ -170,11 +174,11 @@ func (this *Entity) GetModulemgr() *Modulemgr {
 // AddModule 新增模組, 初始化完成後就不能新增模組
 func (this *Entity) AddModule(module Moduler) error {
 	if this.once.Done() {
-		return fmt.Errorf("entity add module: overdue") // TODO: 如果模組介面有名稱, 錯誤時要顯示一下
+		return fmt.Errorf("entity add module: overdue")
 	} // if
 
 	if err := this.modulemgr.Get().Add(module); err != nil {
-		return fmt.Errorf("entity add module: %w", err) // TODO: 如果模組介面有名稱, 錯誤時要顯示一下
+		return fmt.Errorf("entity add module: %w", err)
 	} // if
 
 	module.initialize(this)
