@@ -19,17 +19,16 @@ import (
 // NewPing 建立Ping入口
 func NewPing() *Ping {
 	return &Ping{
-		name: "pingc",
+		name: "ping",
 	}
 }
 
 // Ping Ping入口
 type Ping struct {
-	name    string             // 入口名稱
-	config  PingConfig         // 配置資料
-	connect atomic.Bool        // 連接旗標
-	ctx     context.Context    // ctx物件
-	cancel  context.CancelFunc // 取消物件
+	name    string      // 入口名稱
+	config  PingConfig  // 配置資料
+	connect atomic.Bool // 連接旗標
+	adapter adapter     // 連線檢測
 }
 
 // PingConfig 配置資料
@@ -37,10 +36,10 @@ type PingConfig struct {
 	IP            string        `yaml:"ip"`            // 位址
 	Port          string        `yaml:"port"`          // 埠號
 	Timeout       time.Duration `yaml:"timeout"`       // 逾期時間(秒)
+	InitKey       string        `yaml:"initkey"`       // 初始密鑰
 	Disconnect    bool          `yaml:"disconnect"`    // 斷線旗標
 	Reconnect     bool          `yaml:"reconnect"`     // 重連旗標
 	ReconnectTime time.Duration `yaml:"reconnectTime"` // 重連檢查時間
-	Key           string        `yaml:"key"`           // 密鑰
 }
 
 // Initialize 初始化處理
@@ -55,31 +54,17 @@ func (this *Ping) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	this.ctx, this.cancel = context.WithCancel(contexts.Ctx())
+	this.adapter.start(this.config.ReconnectTime, func() {
+		if this.connect.CompareAndSwap(false, true) == false {
+			return
+		} // if
 
-	go func() { // TODO: 考慮改成用bind/unbind來觸發channel信號來取代定時監測
-		timeout := time.NewTicker(this.config.ReconnectTime)
+		if this.config.Reconnect == false {
+			return
+		} // if
 
-		for {
-			select {
-			case <-timeout.C:
-				if this.connect.Load() {
-					continue
-				} // if
-
-				if this.config.Reconnect == false {
-					continue
-				} // if
-
-				this.connect.Store(true)
-				mizugos.Netmgr().AddConnectTCP(this.config.IP, this.config.Port, this.config.Timeout, this.bind, this.unbind, this.wrong)
-
-			case <-this.ctx.Done():
-				timeout.Stop()
-				return
-			} // select
-		} // for
-	}()
+		mizugos.Netmgr().AddConnectTCP(this.config.IP, this.config.Port, this.config.Timeout, this.bind, this.unbind, this.wrong)
+	})
 
 	mizugos.Info(this.name).Message("entry start").KV("config", this.config).End()
 	return nil
@@ -88,7 +73,7 @@ func (this *Ping) Initialize() error {
 // Finalize 結束處理
 func (this *Ping) Finalize() {
 	mizugos.Info(this.name).Message("entry finalize").End()
-	this.cancel()
+	this.adapter.close()
 }
 
 // bind 綁定處理
@@ -113,17 +98,12 @@ func (this *Ping) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.SetProcess(procs.NewProtoDes().Key([]byte(this.config.Key))); err != nil {
+	if err := entity.SetProcess(procs.NewProtoDes().Key([]byte(this.config.InitKey))); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
 	if err := entity.SetSession(session); err != nil {
-		wrong = fmt.Errorf("bind: %w", err)
-		goto Error
-	} // if
-
-	if err := entity.AddModule(modules.NewKey()); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
@@ -138,7 +118,7 @@ func (this *Ping) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	mizugos.Labelmgr().Add(entity, "label echo")
+	mizugos.Labelmgr().Add(entity, "label ping")
 	session.SetOwner(entity)
 	return entity.Bundle()
 
@@ -150,6 +130,7 @@ Error:
 	} // if
 
 	this.connect.Store(false)
+	this.adapter.unbind()
 	session.Stop()
 	_ = mizugos.Error(this.name).EndError(wrong)
 	return nil
@@ -159,6 +140,7 @@ Error:
 func (this *Ping) unbind(session nets.Sessioner) {
 	if entity, ok := session.GetOwner().(*entitys.Entity); ok {
 		this.connect.Store(false)
+		this.adapter.unbind()
 		entity.Finalize()
 		mizugos.Entitymgr().Del(entity.EntityID())
 		mizugos.Labelmgr().Erase(entity)
@@ -168,4 +150,44 @@ func (this *Ping) unbind(session nets.Sessioner) {
 // wrong 錯誤處理
 func (this *Ping) wrong(err error) {
 	_ = mizugos.Error(this.name).EndError(err)
+}
+
+// adapter 連線檢測器
+type adapter struct {
+	notify chan any // 通知通道
+	cancel func()   // 取消物件
+}
+
+// start 啟動連線檢測
+func (this *adapter) start(interval time.Duration, done func()) {
+	mizugos.Poolmgr().Submit(func() {
+		timeout := time.NewTicker(interval)
+		ctx, cancel := context.WithCancel(contexts.Ctx())
+		this.notify = make(chan any, 1)
+		this.cancel = cancel
+
+		for {
+			select {
+			case <-this.notify:
+				done()
+
+			case <-timeout.C:
+				done()
+
+			case <-ctx.Done():
+				timeout.Stop()
+				return
+			} // select
+		} // for
+	})
+}
+
+// close 關閉連線檢測
+func (this *adapter) close() {
+	this.cancel()
+}
+
+// unbind 通知解除綁定
+func (this *adapter) unbind() {
+	this.notify <- nil
 }

@@ -1,6 +1,6 @@
 package logs
 
-const (
+const ( // 日誌等級
 	LevelDebug Level = iota // 除錯訊息
 	LevelInfo               // 一般訊息
 	LevelWarn               // 警告訊息

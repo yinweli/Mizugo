@@ -95,9 +95,7 @@ func (this *SuiteEntity) TestEntity() {
 	bundle := target.Bundle()
 	assert.NotNil(this.T(), bundle.Encode)
 	assert.NotNil(this.T(), bundle.Decode)
-	assert.NotNil(this.T(), bundle.Receive)
-	assert.NotNil(this.T(), bundle.AfterSend)
-	assert.NotNil(this.T(), bundle.AfterRecv)
+	assert.NotNil(this.T(), bundle.Publish)
 	assert.Equal(this.T(), this.entityID, target.EntityID())
 	assert.True(this.T(), target.Enable())
 
@@ -131,22 +129,17 @@ func (this *SuiteEntity) TestEvent() {
 
 	onceValue := "once"
 	onceValid := atomic.Bool{}
-	onceSubID, err := target.Subscribe(onceValue, func(param any) {
+	onceSubID := target.Subscribe(onceValue, func(param any) {
 		onceValid.Store(param.(string) == onceValue)
 	})
-	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), onceSubID)
 
 	fixedValue := "fixed"
 	fixedValid := atomic.Bool{}
-	fixedSubID, err := target.Subscribe(fixedValue, func(param any) {
+	fixedSubID := target.Subscribe(fixedValue, func(param any) {
 		fixedValid.Store(param.(string) == fixedValue)
 	})
-	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), fixedSubID)
-
-	_, err = target.Subscribe(EventFinalize, nil)
-	assert.NotNil(this.T(), err)
 
 	target.PublishOnce(onceValue, onceValue)
 	target.PublishFixed(fixedValue, fixedValue, time.Millisecond)

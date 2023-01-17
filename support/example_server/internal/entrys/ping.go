@@ -16,23 +16,23 @@ import (
 // NewPing 建立Ping入口
 func NewPing() *Ping {
 	return &Ping{
-		name: "pings",
+		name: "ping",
 	}
 }
 
 // Ping Ping入口
 type Ping struct {
-	name      string        // 入口名稱
-	config    PingConfig    // 配置資料
-	listenID  nets.ListenID // 接聽編號
-	pingCount atomic.Int64  // 封包計數
+	name     string        // 入口名稱
+	config   PingConfig    // 配置資料
+	listenID nets.ListenID // 接聽編號
+	count    atomic.Int64  // Ping計數
 }
 
 // PingConfig 配置資料
 type PingConfig struct {
-	IP   string `yaml:"ip"`   // 位址
-	Port string `yaml:"port"` // 埠號
-	Key  string `yaml:"key"`  // 密鑰
+	IP      string `yaml:"ip"`      // 位址
+	Port    string `yaml:"port"`    // 埠號
+	InitKey string `yaml:"initkey"` // 初始密鑰
 }
 
 // Initialize 初始化處理
@@ -80,7 +80,7 @@ func (this *Ping) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.SetProcess(procs.NewProtoDes().Key([]byte(this.config.Key))); err != nil {
+	if err := entity.SetProcess(procs.NewProtoDes().Key([]byte(this.config.InitKey))); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
@@ -90,14 +90,7 @@ func (this *Ping) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.AddModule(modules.NewKey()); err != nil {
-		wrong = fmt.Errorf("bind: %w", err)
-		goto Error
-	} // if
-
-	if err := entity.AddModule(modules.NewPing(func() int64 {
-		return this.pingCount.Add(1)
-	})); err != nil {
+	if err := entity.AddModule(modules.NewPing(this.incr)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
@@ -135,4 +128,9 @@ func (this *Ping) unbind(session nets.Sessioner) {
 // wrong 錯誤處理
 func (this *Ping) wrong(err error) {
 	_ = mizugos.Error(this.name).EndError(err)
+}
+
+// incr 增加Ping計數
+func (this *Ping) incr() int64 {
+	return this.count.Add(1)
 }

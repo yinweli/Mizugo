@@ -4,6 +4,11 @@ import (
 	"net"
 )
 
+const ( // 網路事件名稱
+	EventRecv = "recv" // 接收訊息事件, 當接收訊息後觸發, 參數是訊息物件
+	EventSend = "send" // 傳送訊息事件, 當傳送訊息後觸發, 參數是訊息物件
+)
+
 // Connecter 連接介面
 type Connecter interface {
 	// Connect 啟動連接
@@ -88,9 +93,7 @@ func (this Wrong) Do(err error) {
 type Bundle struct {
 	Encode
 	Decode
-	Receive
-	AfterSend
-	AfterRecv
+	Publish
 }
 
 // Encode 封包編碼處理函式類型, 用在傳送封包時
@@ -99,25 +102,12 @@ type Encode func(message any) (packet []byte, err error)
 // Decode 封包解碼處理函式類型, 用在接收封包時
 type Decode func(packet []byte) (message any, err error)
 
-// Receive 接收封包處理函式類型
-type Receive func(message any)
-
-// AfterSend 傳送封包後處理函式類型
-type AfterSend func()
+// Publish 發布事件處理函式類型
+type Publish func(name string, param any)
 
 // Do 執行處理
-func (this AfterSend) Do() {
+func (this Publish) Do(name string, param any) {
 	if this != nil {
-		this()
-	} // if
-}
-
-// AfterRecv 接收封包後處理函式類型
-type AfterRecv func()
-
-// Do 執行處理
-func (this AfterRecv) Do() {
-	if this != nil {
-		this()
+		this(name, param)
 	} // if
 }

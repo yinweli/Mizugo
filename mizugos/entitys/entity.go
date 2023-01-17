@@ -30,11 +30,7 @@ import (
 //   使用者可以訂閱或是取消訂閱事件, 發布只執行一次的事件, 或是發布會定時觸發的事件(由於不能刪除定時事件, 因此發布定時事件前請多想想)
 //   事件可以被訂閱多次, 發布事件時會每個訂閱者都會執行一次
 // * 內部事件
-//   實體提供了以下內部事件可供訂閱
-//   - update: 每updateInterval觸發一次
-//   - dispose: 實體結束時執行
-//   - afterSend: 傳送訊息結束後執行
-//   - afterRecv: 接收訊息結束後執行
+//   實體提供了內部事件可供訂閱, 內部事件請參考define.go中的說明
 // * 處理功能
 //   當實體設置了處理物件與會話物件後, 可以通過處理功能來新增或是刪除訊息處理函式
 // * 會話功能
@@ -78,20 +74,16 @@ func (this *Entity) Initialize(wrong Wrong) (err error) {
 		module := modulemgr.All()
 
 		for _, itor := range module {
-			if awaker, ok := itor.(Awaker); ok {
-				if err = awaker.Awake(); err != nil {
-					err = fmt.Errorf("entity initialize: %w", err)
-					return
-				} // if
+			if err = itor.Awake(); err != nil {
+				err = fmt.Errorf("entity initialize: %w", err)
+				return
 			} // if
 		} // for
 
 		for _, itor := range module {
-			if starter, ok := itor.(Starter); ok {
-				if err = starter.Start(); err != nil {
-					err = fmt.Errorf("entity initialize: %w", err)
-					return
-				} // if
+			if err = itor.Start(); err != nil {
+				err = fmt.Errorf("entity initialize: %w", err)
+				return
 			} // if
 		} // for
 
@@ -102,12 +94,15 @@ func (this *Entity) Initialize(wrong Wrong) (err error) {
 			return
 		} // if
 
-		eventmgr.Sub(EventReceive, func(message any) {
-			if err := this.process.Get().Process(message); err != nil {
-				wrong.Do(fmt.Errorf("entity receive: %w", err))
+		eventmgr.Sub(EventRecv, func(param any) {
+			if err := this.process.Get().Process(param); err != nil {
+				wrong.Do(fmt.Errorf("entity recv: %w", err))
 			} // if
 		})
-		eventmgr.Sub(EventFinalize, func(_ any) {
+		eventmgr.Sub(EventSend, func(_ any) {
+			// do nothing...
+		})
+		eventmgr.Sub(EventShutdown, func(_ any) {
 			if session := this.session.Get(); session != nil {
 				session.Stop()
 			} // if
@@ -131,7 +126,7 @@ func (this *Entity) Finalize() {
 
 	if eventmgr := this.eventmgr.Get(); eventmgr != nil {
 		eventmgr.PubOnce(EventDispose, nil)
-		eventmgr.PubOnce(EventFinalize, nil)
+		eventmgr.PubOnce(EventShutdown, nil)
 		eventmgr.Finalize()
 	} // if
 }
@@ -139,17 +134,9 @@ func (this *Entity) Finalize() {
 // Bundle 取得綁定資料
 func (this *Entity) Bundle() *nets.Bundle {
 	return &nets.Bundle{
-		Encode: this.process.Get().Encode,
-		Decode: this.process.Get().Decode,
-		Receive: func(message any) {
-			this.eventmgr.Get().PubOnce(EventReceive, message)
-		},
-		AfterSend: func() {
-			this.eventmgr.Get().PubOnce(EventAfterSend, nil)
-		},
-		AfterRecv: func() {
-			this.eventmgr.Get().PubOnce(EventAfterRecv, nil)
-		},
+		Encode:  this.process.Get().Encode,
+		Decode:  this.process.Get().Decode,
+		Publish: this.eventmgr.Get().PubOnce,
 	}
 }
 
@@ -190,7 +177,7 @@ func (this *Entity) AddModule(module Moduler) error {
 		return fmt.Errorf("entity add module: %w", err) // TODO: 如果模組介面有名稱, 錯誤時要顯示一下
 	} // if
 
-	module.setup(this)
+	module.initialize(this)
 	return nil
 }
 
@@ -217,12 +204,8 @@ func (this *Entity) GetEventmgr() *events.Eventmgr {
 }
 
 // Subscribe 訂閱事件
-func (this *Entity) Subscribe(name string, process events.Process) (subID string, err error) {
-	if name == EventFinalize || name == EventReceive {
-		return subID, fmt.Errorf("entity subscribe: %v: can't subscribe internal event", name)
-	} // if
-
-	return this.eventmgr.Get().Sub(name, process), nil
+func (this *Entity) Subscribe(name string, process events.Process) string {
+	return this.eventmgr.Get().Sub(name, process)
 }
 
 // Unsubscribe 取消訂閱事件

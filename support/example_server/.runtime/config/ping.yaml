@@ -1,0 +1,4 @@
+ping:
+  ip:
+  port: 10001
+  initkey: init-key

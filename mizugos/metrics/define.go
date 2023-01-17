@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-const (
+const ( // 時間定義
 	serverTimeout = time.Second * 5 // http伺服器逾時時間
 	interval1     = 60              // 間隔時間: 1分鐘
 	interval5     = 300             // 間隔時間: 5分鐘

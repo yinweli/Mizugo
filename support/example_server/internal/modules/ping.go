@@ -4,34 +4,88 @@ import (
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/procs"
+	"github.com/yinweli/Mizugo/mizugos/utils"
 	"github.com/yinweli/Mizugo/support/example_server/internal/defines"
 	"github.com/yinweli/Mizugo/support/example_server/internal/features"
 	"github.com/yinweli/Mizugo/support/example_server/internal/messages"
 )
 
 // NewPing 建立Ping模組
-func NewPing(pingIncr PingIncr) *Ping {
+func NewPing(incr Incr) *Ping {
 	return &Ping{
-		Module:   entitys.NewModule(defines.ModuleIDPing),
-		name:     "module ping(server)",
-		pingIncr: pingIncr,
+		Module: entitys.NewModule(defines.ModuleIDPing),
+		name:   "module ping(server)",
+		key:    utils.RandDesKeyString(),
+		incr:   incr,
 	}
 }
 
 // Ping Ping模組
 type Ping struct {
-	*entitys.Module          // 模組資料
-	name            string   // 模組名稱
-	pingIncr        PingIncr // 封包計數函式
+	*entitys.Module        // 模組資料
+	name            string // 模組名稱
+	key             string // 密鑰
+	incr            Incr   // Ping計數函式
+	subID           string // 訂閱索引
 }
 
-// PingIncr 封包計數函式類型
-type PingIncr func() int64
+// Incr Ping計數函式類型
+type Incr func() int64
 
 // Awake awake事件
-func (this *Ping) Awake() error {
+func (this *Ping) Awake() error { // TODO: Awake跟Start還是弄成介面可選比較好
+	this.subID = this.Entity().Subscribe(entitys.EventSend, this.eventSend)
+	this.Entity().AddMessage(procs.MessageID(messages.MsgID_KeyReq), this.procMsgKeyReq)
 	this.Entity().AddMessage(procs.MessageID(messages.MsgID_PingReq), this.procMsgPingReq)
 	return nil
+}
+
+// Start start事件
+func (this *Ping) Start() error {
+	return nil
+}
+
+// eventSend 傳送事件
+func (this *Ping) eventSend(_ any) {
+	process, err := utils.CastPointer[procs.ProtoDes](this.Entity().GetProcess())
+
+	if err != nil {
+		_ = mizugos.Error(this.name).Message("eventSend").EndError(err)
+		return
+	} // if
+
+	process.Key([]byte(this.key))
+	this.Entity().Unsubscribe(this.subID)
+}
+
+// procMsgKeyReq 處理要求密鑰
+func (this *Ping) procMsgKeyReq(message any) {
+	rec := features.Key.Rec()
+	defer rec()
+
+	_, _, err := procs.ProtoDesUnmarshal[*messages.MsgKeyReq](message)
+
+	if err != nil {
+		_ = mizugos.Error(this.name).Message("procMsgKeyReq").EndError(err)
+		return
+	} // if
+
+	this.sendMsgKeyRes()
+	mizugos.Info(this.name).Message("procMsgKeyReq").KV("key", this.key).End()
+}
+
+// sendMsgKeyRes 傳送回應密鑰
+func (this *Ping) sendMsgKeyRes() {
+	msg, err := procs.ProtoDesMarshal(procs.MessageID(messages.MsgID_KeyRes), &messages.MsgKeyRes{
+		Key: this.key,
+	})
+
+	if err != nil {
+		_ = mizugos.Error(this.name).Message("sendMsgKeyRes").EndError(err)
+		return
+	} // if
+
+	this.Entity().Send(msg)
 }
 
 // procMsgPingReq 處理要求Ping
@@ -46,9 +100,9 @@ func (this *Ping) procMsgPingReq(message any) {
 		return
 	} // if
 
-	count := this.pingIncr()
+	count := this.incr()
 	this.sendMsgPingRes(msg, count)
-	mizugos.Info(this.name).Message("procMsgPingReq receive").KV("count", count).End()
+	mizugos.Info(this.name).Message("procMsgPingReq").KV("count", count).End()
 }
 
 // sendMsgPingRes 傳送回應Ping

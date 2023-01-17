@@ -2,6 +2,14 @@ syntax = "proto3";
 
 option go_package = "/messages;messages";
 
+// 要求密鑰
+message MsgKeyReq {}
+
+// 回應密鑰
+message MsgKeyRes {
+  string key = 1; // 密鑰
+}
+
 // 要求Ping
 message MsgPingReq {
   int64 time = 1; // 傳送時間
