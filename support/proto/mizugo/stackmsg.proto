@@ -4,19 +4,18 @@ import "google/protobuf/any.proto";
 
 option go_package = "/msgs;msgs";
 
-// 複合訊息資料
-message ComplexMsg {
-  repeated ComplexUnit messages = 1; // 訊息列表
+// 堆棧訊息資料
+message StackMsg {
+  repeated StackUnit messages = 1; // 訊息列表
 }
 
-// 複合訊息單元資料
-message ComplexUnit {
+// 堆棧訊息單元資料
+message StackUnit {
   int32 messageID = 1; // 訊息編號, 設置為int32以跟proto的列舉類型統一
   google.protobuf.Any message = 2; // 訊息資料
 }
 
-// 複合訊息測試資料
-message ComplexTest {
-  string name = 1;
-  int32 value = 2;
+// 堆棧訊息測試資料
+message StackTest {
+  string Data = 1; // 測試字串
 }

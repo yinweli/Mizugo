@@ -3,6 +3,7 @@ package modules
 import (
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
+	"github.com/yinweli/Mizugo/mizugos/msgs"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/mizugos/utils"
 	"github.com/yinweli/Mizugo/support/example_server/internal/defines"
@@ -42,7 +43,7 @@ func (this *Ping) Awake() error {
 
 // eventSend 傳送事件
 func (this *Ping) eventSend(_ any) {
-	process, err := utils.CastPointer[procs.ProtoDes](this.Entity().GetProcess())
+	process, err := utils.CastPointer[msgs.ProtoMsg](this.Entity().GetProcess())
 
 	if err != nil {
 		_ = mizugos.Error(this.name).Message("eventSend").EndError(err)
@@ -58,7 +59,7 @@ func (this *Ping) procMsgKeyReq(message any) {
 	rec := features.Key.Rec()
 	defer rec()
 
-	_, _, err := procs.ProtoDesUnmarshal[*messages.MsgKeyReq](message)
+	_, _, err := procs.ProtoUnmarshal[*messages.MsgKeyReq](message)
 
 	if err != nil {
 		_ = mizugos.Error(this.name).Message("procMsgKeyReq").EndError(err)

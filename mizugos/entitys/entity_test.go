@@ -89,7 +89,7 @@ func (this *SuiteEntity) TestEntity() {
 	target := NewEntity(this.entityID)
 	assert.Nil(this.T(), target.SetModulemgr(NewModulemgr()))
 	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(this.capacity)))
-	assert.Nil(this.T(), target.SetProcess(procs.NewSimple()))
+	assert.Nil(this.T(), target.SetProcess(procs.NewJson()))
 	assert.Nil(this.T(), target.Initialize(nil))
 
 	bundle := target.Bundle()
@@ -158,7 +158,7 @@ func (this *SuiteEntity) TestProcess() {
 	assert.Nil(this.T(), target.SetModulemgr(NewModulemgr()))
 	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(this.capacity)))
 
-	process := procs.NewSimple()
+	process := procs.NewJson()
 	assert.Nil(this.T(), target.SetProcess(process))
 	assert.Equal(this.T(), process, target.GetProcess())
 	assert.Nil(this.T(), target.Initialize(nil))
