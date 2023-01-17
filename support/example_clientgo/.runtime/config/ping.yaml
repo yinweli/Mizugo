@@ -1,7 +1,8 @@
-echoc:
+ping:
   ip:
   port: 10001
   timeout: 1s
   disconnect: true
   reconnect: true
   reconnecttime: 20ms
+  initkey: init-key

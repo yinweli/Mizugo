@@ -1,12 +1,12 @@
 package modules
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/procs"
+	"github.com/yinweli/Mizugo/mizugos/utils"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/defines"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/features"
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/messages"
@@ -30,18 +30,58 @@ type Ping struct {
 
 // Awake awake事件
 func (this *Ping) Awake() error {
-	if _, err := this.Entity().Subscribe(defines.EventCompleteKey, this.eventCompleteKey); err != nil {
-		return fmt.Errorf("%v awake: %w", this.name, err)
-	} // if
-
+	this.Entity().Subscribe(defines.EventPing, this.eventPing)
+	this.Entity().AddMessage(procs.MessageID(messages.MsgID_KeyRes), this.procMsgKeyRes)
 	this.Entity().AddMessage(procs.MessageID(messages.MsgID_PingRes), this.procMsgPingRes)
 	return nil
 }
 
-// eventCompleteKey completeKey事件
-func (this *Ping) eventCompleteKey(_ any) {
+// Start start事件
+func (this *Ping) Start() error {
+	this.sendMsgKeyReq()
+	return nil
+}
+
+// eventPing ping事件
+func (this *Ping) eventPing(_ any) {
 	time.Sleep(defines.PingWaitTime)
 	this.sendMsgPingReq()
+}
+
+// procMsgKeyRes 處理回應密鑰
+func (this *Ping) procMsgKeyRes(message any) {
+	rec := features.Key.Rec()
+	defer rec()
+
+	_, msg, err := procs.ProtoDesUnmarshal[*messages.MsgKeyRes](message)
+
+	if err != nil {
+		_ = mizugos.Error(this.name).Message("procMsgKeyRes").EndError(err)
+		return
+	} // if
+
+	process, err := utils.CastPointer[procs.ProtoDes](this.Entity().GetProcess())
+
+	if err != nil {
+		_ = mizugos.Error(this.name).Message("procMsgKeyRes").EndError(err)
+		return
+	} // if
+
+	process.Key([]byte(msg.Key))
+	this.Entity().PublishOnce(defines.EventPing, nil)
+	mizugos.Info(this.name).Message("procMsgKeyRes").KV("key", msg.Key).End()
+}
+
+// sendMsgKeyReq 傳送要求密鑰
+func (this *Ping) sendMsgKeyReq() {
+	msg, err := procs.ProtoDesMarshal(procs.MessageID(messages.MsgID_KeyReq), &messages.MsgKeyReq{})
+
+	if err != nil {
+		_ = mizugos.Error(this.name).Message("sendMsgKeyReq").EndError(err)
+		return
+	} // if
+
+	this.Entity().Send(msg)
 }
 
 // procMsgPingRes 處理回應Ping
@@ -62,6 +102,8 @@ func (this *Ping) procMsgPingRes(message any) {
 
 	if this.disconnect {
 		this.Entity().GetSession().Stop()
+	} else {
+		this.sendMsgPingReq()
 	} // if
 }
 

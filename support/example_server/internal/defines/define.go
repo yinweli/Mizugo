@@ -9,6 +9,5 @@ const ConfigType = "yaml"   // 配置類型
 const EventCapacity = 1000  // 事件容量
 
 const ( // 模組編號
-	ModuleIDKey entitys.ModuleID = iota + 1 // TODO: 考慮一下到底是人工產生模組編號, 還是用hash產生?
-	ModuleIDPing
+	ModuleIDPing entitys.ModuleID = iota + 1
 )
