@@ -1,8 +1,6 @@
 package defines
 
 import (
-	"time"
-
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 )
 
@@ -16,8 +14,4 @@ const ( // 模組編號
 
 const ( // 事件名稱
 	EventPing = "ping"
-)
-
-const (
-	PingWaitTime = time.Millisecond * 10 // Ping等待時間, 讓伺服器有時間設置新的密鑰
 )

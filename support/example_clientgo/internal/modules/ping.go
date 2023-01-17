@@ -13,19 +13,23 @@ import (
 )
 
 // NewPing 建立Ping模組
-func NewPing(disconnect bool) *Ping {
+func NewPing(waitKey, waitPing time.Duration, disconnect bool) *Ping {
 	return &Ping{
 		Module:     entitys.NewModule(defines.ModuleIDPing),
 		name:       "module ping(client)",
+		waitKey:    waitKey,
+		waitPing:   waitPing,
 		disconnect: disconnect,
 	}
 }
 
 // Ping Ping模組
 type Ping struct {
-	*entitys.Module        // 模組資料
-	name            string // 模組名稱
-	disconnect      bool   // 斷線旗標
+	*entitys.Module               // 模組資料
+	name            string        // 模組名稱
+	waitKey         time.Duration // 等待要求Key時間
+	waitPing        time.Duration // 等待要求Ping時間
+	disconnect      bool          // 斷線旗標
 }
 
 // Awake awake事件
@@ -38,13 +42,14 @@ func (this *Ping) Awake() error {
 
 // Start start事件
 func (this *Ping) Start() error {
+	time.Sleep(this.waitKey)
 	this.sendMsgKeyReq()
 	return nil
 }
 
 // eventPing ping事件
 func (this *Ping) eventPing(_ any) {
-	time.Sleep(defines.PingWaitTime)
+	time.Sleep(this.waitPing)
 	this.sendMsgPingReq()
 }
 

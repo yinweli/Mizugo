@@ -2,7 +2,9 @@ ping:
   ip:
   port: 10001
   timeout: 1s
-  disconnect: true
-  reconnect: true
-  reconnecttime: 20ms
   initkey: init-key
+  count: 1000
+  interval: 10ms
+  waitkey: 5s
+  waitping: 10ms
+  disconnect: true
