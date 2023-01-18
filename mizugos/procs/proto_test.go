@@ -103,19 +103,15 @@ func (this *SuiteProto) TestMarshal() {
 	_, err = ProtoMarshal(this.messageID, nil)
 	assert.NotNil(this.T(), err)
 
-	messageID, output2, err := ProtoUnmarshal(output1)
+	messageID, output2, err := ProtoUnmarshal[msgs.ProtoTest](output1)
 	assert.Nil(this.T(), err)
 	assert.Equal(this.T(), this.messageID, messageID)
 	assert.True(this.T(), proto.Equal(this.message, output2))
 
-	output3, ok := output2.(*msgs.ProtoTest)
-	assert.True(this.T(), ok)
-	assert.True(this.T(), proto.Equal(this.message, output3))
-
-	_, _, err = ProtoUnmarshal(nil)
+	_, _, err = ProtoUnmarshal[msgs.ProtoTest](nil)
 	assert.NotNil(this.T(), err)
 
-	_, _, err = ProtoUnmarshal("!?")
+	_, _, err = ProtoUnmarshal[msgs.ProtoTest]("!?")
 	assert.NotNil(this.T(), err)
 }
 
@@ -167,6 +163,6 @@ func BenchmarkProtoUnmarshal(b *testing.B) {
 	})
 
 	for i := 0; i < b.N; i++ {
-		_, _, _ = ProtoUnmarshal(input)
+		_, _, _ = ProtoUnmarshal[msgs.ProtoTest](input)
 	} // for
 }

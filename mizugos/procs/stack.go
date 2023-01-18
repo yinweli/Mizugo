@@ -99,8 +99,9 @@ func (this *Stack) Process(input any) error {
 		return fmt.Errorf("stack process: %w", err)
 	} // if
 
-	stackContext := &StackContext{}
-	stackContext.initialize(message)
+	stackContext := &StackContext{
+		request: message.Messages,
+	}
 
 	for stackContext.next() {
 		messageID := stackContext.messageID()
@@ -113,10 +114,19 @@ func (this *Stack) Process(input any) error {
 		process(stackContext)
 	} // if
 
-	if send := this.send.Get(); send != nil {
-		send(stackContext.result())
+	send := this.send.Get()
+
+	if send == nil {
+		return fmt.Errorf("stack process: send nil")
 	} // if
 
+	result, err := StackMarshal(stackContext)
+
+	if err != nil {
+		return fmt.Errorf("stack process: %w", err)
+	} // if
+
+	send(result)
 	return nil
 }
 
@@ -124,20 +134,15 @@ func (this *Stack) Process(input any) error {
 type StackContext struct {
 	request []*msgs.StackUnit // 要求訊息列表
 	respond []*msgs.StackUnit // 回應訊息列表
-	current int               // 當前位置
-	message *msgs.StackUnit   // 當前訊息
-}
-
-// initialize 初始化處理
-func (this *StackContext) initialize(message *msgs.StackMsg) {
-	this.request = message.Messages
+	currmsg *msgs.StackUnit   // 當前訊息
+	currpos int               // 當前位置
 }
 
 // next 移動到下個訊息
 func (this *StackContext) next() bool {
-	if this.current < len(this.request) {
-		this.message = this.request[this.current]
-		this.current++
+	if this.currpos < len(this.request) {
+		this.currmsg = this.request[this.currpos]
+		this.currpos++
 		return true
 	} // if
 
@@ -146,31 +151,20 @@ func (this *StackContext) next() bool {
 
 // messageID 取得當前訊息編號
 func (this *StackContext) messageID() MessageID {
-	if this.message != nil {
-		return this.message.MessageID
+	if this.currmsg != nil {
+		return this.currmsg.MessageID
 	} // if
 
 	return 0
 }
 
-// Unmarshal 反序列化當前訊息
-func (this *StackContext) Unmarshal() (messageID MessageID, output proto.Message, err error) {
-	if this.message == nil {
-		return 0, nil, fmt.Errorf("stackcontext unmarshal: message nil")
+// message 取得當前訊息
+func (this *StackContext) message() *anypb.Any {
+	if this.currmsg != nil {
+		return this.currmsg.Message
 	} // if
 
-	if output, err = this.message.Message.UnmarshalNew(); err != nil {
-		return 0, nil, fmt.Errorf("stackcontext unmarshal: %w", err)
-	} // if
-
-	return this.message.MessageID, output, nil
-}
-
-// bundle 取得結果訊息
-func (this *StackContext) result() *msgs.StackMsg {
-	return &msgs.StackMsg{
-		Messages: this.respond,
-	}
+	return nil
 }
 
 // AddRespond 新增回應訊息
@@ -186,4 +180,42 @@ func (this *StackContext) AddRespond(messageID MessageID, input proto.Message) e
 		Message:   message,
 	})
 	return nil
+}
+
+// StackMarshal 序列化堆棧訊息
+func StackMarshal(input *StackContext) (output *msgs.StackMsg, err error) {
+	if input == nil {
+		return nil, fmt.Errorf("stack marshal: input nil")
+	} // if
+
+	return &msgs.StackMsg{
+		Messages: input.respond,
+	}, nil
+}
+
+// StackUnmarshal 反序列化堆棧訊息
+func StackUnmarshal[T any](input *StackContext) (messageID MessageID, output *T, err error) {
+	if input == nil {
+		return 0, nil, fmt.Errorf("stack unmarshal: input nil")
+	} // if
+
+	message := input.message()
+
+	if message == nil {
+		return 0, nil, fmt.Errorf("stack unmarshal: message nil")
+	} // if
+
+	temp, err := message.UnmarshalNew()
+
+	if err != nil {
+		return 0, nil, fmt.Errorf("stack unmarshal: %w", err)
+	} // if
+
+	output, ok := temp.(any).(*T)
+
+	if ok == false {
+		return 0, nil, fmt.Errorf("stack unmarshal: cast failed")
+	} // if
+
+	return input.messageID(), output, nil
 }

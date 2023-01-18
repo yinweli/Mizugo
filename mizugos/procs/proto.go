@@ -104,7 +104,7 @@ func ProtoMarshal(messageID MessageID, input proto.Message) (output *msgs.ProtoM
 }
 
 // ProtoUnmarshal 反序列化proto訊息
-func ProtoUnmarshal(input any) (messageID MessageID, output proto.Message, err error) {
+func ProtoUnmarshal[T any](input any) (messageID MessageID, output *T, err error) {
 	if input == nil {
 		return 0, nil, fmt.Errorf("proto unmarshal: input nil")
 	} // if
@@ -115,11 +115,17 @@ func ProtoUnmarshal(input any) (messageID MessageID, output proto.Message, err e
 		return 0, nil, fmt.Errorf("proto unmarshal: %w", err)
 	} // if
 
-	if output, err = message.Message.UnmarshalNew(); err != nil {
+	temp, err := message.Message.UnmarshalNew()
+
+	if err != nil {
 		return 0, nil, fmt.Errorf("proto unmarshal: %w", err)
+	} // if
+
+	output, ok := temp.(any).(*T)
+
+	if ok == false {
+		return 0, nil, fmt.Errorf("proto unmarshal: cast failed")
 	} // if
 
 	return message.MessageID, output, nil
 }
-
-// TODO: 從proto.Message轉到proto message是否可以通過(any(input)).(*T)達成呢?
