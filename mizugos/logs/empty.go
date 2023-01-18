@@ -42,8 +42,7 @@ func (this *EmptyStream) Error(_ error) Stream {
 }
 
 // EndError 以錯誤結束記錄
-func (this *EmptyStream) EndError(err error) error {
-	return err
+func (this *EmptyStream) EndError(_ error) {
 }
 
 // End 結束記錄

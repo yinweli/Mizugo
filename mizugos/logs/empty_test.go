@@ -47,7 +47,7 @@ func (this *SuiteEmpty) TestEmptyStream() {
 	assert.Equal(this.T(), target, target.Message("message"))
 	assert.Equal(this.T(), target, target.KV("key", "value"))
 	assert.Equal(this.T(), target, target.Error(fmt.Errorf("error")))
-	assert.NotNil(this.T(), target.EndError(fmt.Errorf("end error")))
+	target.EndError(fmt.Errorf("end error"))
 	target.End()
 
 	logger.Finalize()

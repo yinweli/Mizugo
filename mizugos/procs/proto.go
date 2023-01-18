@@ -121,3 +121,5 @@ func ProtoUnmarshal(input any) (messageID MessageID, output proto.Message, err e
 
 	return message.MessageID, output, nil
 }
+
+// TODO: 從proto.Message轉到proto message是否可以通過(any(input)).(*T)達成呢?

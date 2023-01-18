@@ -260,9 +260,8 @@ func (this *ZapStream) Error(err error) Stream {
 }
 
 // EndError 以錯誤結束記錄
-func (this *ZapStream) EndError(err error) error {
+func (this *ZapStream) EndError(err error) {
 	this.Error(err).End()
-	return err
 }
 
 // End 結束記錄

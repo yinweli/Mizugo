@@ -48,8 +48,7 @@ func (this *streamTester) Error(_ error) Stream {
 	return this
 }
 
-func (this *streamTester) EndError(err error) error {
-	return err
+func (this *streamTester) EndError(_ error) {
 }
 
 func (this *streamTester) End() {
