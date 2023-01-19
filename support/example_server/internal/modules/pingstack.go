@@ -53,7 +53,7 @@ func (this *PingStack) eventSend(_ any) {
 
 // procMKeyQ 處理要求Key
 func (this *PingStack) procMKeyQ(message any) {
-	rec := features.Ping.Rec()
+	rec := features.Key.Rec()
 	defer rec()
 
 	context, ok := message.(*procs.StackContext)

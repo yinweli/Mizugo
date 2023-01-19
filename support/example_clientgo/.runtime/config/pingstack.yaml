@@ -1,10 +1,11 @@
-ping:
+pingstack:
+  enable: true
   ip:
-  port: 10001
+  port: 10003
   timeout: 1s
-  initkey: init-key
   count: 1000
   interval: 10ms
-  waitkey: 5s
+  waitkey: 10ms
   waitping: 10ms
+  keyinit: key-init
   disconnect: true
