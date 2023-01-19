@@ -134,6 +134,13 @@ func (this *SuiteEntity) TestEvent() {
 	})
 	assert.NotNil(this.T(), onceSubID)
 
+	delayValue := "delay"
+	delayValid := atomic.Bool{}
+	delaySubID := target.Subscribe(delayValue, func(param any) {
+		delayValid.Store(param.(string) == delayValue)
+	})
+	assert.NotNil(this.T(), delaySubID)
+
 	fixedValue := "fixed"
 	fixedValid := atomic.Bool{}
 	fixedSubID := target.Subscribe(fixedValue, func(param any) {
@@ -142,7 +149,8 @@ func (this *SuiteEntity) TestEvent() {
 	assert.NotNil(this.T(), fixedSubID)
 
 	target.PublishOnce(onceValue, onceValue)
-	target.PublishFixed(fixedValue, fixedValue, time.Millisecond)
+	target.PublishDelay(onceValue, onceValue, testdata.Timeout)
+	target.PublishFixed(fixedValue, fixedValue, testdata.Timeout)
 
 	time.Sleep(testdata.Timeout * 2) // 多等一下讓定時事件發生
 	assert.True(this.T(), onceValid.Load())

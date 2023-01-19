@@ -219,7 +219,12 @@ func (this *Entity) PublishOnce(name string, param any) {
 	this.eventmgr.Get().PubOnce(name, param)
 }
 
-// PublishFixed 發布定時事件; 請注意! 由於不能刪除定時事件, 因此發布定時事件前請多想想
+// PublishDelay 發布延遲事件, 事件會延遲一段時間才發布, 但仍是單次事件
+func (this *Entity) PublishDelay(name string, param any, delay time.Duration) {
+	this.eventmgr.Get().PubDelay(name, param, delay)
+}
+
+// PublishFixed 發布定時事件, 請注意! 由於不能刪除定時事件, 因此發布定時事件前請多想想
 func (this *Entity) PublishFixed(name string, param any, interval time.Duration) {
 	this.eventmgr.Get().PubFixed(name, param, interval)
 }

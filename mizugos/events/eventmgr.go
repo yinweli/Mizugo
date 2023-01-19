@@ -118,7 +118,28 @@ func (this *Eventmgr) PubOnce(name string, param any) {
 	}
 }
 
-// PubFixed 發布定時事件; 請注意! 由於不能刪除定時事件, 因此發布定時事件前請多想想
+// PubDelay 發布延遲事件, 事件會延遲一段時間才發布, 但仍是單次事件
+func (this *Eventmgr) PubDelay(name string, param any, delay time.Duration) {
+	if this.close.Load() {
+		return
+	} // if
+
+	pools.DefaultPool.Submit(func() {
+		timeout := time.After(delay)
+
+		for range timeout {
+			if this.close.Load() == false {
+				this.notify <- notify{
+					pub:   true,
+					name:  name,
+					param: param,
+				}
+			} // if
+		} // for
+	})
+}
+
+// PubFixed 發布定時事件, 請注意! 由於不能刪除定時事件, 因此發布定時事件前請多想想
 func (this *Eventmgr) PubFixed(name string, param any, interval time.Duration) {
 	if this.close.Load() {
 		return

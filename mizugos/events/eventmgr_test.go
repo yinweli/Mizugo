@@ -65,8 +65,29 @@ func (this *SuiteEventmgr) TestPubOnce() {
 	assert.True(this.T(), valid.Load())
 
 	target.Finalize()
-	target.PubOnce(value, value) // 測試在結束之後發布事件
-	target.Unsub("")             // 測試在結束之後取消訂閱
+	target.PubOnce(value, value)
+	target.Unsub("")
+}
+
+func (this *SuiteEventmgr) TestPubDelay() {
+	target := NewEventmgr(this.capacity)
+	assert.Nil(this.T(), target.Initialize())
+
+	value := "value delay"
+	valid := atomic.Bool{}
+	subID := ""
+	subID = target.Sub(value, func(param any) {
+		valid.Store(param.(string) == value)
+		target.Unsub(subID)
+	})
+
+	target.PubDelay(value, value, testdata.Timeout)
+	time.Sleep(testdata.Timeout * 2) // 多等一下讓延遲事件發生
+	assert.True(this.T(), valid.Load())
+
+	target.Finalize()
+	target.PubDelay(value, value, testdata.Timeout)
+	target.Unsub("")
 }
 
 func (this *SuiteEventmgr) TestPubFixed() {
@@ -86,8 +107,8 @@ func (this *SuiteEventmgr) TestPubFixed() {
 	assert.True(this.T(), valid.Load())
 
 	target.Finalize()
-	target.PubFixed(value, value, testdata.Timeout) // 測試在結束之後發布事件
-	target.Unsub("")                                // 測試在結束之後取消訂閱
+	target.PubFixed(value, value, testdata.Timeout)
+	target.Unsub("")
 }
 
 func (this *SuiteEventmgr) TestPubsub() {

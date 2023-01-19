@@ -9,8 +9,7 @@ const ConfigType = "yaml"   // 配置類型
 const EventCapacity = 1000  // 事件容量
 
 const ( // 模組編號
-	ModuleIDKey entitys.ModuleID = iota + 1
-	ModuleIDPingJson
+	ModuleIDPingJson entitys.ModuleID = iota + 1
 	ModuleIDPingProto
 	ModuleIDPingStack
 )
