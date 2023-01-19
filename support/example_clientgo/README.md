@@ -9,3 +9,6 @@ expvarmon -ports="http://localhost:8082" -i 1s -vars="time:ping.time,time(max):p
 
 # 使用expvarmon監控客戶端連線數量
 expvarmon -ports="http://localhost:8082" -i 1s -vars="connect:connect"
+
+# 使用圖形化檢視查看伺服器記憶體狀況
+go tool pprof -http=:18082 http://localhost:8082/debug/pprof/heap

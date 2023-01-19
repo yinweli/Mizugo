@@ -6,3 +6,6 @@ expvarmon -ports="http://localhost:8081" -i 1s -vars="time:key.time,time(max):ke
 
 # 使用expvarmon監控伺服器ping狀況
 expvarmon -ports="http://localhost:8081" -i 1s -vars="time:ping.time,time(max):ping.time(max),time(avg):ping.time(avg),count:ping.count,count(1m):ping.count(1m),count(5m):ping.count(5m),count(10m):ping.count(10m),count(60m):ping.count(60m)"
+
+# 使用圖形化檢視查看伺服器記憶體狀況
+go tool pprof -http=:18081 http://localhost:8081/debug/pprof/heap

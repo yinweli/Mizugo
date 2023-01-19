@@ -232,13 +232,21 @@ func (this *pubsub) unsub(subID string) {
 // pub 發布
 func (this *pubsub) pub(name string, param any) {
 	this.lock.RLock()
-	defer this.lock.RUnlock()
+
+	process := []Process{}
 
 	if cell, ok := this.data[name]; ok {
 		for _, itor := range cell {
-			itor.Do(param)
+			process = append(process, itor)
 		} // for
 	} // if
+
+	this.lock.RUnlock()
+
+	for _, itor := range process {
+		itor.Do(param)
+	} // for
+
 }
 
 // subIDEncode 編碼訂閱索引

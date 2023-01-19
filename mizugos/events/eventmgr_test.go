@@ -133,6 +133,21 @@ func (this *SuiteEventmgr) TestPubsub() {
 	target.unsub(subID2)
 	target.pub(value, value)
 	assert.Equal(this.T(), 3, valid)
+
+	value1 := "value cycle1"
+	value2 := "value cycle2"
+	valid1 := 0
+	valid2 := 0
+	target.sub(value1, func(param any) {
+		valid1++
+		target.sub(value2, func(param any) {
+			valid2++
+		})
+	})
+	target.pub(value1, nil)
+	target.pub(value2, nil)
+	assert.Equal(this.T(), 1, valid1)
+	assert.Equal(this.T(), 1, valid2)
 }
 
 func (this *SuiteEventmgr) TestSubID() {

@@ -6,6 +6,6 @@ pingstack:
   count: 1000
   interval: 10ms
   waitkey: 10ms
-  waitping: 10ms
+  waitping: 1s
   keyinit: key-init
   disconnect: true
