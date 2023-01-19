@@ -8,13 +8,11 @@ type EmptyLogger struct {
 
 // Initialize 初始化處理
 func (this *EmptyLogger) Initialize() error {
-	// do nothing...
 	return nil
 }
 
 // Finalize 結束處理
 func (this *EmptyLogger) Finalize() {
-	// do nothing...
 }
 
 // New 建立日誌

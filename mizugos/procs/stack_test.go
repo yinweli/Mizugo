@@ -85,10 +85,10 @@ func (this *SuiteStack) TestProcess() {
 		_, validSend = message.(*msgs.StackMsg)
 	})
 	validProcess := false
-	target.Add(this.messageID, func(context any) {
-		if stackContext, ok := context.(*StackContext); ok {
-			messageID, message, err := StackUnmarshal[msgs.StackTest](stackContext)
-			validProcess = err == nil && this.messageID == messageID && proto.Equal(this.message, message)
+	target.Add(this.messageID, func(message any) {
+		if context, ok := message.(*StackContext); ok {
+			messageID, msg, err := StackUnmarshal[msgs.StackTest](context)
+			validProcess = err == nil && this.messageID == messageID && proto.Equal(this.message, msg)
 		} // if
 	})
 	assert.Nil(this.T(), target.Process(input))

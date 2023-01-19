@@ -103,9 +103,6 @@ func (this *Entity) Initialize(wrong Wrong) (err error) {
 				wrong.Do(fmt.Errorf("entity recv: %w", err))
 			} // if
 		})
-		eventmgr.Sub(EventSend, func(_ any) {
-			// do nothing...
-		})
 		eventmgr.Sub(EventShutdown, func(_ any) {
 			if session := this.session.Get(); session != nil {
 				session.Stop()
