@@ -43,6 +43,7 @@ func (this *Metrics) Initialize() error {
 	mizugos.Info(this.name).Message("initialize").KV("config", this.config).End()
 	Key = mizugos.Metricsmgr().NewRuntime("key")
 	Ping = mizugos.Metricsmgr().NewRuntime("ping")
+	Connect = mizugos.Metricsmgr().NewInt("connect")
 	return nil
 }
 
@@ -53,3 +54,4 @@ func (this *Metrics) Finalize() {
 
 var Key *metrics.Runtime  // 密鑰統計物件
 var Ping *metrics.Runtime // Ping統計物件
+var Connect *metrics.Int  // 連線統計物件

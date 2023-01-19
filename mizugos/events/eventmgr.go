@@ -118,7 +118,35 @@ func (this *Eventmgr) PubOnce(name string, param any) {
 	}
 }
 
-// PubFixed 發布定時事件; 請注意! 由於不能刪除定時事件, 因此發布定時事件前請多想想
+// PubDelay 發布延遲事件, 事件會延遲一段時間才發布, 但仍是單次事件
+func (this *Eventmgr) PubDelay(name string, param any, delay time.Duration) {
+	if this.close.Load() {
+		return
+	} // if
+
+	pools.DefaultPool.Submit(func() {
+		timeout := time.NewTimer(delay)
+
+		for {
+			select {
+			case <-timeout.C:
+				if this.close.Load() == false {
+					this.notify <- notify{
+						pub:   true,
+						name:  name,
+						param: param,
+					}
+				} // if
+
+			case <-this.ctx.Done():
+				timeout.Stop()
+				return
+			} // select
+		} // for
+	})
+}
+
+// PubFixed 發布定時事件, 請注意! 由於不能刪除定時事件, 因此發布定時事件前請多想想
 func (this *Eventmgr) PubFixed(name string, param any, interval time.Duration) {
 	if this.close.Load() {
 		return
@@ -211,13 +239,20 @@ func (this *pubsub) unsub(subID string) {
 // pub 發布
 func (this *pubsub) pub(name string, param any) {
 	this.lock.RLock()
-	defer this.lock.RUnlock()
+
+	process := []Process{}
 
 	if cell, ok := this.data[name]; ok {
 		for _, itor := range cell {
-			itor.Do(param)
+			process = append(process, itor)
 		} // for
 	} // if
+
+	this.lock.RUnlock()
+
+	for _, itor := range process {
+		itor.Do(param)
+	} // for
 }
 
 // subIDEncode 編碼訂閱索引

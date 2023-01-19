@@ -31,7 +31,7 @@ type Stream interface {
 	Error(err error) Stream
 
 	// EndError 以錯誤結束記錄
-	EndError(err error) error
+	EndError(err error)
 
 	// End 結束記錄
 	End()

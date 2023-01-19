@@ -8,13 +8,11 @@ type EmptyLogger struct {
 
 // Initialize 初始化處理
 func (this *EmptyLogger) Initialize() error {
-	// do nothing...
 	return nil
 }
 
 // Finalize 結束處理
 func (this *EmptyLogger) Finalize() {
-	// do nothing...
 }
 
 // New 建立日誌
@@ -42,8 +40,7 @@ func (this *EmptyStream) Error(_ error) Stream {
 }
 
 // EndError 以錯誤結束記錄
-func (this *EmptyStream) EndError(err error) error {
-	return err
+func (this *EmptyStream) EndError(_ error) {
 }
 
 // End 結束記錄

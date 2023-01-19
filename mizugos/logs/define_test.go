@@ -25,7 +25,6 @@ func (this *loggerTester) Initialize() error {
 }
 
 func (this *loggerTester) Finalize() {
-	// do nothing...
 }
 
 func (this *loggerTester) New(label string, level Level) Stream {
@@ -48,8 +47,7 @@ func (this *streamTester) Error(_ error) Stream {
 	return this
 }
 
-func (this *streamTester) EndError(err error) error {
-	return err
+func (this *streamTester) EndError(_ error) {
 }
 
 func (this *streamTester) End() {

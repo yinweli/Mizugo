@@ -74,16 +74,20 @@ func (this *Entity) Initialize(wrong Wrong) (err error) {
 		module := modulemgr.All()
 
 		for _, itor := range module {
-			if err = itor.Awake(); err != nil {
-				err = fmt.Errorf("entity initialize: %w", err)
-				return
+			if awaker, ok := itor.(Awaker); ok {
+				if err = awaker.Awake(); err != nil {
+					err = fmt.Errorf("entity initialize: %w", err)
+					return
+				} // if
 			} // if
 		} // for
 
 		for _, itor := range module {
-			if err = itor.Start(); err != nil {
-				err = fmt.Errorf("entity initialize: %w", err)
-				return
+			if starter, ok := itor.(Starter); ok {
+				if err = starter.Start(); err != nil {
+					err = fmt.Errorf("entity initialize: %w", err)
+					return
+				} // if
 			} // if
 		} // for
 
@@ -98,9 +102,6 @@ func (this *Entity) Initialize(wrong Wrong) (err error) {
 			if err := this.process.Get().Process(param); err != nil {
 				wrong.Do(fmt.Errorf("entity recv: %w", err))
 			} // if
-		})
-		eventmgr.Sub(EventSend, func(_ any) {
-			// do nothing...
 		})
 		eventmgr.Sub(EventShutdown, func(_ any) {
 			if session := this.session.Get(); session != nil {
@@ -170,11 +171,11 @@ func (this *Entity) GetModulemgr() *Modulemgr {
 // AddModule 新增模組, 初始化完成後就不能新增模組
 func (this *Entity) AddModule(module Moduler) error {
 	if this.once.Done() {
-		return fmt.Errorf("entity add module: overdue") // TODO: 如果模組介面有名稱, 錯誤時要顯示一下
+		return fmt.Errorf("entity add module: overdue")
 	} // if
 
 	if err := this.modulemgr.Get().Add(module); err != nil {
-		return fmt.Errorf("entity add module: %w", err) // TODO: 如果模組介面有名稱, 錯誤時要顯示一下
+		return fmt.Errorf("entity add module: %w", err)
 	} // if
 
 	module.initialize(this)
@@ -218,7 +219,12 @@ func (this *Entity) PublishOnce(name string, param any) {
 	this.eventmgr.Get().PubOnce(name, param)
 }
 
-// PublishFixed 發布定時事件; 請注意! 由於不能刪除定時事件, 因此發布定時事件前請多想想
+// PublishDelay 發布延遲事件, 事件會延遲一段時間才發布, 但仍是單次事件
+func (this *Entity) PublishDelay(name string, param any, delay time.Duration) {
+	this.eventmgr.Get().PubDelay(name, param, delay)
+}
+
+// PublishFixed 發布定時事件, 請注意! 由於不能刪除定時事件, 因此發布定時事件前請多想想
 func (this *Entity) PublishFixed(name string, param any, interval time.Duration) {
 	this.eventmgr.Get().PubFixed(name, param, interval)
 }

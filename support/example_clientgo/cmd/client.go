@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	mizugos.Start("example_client_go", initialize, finalize)
+	mizugos.Start("example_clientgo", initialize, finalize)
 }
 
 // initialize 初始化處理
@@ -18,7 +18,9 @@ func initialize() error {
 	client.logger = features.NewLogger()
 	client.pool = features.NewPool()
 	client.metrics = features.NewMetrics()
-	client.ping = entrys.NewPing()
+	client.pingJson = entrys.NewPingJson()
+	client.pingProto = entrys.NewPingProto()
+	client.pingStack = entrys.NewPingStack()
 
 	mizugos.Configmgr().AddPath(defines.ConfigPath)
 
@@ -34,7 +36,15 @@ func initialize() error {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := client.ping.Initialize(); err != nil {
+	if err := client.pingJson.Initialize(); err != nil {
+		return fmt.Errorf("initialize: %w", err)
+	} // if
+
+	if err := client.pingProto.Initialize(); err != nil {
+		return fmt.Errorf("initialize: %w", err)
+	} // if
+
+	if err := client.pingStack.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
@@ -43,7 +53,9 @@ func initialize() error {
 
 // finalize 結束處理
 func finalize() {
-	client.ping.Finalize()
+	client.pingJson.Finalize()
+	client.pingProto.Finalize()
+	client.pingStack.Finalize()
 	client.metrics.Finalize()
 	client.pool.Finalize()
 	client.logger.Finalize()
@@ -51,8 +63,10 @@ func finalize() {
 
 // client 客戶端資料
 var client struct {
-	logger  *features.Logger  // 日誌資料
-	pool    *features.Pool    // 執行緒池資料
-	metrics *features.Metrics // 統計資料
-	ping    *entrys.Ping      // Ping入口
+	logger    *features.Logger  // 日誌資料
+	pool      *features.Pool    // 執行緒池資料
+	metrics   *features.Metrics // 統計資料
+	pingJson  *entrys.PingJson  // PingJson入口
+	pingProto *entrys.PingProto // PingProto入口
+	pingStack *entrys.PingStack // PingStack入口
 }

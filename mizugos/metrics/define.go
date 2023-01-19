@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"expvar"
 	"time"
 )
 
@@ -11,3 +12,15 @@ const ( // 時間定義
 	interval10    = 600             // 間隔時間: 10分鐘
 	interval60    = 3600            // 間隔時間: 60分鐘
 )
+
+// Int 整數統計
+type Int = expvar.Int
+
+// Float 浮點數統計
+type Float = expvar.Float
+
+// String 字串統計
+type String = expvar.String
+
+// Map 映射統計
+type Map = expvar.Map

@@ -79,7 +79,7 @@ func (this *SuiteZap) TestZapStream() {
 
 	target = logger.New("log", LevelDebug)
 	assert.Equal(this.T(), target, target.Message("message"))
-	assert.NotNil(this.T(), target.EndError(fmt.Errorf("end error")))
+	target.EndError(fmt.Errorf("end error"))
 
 	logger.Finalize()
 }

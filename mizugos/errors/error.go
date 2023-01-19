@@ -19,9 +19,9 @@ import (
 type ErrorID = int64
 
 const ( // 錯誤編號
-	Success ErrorID  = iota // 成功
-	Unknown                 // 不明錯誤
-	Max     = 100000        // 最大錯誤編號, 外部系統由此編號之後編制自己的錯誤編號
+	Success ErrorID = iota // 成功
+	Unknown                // 不明錯誤
+	Max     = 10000        // 最大錯誤編號, 外部系統由此編號之後編制自己的錯誤編號
 )
 
 // Errorf 產生錯誤

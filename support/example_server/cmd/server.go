@@ -18,7 +18,9 @@ func initialize() error {
 	server.logger = features.NewLogger()
 	server.pool = features.NewPool()
 	server.metrics = features.NewMetrics()
-	server.ping = entrys.NewPing()
+	server.pingJson = entrys.NewPingJson()
+	server.pingProto = entrys.NewPingProto()
+	server.pingStack = entrys.NewPingStack()
 
 	mizugos.Configmgr().AddPath(defines.ConfigPath)
 
@@ -34,7 +36,15 @@ func initialize() error {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := server.ping.Initialize(); err != nil {
+	if err := server.pingJson.Initialize(); err != nil {
+		return fmt.Errorf("initialize: %w", err)
+	} // if
+
+	if err := server.pingProto.Initialize(); err != nil {
+		return fmt.Errorf("initialize: %w", err)
+	} // if
+
+	if err := server.pingStack.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
@@ -43,7 +53,9 @@ func initialize() error {
 
 // finalize 結束處理
 func finalize() {
-	server.ping.Finalize()
+	server.pingJson.Finalize()
+	server.pingProto.Finalize()
+	server.pingStack.Finalize()
 	server.metrics.Finalize()
 	server.pool.Finalize()
 	server.logger.Finalize()
@@ -51,8 +63,10 @@ func finalize() {
 
 // server 伺服器資料
 var server struct {
-	logger  *features.Logger  // 日誌資料
-	pool    *features.Pool    // 執行緒池資料
-	metrics *features.Metrics // 統計資料
-	ping    *entrys.Ping      // Ping入口
+	logger    *features.Logger  // 日誌資料
+	pool      *features.Pool    // 執行緒池資料
+	metrics   *features.Metrics // 統計資料
+	pingJson  *entrys.PingJson  // PingJson入口
+	pingProto *entrys.PingProto // PingProto入口
+	pingStack *entrys.PingStack // PingStack入口
 }

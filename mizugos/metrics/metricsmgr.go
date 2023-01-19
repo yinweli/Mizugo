@@ -89,22 +89,22 @@ func (this *Metricsmgr) Finalize() {
 }
 
 // NewInt 建立整數統計
-func (this *Metricsmgr) NewInt(name string) *expvar.Int {
+func (this *Metricsmgr) NewInt(name string) *Int {
 	return expvar.NewInt(name)
 }
 
 // NewFloat 建立浮點數統計
-func (this *Metricsmgr) NewFloat(name string) *expvar.Float {
+func (this *Metricsmgr) NewFloat(name string) *Float {
 	return expvar.NewFloat(name)
 }
 
 // NewString 建立字串統計
-func (this *Metricsmgr) NewString(name string) *expvar.String {
+func (this *Metricsmgr) NewString(name string) *String {
 	return expvar.NewString(name)
 }
 
 // NewMap 建立映射統計
-func (this *Metricsmgr) NewMap(name string) *expvar.Map {
+func (this *Metricsmgr) NewMap(name string) *Map {
 	return expvar.NewMap(name)
 }
 

@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option go_package = "/messages;messages";
+
+// 訊息編號
+enum MsgID {
+  Unknown = 0; // 不明/錯誤訊息編號, 此編號不可使用
+  KeyQ = 1; // 要求密鑰
+  KeyA = 2; // 回應密鑰
+  PingJsonQ = 3; // 要求PingJson
+  PingJsonA = 4; // 回應PingJson
+  PingProtoQ = 5; // 要求PingProto
+  PingProtoA = 6; // 回應PingProto
+  PingStackQ = 7; // 要求PingStack
+  PingStackA = 8; // 回應PingStack
+}

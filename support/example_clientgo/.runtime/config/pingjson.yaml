@@ -1,0 +1,10 @@
+pingjson:
+  enable: false
+  ip:
+  port: 10001
+  timeout: 1s
+  total: 1000
+  batch: 1
+  interval: 10ms
+  waittime: 10ms
+  disconnect: true

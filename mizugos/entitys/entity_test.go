@@ -89,7 +89,7 @@ func (this *SuiteEntity) TestEntity() {
 	target := NewEntity(this.entityID)
 	assert.Nil(this.T(), target.SetModulemgr(NewModulemgr()))
 	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(this.capacity)))
-	assert.Nil(this.T(), target.SetProcess(procs.NewSimple()))
+	assert.Nil(this.T(), target.SetProcess(procs.NewJson()))
 	assert.Nil(this.T(), target.Initialize(nil))
 
 	bundle := target.Bundle()
@@ -134,6 +134,13 @@ func (this *SuiteEntity) TestEvent() {
 	})
 	assert.NotNil(this.T(), onceSubID)
 
+	delayValue := "delay"
+	delayValid := atomic.Bool{}
+	delaySubID := target.Subscribe(delayValue, func(param any) {
+		delayValid.Store(param.(string) == delayValue)
+	})
+	assert.NotNil(this.T(), delaySubID)
+
 	fixedValue := "fixed"
 	fixedValid := atomic.Bool{}
 	fixedSubID := target.Subscribe(fixedValue, func(param any) {
@@ -142,7 +149,8 @@ func (this *SuiteEntity) TestEvent() {
 	assert.NotNil(this.T(), fixedSubID)
 
 	target.PublishOnce(onceValue, onceValue)
-	target.PublishFixed(fixedValue, fixedValue, time.Millisecond)
+	target.PublishDelay(onceValue, onceValue, testdata.Timeout)
+	target.PublishFixed(fixedValue, fixedValue, testdata.Timeout)
 
 	time.Sleep(testdata.Timeout * 2) // 多等一下讓定時事件發生
 	assert.True(this.T(), onceValid.Load())
@@ -158,13 +166,13 @@ func (this *SuiteEntity) TestProcess() {
 	assert.Nil(this.T(), target.SetModulemgr(NewModulemgr()))
 	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(this.capacity)))
 
-	process := procs.NewSimple()
+	process := procs.NewJson()
 	assert.Nil(this.T(), target.SetProcess(process))
 	assert.Equal(this.T(), process, target.GetProcess())
 	assert.Nil(this.T(), target.Initialize(nil))
 	assert.NotNil(this.T(), target.SetProcess(process))
 
-	target.AddMessage(procs.MessageID(1), func(message any) {})
+	target.AddMessage(procs.MessageID(1), func(_ any) {})
 	target.DelMessage(procs.MessageID(1))
 
 	target.Finalize()
