@@ -4,6 +4,5 @@ pingjson:
   port: 10001
   timeout: 1s
   count: 1000
-  interval: 10ms
-  waitping: 10ms
+  waitping: 5s
   disconnect: true

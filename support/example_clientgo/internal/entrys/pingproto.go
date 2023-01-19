@@ -35,7 +35,6 @@ type PingProtoConfig struct {
 	Port       string        `yaml:"port"`       // 埠號
 	Timeout    time.Duration `yaml:"timeout"`    // 逾期時間(秒)
 	Count      int           `yaml:"count"`      // 連線總數
-	Interval   time.Duration `yaml:"interval"`   // 連線間隔時間
 	WaitPing   time.Duration `yaml:"waitping"`   // 等待Ping時間
 	Disconnect bool          `yaml:"disconnect"` // 斷線旗標
 }
@@ -53,7 +52,7 @@ func (this *PingProto) Initialize() error {
 	} // if
 
 	if this.config.Enable {
-		this.detector.Start(this.config.Count, this.config.Interval, func() {
+		this.detector.Start(this.config.Count, func() {
 			mizugos.Netmgr().AddConnectTCP(this.config.IP, this.config.Port, this.config.Timeout, this.bind, this.unbind, this.wrong)
 		})
 	} // if
