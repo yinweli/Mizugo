@@ -99,19 +99,19 @@ func (this *Stack) Process(input any) error {
 		return fmt.Errorf("stack process: %w", err)
 	} // if
 
-	stackContext := &StackContext{
+	context := &StackContext{
 		request: message.Messages,
 	}
 
-	for stackContext.next() {
-		messageID := stackContext.messageID()
+	for context.next() {
+		messageID := context.messageID()
 		process := this.Get(messageID)
 
 		if process == nil {
 			return fmt.Errorf("stack process: not found: %v", messageID)
 		} // if
 
-		process(stackContext)
+		process(context)
 	} // if
 
 	send := this.send.Get()
@@ -120,7 +120,7 @@ func (this *Stack) Process(input any) error {
 		return fmt.Errorf("stack process: send nil")
 	} // if
 
-	result, err := StackMarshal(stackContext)
+	result, err := StackMarshal(context)
 
 	if err != nil {
 		return fmt.Errorf("stack process: %w", err)

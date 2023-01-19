@@ -30,9 +30,8 @@ type PingProto struct {
 
 // PingProtoConfig 配置資料
 type PingProtoConfig struct {
-	Enable bool   `yaml:"enable"` // 啟用旗標
-	IP     string `yaml:"ip"`     // 位址
-	Port   string `yaml:"port"`   // 埠號
+	IP   string `yaml:"ip"`   // 位址
+	Port string `yaml:"port"` // 埠號
 }
 
 // Initialize 初始化處理
@@ -47,11 +46,8 @@ func (this *PingProto) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	if this.config.Enable {
-		this.listenID = mizugos.Netmgr().AddListenTCP(this.config.IP, this.config.Port, this.bind, this.unbind, this.wrong)
-		mizugos.Info(this.name).Message("entry start").KV("config", this.config).End()
-	} // if
-
+	this.listenID = mizugos.Netmgr().AddListenTCP(this.config.IP, this.config.Port, this.bind, this.unbind, this.wrong)
+	mizugos.Info(this.name).Message("entry start").KV("config", this.config).End()
 	return nil
 }
 

@@ -1,5 +1,4 @@
 pingstack:
-  enable: true
   ip:
   port: 10001
   keyinit: key-init
