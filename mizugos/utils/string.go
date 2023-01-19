@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// ExpvarStr 取得指標字串
+// ExpvarStr 取得度量字串
 func ExpvarStr(expvarStat []ExpvarStat) string {
 	builder := &strings.Builder{}
 	builder.WriteByte('{')
@@ -31,7 +31,7 @@ func ExpvarStr(expvarStat []ExpvarStat) string {
 	return builder.String()
 }
 
-// ExpvarStat 指標資料
+// ExpvarStat 度量資料
 type ExpvarStat struct {
 	Name string // 名稱
 	Data any    // 資料

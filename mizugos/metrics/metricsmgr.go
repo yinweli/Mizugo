@@ -12,32 +12,32 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
-// 指標管理器, 其中包括兩部分
-//   效能指標(來自pprof)
-//   自訂指標或統計數據(來自expvar)
-// 如果想查看效能指標, 可以參考以下網址
+// 度量管理器, 其中包括兩部分
+//   效能數據(來自pprof)
+//   自訂數據或統計數據(來自expvar)
+// 如果想查看效能數據, 可以參考以下網址
 //   https://blog.csdn.net/skh2015java/article/details/102748222
 //   http://www.zyiz.net/tech/detail-112761.html
 //   https://www.iargs.cn/?p=62
 //   https://www.readfog.com/a/1635446409103773696
-// 如果想查看自訂指標或統計數據, 可以通過以下工具
+// 如果想查看自訂數據或統計數據, 可以通過以下工具
 //   https://github.com/divan/expvarmon
 // 此工具同時也可以查看記憶體使用情況, 可使用以下參數
 //   -ports="http://網址:埠號"
 //   -i 間隔時間
 //   範例: expvarmon -ports="http://localhost:8080" -i 1s
-//   範例: expvarmon -ports="http://localhost:8080" -vars="...自訂指標..." -i 1s
-// 指標管理器同時還提供執行統計工具, 只要建立 Metricsmgr.NewRuntime(統計名稱) 就可以記錄特定區段的執行數據
+//   範例: expvarmon -ports="http://localhost:8080" -vars="...自訂數據..." -i 1s
+// 度量管理器同時還提供執行統計工具, 只要建立 Metricsmgr.NewRuntime(統計名稱) 就可以記錄特定區段的執行數據
 // 如果要用expvarmon查看執行數據, 可以添加以下參數
 //   假設執行數據的名稱為 'echo'
 //   -vars="time:echo.time,time(max):echo.time(max),time(avg):echo.time(avg),count:echo.count,count(1m):echo.count(1m),count(5m):echo.count(5m),count(10m):echo.count(10m),count(60m):echo.count(60m)"
 
-// NewMetricsmgr 建立指標管理器
+// NewMetricsmgr 建立度量管理器
 func NewMetricsmgr() *Metricsmgr {
 	return &Metricsmgr{}
 }
 
-// Metricsmgr 指標管理器
+// Metricsmgr 度量管理器
 type Metricsmgr struct {
 	once   utils.SyncOnce     // 單次執行物件
 	ctx    context.Context    // ctx物件
