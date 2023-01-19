@@ -125,16 +125,23 @@ func (this *Eventmgr) PubDelay(name string, param any, delay time.Duration) {
 	} // if
 
 	pools.DefaultPool.Submit(func() {
-		timeout := time.After(delay)
+		timeout := time.NewTimer(delay)
 
-		for range timeout {
-			if this.close.Load() == false {
-				this.notify <- notify{
-					pub:   true,
-					name:  name,
-					param: param,
-				}
-			} // if
+		for {
+			select {
+			case <-timeout.C:
+				if this.close.Load() == false {
+					this.notify <- notify{
+						pub:   true,
+						name:  name,
+						param: param,
+					}
+				} // if
+
+			case <-this.ctx.Done():
+				timeout.Stop()
+				return
+			} // select
 		} // for
 	})
 }
