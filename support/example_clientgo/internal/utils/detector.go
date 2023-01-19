@@ -9,37 +9,22 @@ import (
 	"github.com/yinweli/Mizugo/support/example_clientgo/internal/features"
 )
 
-const interval = time.Millisecond * 10 // 檢測間隔時間
-
 // Detector 連線檢測器
 type Detector struct {
-	notify chan any // 通知通道
-	cancel func()   // 取消物件
+	cancel func() // 取消物件
 }
 
 // Start 啟動連線檢測
-func (this *Detector) Start(count int, done func()) {
+func (this *Detector) Start(total, batch int, interval time.Duration, done func()) {
 	mizugos.Poolmgr().Submit(func() {
 		timeout := time.NewTicker(interval)
 		ctx, cancel := context.WithCancel(contexts.Ctx())
-		conn := func() {
-			session := mizugos.Netmgr().Status().Session
-			features.Connect.Set(int64(session))
-
-			if session < count {
-				done()
-			} // if
-		}
-		this.notify = make(chan any, 1)
 		this.cancel = cancel
 
 		for {
 			select {
-			case <-this.notify:
-				conn()
-
 			case <-timeout.C:
-				conn()
+				this.connect(total, batch, done)
 
 			case <-ctx.Done():
 				timeout.Stop()
@@ -56,9 +41,23 @@ func (this *Detector) Stop() {
 	} // if
 }
 
-// Notice 通知連線變化
-func (this *Detector) Notice() {
-	if this.cancel != nil {
-		this.notify <- nil
+// connect 連線處理
+func (this *Detector) connect(total, batch int, done func()) {
+	session := mizugos.Netmgr().Status().Session
+	features.Connect.Set(int64(session))
+
+	if total <= session {
+		return
+	} // if
+
+	count := total - session
+
+	if count > batch {
+		count = batch
+	} // if
+
+	for batch > 0 {
+		done()
+		batch--
 	} // if
 }

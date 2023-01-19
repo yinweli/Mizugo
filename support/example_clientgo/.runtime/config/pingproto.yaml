@@ -3,6 +3,8 @@ pingproto:
   ip:
   port: 10002
   timeout: 1s
-  count: 1000
-  waitping: 5s
+  total: 1000
+  batch: 1
+  interval: 10ms
+  waittime: 10ms
   disconnect: true

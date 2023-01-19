@@ -14,12 +14,11 @@ import (
 )
 
 // NewPingStack 建立PingStack模組
-func NewPingStack(waitKey, waitPing time.Duration, disconnect bool) *PingStack {
+func NewPingStack(waitTime time.Duration, disconnect bool) *PingStack {
 	return &PingStack{
 		Module:     entitys.NewModule(defines.ModuleIDPingStack),
 		name:       "module pingstack",
-		waitKey:    waitKey,
-		waitPing:   waitPing,
+		waitTime:   waitTime,
 		disconnect: disconnect,
 	}
 }
@@ -28,8 +27,7 @@ func NewPingStack(waitKey, waitPing time.Duration, disconnect bool) *PingStack {
 type PingStack struct {
 	*entitys.Module               // 模組資料
 	name            string        // 模組名稱
-	waitKey         time.Duration // 等待Key時間
-	waitPing        time.Duration // 等待Ping時間
+	waitTime        time.Duration // 等待時間
 	disconnect      bool          // 斷線旗標
 }
 
@@ -44,7 +42,7 @@ func (this *PingStack) Awake() error {
 
 // Start 啟動事件
 func (this *PingStack) Start() error {
-	this.Entity().PublishDelay(defines.EventKey, nil, this.waitKey)
+	this.Entity().PublishOnce(defines.EventKey, nil)
 	return nil
 }
 
@@ -85,7 +83,7 @@ func (this *PingStack) procMKeyA(message any) {
 	} // if
 
 	process.Key([]byte(msg.Key))
-	this.Entity().PublishDelay(defines.EventPing, nil, this.waitPing)
+	this.Entity().PublishDelay(defines.EventPing, nil, this.waitTime)
 	mizugos.Info(this.name).Message("procMKeyA").KV("key", msg.Key).End()
 }
 

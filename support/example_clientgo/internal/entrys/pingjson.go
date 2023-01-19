@@ -34,8 +34,10 @@ type PingJsonConfig struct {
 	IP         string        `yaml:"ip"`         // 位址
 	Port       string        `yaml:"port"`       // 埠號
 	Timeout    time.Duration `yaml:"timeout"`    // 逾期時間(秒)
-	Count      int           `yaml:"count"`      // 連線總數
-	WaitPing   time.Duration `yaml:"waitping"`   // 等待Ping時間
+	Total      int           `yaml:"total"`      // 連線總數
+	Batch      int           `yaml:"batch"`      // 連線批數
+	Interval   time.Duration `yaml:"interval"`   // 連線間隔時間
+	WaitTime   time.Duration `yaml:"waittime"`   // 等待時間
 	Disconnect bool          `yaml:"disconnect"` // 斷線旗標
 }
 
@@ -52,7 +54,7 @@ func (this *PingJson) Initialize() error {
 	} // if
 
 	if this.config.Enable {
-		this.detector.Start(this.config.Count, func() {
+		this.detector.Start(this.config.Total, this.config.Batch, this.config.Interval, func() {
 			mizugos.Netmgr().AddConnectTCP(this.config.IP, this.config.Port, this.config.Timeout, this.bind, this.unbind, this.wrong)
 		})
 	} // if
@@ -99,7 +101,7 @@ func (this *PingJson) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.AddModule(modules.NewPingJson(this.config.WaitPing, this.config.Disconnect)); err != nil {
+	if err := entity.AddModule(modules.NewPingJson(this.config.WaitTime, this.config.Disconnect)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
@@ -120,7 +122,6 @@ Error:
 		mizugos.Labelmgr().Erase(entity)
 	} // if
 
-	this.detector.Notice()
 	session.Stop()
 	mizugos.Error(this.name).EndError(wrong)
 	return nil
@@ -129,7 +130,6 @@ Error:
 // unbind 解綁處理
 func (this *PingJson) unbind(session nets.Sessioner) {
 	if entity, ok := session.GetOwner().(*entitys.Entity); ok {
-		this.detector.Notice()
 		entity.Finalize()
 		mizugos.Entitymgr().Del(entity.EntityID())
 		mizugos.Labelmgr().Erase(entity)

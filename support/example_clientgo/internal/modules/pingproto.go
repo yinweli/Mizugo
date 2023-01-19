@@ -12,11 +12,11 @@ import (
 )
 
 // NewPingProto 建立PingProto模組
-func NewPingProto(waitPing time.Duration, disconnect bool) *PingProto {
+func NewPingProto(waitTime time.Duration, disconnect bool) *PingProto {
 	return &PingProto{
 		Module:     entitys.NewModule(defines.ModuleIDPingProto),
 		name:       "module pingproto",
-		waitPing:   waitPing,
+		waitTime:   waitTime,
 		disconnect: disconnect,
 	}
 }
@@ -25,7 +25,7 @@ func NewPingProto(waitPing time.Duration, disconnect bool) *PingProto {
 type PingProto struct {
 	*entitys.Module               // 模組資料
 	name            string        // 模組名稱
-	waitPing        time.Duration // 等待Ping時間
+	waitTime        time.Duration // 等待時間
 	disconnect      bool          // 斷線旗標
 }
 
@@ -38,7 +38,7 @@ func (this *PingProto) Awake() error {
 
 // Start 啟動事件
 func (this *PingProto) Start() error {
-	this.Entity().PublishDelay(defines.EventPing, nil, this.waitPing)
+	this.Entity().PublishDelay(defines.EventPing, nil, this.waitTime)
 	return nil
 }
 

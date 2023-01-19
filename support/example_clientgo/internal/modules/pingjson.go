@@ -12,11 +12,11 @@ import (
 )
 
 // NewPingJson 建立PingJson模組
-func NewPingJson(waitPing time.Duration, disconnect bool) *PingJson {
+func NewPingJson(waitTime time.Duration, disconnect bool) *PingJson {
 	return &PingJson{
 		Module:     entitys.NewModule(defines.ModuleIDPingJson),
 		name:       "module pingjson",
-		waitPing:   waitPing,
+		waitTime:   waitTime,
 		disconnect: disconnect,
 	}
 }
@@ -25,7 +25,7 @@ func NewPingJson(waitPing time.Duration, disconnect bool) *PingJson {
 type PingJson struct {
 	*entitys.Module               // 模組資料
 	name            string        // 模組名稱
-	waitPing        time.Duration // 等待Ping時間
+	waitTime        time.Duration // 等待時間
 	disconnect      bool          // 斷線旗標
 }
 
@@ -38,7 +38,7 @@ func (this *PingJson) Awake() error {
 
 // Start 啟動事件
 func (this *PingJson) Start() error {
-	this.Entity().PublishDelay(defines.EventPing, nil, this.waitPing)
+	this.Entity().PublishDelay(defines.EventPing, nil, this.waitTime)
 	return nil
 }
 
