@@ -7,7 +7,8 @@ message MKeyQ {}
 
 // 回應密鑰
 message MKeyA {
-  string key = 1; // 密鑰
+  MKeyQ from = 1; // 來源訊息
+  string key = 2; // 密鑰
 }
 
 // 要求PingProto

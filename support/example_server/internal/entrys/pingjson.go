@@ -30,8 +30,9 @@ type PingJson struct {
 
 // PingJsonConfig 配置資料
 type PingJsonConfig struct {
-	IP   string `yaml:"ip"`   // 位址
-	Port string `yaml:"port"` // 埠號
+	Enable bool   `yaml:"enable"` // 啟用旗標
+	IP     string `yaml:"ip"`     // 位址
+	Port   string `yaml:"port"`   // 埠號
 }
 
 // Initialize 初始化處理
@@ -46,8 +47,11 @@ func (this *PingJson) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	this.listenID = mizugos.Netmgr().AddListenTCP(this.config.IP, this.config.Port, this.bind, this.unbind, this.wrong)
-	mizugos.Info(this.name).Message("entry start").KV("config", this.config).End()
+	if this.config.Enable {
+		this.listenID = mizugos.Netmgr().AddListenTCP(this.config.IP, this.config.Port, this.bind, this.unbind, this.wrong)
+		mizugos.Info(this.name).Message("entry start").KV("config", this.config).End()
+	} // if
+
 	return nil
 }
 

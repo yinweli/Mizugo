@@ -1,0 +1,4 @@
+pingjson:
+  enable: true
+  ip:
+  port: 10001
