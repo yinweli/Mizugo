@@ -94,11 +94,6 @@ func (this *PingStack) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.AddModule(modules.NewKey()); err != nil {
-		wrong = fmt.Errorf("bind: %w", err)
-		goto Error
-	} // if
-
 	if err := entity.AddModule(modules.NewPingStack(this.incr)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
