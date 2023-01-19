@@ -1,8 +1,6 @@
 package modules
 
 import (
-	"fmt"
-
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/procs"
@@ -38,17 +36,10 @@ func (this *PingProto) procMPingProtoQ(message any) {
 	rec := features.Ping.Rec()
 	defer rec()
 
-	_, proto, err := procs.ProtoUnmarshal(message)
+	_, msg, err := procs.ProtoUnmarshal[messages.MPingProtoQ](message)
 
 	if err != nil {
 		mizugos.Error(this.name).Message("procMPingProtoQ").EndError(err)
-		return
-	} // if
-
-	msg, ok := proto.(*messages.MPingQ)
-
-	if ok == false {
-		mizugos.Error(this.name).Message("procMPingProtoQ").EndError(fmt.Errorf("invalid message"))
 		return
 	} // if
 
@@ -58,8 +49,8 @@ func (this *PingProto) procMPingProtoQ(message any) {
 }
 
 // sendMPingProtoA 傳送回應PingProto
-func (this *PingProto) sendMPingProtoA(from *messages.MPingQ, count int64) {
-	msg, err := procs.ProtoMarshal(procs.MessageID(messages.MsgID_PingProtoA), &messages.MPingA{
+func (this *PingProto) sendMPingProtoA(from *messages.MPingProtoQ, count int64) {
+	msg, err := procs.ProtoMarshal(procs.MessageID(messages.MsgID_PingProtoA), &messages.MPingProtoA{
 		From:  from,
 		Count: count,
 	})

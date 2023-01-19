@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option go_package = "/messages;messages";
+
+// 要求密鑰
+message MKeyQ {}
+
+// 回應密鑰
+message MKeyA {
+  string key = 1; // 密鑰
+}
+
+// 要求PingProto
+message MPingProtoQ {
+  int64 time = 1; // 傳送時間
+}
+
+// 回應PingProto
+message MPingProtoA {
+  MPingProtoQ from = 1; // 來源訊息
+  int64 count = 2; // 封包計數
+}
+
+// 要求PingStack
+message MPingStackQ {
+  int64 time = 1; // 傳送時間
+}
+
+// 回應PingStack
+message MPingStackA {
+  MPingStackQ from = 1; // 來源訊息
+  int64 count = 2; // 封包計數
+}

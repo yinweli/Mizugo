@@ -45,17 +45,10 @@ func (this *PingStack) procMPingStackQ(message any) {
 		return
 	} // if
 
-	_, proto, err := context.Unmarshal()
+	_, msg, err := procs.StackUnmarshal[messages.MPingStackQ](context)
 
 	if err != nil {
 		mizugos.Error(this.name).Message("procMPingStackQ").EndError(err)
-		return
-	} // if
-
-	msg, ok := proto.(*messages.MPingQ)
-
-	if ok == false {
-		mizugos.Error(this.name).Message("procMPingStackQ").EndError(fmt.Errorf("invalid message"))
 		return
 	} // if
 
@@ -65,8 +58,8 @@ func (this *PingStack) procMPingStackQ(message any) {
 }
 
 // sendMPingStackA 傳送回應PingStack
-func (this *PingStack) sendMPingStackA(context *procs.StackContext, from *messages.MPingQ, count int64) {
-	if err := context.AddRespond(procs.MessageID(messages.MsgID_PingStackA), &messages.MPingA{
+func (this *PingStack) sendMPingStackA(context *procs.StackContext, from *messages.MPingStackQ, count int64) {
+	if err := context.AddRespond(procs.MessageID(messages.MsgID_PingStackA), &messages.MPingStackA{
 		From:  from,
 		Count: count,
 	}); err != nil {
