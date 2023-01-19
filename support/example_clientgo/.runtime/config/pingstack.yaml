@@ -4,7 +4,7 @@ pingstack:
   port: 10003
   timeout: 1s
   total: 1000
-  batch: 1000
+  batch: 100
   interval: 100ms
   waittime: 10ms
   disconnect: true

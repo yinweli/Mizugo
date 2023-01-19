@@ -253,7 +253,6 @@ func (this *pubsub) pub(name string, param any) {
 	for _, itor := range process {
 		itor.Do(param)
 	} // for
-
 }
 
 // subIDEncode 編碼訂閱索引
