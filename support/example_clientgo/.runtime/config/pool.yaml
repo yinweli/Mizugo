@@ -1,6 +1,0 @@
-pool:
-  capacity: 0
-  expire: 100ms
-  preAlloc: false
-  nonblocking: false
-  maxBlocking: 0

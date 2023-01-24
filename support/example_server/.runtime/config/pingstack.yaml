@@ -1,4 +1,0 @@
-pingstack:
-  ip:
-  port: 10003
-  keyinit: key-init

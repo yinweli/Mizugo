@@ -1,0 +1,34 @@
+logger:
+  name: test_server.log
+  path: log
+  json: false
+  console: true
+  file: true
+  level: 0
+  maxSize: 100
+  maxTime: 0
+  maxBackups: 0
+  compress: false
+
+pool:
+  capacity: 0
+  expire: 100ms
+  preAlloc: false
+  nonblocking: false
+  maxBlocking: 0
+
+metrics:
+  port: 20001
+
+json:
+  ip:
+  port: 10001
+
+proto:
+  ip:
+  port: 10002
+
+stack:
+  ip:
+  port: 10003
+  keyinit: key-init

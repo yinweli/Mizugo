@@ -1,0 +1,55 @@
+logger:
+  name: test_server.log
+  path: log
+  json: false
+  console: true
+  file: true
+  level: 0
+  maxSize: 100
+  maxTime: 0
+  maxBackups: 0
+  compress: false
+
+pool:
+  capacity: 0
+  expire: 100ms
+  preAlloc: false
+  nonblocking: false
+  maxBlocking: 0
+
+metrics:
+  port: 20002
+
+json:
+  enable: true
+  ip:
+  port: 10001
+  timeout: 1s
+  max: 100
+  baseline: 1s
+  interval: 10ms
+  disconnect: true
+  delayTime: 10ms
+
+proto:
+  enable: false
+  ip:
+  port: 10002
+  timeout: 1s
+  max: 1
+  baseline: 1s
+  interval: 10ms
+  disconnect: true
+  delayTime: 10ms
+
+stack:
+  enable: false
+  ip:
+  port: 10003
+  timeout: 1s
+  max: 100
+  baseline: 1s
+  interval: 10ms
+  disconnect: true
+  delayTime: 10ms
+  keyinit: key-init
