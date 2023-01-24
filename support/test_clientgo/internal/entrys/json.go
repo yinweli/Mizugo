@@ -35,6 +35,7 @@ type JsonConfig struct {
 	Port       string        `yaml:"port"`       // 埠號
 	Timeout    time.Duration `yaml:"timeout"`    // 逾期時間(秒)
 	Max        int           `yaml:"max"`        // 最大連線數
+	Batch      int           `yaml:"batch"`      // 批次連線數
 	Baseline   time.Duration `yaml:"baseline"`   // 基準時間
 	Interval   time.Duration `yaml:"interval"`   // 間隔時間
 	Disconnect bool          `yaml:"disconnect"` // 斷線旗標
@@ -50,7 +51,7 @@ func (this *Json) Initialize() error {
 	} // if
 
 	if this.config.Enable {
-		this.generator = miscs.NewGenerator(this.config.Max, this.config.Baseline, this.config.Interval, func() {
+		this.generator = miscs.NewGenerator(this.config.Max, this.config.Batch, this.config.Baseline, this.config.Interval, func() {
 			mizugos.Netmgr().AddConnectTCP(this.config.IP, this.config.Port, this.config.Timeout, this.bind, this.unbind, this.wrong)
 		})
 		this.generator.Start()

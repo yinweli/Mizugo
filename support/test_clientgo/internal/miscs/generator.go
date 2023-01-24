@@ -11,9 +11,10 @@ import (
 )
 
 // NewGenerator 建立連線產生器
-func NewGenerator(max int, baseline, internal time.Duration, done func()) *Generator {
+func NewGenerator(max, batch int, baseline, internal time.Duration, done func()) *Generator {
 	return &Generator{
 		max:      max,
+		batch:    batch,
 		baseline: baseline,
 		internal: internal,
 		done:     done,
@@ -23,6 +24,7 @@ func NewGenerator(max int, baseline, internal time.Duration, done func()) *Gener
 // Generator 連線產生器
 type Generator struct {
 	max      int           // 最大連線數
+	batch    int           // 批次連線數
 	baseline time.Duration // 基準時間
 	internal time.Duration // 間隔時間
 	done     func()        // 完成物件
@@ -40,10 +42,25 @@ func (this *Generator) Start() {
 		for {
 			select {
 			case <-timeout.C:
-				session := mizugos.Netmgr().Status().Session
-				features.Connect.Set(int64(session))
+				current := mizugos.Netmgr().Status().Session
+				features.Connect.Set(int64(current))
 
-				if this.max > session && this.usage.average() <= this.baseline {
+				if this.baseline < this.usage.average() {
+					continue
+				} // if
+
+				if this.max <= current {
+					continue
+				} // if
+
+				count := this.max - current
+
+				if count > this.batch {
+					count = this.batch
+				} // if
+
+				for count > 0 {
+					count--
 					this.done()
 				} // if
 

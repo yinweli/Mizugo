@@ -21,35 +21,38 @@ metrics:
   port: 20002
 
 json:
-  enable: true
+  enable: false
   ip:
   port: 10001
   timeout: 1s
   max: 100
-  baseline: 1s
-  interval: 10ms
+  batch: 5
+  baseline: 100ms
+  interval: 20ms
   disconnect: true
-  delayTime: 10ms
+  delayTime: 50ms
 
 proto:
   enable: false
   ip:
   port: 10002
   timeout: 1s
-  max: 1
-  baseline: 1s
-  interval: 10ms
+  max: 100
+  batch: 5
+  baseline: 100ms
+  interval: 20ms
   disconnect: true
-  delayTime: 10ms
+  delayTime: 50ms
 
 stack:
-  enable: false
+  enable: true
   ip:
   port: 10003
   timeout: 1s
   max: 100
-  baseline: 1s
-  interval: 10ms
+  batch: 5
+  baseline: 100ms
+  interval: 20ms
   disconnect: true
-  delayTime: 10ms
+  delayTime: 50ms
   keyinit: key-init
