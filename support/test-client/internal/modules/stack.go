@@ -8,9 +8,9 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/mizugos/utils"
-	"github.com/yinweli/Mizugo/support/test-clientgo/internal/defines"
-	"github.com/yinweli/Mizugo/support/test-clientgo/internal/features"
-	"github.com/yinweli/Mizugo/support/test-clientgo/internal/messages"
+	"github.com/yinweli/Mizugo/support/test-client/internal/defines"
+	"github.com/yinweli/Mizugo/support/test-client/internal/features"
+	"github.com/yinweli/Mizugo/support/test-client/internal/messages"
 )
 
 // NewStack 建立Stack模組

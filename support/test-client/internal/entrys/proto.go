@@ -9,9 +9,9 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/events"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/support/test-clientgo/internal/defines"
-	"github.com/yinweli/Mizugo/support/test-clientgo/internal/miscs"
-	"github.com/yinweli/Mizugo/support/test-clientgo/internal/modules"
+	"github.com/yinweli/Mizugo/support/test-client/internal/defines"
+	"github.com/yinweli/Mizugo/support/test-client/internal/miscs"
+	"github.com/yinweli/Mizugo/support/test-client/internal/modules"
 )
 
 // NewProto 建立Proto入口
