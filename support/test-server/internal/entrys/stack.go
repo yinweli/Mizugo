@@ -1,4 +1,5 @@
-package entrys //nolint:dupl
+package entrys
+
 import (
 	"fmt"
 	"sync/atomic"
