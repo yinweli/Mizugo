@@ -1,4 +1,4 @@
-package entrys //nolint:dupl
+package entrys
 
 import (
 	"fmt"
@@ -9,8 +9,8 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/events"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/support/test_server/internal/defines"
-	"github.com/yinweli/Mizugo/support/test_server/internal/modules"
+	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
+	"github.com/yinweli/Mizugo/support/test-server/internal/modules"
 )
 
 // NewJson 建立Json入口

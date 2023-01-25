@@ -6,9 +6,9 @@ import (
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/support/test_clientgo/internal/defines"
-	"github.com/yinweli/Mizugo/support/test_clientgo/internal/features"
-	"github.com/yinweli/Mizugo/support/test_clientgo/internal/messages"
+	"github.com/yinweli/Mizugo/support/test-clientgo/internal/defines"
+	"github.com/yinweli/Mizugo/support/test-clientgo/internal/features"
+	"github.com/yinweli/Mizugo/support/test-clientgo/internal/messages"
 )
 
 // NewJson 建立Json模組

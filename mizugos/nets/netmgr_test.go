@@ -25,7 +25,7 @@ type SuiteNetmgr struct {
 func (this *SuiteNetmgr) SetupSuite() {
 	this.Change("test-nets-netmgr")
 	this.hostGoogle = host{ip: "google.com", port: "80"}
-	this.hostLocal = host{ip: "", port: "4001"}
+	this.hostLocal = host{port: "5001"}
 }
 
 func (this *SuiteNetmgr) TearDownSuite() {

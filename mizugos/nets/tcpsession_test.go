@@ -24,7 +24,7 @@ type SuiteTCPSession struct {
 
 func (this *SuiteTCPSession) SetupSuite() {
 	this.Change("test-nets-tcpSession")
-	this.host = host{port: "3001"}
+	this.host = host{port: "4001"}
 	this.message = "message"
 }
 

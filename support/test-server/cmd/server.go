@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/support/test_server/internal/defines"
-	"github.com/yinweli/Mizugo/support/test_server/internal/entrys"
-	"github.com/yinweli/Mizugo/support/test_server/internal/features"
+	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
+	"github.com/yinweli/Mizugo/support/test-server/internal/entrys"
+	"github.com/yinweli/Mizugo/support/test-server/internal/features"
 )
 
 func main() {

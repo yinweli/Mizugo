@@ -24,7 +24,7 @@ type SuiteTCPListen struct {
 
 func (this *SuiteTCPListen) SetupSuite() {
 	this.Change("test-nets-tcpListen")
-	this.host = host{ip: "", port: "2001"}
+	this.host = host{port: "3001"}
 }
 
 func (this *SuiteTCPListen) TearDownSuite() {
