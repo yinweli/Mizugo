@@ -12,23 +12,21 @@ import (
 )
 
 // NewJson 建立Json模組
-func NewJson(disconnect bool, delayTime time.Duration, report func(duration time.Duration)) *Json {
+func NewJson(disconnect bool, delayTime time.Duration) *Json {
 	return &Json{
 		Module:     entitys.NewModule(defines.ModuleIDJson),
 		name:       "module json",
 		disconnect: disconnect,
 		delayTime:  delayTime,
-		report:     report,
 	}
 }
 
 // Json Json模組
 type Json struct {
-	*entitys.Module                              // 模組資料
-	name            string                       // 模組名稱
-	disconnect      bool                         // 斷線旗標
-	delayTime       time.Duration                // 延遲時間
-	report          func(duration time.Duration) // 回報函式物件
+	*entitys.Module               // 模組資料
+	name            string        // 模組名稱
+	disconnect      bool          // 斷線旗標
+	delayTime       time.Duration // 延遲時間
 }
 
 // Awake 喚醒事件
@@ -59,7 +57,6 @@ func (this *Json) procMJsonA(message any) {
 	} // if
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
-	this.report(duration)
 	features.Json.Add(duration)
 
 	if this.disconnect {

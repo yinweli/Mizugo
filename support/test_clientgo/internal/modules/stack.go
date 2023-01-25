@@ -14,23 +14,21 @@ import (
 )
 
 // NewStack 建立Stack模組
-func NewStack(disconnect bool, delayTime time.Duration, report func(duration time.Duration)) *Stack {
+func NewStack(disconnect bool, delayTime time.Duration) *Stack {
 	return &Stack{
 		Module:     entitys.NewModule(defines.ModuleIDStack),
 		name:       "module stack",
 		disconnect: disconnect,
 		delayTime:  delayTime,
-		report:     report,
 	}
 }
 
 // Stack Stack模組
 type Stack struct {
-	*entitys.Module                              // 模組資料
-	name            string                       // 模組名稱
-	disconnect      bool                         // 斷線旗標
-	delayTime       time.Duration                // 延遲時間
-	report          func(duration time.Duration) // 回報函式物件
+	*entitys.Module               // 模組資料
+	name            string        // 模組名稱
+	disconnect      bool          // 斷線旗標
+	delayTime       time.Duration // 延遲時間
 }
 
 // Awake 喚醒事件
@@ -125,7 +123,6 @@ func (this *Stack) procMStackA(message any) {
 	} // if
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
-	this.report(duration)
 	features.Stack.Add(duration)
 
 	if this.disconnect {

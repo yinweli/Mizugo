@@ -12,23 +12,21 @@ import (
 )
 
 // NewProto 建立Proto模組
-func NewProto(disconnect bool, delayTime time.Duration, report func(duration time.Duration)) *Proto {
+func NewProto(disconnect bool, delayTime time.Duration) *Proto {
 	return &Proto{
 		Module:     entitys.NewModule(defines.ModuleIDProto),
 		name:       "module proto",
 		disconnect: disconnect,
 		delayTime:  delayTime,
-		report:     report,
 	}
 }
 
 // Proto Proto模組
 type Proto struct {
-	*entitys.Module                              // 模組資料
-	name            string                       // 模組名稱
-	disconnect      bool                         // 斷線旗標
-	delayTime       time.Duration                // 延遲時間
-	report          func(duration time.Duration) // 回報函式物件
+	*entitys.Module               // 模組資料
+	name            string        // 模組名稱
+	disconnect      bool          // 斷線旗標
+	delayTime       time.Duration // 延遲時間
 }
 
 // Awake 喚醒事件
@@ -59,7 +57,6 @@ func (this *Proto) procMProtoA(message any) {
 	} // if
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
-	this.report(duration)
 	features.Proto.Add(duration)
 
 	if this.disconnect {

@@ -23,9 +23,8 @@ func NewStack() *Stack {
 
 // Stack Stack入口
 type Stack struct {
-	name      string           // 入口名稱
-	config    StackConfig      // 配置資料
-	generator *miscs.Generator // 連線產生物件
+	name   string      // 入口名稱
+	config StackConfig // 配置資料
 }
 
 // StackConfig 配置資料
@@ -34,9 +33,8 @@ type StackConfig struct {
 	IP         string        `yaml:"ip"`         // 位址
 	Port       string        `yaml:"port"`       // 埠號
 	Timeout    time.Duration `yaml:"timeout"`    // 逾期時間(秒)
-	Max        int           `yaml:"max"`        // 最大連線數
+	Count      int           `yaml:"count"`      // 總連線數
 	Batch      int           `yaml:"batch"`      // 批次連線數
-	Baseline   time.Duration `yaml:"baseline"`   // 基準時間
 	Interval   time.Duration `yaml:"interval"`   // 間隔時間
 	Disconnect bool          `yaml:"disconnect"` // 斷線旗標
 	DelayTime  time.Duration `yaml:"delayTime"`  // 延遲時間
@@ -52,10 +50,9 @@ func (this *Stack) Initialize() error {
 	} // if
 
 	if this.config.Enable {
-		this.generator = miscs.NewGenerator(this.config.Max, this.config.Batch, this.config.Baseline, this.config.Interval, func() {
+		miscs.GenerateConnection(this.config.Count, this.config.Batch, this.config.Interval, func() {
 			mizugos.Netmgr().AddConnectTCP(this.config.IP, this.config.Port, this.config.Timeout, this.bind, this.unbind, this.wrong)
 		})
-		this.generator.Start()
 	} // if
 
 	mizugos.Info(this.name).Message("entry start").KV("config", this.config).End()
@@ -64,7 +61,6 @@ func (this *Stack) Initialize() error {
 
 // Finalize 結束處理
 func (this *Stack) Finalize() {
-	this.generator.Stop()
 	mizugos.Info(this.name).Message("entry finalize").End()
 }
 
@@ -100,7 +96,7 @@ func (this *Stack) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.AddModule(modules.NewStack(this.config.Disconnect, this.config.DelayTime, this.generator.Report)); err != nil {
+	if err := entity.AddModule(modules.NewStack(this.config.Disconnect, this.config.DelayTime)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
