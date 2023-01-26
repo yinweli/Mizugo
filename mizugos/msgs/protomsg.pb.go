@@ -21,7 +21,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// proto訊息資料
+// Proto訊息資料
 type ProtoMsg struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -77,7 +77,7 @@ func (x *ProtoMsg) GetMessage() *anypb.Any {
 	return nil
 }
 
-// proto訊息測試資料
+// Proto訊息測試資料
 type ProtoTest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

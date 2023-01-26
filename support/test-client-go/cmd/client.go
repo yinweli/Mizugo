@@ -4,13 +4,13 @@ import (
 	"fmt"
 
 	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
-	"github.com/yinweli/Mizugo/support/test-server/internal/entrys"
-	"github.com/yinweli/Mizugo/support/test-server/internal/features"
+	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
+	"github.com/yinweli/Mizugo/support/test-client-go/internal/entrys"
+	"github.com/yinweli/Mizugo/support/test-client-go/internal/features"
 )
 
 func main() {
-	mizugos.Start("test_server", initialize, finalize)
+	mizugos.Start("test_client-go", initialize, finalize)
 }
 
 // initialize 初始化處理

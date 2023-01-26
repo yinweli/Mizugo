@@ -17,3 +17,8 @@ const ( // 模組編號
 	ModuleIDProto
 	ModuleIDPList
 )
+
+const ( // 事件名稱
+	EventKey   = "key"
+	EventBegin = "begin"
+)

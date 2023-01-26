@@ -18,17 +18,38 @@ pool:
   maxBlocking: 0
 
 metrics:
-  port: 20001
+  port: 20002
 
 json:
+  enable: false
   ip:
   port: 10001
+  timeout: 1s
+  count: 1000
+  batch: 100
+  interval: 10ms
+  disconnect: true
+  delayTime: 50ms
 
 proto:
+  enable: false
   ip:
   port: 10002
+  timeout: 1s
+  count: 1000
+  batch: 100
+  interval: 10ms
+  disconnect: true
+  delayTime: 50ms
 
 plist:
+  enable: true
   ip:
   port: 10003
+  timeout: 1s
+  count: 1000
+  batch: 100
+  interval: 20ms
+  disconnect: true
+  delayTime: 50ms
   keyinit: key-init

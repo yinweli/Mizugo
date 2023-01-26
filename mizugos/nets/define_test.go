@@ -29,6 +29,8 @@ type tester struct {
 	unbindCount int
 	encodeCount int
 	decodeCount int
+	startCount  int
+	stopCount   int
 	recvCount   int
 	sendCount   int
 	session     Sessioner
@@ -69,6 +71,20 @@ func (this *tester) validDecode() bool {
 	defer this.lock.RUnlock()
 
 	return this.decodeCount > 0
+}
+
+func (this *tester) validStart() bool {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+
+	return this.startCount == 1
+}
+
+func (this *tester) validStop() bool {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+
+	return this.stopCount == 1
 }
 
 func (this *tester) validRecv() bool {
@@ -143,14 +159,20 @@ func (this *tester) bind(session Sessioner) *Bundle {
 				this.lock.Lock()
 				defer this.lock.Unlock()
 
-				if name == EventRecv {
+				switch name {
+				case EventStart:
+					this.startCount++
+
+				case EventStop:
+					this.stopCount++
+
+				case EventRecv:
 					this.recvCount++
 					this.message = param
-				} // if
 
-				if name == EventSend {
+				case EventSend:
 					this.sendCount++
-				} // if
+				} // switch
 			},
 		}
 	} else {

@@ -11,7 +11,7 @@ type TestMsg struct {
 	Message   proto.Message // 訊息資料
 }
 
-// MarshalProtoMsg 序列化測試訊息到proto訊息
+// MarshalProtoMsg 序列化測試訊息到Proto訊息
 func MarshalProtoMsg(input *TestMsg) *ProtoMsg {
 	message, _ := anypb.New(input.Message)
 	return &ProtoMsg{
@@ -20,13 +20,13 @@ func MarshalProtoMsg(input *TestMsg) *ProtoMsg {
 	}
 }
 
-// MarshalStackMsg 序列化測試訊息到stack訊息
-func MarshalStackMsg(input []TestMsg) *StackMsg {
-	result := &StackMsg{}
+// MarshalPListMsg 序列化測試訊息到PList訊息
+func MarshalPListMsg(input []TestMsg) *PListMsg {
+	result := &PListMsg{}
 
 	for _, itor := range input {
 		message, _ := anypb.New(itor.Message)
-		result.Messages = append(result.Messages, &StackUnit{
+		result.Messages = append(result.Messages, &PListUnit{
 			MessageID: itor.MessageID,
 			Message:   message,
 		})

@@ -1,9 +1,9 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="mizugo test client" type="GoApplicationRunConfiguration" factoryName="Go Application">
     <module name="Mizugo" />
-    <working_directory value="$PROJECT_DIR$/support/test-client/.runtime" />
+    <working_directory value="$PROJECT_DIR$/support/test-client-go/.runtime" />
     <kind value="DIRECTORY" />
-    <directory value="$PROJECT_DIR$/support/test-client/cmd" />
+    <directory value="$PROJECT_DIR$/support/test-client-go/cmd" />
     <filePath value="$PROJECT_DIR$" />
     <method v="2" />
   </configuration>

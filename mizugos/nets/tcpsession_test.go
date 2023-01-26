@@ -24,7 +24,7 @@ type SuiteTCPSession struct {
 
 func (this *SuiteTCPSession) SetupSuite() {
 	this.Change("test-nets-tcpSession")
-	this.host = host{port: "4001"}
+	this.host = host{port: "11001"}
 	this.message = "message"
 }
 
@@ -70,8 +70,12 @@ func (this *SuiteTCPSession) TestStart() {
 
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), testc1.validUnbind())
+	assert.True(this.T(), testc1.validStart())
+	assert.True(this.T(), testc1.validStop())
 	assert.False(this.T(), testc1.validSession())
 	assert.True(this.T(), testc2.validUnbind())
+	assert.True(this.T(), testc2.validStart())
+	assert.True(this.T(), testc2.validStop())
 	assert.False(this.T(), testc2.validSession())
 }
 

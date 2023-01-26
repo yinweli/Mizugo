@@ -1,6 +1,6 @@
 echo off
-set test_server=..\..\test_server\internal\messages\
-set test_clientgo=..\..\test_clientgo\internal\messages\
+set test_server=..\..\test-server\internal\messages\
+set test_clientgo=..\..\test-client-go\internal\messages\
 
 rm -r .\messages\
 protoc --go_out=. msgid.proto
