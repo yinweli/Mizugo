@@ -1,3 +1,5 @@
+using System;
+
 namespace Mizugo
 {
     /// <summary>
@@ -7,7 +9,10 @@ namespace Mizugo
     {
         public override byte[] Encode(object input)
         {
-            throw new System.NotImplementedException();
+            var message = input as JsonMsg;
+
+            if (message == null)
+                throw new Exception("json encode: invalid message");
         }
 
         public override object Decode(byte[] input)
