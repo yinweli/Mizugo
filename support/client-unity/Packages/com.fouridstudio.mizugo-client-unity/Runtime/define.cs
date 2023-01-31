@@ -213,5 +213,12 @@ namespace Mizugo
         /// </summary>
         /// <param name="messageID">訊息編號</param>
         public void Del(MessageID messageID);
+
+        /// <summary>
+        /// 取得訊息處理
+        /// </summary>
+        /// <param name="messageID">訊息編號</param>
+        /// <returns>訊息處理函式</returns>
+        public OnTrigger Get(MessageID messageID);
     }
 }

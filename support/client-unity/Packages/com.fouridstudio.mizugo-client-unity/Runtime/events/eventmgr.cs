@@ -31,7 +31,7 @@ namespace Mizugo
         /// <param name="onEvent">事件處理函式</param>
         public void Add(EventID eventID, OnTrigger onEvent)
         {
-            data.Add(eventID, onEvent);
+            data[eventID] = onEvent;
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Mizugo
         }
 
         /// <summary>
-        /// 事件列表
+        /// 處理列表
         /// </summary>
         private Dictionary<EventID, OnTrigger> data = new Dictionary<EventID, OnTrigger>();
     }
