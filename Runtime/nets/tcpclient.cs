@@ -11,10 +11,6 @@ namespace Mizugo
     /// </summary>
     using MessageID = Int32;
 
-    // TODO: 還要做傳送完畢事件跟接收完畢事件
-    // TODO: send: message -> s queue -> send thread -> encode -> byte[] -> send!
-    // TODO: recv: recv thread -> recv! -> byte[] -> decode -> message -> r queue -> update -> process
-
     /// <summary>
     /// TCP客戶端組件
     /// </summary>

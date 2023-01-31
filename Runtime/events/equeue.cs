@@ -5,7 +5,7 @@ namespace Mizugo
     /// <summary>
     /// 事件佇列
     /// </summary>
-    internal class EQueue
+    public class EQueue
     {
         /// <summary>
         /// 事件資料
