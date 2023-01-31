@@ -21,6 +21,7 @@ copy %source%\msgs\*.* %targetc%
 copy %source%\msgs-json\*.* %targetc%
 
 REM Generate the message for Unity
+echo #### Generate the message for Unity
 set source=msg-cs
 set targetc=..\..\..\support\test-client-cs\internal\msgs
 
@@ -28,6 +29,16 @@ rm -r %source%\msgs
 mkdir %source%\msgs
 protoc --csharp_out=%source%\msgs msgid.proto
 protoc --csharp_out=%source%\msgs msgtest.proto
+
+rm -r %targetc%
+mkdir %targetc%
+copy %source%\msgs\*.* %targetc%
+copy %source%\msgs-json\*.* %targetc%
+
+REM Generate the message for Unity Test
+echo #### Generate the message for Unity Test
+set source=msg-cs
+set targetc=..\..\..\support\client-unity\Packages\com.fouridstudio.mizugo-client-unity\Tests\Runtime\msgs
 
 rm -r %targetc%
 mkdir %targetc%
