@@ -1,4 +1,4 @@
-package messages
+package msgs
 
 // MJsonQ 要求Json
 type MJsonQ struct {

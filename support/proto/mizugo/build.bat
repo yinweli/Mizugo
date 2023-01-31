@@ -1,8 +1,30 @@
-set mizugo=..\..\..\mizugos\msgs\
+echo off
 
-rm -r .\msgs\
-protoc --go_out=. protomsg.proto
-protoc --go_out=. plistmsg.proto
+REM Generate the message for GO
+echo #### Generate the message for GO
+set source=msg-go
+set target=..\..\..\mizugos\msgs
 
-mkdir %mizugo%
-copy .\msgs\*.* %mizugo%
+rm -r %source%\msgs
+protoc --go_out=%source% protomsg.proto
+protoc --go_out=%source% plistmsg.proto
+
+rm -r %target%
+mkdir %target%
+copy %source%\msgs\*.* %target%
+copy %source%\msgs-json\*.* %target%
+
+REM Generate the message for Unity
+echo #### Generate the message for Unity
+set source=msg-cs
+set target=..\..\..\support\client-unity\Packages\com.fouridstudio.mizugo-client-unity\Runtime\msgs
+
+rm -r %source%\msgs
+mkdir %source%\msgs
+protoc --csharp_out=%source%\msgs protomsg.proto
+protoc --csharp_out=%source%\msgs plistmsg.proto
+
+rm -r %target%
+mkdir %target%
+copy %source%\msgs\*.* %target%
+copy %source%\msgs-json\*.* %target%

@@ -9,7 +9,7 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/utils"
 	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-server/internal/features"
-	"github.com/yinweli/Mizugo/support/test-server/internal/messages"
+	"github.com/yinweli/Mizugo/support/test-server/internal/msgs"
 )
 
 // NewPList 建立PList模組
@@ -33,8 +33,8 @@ type PList struct {
 
 // Awake 喚醒事件
 func (this *PList) Awake() error {
-	this.Entity().AddMessage(procs.MessageID(messages.MsgID_KeyQ), this.procMKeyQ)
-	this.Entity().AddMessage(procs.MessageID(messages.MsgID_PListQ), this.procMPListQ)
+	this.Entity().AddMessage(procs.MessageID(msgs.MsgID_KeyQ), this.procMKeyQ)
+	this.Entity().AddMessage(procs.MessageID(msgs.MsgID_PListQ), this.procMPListQ)
 	return nil
 }
 
@@ -63,7 +63,7 @@ func (this *PList) procMKeyQ(message any) {
 		return
 	} // if
 
-	_, msg, err := procs.PListUnmarshal[messages.MKeyQ](context)
+	_, msg, err := procs.PListUnmarshal[msgs.MKeyQ](context)
 
 	if err != nil {
 		mizugos.Error(this.name).Message("procMKeyQ").EndError(err)
@@ -76,8 +76,8 @@ func (this *PList) procMKeyQ(message any) {
 }
 
 // sendMKeyA 傳送回應Key
-func (this *PList) sendMKeyA(context *procs.PListContext, from *messages.MKeyQ, key string) {
-	if err := context.AddRespond(procs.MessageID(messages.MsgID_KeyA), &messages.MKeyA{
+func (this *PList) sendMKeyA(context *procs.PListContext, from *msgs.MKeyQ, key string) {
+	if err := context.AddRespond(procs.MessageID(msgs.MsgID_KeyA), &msgs.MKeyA{
 		From: from,
 		Key:  key,
 	}); err != nil {
@@ -97,7 +97,7 @@ func (this *PList) procMPListQ(message any) {
 		return
 	} // if
 
-	_, msg, err := procs.PListUnmarshal[messages.MPListQ](context)
+	_, msg, err := procs.PListUnmarshal[msgs.MPListQ](context)
 
 	if err != nil {
 		mizugos.Error(this.name).Message("procMPListQ").EndError(err)
@@ -110,8 +110,8 @@ func (this *PList) procMPListQ(message any) {
 }
 
 // sendMPListA 傳送回應PList
-func (this *PList) sendMPListA(context *procs.PListContext, from *messages.MPListQ, count int64) {
-	if err := context.AddRespond(procs.MessageID(messages.MsgID_PListA), &messages.MPListA{
+func (this *PList) sendMPListA(context *procs.PListContext, from *msgs.MPListQ, count int64) {
+	if err := context.AddRespond(procs.MessageID(msgs.MsgID_PListA), &msgs.MPListA{
 		From:  from,
 		Count: count,
 	}); err != nil {

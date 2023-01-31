@@ -45,7 +45,7 @@ func (this *SuiteProto) TestNewProto() {
 
 func (this *SuiteProto) TestEncode() {
 	target := NewProto()
-	input := msgs.MarshalProtoMsg(&msgs.TestMsg{
+	input := MarshalProtoMsg(&TestMsg{
 		MessageID: this.messageID,
 		Message:   this.message,
 	})
@@ -74,7 +74,7 @@ func (this *SuiteProto) TestEncode() {
 
 func (this *SuiteProto) TestProcess() {
 	target := NewProto()
-	input := msgs.MarshalProtoMsg(&msgs.TestMsg{
+	input := MarshalProtoMsg(&TestMsg{
 		MessageID: this.messageID,
 		Message:   this.message,
 	})
@@ -86,7 +86,7 @@ func (this *SuiteProto) TestProcess() {
 	assert.Nil(this.T(), target.Process(input))
 	assert.True(this.T(), valid)
 
-	input = msgs.MarshalProtoMsg(&msgs.TestMsg{
+	input = MarshalProtoMsg(&TestMsg{
 		MessageID: 0,
 		Message:   this.message,
 	})
@@ -117,7 +117,7 @@ func (this *SuiteProto) TestMarshal() {
 
 func BenchmarkProtoEncode(b *testing.B) {
 	target := NewProto()
-	input := msgs.MarshalProtoMsg(&msgs.TestMsg{
+	input := MarshalProtoMsg(&TestMsg{
 		MessageID: 1,
 		Message: &msgs.ProtoTest{
 			Data: "benchmark encode",
@@ -131,7 +131,7 @@ func BenchmarkProtoEncode(b *testing.B) {
 
 func BenchmarkProtoDecode(b *testing.B) {
 	target := NewProto()
-	input := msgs.MarshalProtoMsg(&msgs.TestMsg{
+	input := MarshalProtoMsg(&TestMsg{
 		MessageID: 1,
 		Message: &msgs.ProtoTest{
 			Data: "benchmark decode",
@@ -155,7 +155,7 @@ func BenchmarkProtoMarshal(b *testing.B) {
 }
 
 func BenchmarkProtoUnmarshal(b *testing.B) {
-	input := msgs.MarshalProtoMsg(&msgs.TestMsg{
+	input := MarshalProtoMsg(&TestMsg{
 		MessageID: 1,
 		Message: &msgs.ProtoTest{
 			Data: "benchmark unmarshal",

@@ -10,7 +10,7 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/utils"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/features"
-	"github.com/yinweli/Mizugo/support/test-client-go/internal/messages"
+	"github.com/yinweli/Mizugo/support/test-client-go/internal/msgs"
 )
 
 // NewPList 建立PList模組
@@ -35,8 +35,8 @@ type PList struct {
 func (this *PList) Awake() error {
 	this.Entity().Subscribe(defines.EventKey, this.eventKey)
 	this.Entity().Subscribe(defines.EventBegin, this.eventBegin)
-	this.Entity().AddMessage(procs.MessageID(messages.MsgID_KeyA), this.procMKeyA)
-	this.Entity().AddMessage(procs.MessageID(messages.MsgID_PListA), this.procMPListA)
+	this.Entity().AddMessage(procs.MessageID(msgs.MsgID_KeyA), this.procMKeyA)
+	this.Entity().AddMessage(procs.MessageID(msgs.MsgID_PListA), this.procMPListA)
 	return nil
 }
 
@@ -68,7 +68,7 @@ func (this *PList) procMKeyA(message any) {
 		return
 	} // if
 
-	_, msg, err := procs.PListUnmarshal[messages.MKeyA](context)
+	_, msg, err := procs.PListUnmarshal[msgs.MKeyA](context)
 
 	if err != nil {
 		mizugos.Error(this.name).Message("procMKeyA").EndError(err)
@@ -91,7 +91,7 @@ func (this *PList) procMKeyA(message any) {
 func (this *PList) sendMKeyQ() {
 	context := &procs.PListContext{}
 
-	if err := context.AddRespond(procs.MessageID(messages.MsgID_KeyQ), &messages.MKeyQ{}); err != nil {
+	if err := context.AddRespond(procs.MessageID(msgs.MsgID_KeyQ), &msgs.MKeyQ{}); err != nil {
 		mizugos.Error(this.name).Message("sendMKeyQ").EndError(err)
 		return
 	} // if
@@ -115,7 +115,7 @@ func (this *PList) procMPListA(message any) {
 		return
 	} // if
 
-	_, msg, err := procs.PListUnmarshal[messages.MPListA](context)
+	_, msg, err := procs.PListUnmarshal[msgs.MPListA](context)
 
 	if err != nil {
 		mizugos.Error(this.name).Message("procMPListA").EndError(err)
@@ -141,7 +141,7 @@ func (this *PList) procMPListA(message any) {
 func (this *PList) sendMPListQ() {
 	context := &procs.PListContext{}
 
-	if err := context.AddRespond(procs.MessageID(messages.MsgID_PListQ), &messages.MPListQ{
+	if err := context.AddRespond(procs.MessageID(msgs.MsgID_PListQ), &msgs.MPListQ{
 		Time: time.Now().UnixNano(),
 	}); err != nil {
 		mizugos.Error(this.name).Message("sendMPListQ").EndError(err)

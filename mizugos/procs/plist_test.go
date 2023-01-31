@@ -48,7 +48,7 @@ func (this *SuitePList) TestNewPList() {
 
 func (this *SuitePList) TestEncode() {
 	target := NewPList().Key(this.key)
-	input := msgs.MarshalPListMsg([]msgs.TestMsg{
+	input := MarshalPListMsg([]TestMsg{
 		{MessageID: this.messageID, Message: this.message},
 	})
 
@@ -76,7 +76,7 @@ func (this *SuitePList) TestEncode() {
 
 func (this *SuitePList) TestProcess() {
 	target := NewPList().Key(this.key)
-	input := msgs.MarshalPListMsg([]msgs.TestMsg{
+	input := MarshalPListMsg([]TestMsg{
 		{MessageID: this.messageID, Message: this.message},
 	})
 
@@ -95,7 +95,7 @@ func (this *SuitePList) TestProcess() {
 	assert.True(this.T(), validSend)
 	assert.True(this.T(), validProcess)
 
-	input = msgs.MarshalPListMsg([]msgs.TestMsg{
+	input = MarshalPListMsg([]TestMsg{
 		{MessageID: 0, Message: this.message},
 	})
 	assert.NotNil(this.T(), target.Process(input))
@@ -105,7 +105,7 @@ func (this *SuitePList) TestProcess() {
 
 func (this *SuitePList) TestPListContext() {
 	target := &PListContext{
-		request: msgs.MarshalPListMsg([]msgs.TestMsg{
+		request: MarshalPListMsg([]TestMsg{
 			{MessageID: 1, Message: this.message},
 			{MessageID: 2, Message: this.message},
 			{MessageID: 3, Message: this.message},
@@ -141,7 +141,7 @@ func (this *SuitePList) TestMarshal() {
 	assert.NotNil(this.T(), err)
 
 	target = &PListContext{
-		request: msgs.MarshalPListMsg([]msgs.TestMsg{
+		request: MarshalPListMsg([]TestMsg{
 			{MessageID: 1, Message: this.message},
 			{MessageID: 2, Message: this.message},
 			{MessageID: 3, Message: this.message},
@@ -159,7 +159,7 @@ func (this *SuitePList) TestMarshal() {
 
 func BenchmarkPListEncode(b *testing.B) {
 	target := NewPList()
-	input := msgs.MarshalPListMsg([]msgs.TestMsg{
+	input := MarshalPListMsg([]TestMsg{
 		{MessageID: 1, Message: &msgs.PListTest{Data: "benchmark encode"}},
 	})
 
@@ -170,7 +170,7 @@ func BenchmarkPListEncode(b *testing.B) {
 
 func BenchmarkPListDecode(b *testing.B) {
 	target := NewPList()
-	input := msgs.MarshalPListMsg([]msgs.TestMsg{
+	input := MarshalPListMsg([]TestMsg{
 		{MessageID: 1, Message: &msgs.PListTest{Data: "benchmark decode"}},
 	})
 	encode, _ := target.Encode(input)
@@ -193,7 +193,7 @@ func BenchmarkPListMarshal(b *testing.B) {
 
 func BenchmarkPListUnmarshal(b *testing.B) {
 	input := &PListContext{
-		request: msgs.MarshalPListMsg([]msgs.TestMsg{
+		request: MarshalPListMsg([]TestMsg{
 			{MessageID: 1, Message: &msgs.PListTest{Data: "benchmark unmarshal"}},
 		}).Messages,
 	}

@@ -6,7 +6,7 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-server/internal/features"
-	"github.com/yinweli/Mizugo/support/test-server/internal/messages"
+	"github.com/yinweli/Mizugo/support/test-server/internal/msgs"
 )
 
 // NewJson 建立Json模組
@@ -27,7 +27,7 @@ type Json struct {
 
 // Awake 喚醒事件
 func (this *Json) Awake() error {
-	this.Entity().AddMessage(procs.MessageID(messages.MsgID_JsonQ), this.procMJsonQ)
+	this.Entity().AddMessage(procs.MessageID(msgs.MsgID_JsonQ), this.procMJsonQ)
 	return nil
 }
 
@@ -36,7 +36,7 @@ func (this *Json) procMJsonQ(message any) {
 	rec := features.Json.Rec()
 	defer rec()
 
-	_, msg, err := procs.JsonUnmarshal[messages.MJsonQ](message)
+	_, msg, err := procs.JsonUnmarshal[msgs.MJsonQ](message)
 
 	if err != nil {
 		mizugos.Error(this.name).Message("procMJsonQ").EndError(err)
@@ -49,8 +49,8 @@ func (this *Json) procMJsonQ(message any) {
 }
 
 // sendMJsonA 傳送回應Json
-func (this *Json) sendMJsonA(from *messages.MJsonQ, count int64) {
-	msg, err := procs.JsonMarshal(procs.MessageID(messages.MsgID_JsonA), &messages.MJsonA{
+func (this *Json) sendMJsonA(from *msgs.MJsonQ, count int64) {
+	msg, err := procs.JsonMarshal(procs.MessageID(msgs.MsgID_JsonA), &msgs.MJsonA{
 		From:  from,
 		Count: count,
 	})

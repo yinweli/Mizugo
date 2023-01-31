@@ -8,7 +8,7 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/features"
-	"github.com/yinweli/Mizugo/support/test-client-go/internal/messages"
+	"github.com/yinweli/Mizugo/support/test-client-go/internal/msgs"
 )
 
 // NewJson 建立Json模組
@@ -32,7 +32,7 @@ type Json struct {
 // Awake 喚醒事件
 func (this *Json) Awake() error {
 	this.Entity().Subscribe(defines.EventBegin, this.eventBegin)
-	this.Entity().AddMessage(procs.MessageID(messages.MsgID_JsonA), this.procMJsonA)
+	this.Entity().AddMessage(procs.MessageID(msgs.MsgID_JsonA), this.procMJsonA)
 	return nil
 }
 
@@ -49,7 +49,7 @@ func (this *Json) eventBegin(_ any) {
 
 // procMJsonA 處理回應Json
 func (this *Json) procMJsonA(message any) {
-	_, msg, err := procs.JsonUnmarshal[messages.MJsonA](message)
+	_, msg, err := procs.JsonUnmarshal[msgs.MJsonA](message)
 
 	if err != nil {
 		mizugos.Error(this.name).Message("procMJsonA").EndError(err)
@@ -73,7 +73,7 @@ func (this *Json) procMJsonA(message any) {
 
 // sendMJsonQ 傳送要求Json
 func (this *Json) sendMJsonQ() {
-	msg, err := procs.JsonMarshal(procs.MessageID(messages.MsgID_JsonQ), &messages.MJsonQ{
+	msg, err := procs.JsonMarshal(procs.MessageID(msgs.MsgID_JsonQ), &msgs.MJsonQ{
 		Time: time.Now().UnixNano(),
 	})
 

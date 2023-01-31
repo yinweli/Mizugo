@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "/messages;messages";
+option go_package = "/msgs;msgs";
 
 // 要求密鑰
 message MKeyQ {}
