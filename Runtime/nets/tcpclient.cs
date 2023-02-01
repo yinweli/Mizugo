@@ -166,10 +166,10 @@ namespace Mizugo
             /// </summary>
             public void Close()
             {
+                queue?.CompleteAdding(); // 佇列必須先結束才可能結束執行緒
+                queue = null;
                 thread?.Join();
                 thread = null;
-                queue?.CompleteAdding();
-                queue = null;
             }
 
             /// <summary>
@@ -222,46 +222,39 @@ namespace Mizugo
 
         public void Connect(string host, int port)
         {
-            try
-            {
-                if (eventmgr == null)
-                    throw new ArgumentNullException("eventmgr");
+            if (eventmgr == null)
+                throw new ArgumentNullException("eventmgr");
 
-                if (procmgr == null)
-                    throw new ArgumentNullException("procmgr");
+            if (procmgr == null)
+                throw new ArgumentNullException("procmgr");
 
-                if (client != null)
-                    throw new AlreadyStartException("tcp client");
+            if (client != null)
+                throw new AlreadyStartException("tcp client");
 
-                this.host = host;
-                this.port = port;
+            this.host = host;
+            this.port = port;
 
-                equeue = new EQueue();
-                client = new TcpClient();
-                client.NoDelay = true;
-                client.ReceiveBufferSize = Define.packetSize;
-                client.SendBufferSize = Define.packetSize;
+            equeue = new EQueue();
+            client = new TcpClient();
+            client.NoDelay = true;
+            client.ReceiveBufferSize = Define.packetSize;
+            client.SendBufferSize = Define.packetSize;
 
-                var addr = Dns.GetHostAddresses(host);
-                var callback = new AsyncCallback(
-                    (IAsyncResult result) =>
-                    {
-                        client.EndConnect(result);
-                        stream = client.GetStream();
-                        recvHandler = new RecvHandler();
-                        recvHandler.Start(stream, procmgr, equeue);
-                        sendHandler = new SendHandler();
-                        sendHandler.Start(stream, procmgr, equeue);
-                        equeue.Enqueue(EventID.Connect, null);
-                    }
-                );
+            var addr = Dns.GetHostAddresses(host);
+            var callback = new AsyncCallback(
+                (IAsyncResult result) =>
+                {
+                    client.EndConnect(result);
+                    stream = client.GetStream();
+                    recvHandler = new RecvHandler();
+                    recvHandler.Start(stream, procmgr, equeue);
+                    sendHandler = new SendHandler();
+                    sendHandler.Start(stream, procmgr, equeue);
+                    equeue.Enqueue(EventID.Connect, null);
+                }
+            );
 
-                client.BeginConnect(addr, port, callback, this);
-            } // try
-            catch (Exception e)
-            {
-                equeue.Enqueue(EventID.Error, e);
-            } // catch
+            client.BeginConnect(addr, port, callback, this);
         }
 
         public void Disconnect()
@@ -274,7 +267,6 @@ namespace Mizugo
             sendHandler = null;
             client?.Close();
             client = null;
-            equeue = null;
         }
 
         public void Update()

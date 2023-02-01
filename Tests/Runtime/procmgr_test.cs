@@ -1,12 +1,18 @@
 using NUnit.Framework;
+using System;
 using System.Collections;
 
 namespace Mizugo
 {
+    using MessageID = Int32;
+
     internal class TestProcmgr
     {
-        [Test, TestCaseSource("AddCases")]
-        public void Add(int messageID, object param)
+        [Test]
+        [TestCase(1, 9999)]
+        [TestCase(2, "9999")]
+        [TestCase(3, null)]
+        public void Add(MessageID messageID, object param)
         {
             var procmgr = new EmptyProc();
             var expected = param;
@@ -27,19 +33,10 @@ namespace Mizugo
             Assert.IsTrue(valid);
         }
 
-        public static IEnumerable AddCases
-        {
-            get
-            {
-                yield return new TestCaseData(1, 9999);
-                yield return new TestCaseData(2, "9999");
-                yield return new TestCaseData(3, new object());
-                yield return new TestCaseData(4, null);
-            }
-        }
-
-        [Test, TestCaseSource("DelCases")]
-        public void Del(int messageID)
+        [Test]
+        [TestCase(1)]
+        [TestCase(2)]
+        public void Del(MessageID messageID)
         {
             var procmgr = new EmptyProc();
 

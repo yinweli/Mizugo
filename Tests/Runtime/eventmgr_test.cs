@@ -1,11 +1,13 @@
 using NUnit.Framework;
-using System.Collections;
 
 namespace Mizugo
 {
     internal class TestEventmgr
     {
-        [Test, TestCaseSource("AddCases")]
+        [Test]
+        [TestCase(1, 9999)]
+        [TestCase(2, "9999")]
+        [TestCase(3, null)]
         public void Add(EventID eventID, object param)
         {
             var eventmgr = new Eventmgr();
@@ -23,17 +25,6 @@ namespace Mizugo
             Assert.IsTrue(valid);
         }
 
-        public static IEnumerable AddCases
-        {
-            get
-            {
-                yield return new TestCaseData(1, 9999);
-                yield return new TestCaseData(2, "9999");
-                yield return new TestCaseData(3, new object());
-                yield return new TestCaseData(4, null);
-            }
-        }
-
         [Test]
         public void AddNull()
         {
@@ -44,7 +35,10 @@ namespace Mizugo
             eventmgr.Process(eventID, null);
         }
 
-        [Test, TestCaseSource("DelCases")]
+        [Test]
+        [TestCase(1, 9999)]
+        [TestCase(2, "9999")]
+        [TestCase(3, null)]
         public void Del(EventID eventID, object param)
         {
             var eventmgr = new Eventmgr();
@@ -61,17 +55,6 @@ namespace Mizugo
             eventmgr.Del(eventID);
             eventmgr.Process(eventID, param);
             Assert.IsFalse(valid);
-        }
-
-        public static IEnumerable DelCases
-        {
-            get
-            {
-                yield return new TestCaseData(1, 9999);
-                yield return new TestCaseData(2, "9999");
-                yield return new TestCaseData(3, new object());
-                yield return new TestCaseData(4, null);
-            }
         }
     }
 }
