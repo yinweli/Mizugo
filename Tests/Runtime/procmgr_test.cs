@@ -3,21 +3,52 @@ using System.Collections;
 
 namespace Mizugo
 {
-    internal class ProcmgrSuite
+    internal class TestProcmgr
     {
-        [Test, TestCaseSource("ProcmgrTestCases")]
-        public void ProcmgrTest(int messageID)
+        [Test, TestCaseSource("AddCases")]
+        public void Add(int messageID, object param)
         {
-            var procmgr = new ProcmgrTester();
+            var procmgr = new EmptyProc();
+            var expected = param;
+            var valid = false;
 
-            procmgr.Add(messageID, procmgr.Trigger);
-            Assert.AreEqual((OnTrigger)procmgr.Trigger, procmgr.Get(messageID));
+            procmgr.Add(
+                messageID,
+                (object param) =>
+                {
+                    valid = expected == param;
+                }
+            );
 
+            var process = procmgr.Get(messageID);
+
+            Assert.IsNotNull(process);
+            process(param);
+            Assert.IsTrue(valid);
+        }
+
+        public static IEnumerable AddCases
+        {
+            get
+            {
+                yield return new TestCaseData(1, 9999);
+                yield return new TestCaseData(2, "9999");
+                yield return new TestCaseData(3, new object());
+                yield return new TestCaseData(4, null);
+            }
+        }
+
+        [Test, TestCaseSource("DelCases")]
+        public void Del(int messageID)
+        {
+            var procmgr = new EmptyProc();
+
+            procmgr.Add(messageID, (object param) => { });
             procmgr.Del(messageID);
             Assert.IsNull(procmgr.Get(messageID));
         }
 
-        public static IEnumerable ProcmgrTestCases
+        public static IEnumerable DelCases
         {
             get
             {
@@ -26,10 +57,7 @@ namespace Mizugo
             }
         }
 
-        /// <summary>
-        /// 測試用的訊息處理器以字串為核心來進行處理
-        /// </summary>
-        private class ProcmgrTester : Procmgr
+        private class EmptyProc : Procmgr
         {
             public override byte[] Encode(object input)
             {
@@ -41,12 +69,10 @@ namespace Mizugo
                 throw new System.NotImplementedException();
             }
 
-            public override bool Process(object message)
+            public override void Process(object message)
             {
                 throw new System.NotImplementedException();
             }
-
-            public void Trigger(object _) { }
         }
     }
 }

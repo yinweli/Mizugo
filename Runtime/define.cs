@@ -68,11 +68,6 @@ namespace Mizugo
         /// 封包長度
         /// </summary>
         public const int packetSize = ushort.MaxValue;
-
-        /// <summary>
-        /// 更新次數限制
-        /// </summary>
-        public const int updateLimit = 1000;
     }
 
     /// <summary>
@@ -158,8 +153,7 @@ namespace Mizugo
         /// </summary>
         /// <param name="eventID">事件編號</param>
         /// <param name="param">事件參數</param>
-        /// <returns>true表示有進行處理, false則否</returns>
-        public bool Process(EventID eventID, object param);
+        public void Process(EventID eventID, object param);
 
         /// <summary>
         /// 新增事件處理
@@ -197,9 +191,8 @@ namespace Mizugo
         /// <summary>
         /// 訊息處理
         /// </summary>
-        /// <param name="message">訊息物件</param>
-        /// <returns>true表示有進行處理, false則否</returns>
-        public bool Process(object message);
+        /// <param name="input">輸入物件</param>
+        public void Process(object input);
 
         /// <summary>
         /// 新增訊息處理

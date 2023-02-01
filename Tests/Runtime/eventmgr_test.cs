@@ -3,59 +3,75 @@ using System.Collections;
 
 namespace Mizugo
 {
-    internal class EventmgrSuite
+    internal class TestEventmgr
     {
-        [Test, TestCaseSource("EventmgrTestCases")]
-        public void EventmgrTest(EventID eventID, object param)
+        [Test, TestCaseSource("AddCases")]
+        public void Add(EventID eventID, object param)
         {
             var eventmgr = new Eventmgr();
-            var tester = new TriggerTester();
+            var expected = param;
+            var valid = false;
 
-            tester.Reset(param);
-            eventmgr.Add(eventID, tester.Trigger);
+            eventmgr.Add(
+                eventID,
+                (object param) =>
+                {
+                    valid = expected == param;
+                }
+            );
             eventmgr.Process(eventID, param);
-            Assert.IsTrue(tester.Valid());
-
-            tester.Reset(param);
-            eventmgr.Del(eventID);
-            eventmgr.Process(eventID, param);
-            Assert.IsFalse(tester.Valid());
-
-            tester.Reset(param);
-            eventmgr.Process(eventID, null);
-            Assert.IsFalse(tester.Valid());
+            Assert.IsTrue(valid);
         }
 
-        public static IEnumerable EventmgrTestCases
+        public static IEnumerable AddCases
         {
             get
             {
                 yield return new TestCaseData(1, 9999);
                 yield return new TestCaseData(2, "9999");
                 yield return new TestCaseData(3, new object());
+                yield return new TestCaseData(4, null);
             }
         }
 
-        private class TriggerTester
+        [Test]
+        public void AddNull()
         {
-            public void Reset(object param)
-            {
-                expected = param;
-                valid = false;
-            }
+            var eventmgr = new Eventmgr();
+            var eventID = (EventID)1;
 
-            public bool Valid()
-            {
-                return valid;
-            }
+            eventmgr.Add(eventID, null);
+            eventmgr.Process(eventID, null);
+        }
 
-            public void Trigger(object param)
-            {
-                valid = expected == param;
-            }
+        [Test, TestCaseSource("DelCases")]
+        public void Del(EventID eventID, object param)
+        {
+            var eventmgr = new Eventmgr();
+            var expected = param;
+            var valid = false;
 
-            private object expected = null;
-            private bool valid = false;
+            eventmgr.Add(
+                eventID,
+                (object param) =>
+                {
+                    valid = expected == param;
+                }
+            );
+            eventmgr.Del(eventID);
+            eventmgr.Process(eventID, param);
+            Assert.IsFalse(valid);
+        }
+
+        public static IEnumerable DelCases
+        {
+            get
+            {
+                yield return new TestCaseData(1, 9999);
+                yield return new TestCaseData(2, "9999");
+                yield return new TestCaseData(3, new object());
+                yield return new TestCaseData(4, null);
+            }
         }
     }
 }
