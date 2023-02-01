@@ -12,16 +12,10 @@ namespace Mizugo
         /// </summary>
         /// <param name="eventID">事件編號</param>
         /// <param name="param">事件參數</param>
-        /// <returns>true表示有進行處理, false則否</returns>
-        public bool Process(EventID eventID, object param)
+        public void Process(EventID eventID, object param)
         {
-            if (data.TryGetValue(eventID, out var result) && result != null)
-            {
-                result.Invoke(param);
-                return true;
-            } // if
-
-            return false;
+            if (data.TryGetValue(eventID, out var result))
+                result?.Invoke(param);
         }
 
         /// <summary>

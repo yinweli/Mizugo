@@ -15,7 +15,7 @@ namespace Mizugo
     {
         public abstract byte[] Encode(object input);
         public abstract object Decode(byte[] input);
-        public abstract bool Process(object message);
+        public abstract void Process(object input);
 
         public void Add(MessageID messageID, OnTrigger onProcess)
         {

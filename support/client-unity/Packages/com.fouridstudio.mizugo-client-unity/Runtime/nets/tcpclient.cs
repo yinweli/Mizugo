@@ -16,7 +16,6 @@ namespace Mizugo
     /// </summary>
     public class TCPClient : IClient
     {
-        #region 接收處理器
         /// <summary>
         /// 接收處理器
         /// </summary>
@@ -33,7 +32,7 @@ namespace Mizugo
                 try
                 {
                     if (thread != null)
-                        throw new Exception("recv handler already start");
+                        throw new AlreadyStartException("recv handler");
 
                     thread = new Thread(() =>
                     {
@@ -44,20 +43,20 @@ namespace Mizugo
                                 var byteOfSize = new byte[Define.headerSize];
 
                                 if (stream.Read(byteOfSize, 0, Define.headerSize) == 0)
-                                    throw new Exception("read size EOF");
+                                    throw new EofException();
 
                                 var size = BitConverter.ToUInt16(byteOfSize, 0);
 
                                 if (size <= 0)
-                                    throw new Exception("packet size zero");
+                                    throw new PacketZeroException("recv");
 
                                 if (size > Define.packetSize)
-                                    throw new Exception("packet size limit");
+                                    throw new PacketLimitException("recv");
 
                                 var byteOfData = new byte[size];
 
                                 if (stream.Read(byteOfData, 0, size) == 0)
-                                    throw new Exception("read data EOF");
+                                    throw new ReceiveException();
 
                                 var message = procmgr.Decode(byteOfData);
 
@@ -95,9 +94,7 @@ namespace Mizugo
             /// </summary>
             private Thread thread = null;
         }
-        #endregion
 
-        #region 傳送處理器
         /// <summary>
         /// 傳送處理器
         /// </summary>
@@ -114,7 +111,7 @@ namespace Mizugo
                 try
                 {
                     if (thread != null)
-                        throw new Exception("send handler already start");
+                        throw new AlreadyStartException("send handler");
 
                     queue = new BlockingCollection<object>();
                     thread = new Thread(() =>
@@ -132,10 +129,10 @@ namespace Mizugo
                                 var size = packet.Length;
 
                                 if (size <= 0)
-                                    throw new Exception("packet size zero");
+                                    throw new PacketZeroException("send");
 
                                 if (size > Define.packetSize)
-                                    throw new Exception("packet size limit");
+                                    throw new PacketLimitException("send");
 
                                 var byteOfSize = BitConverter.GetBytes(size);
 
@@ -201,10 +198,6 @@ namespace Mizugo
             private BlockingCollection<object> queue = null;
         }
 
-        #endregion
-
-        #region 封包資料
-
         /// <summary>
         /// 封包資料
         /// </summary>
@@ -220,7 +213,6 @@ namespace Mizugo
             /// </summary>
             public byte[] Data = null;
         }
-        #endregion
 
         public TCPClient(IEventmgr eventmgr, IProcmgr procmgr)
         {
@@ -233,13 +225,13 @@ namespace Mizugo
             try
             {
                 if (eventmgr == null)
-                    throw new Exception("tcp client eventmgr null");
+                    throw new ArgumentNullException("eventmgr");
 
                 if (procmgr == null)
-                    throw new Exception("tcp client procmgr null");
+                    throw new ArgumentNullException("procmgr");
 
                 if (client != null)
-                    throw new Exception("tcp client already connect");
+                    throw new AlreadyStartException("tcp client");
 
                 this.host = host;
                 this.port = port;
@@ -290,24 +282,23 @@ namespace Mizugo
             if (equeue == null)
                 return;
 
-            var count = 0;
+            if (equeue.Dequeue(out var data) == false)
+                return;
 
-            // 這裡會執行直到有任一事件被處理, 或是執行到次數限制才會結束; 次數限制是為了避免變成無限迴圈
-            while (equeue.Dequeue(out var data) && count <= Define.updateLimit)
+            if (data.eventID != EventID.Message)
             {
-                if (data.eventID != EventID.Message)
-                {
-                    if (eventmgr.Process(data.eventID, data.param))
-                        return;
-                }
-                else
-                {
-                    if (procmgr.Process(data.param))
-                        return;
-                } // if
+                eventmgr.Process(data.eventID, data.param);
+                return;
+            } // if
 
-                count++;
-            } // while
+            try
+            {
+                procmgr.Process(data.param);
+            } // try
+            catch (Exception e)
+            {
+                equeue.Enqueue(EventID.Error, e);
+            } // catch
         }
 
         public void Send(object message)
