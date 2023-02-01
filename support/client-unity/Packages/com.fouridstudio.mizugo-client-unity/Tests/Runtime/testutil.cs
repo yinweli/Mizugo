@@ -1,17 +1,26 @@
 using Newtonsoft.Json;
 using NUnit.Framework;
+using System.Threading;
 
 namespace Mizugo
 {
     internal class TestUtil
     {
         /// <summary>
-        /// ¥Ñ©óNUnit´£¨ÑªºAssert.AreEqualµLªk¤ñ¹ïÃş§Oª«¥ó, µ²ºcª«¥ó
-        /// ©Ò¥H³o¸Ì¨Ï¥Î§âª«¥óÂà´«¬°json¦r¦ê¨Ó¤ñ¹ï
-        /// ¦ı¬O¦pªGª«¥ó¤º¦³¶°¦X, ¤´µM¥i¯à¦]¬°¶°¦X¶¶§Ç¤£¦P³y¦¨¤ñ¹ï¥¢±Ñ
+        /// å…±ç”¨çš„æš«åœå‡½å¼
         /// </summary>
-        /// <param name="expected">¹w´Áª«¥ó</param>
-        /// <param name="actual">¹ê»Úª«¥ó</param>
+        public static void Sleep()
+        {
+            Thread.Sleep(200);
+        }
+
+        /// <summary>
+        /// ç”±æ–¼NUnitæä¾›çš„Assert.AreEqualç„¡æ³•æ¯”å°é¡åˆ¥ç‰©ä»¶, çµæ§‹ç‰©ä»¶
+        /// æ‰€ä»¥é€™è£¡ä½¿ç”¨æŠŠç‰©ä»¶è½‰æ›ç‚ºjsonå­—ä¸²ä¾†æ¯”å°
+        /// ä½†æ˜¯å¦‚æœç‰©ä»¶å…§æœ‰é›†åˆ, ä»ç„¶å¯èƒ½å› ç‚ºé›†åˆé †åºä¸åŒé€ æˆæ¯”å°å¤±æ•—
+        /// </summary>
+        /// <param name="expected">é æœŸç‰©ä»¶</param>
+        /// <param name="actual">å¯¦éš›ç‰©ä»¶</param>
         public static void AreEqualByJson(object expected, object actual)
         {
             Assert.AreEqual(
