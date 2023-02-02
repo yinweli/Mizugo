@@ -210,8 +210,74 @@ namespace Mizugo
         /// 這項測試需要啟動測試伺服器才能執行
         /// </summary>
         [Test]
-        [TestCase("127.0.0.1", 10001)]
-        public void Test(string host, int port) { }
+        [TestCase("127.0.0.1", 10002)]
+        public void Test(string host, int port)
+        {
+            var client = new TCPClient(new Eventmgr(), new ProtoProc());
+            var stopwatch = new Stopwatch();
+            var vaildConnect = false;
+            var vaildDisconnect = false;
+            var vaildRecv = false;
+            var vaildSend = false;
+            var validMessage = false;
+
+            client.AddEvent(
+                EventID.Connect,
+                (object _) =>
+                {
+                    vaildConnect = true;
+                }
+            );
+            client.AddEvent(
+                EventID.Disconnect,
+                (object _) =>
+                {
+                    vaildDisconnect = true;
+                }
+            );
+            client.AddEvent(
+                EventID.Recv,
+                (object _) =>
+                {
+                    vaildRecv = true;
+                    client.Disconnect();
+                }
+            );
+            client.AddEvent(
+                EventID.Send,
+                (object _) =>
+                {
+                    vaildSend = true;
+                }
+            );
+            client.AddEvent(EventID.Error, UnityEngine.Debug.Log);
+            client.AddProcess(
+                (int)MsgID.ProtoA,
+                (object param) =>
+                {
+                    ProtoProc.Unmarshal<MProtoA>(param, out var messageID, out var message);
+
+                    validMessage = true;
+                    UnityEngine.Debug.Log("duration: " + (stopwatch.ElapsedMilliseconds - message.From.Time));
+                    UnityEngine.Debug.Log("count: " + message.Count);
+                }
+            );
+
+            stopwatch.Start();
+            client.Connect(host, port);
+            TestUtil.Sleep();
+            client.Send(ProtoProc.Marshal((int)MsgID.ProtoQ, new MProtoQ() { Time = stopwatch.ElapsedMilliseconds }));
+            TestUtil.Sleep();
+
+            while (client.IsUpdate())
+                client.Update();
+
+            Assert.IsTrue(vaildConnect);
+            Assert.IsTrue(vaildDisconnect);
+            Assert.IsTrue(vaildRecv);
+            Assert.IsTrue(vaildSend);
+            Assert.IsTrue(validMessage);
+        }
     }
 
     internal class TestTCPClientPList

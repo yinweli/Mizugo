@@ -1,24 +1,23 @@
 using NUnit.Framework;
 using System;
 using System.Collections;
-using System.Text;
 
 namespace Mizugo
 {
     /// <summary>
-    /// Ë®äÊÅØÁ∑®Ëôü, Ë®≠ÁΩÆÁÇ∫int32‰ª•Ë∑üprotoÁöÑÂàóËàâÈ°ûÂûãÁµ±‰∏Ä
+    /// ∞TÆßΩs∏π, ≥]∏m¨∞int32•H∏Úproto™∫¶C¡|√˛´¨≤Œ§@
     /// </summary>
     using MessageID = Int32;
 
-    internal class TestJsonProc
+    internal class TestProtoProc
     {
         [Test]
         [TestCaseSource("EncodeCases")]
-        public void Encode(JsonMsg input)
+        public void Encode(ProtoMsg input)
         {
-            var jsonproc = new JsonProc();
-            var encode = jsonproc.Encode(input);
-            var decode = jsonproc.Decode(encode);
+            var protoproc = new ProtoProc();
+            var encode = protoproc.Encode(input);
+            var decode = protoproc.Decode(encode);
 
             Assert.IsTrue(TestUtil.EqualsByJson(input, decode));
         }
@@ -27,53 +26,53 @@ namespace Mizugo
         {
             get
             {
-                yield return new TestCaseData(JsonProc.Marshal(1, Encoding.UTF8.GetBytes("test")));
-                yield return new TestCaseData(JsonProc.Marshal(2, new byte[] { 0, 1, 2, }));
+                yield return new TestCaseData(ProtoProc.Marshal(1, new ProtoTest() { Data = "test1" }));
+                yield return new TestCaseData(ProtoProc.Marshal(2, new ProtoTest() { Data = "test2" }));
             }
         }
 
         [Test]
         public void EncodeFailed()
         {
-            var jsonproc = new JsonProc();
+            var protoproc = new ProtoProc();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                jsonproc.Encode(null);
+                protoproc.Encode(null);
             });
             Assert.Throws<InvalidMessageException>(() =>
             {
-                jsonproc.Encode(new object());
+                protoproc.Encode(new object());
             });
         }
 
         [Test]
         public void DecodeFailed()
         {
-            var jsonproc = new JsonProc();
+            var protoproc = new ProtoProc();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                jsonproc.Decode(null);
+                protoproc.Decode(null);
             });
         }
 
         [Test]
         [TestCaseSource("ProcessCases")]
-        public void Process(JsonMsg jsonMsg)
+        public void Process(ProtoMsg protoMsg)
         {
-            var jsonproc = new JsonProc();
-            var expected = jsonMsg;
+            var protoproc = new ProtoProc();
+            var expected = protoMsg;
             var valid = false;
 
-            jsonproc.Add(
-                jsonMsg.MessageID,
+            protoproc.Add(
+                protoMsg.MessageID,
                 (object param) =>
                 {
                     valid = expected == param;
                 }
             );
-            jsonproc.Process(jsonMsg);
+            protoproc.Process(protoMsg);
             Assert.IsTrue(valid);
         }
 
@@ -81,36 +80,36 @@ namespace Mizugo
         {
             get
             {
-                yield return new TestCaseData(JsonProc.Marshal(1, Encoding.UTF8.GetBytes("test")));
-                yield return new TestCaseData(JsonProc.Marshal(2, new byte[] { 0, 1, 2, }));
+                yield return new TestCaseData(ProtoProc.Marshal(1, new ProtoTest() { Data = "test1" }));
+                yield return new TestCaseData(ProtoProc.Marshal(2, new ProtoTest() { Data = "test2" }));
             }
         }
 
         [Test]
         public void ProcessFailed()
         {
-            var jsonproc = new JsonProc();
+            var protoproc = new ProtoProc();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                jsonproc.Process(null);
+                protoproc.Process(null);
             });
             Assert.Throws<InvalidMessageException>(() =>
             {
-                jsonproc.Process(new object());
+                protoproc.Process(new object());
             });
             Assert.Throws<UnProcessException>(() =>
             {
-                jsonproc.Process(new JsonMsg() { MessageID = 1 });
+                protoproc.Process(new ProtoMsg() { MessageID = 1 });
             });
         }
 
         [Test]
         [TestCaseSource("MarshalCases")]
-        public void Marshal(MessageID messageID, JsonTest message)
+        public void Marshal(MessageID messageID, ProtoTest message)
         {
-            var marshal = JsonProc.Marshal(messageID, message);
-            JsonProc.Unmarshal<JsonTest>(marshal, out var resultID, out var result);
+            var marshal = ProtoProc.Marshal(messageID, message);
+            ProtoProc.Unmarshal<ProtoTest>(marshal, out var resultID, out var result);
 
             Assert.AreEqual(messageID, resultID);
             Assert.IsTrue(TestUtil.EqualsByJson(message, result));
@@ -120,8 +119,8 @@ namespace Mizugo
         {
             get
             {
-                yield return new TestCaseData(1, new JsonTest() { Data = "test1" });
-                yield return new TestCaseData(2, new JsonTest() { Data = "test2" });
+                yield return new TestCaseData(1, new ProtoTest() { Data = "test1" });
+                yield return new TestCaseData(2, new ProtoTest() { Data = "test2" });
             }
         }
 
@@ -130,7 +129,7 @@ namespace Mizugo
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                JsonProc.Marshal(1, null);
+                ProtoProc.Marshal(1, null);
             });
         }
 
@@ -139,11 +138,11 @@ namespace Mizugo
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                JsonProc.Unmarshal<JsonTest>(null, out var _, out var _);
+                JsonProc.Unmarshal<ProtoTest>(null, out var _, out var _);
             });
             Assert.Throws<InvalidMessageException>(() =>
             {
-                JsonProc.Unmarshal<JsonTest>(new object(), out var _, out var _);
+                JsonProc.Unmarshal<ProtoTest>(new object(), out var _, out var _);
             });
         }
     }
