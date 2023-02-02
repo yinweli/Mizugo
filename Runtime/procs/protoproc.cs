@@ -11,7 +11,11 @@ namespace Mizugo
     using MessageID = Int32;
 
     /// <summary>
-    /// proto處理器
+    /// proto處理器, 封包結構使用ProtoMsg
+    /// 沒有使用加密技術, 所以安全性很低, 僅用於傳送簡單訊息或是傳送密鑰使用
+    /// 訊息內容: support/proto/mizugo/protomsg.proto
+    /// 封包編碼: protobuf編碼成位元陣列, 再通過base64編碼
+    /// 封包解碼: base64解碼, 再通過protobuf解碼成訊息結構
     /// </summary>
     public class ProtoProc : Procmgr
     {
