@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/yinweli/Mizugo/mizugos"
+	"github.com/yinweli/Mizugo/mizugos/cryptos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/mizugos/utils"
@@ -18,7 +19,7 @@ func NewPList(incr func() int64) *PList {
 		Module: entitys.NewModule(defines.ModuleIDPList),
 		name:   "module plist",
 		incr:   incr,
-		key:    utils.RandDesKeyString(),
+		key:    cryptos.RandDesKeyString(),
 	}
 }
 

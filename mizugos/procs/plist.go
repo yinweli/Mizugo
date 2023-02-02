@@ -6,6 +6,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 
+	"github.com/yinweli/Mizugo/mizugos/cryptos"
 	"github.com/yinweli/Mizugo/mizugos/msgs"
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
@@ -61,7 +62,7 @@ func (this *PList) Encode(input any) (output []byte, err error) {
 		return nil, fmt.Errorf("plist encode: %w", err)
 	} // if
 
-	output, err = utils.DesEncrypt(this.key.Get(), bytes)
+	output, err = cryptos.DesECBEncrypt(cryptos.PaddingPKCS7, this.key.Get(), bytes)
 
 	if err != nil {
 		return nil, fmt.Errorf("plist encode: %w", err)
@@ -76,7 +77,7 @@ func (this *PList) Decode(input []byte) (output any, err error) {
 		return nil, fmt.Errorf("plist decode: input nil")
 	} // if
 
-	bytes, err := utils.DesDecrypt(this.key.Get(), input)
+	bytes, err := cryptos.DesECBDecrypt(cryptos.PaddingPKCS7, this.key.Get(), input)
 
 	if err != nil {
 		return nil, fmt.Errorf("plist decode: %w", err)

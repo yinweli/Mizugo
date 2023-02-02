@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/yinweli/Mizugo/mizugos/cryptos"
 	"github.com/yinweli/Mizugo/mizugos/msgs"
-	"github.com/yinweli/Mizugo/mizugos/utils"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -27,7 +27,7 @@ type SuitePList struct {
 
 func (this *SuitePList) SetupSuite() {
 	this.Change("test-procs-plist")
-	this.key = utils.RandDesKey()
+	this.key = cryptos.RandDesKey()
 	this.messageID = MessageID(1)
 	this.message = &msgs.PListTest{
 		Data: "plist test",

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/yinweli/Mizugo/mizugos/cryptos"
 	"github.com/yinweli/Mizugo/mizugos/msgs"
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
@@ -41,13 +42,13 @@ func (this *Json) Encode(input any) (output []byte, err error) {
 		return nil, fmt.Errorf("json encode: %w", err)
 	} // if
 
-	output = utils.Base64Encode(bytes)
+	output = cryptos.Base64Encode(bytes)
 	return output, nil
 }
 
 // Decode 封包解碼
 func (this *Json) Decode(input []byte) (output any, err error) {
-	bytes, err := utils.Base64Decode(input)
+	bytes, err := cryptos.Base64Decode(input)
 
 	if err != nil {
 		return nil, fmt.Errorf("json decode: %w", err)
