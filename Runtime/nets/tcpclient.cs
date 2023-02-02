@@ -70,11 +70,6 @@ namespace Mizugo
                                 equeue.Enqueue(EventID.Message, message);
                                 equeue.Enqueue(EventID.Recv, null);
                             } // try
-                            catch (EndOfStreamException) // eof表示斷線了
-                            {
-                                equeue.Enqueue(EventID.Disconnect, null);
-                                return;
-                            } // catch
                             catch (Exception e)
                             {
                                 equeue.Enqueue(EventID.Error, e);

@@ -1,4 +1,5 @@
-using Newtonsoft.Json;
+using Google.Protobuf;
+using Google.Protobuf.WellKnownTypes;
 using System;
 using System.Text;
 
@@ -10,21 +11,20 @@ namespace Mizugo
     using MessageID = Int32;
 
     /// <summary>
-    /// json處理器
+    /// proto處理器
     /// </summary>
-    public class JsonProc : Procmgr
+    public class ProtoProc : Procmgr
     {
         public override byte[] Encode(object input)
         {
             if (input == null)
                 throw new ArgumentNullException("input");
 
-            if (input is not JsonMsg message)
+            if (input is not ProtoMsg message)
                 throw new InvalidMessageException("encode");
 
-            var json = JsonConvert.SerializeObject(message);
-            var jsonBytes = Encoding.UTF8.GetBytes(json);
-            var base64 = Convert.ToBase64String(jsonBytes);
+            var protoBytes = message.ToByteArray();
+            var base64 = Convert.ToBase64String(protoBytes);
             var base64Bytes = Encoding.UTF8.GetBytes(base64);
 
             return base64Bytes;
@@ -37,8 +37,7 @@ namespace Mizugo
 
             var base64 = Encoding.UTF8.GetString(input);
             var base64Bytes = Convert.FromBase64String(base64);
-            var json = Encoding.UTF8.GetString(base64Bytes);
-            var message = JsonConvert.DeserializeObject<JsonMsg>(json);
+            var message = ProtoMsg.Parser.ParseFrom(base64Bytes);
 
             return message;
         }
@@ -48,7 +47,7 @@ namespace Mizugo
             if (input == null)
                 throw new ArgumentNullException("input");
 
-            if (input is not JsonMsg message)
+            if (input is not ProtoMsg message)
                 throw new InvalidMessageException("process");
 
             var process = Get(message.MessageID);
@@ -60,41 +59,37 @@ namespace Mizugo
         }
 
         /// <summary>
-        /// json訊息序列化
+        /// proto訊息序列化
         /// </summary>
         /// <param name="messageID">訊息編號</param>
         /// <param name="message">訊息物件</param>
         /// <returns>訊息物件</returns>
-        public static JsonMsg Marshal(MessageID messageID, object message)
+        public static ProtoMsg Marshal(MessageID messageID, IMessage message)
         {
             if (message == null)
                 throw new ArgumentNullException("input");
 
-            var json = JsonConvert.SerializeObject(message);
-            var jsonBytes = Encoding.UTF8.GetBytes(json);
-
-            return new JsonMsg { MessageID = messageID, Message = jsonBytes };
+            return new ProtoMsg { MessageID = messageID, Message = Any.Pack(message) };
         }
 
         /// <summary>
-        /// json訊息反序列化
+        /// proto訊息反序列化
         /// </summary>
         /// <typeparam name="T">訊息類型</typeparam>
         /// <param name="input">輸入物件</param>
         /// <param name="messageID">訊息編號</param>
         /// <param name="message">訊息物件</param>
         public static void Unmarshal<T>(object input, out MessageID messageID, out T message)
+            where T : IMessage, new()
         {
             if (input == null)
                 throw new ArgumentNullException("input");
 
-            if (input is not JsonMsg jsonMsg)
+            if (input is not ProtoMsg protoMsg)
                 throw new InvalidMessageException("unmarshal");
 
-            var json = Encoding.UTF8.GetString(jsonMsg.Message);
-
-            messageID = jsonMsg.MessageID;
-            message = JsonConvert.DeserializeObject<T>(json);
+            messageID = protoMsg.MessageID;
+            message = protoMsg.Message.Unpack<T>();
         }
     }
 }
