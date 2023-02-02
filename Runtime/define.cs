@@ -141,6 +141,12 @@ namespace Mizugo
         /// </summary>
         /// <returns>true表示連線中, false則否</returns>
         public bool IsConnect();
+
+        /// <summary>
+        /// 取得是否需要處理事件
+        /// </summary>
+        /// <returns>true表示需要處理事件, false則否</returns>
+        public bool IsUpdate();
     }
 
     /// <summary>

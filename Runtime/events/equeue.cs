@@ -24,6 +24,14 @@ namespace Mizugo
         }
 
         /// <summary>
+        /// 取得是否為空
+        /// </summary>
+        public bool IsEmpty
+        {
+            get { return queue.IsEmpty; }
+        }
+
+        /// <summary>
         /// 新增事件
         /// </summary>
         /// <param name="eventID">事件編號</param>

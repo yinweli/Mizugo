@@ -27,5 +27,18 @@ namespace Mizugo
             Assert.IsFalse(equeue.Dequeue(out var _));
             Assert.IsFalse(equeue.Dequeue(out var _));
         }
+
+        [Test]
+        public void Misc()
+        {
+            var equeue = new EQueue();
+
+            Assert.IsTrue(equeue.IsEmpty);
+
+            equeue.Enqueue(EventID.Connect, null);
+            equeue.Enqueue(EventID.Disconnect, null);
+
+            Assert.IsFalse(equeue.IsEmpty);
+        }
     }
 }

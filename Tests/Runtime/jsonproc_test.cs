@@ -1,7 +1,6 @@
 using NUnit.Framework;
 using System;
 using System.Collections;
-using System.Linq;
 using System.Text;
 
 namespace Mizugo
@@ -22,12 +21,8 @@ namespace Mizugo
         {
             get
             {
-                yield return new TestCaseData(
-                    new JsonMsg() { MessageID = 1, Message = Encoding.UTF8.GetBytes("test1") }
-                );
-                yield return new TestCaseData(
-                    new JsonMsg() { MessageID = 2, Message = new byte[] { 0, 1, 2, } }
-                );
+                yield return new TestCaseData(new JsonMsg() { MessageID = 1, Message = Encoding.UTF8.GetBytes("test1") });
+                yield return new TestCaseData(new JsonMsg() { MessageID = 2, Message = new byte[] { 0, 1, 2, } });
             }
         }
 
@@ -61,14 +56,14 @@ namespace Mizugo
         public void Process(JsonMsg jsonMsg)
         {
             var jsonproc = new JsonProc();
-            var expected = jsonMsg.Message;
+            var expected = jsonMsg;
             var valid = false;
 
             jsonproc.Add(
                 jsonMsg.MessageID,
                 (object param) =>
                 {
-                    valid = expected.SequenceEqual(param as byte[]);
+                    valid = expected == param;
                 }
             );
             jsonproc.Process(jsonMsg);
@@ -79,12 +74,8 @@ namespace Mizugo
         {
             get
             {
-                yield return new TestCaseData(
-                    new JsonMsg() { MessageID = 1, Message = Encoding.UTF8.GetBytes("test1") }
-                );
-                yield return new TestCaseData(
-                    new JsonMsg() { MessageID = 2, Message = new byte[] { 0, 1, 2, } }
-                );
+                yield return new TestCaseData(new JsonMsg() { MessageID = 1, Message = Encoding.UTF8.GetBytes("test1") });
+                yield return new TestCaseData(new JsonMsg() { MessageID = 2, Message = new byte[] { 0, 1, 2, } });
             }
         }
 
