@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System;
+using System.Diagnostics;
 
 namespace Mizugo
 {
@@ -30,14 +31,16 @@ namespace Mizugo
                     vaildDisconnect = true;
                 }
             );
+
             client.Connect(host, port);
             TestUtil.Sleep();
-            client.Update();
-            Assert.IsTrue(vaildConnect);
             client.Disconnect();
             TestUtil.Sleep();
-            client.Update(); // 這次處理異常
-            client.Update(); // 這次處理斷線事件
+
+            while (client.IsUpdate())
+                client.Update();
+
+            Assert.IsTrue(vaildConnect);
             Assert.IsTrue(vaildDisconnect);
         }
 
@@ -59,7 +62,6 @@ namespace Mizugo
 
             client = new TCPClient(new Eventmgr(), new JsonProc());
             client.Connect(host, port);
-            TestUtil.Sleep();
             Assert.Throws<AlreadyStartException>(() =>
             {
                 client.Connect(host, port);
@@ -82,7 +84,6 @@ namespace Mizugo
             var client = new TCPClient(new Eventmgr(), new JsonProc());
 
             client.Update();
-
             client.Connect(host, port);
             TestUtil.Sleep();
             client.Update();
@@ -127,9 +128,99 @@ namespace Mizugo
         }
     }
 
-    internal class TestTCPClientJson { }
+    internal class TestTCPClientJson
+    {
+        /// <summary>
+        /// 這項測試需要啟動測試伺服器才能執行
+        /// </summary>
+        [Test]
+        [TestCase("127.0.0.1", 10001)]
+        public void Test(string host, int port)
+        {
+            var client = new TCPClient(new Eventmgr(), new JsonProc());
+            var stopwatch = new Stopwatch();
+            var vaildConnect = false;
+            var vaildDisconnect = false;
+            var vaildRecv = false;
+            var vaildSend = false;
+            var validMessage = false;
 
-    internal class TestTCPClientProto { }
+            client.AddEvent(
+                EventID.Connect,
+                (object _) =>
+                {
+                    vaildConnect = true;
+                }
+            );
+            client.AddEvent(
+                EventID.Disconnect,
+                (object _) =>
+                {
+                    vaildDisconnect = true;
+                }
+            );
+            client.AddEvent(
+                EventID.Recv,
+                (object _) =>
+                {
+                    vaildRecv = true;
+                    client.Disconnect();
+                }
+            );
+            client.AddEvent(
+                EventID.Send,
+                (object _) =>
+                {
+                    vaildSend = true;
+                }
+            );
+            client.AddEvent(EventID.Error, UnityEngine.Debug.Log);
+            client.AddProcess(
+                (int)MsgID.JsonA,
+                (object param) =>
+                {
+                    JsonProc.Unmarshal<MJsonA>(param, out var messageID, out var message);
 
-    internal class TestTCPClientPList { }
+                    validMessage = true;
+                    UnityEngine.Debug.Log("duration: " + (stopwatch.ElapsedMilliseconds - message.From.Time));
+                    UnityEngine.Debug.Log("count: " + message.Count);
+                }
+            );
+
+            stopwatch.Start();
+            client.Connect(host, port);
+            TestUtil.Sleep();
+            client.Send(JsonProc.Marshal((int)MsgID.JsonQ, new MJsonQ() { Time = stopwatch.ElapsedMilliseconds }));
+            TestUtil.Sleep();
+
+            while (client.IsUpdate())
+                client.Update();
+
+            Assert.IsTrue(vaildConnect);
+            Assert.IsTrue(vaildDisconnect);
+            Assert.IsTrue(vaildRecv);
+            Assert.IsTrue(vaildSend);
+            Assert.IsTrue(validMessage);
+        }
+    }
+
+    internal class TestTCPClientProto
+    {
+        /// <summary>
+        /// 這項測試需要啟動測試伺服器才能執行
+        /// </summary>
+        [Test]
+        [TestCase("127.0.0.1", 10001)]
+        public void Test(string host, int port) { }
+    }
+
+    internal class TestTCPClientPList
+    {
+        /// <summary>
+        /// 這項測試需要啟動測試伺服器才能執行
+        /// </summary>
+        [Test]
+        [TestCase("127.0.0.1", 10001)]
+        public void Test(string host, int port) { }
+    }
 }

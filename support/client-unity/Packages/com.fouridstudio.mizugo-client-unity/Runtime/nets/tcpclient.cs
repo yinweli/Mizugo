@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -31,21 +32,27 @@ namespace Mizugo
             {
                 try
                 {
+                    if (stream == null)
+                        throw new ArgumentNullException("stream");
+
+                    if (procmgr == null)
+                        throw new ArgumentNullException("procmgr");
+
+                    if (equeue == null)
+                        throw new ArgumentNullException("equeue");
+
                     if (thread != null)
                         throw new AlreadyStartException("recv handler");
 
                     thread = new Thread(() =>
                     {
+                        var reader = new BinaryReader(stream);
+
                         while (true)
                         {
                             try
                             {
-                                var byteOfSize = new byte[Define.headerSize];
-
-                                if (stream.Read(byteOfSize, 0, Define.headerSize) == 0)
-                                    throw new EofException();
-
-                                var size = BitConverter.ToUInt16(byteOfSize, 0);
+                                var size = reader.ReadUInt16();
 
                                 if (size <= 0)
                                     throw new PacketZeroException("recv");
@@ -53,16 +60,21 @@ namespace Mizugo
                                 if (size > Define.packetSize)
                                     throw new PacketLimitException("recv");
 
-                                var byteOfData = new byte[size];
+                                var buffer = new byte[size];
 
-                                if (stream.Read(byteOfData, 0, size) == 0)
+                                if (stream.Read(buffer, 0, size) != size)
                                     throw new ReceiveException();
 
-                                var message = procmgr.Decode(byteOfData);
+                                var message = procmgr.Decode(buffer);
 
                                 equeue.Enqueue(EventID.Message, message);
                                 equeue.Enqueue(EventID.Recv, null);
                             } // try
+                            catch (EndOfStreamException) // eof表示斷線了
+                            {
+                                equeue.Enqueue(EventID.Disconnect, null);
+                                return;
+                            } // catch
                             catch (Exception e)
                             {
                                 equeue.Enqueue(EventID.Error, e);
@@ -110,12 +122,23 @@ namespace Mizugo
             {
                 try
                 {
+                    if (stream == null)
+                        throw new ArgumentNullException("stream");
+
+                    if (procmgr == null)
+                        throw new ArgumentNullException("procmgr");
+
+                    if (equeue == null)
+                        throw new ArgumentNullException("equeue");
+
                     if (thread != null)
                         throw new AlreadyStartException("send handler");
 
                     queue = new BlockingCollection<object>();
                     thread = new Thread(() =>
                     {
+                        var writer = new BinaryWriter(stream);
+
                         while (true)
                         {
                             try
@@ -126,7 +149,7 @@ namespace Mizugo
                                     continue;
 
                                 var packet = procmgr.Encode(message);
-                                var size = packet.Length;
+                                var size = (ushort)packet.Length;
 
                                 if (size <= 0)
                                     throw new PacketZeroException("send");
@@ -134,11 +157,8 @@ namespace Mizugo
                                 if (size > Define.packetSize)
                                     throw new PacketLimitException("send");
 
-                                var byteOfSize = BitConverter.GetBytes(size);
-
-                                stream.Write(byteOfSize, 0, Define.headerSize);
-                                stream.Write(packet, 0, size);
-                                stream.Flush();
+                                writer.Write(size);
+                                writer.Write(packet, 0, size);
                                 equeue.Enqueue(EventID.Send, null);
                             } // try
                             catch (InvalidOperationException) // 這是因為關閉處理的CompleteAdding引發的, 所以不算錯誤
@@ -333,6 +353,11 @@ namespace Mizugo
         public bool IsConnect()
         {
             return client != null && client.Connected;
+        }
+
+        public bool IsUpdate()
+        {
+            return equeue?.IsEmpty == false;
         }
 
         /// <summary>

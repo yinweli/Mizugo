@@ -23,10 +23,7 @@ namespace Mizugo
         /// <param name="actual">實際物件</param>
         public static void AreEqualByJson(object expected, object actual)
         {
-            Assert.AreEqual(
-                JsonConvert.SerializeObject(expected),
-                JsonConvert.SerializeObject(actual)
-            );
+            Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(actual));
         }
     }
 }
