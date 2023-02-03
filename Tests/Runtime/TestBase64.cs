@@ -14,12 +14,6 @@ namespace Mizugo
             Assert.AreEqual(src, output);
         }
 
-        [SetUp]
-        public void SetUp()
-        {
-            src = Encoding.UTF8.GetBytes("testdata");
-        }
-
-        private byte[] src = null;
+        private byte[] src = Encoding.UTF8.GetBytes("testdata");
     }
 }

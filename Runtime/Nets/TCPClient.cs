@@ -213,22 +213,6 @@ namespace Mizugo
             private BlockingCollection<object> queue = null;
         }
 
-        /// <summary>
-        /// 封包資料
-        /// </summary>
-        private class Packet
-        {
-            /// <summary>
-            /// 封包長度
-            /// </summary>
-            public ushort Size = 0;
-
-            /// <summary>
-            /// 封包資料
-            /// </summary>
-            public byte[] Data = null;
-        }
-
         public TCPClient(IEventmgr eventmgr, IProcmgr procmgr)
         {
             this.eventmgr = eventmgr;

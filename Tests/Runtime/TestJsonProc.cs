@@ -14,13 +14,13 @@ namespace Mizugo
     {
         [Test]
         [TestCaseSource("EncodeCases")]
-        public void Encode(JsonMsg input)
+        public void Encode(JsonMsg message)
         {
-            var jsonproc = new JsonProc();
-            var encode = jsonproc.Encode(input);
-            var decode = jsonproc.Decode(encode);
+            var proc = new JsonProc();
+            var encode = proc.Encode(message);
+            var decode = proc.Decode(encode);
 
-            Assert.IsTrue(TestUtil.EqualsByJson(input, decode));
+            Assert.IsTrue(TestUtil.EqualsByJson(message, decode));
         }
 
         public static IEnumerable EncodeCases
@@ -35,45 +35,44 @@ namespace Mizugo
         [Test]
         public void EncodeFailed()
         {
-            var jsonproc = new JsonProc();
+            var proc = new JsonProc();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                jsonproc.Encode(null);
+                proc.Encode(null);
             });
             Assert.Throws<InvalidMessageException>(() =>
             {
-                jsonproc.Encode(new object());
+                proc.Encode(new object());
             });
         }
 
         [Test]
         public void DecodeFailed()
         {
-            var jsonproc = new JsonProc();
+            var proc = new JsonProc();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                jsonproc.Decode(null);
+                proc.Decode(null);
             });
         }
 
         [Test]
         [TestCaseSource("ProcessCases")]
-        public void Process(JsonMsg jsonMsg)
+        public void Process(JsonMsg message)
         {
-            var jsonproc = new JsonProc();
-            var expected = jsonMsg;
+            var proc = new JsonProc();
             var valid = false;
 
-            jsonproc.Add(
-                jsonMsg.MessageID,
+            proc.Add(
+                message.MessageID,
                 (object param) =>
                 {
-                    valid = expected == param;
+                    valid = TestUtil.EqualsByJson(message, param);
                 }
             );
-            jsonproc.Process(jsonMsg);
+            proc.Process(message);
             Assert.IsTrue(valid);
         }
 
@@ -89,19 +88,19 @@ namespace Mizugo
         [Test]
         public void ProcessFailed()
         {
-            var jsonproc = new JsonProc();
+            var proc = new JsonProc();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                jsonproc.Process(null);
+                proc.Process(null);
             });
             Assert.Throws<InvalidMessageException>(() =>
             {
-                jsonproc.Process(new object());
+                proc.Process(new object());
             });
             Assert.Throws<UnprocessException>(() =>
             {
-                jsonproc.Process(new JsonMsg() { MessageID = 1 });
+                proc.Process(new JsonMsg { MessageID = 1 });
             });
         }
 
@@ -110,8 +109,8 @@ namespace Mizugo
         public void Marshal(MessageID messageID, JsonTest message)
         {
             var marshal = JsonProc.Marshal(messageID, message);
-            JsonProc.Unmarshal<JsonTest>(marshal, out var resultID, out var result);
 
+            JsonProc.Unmarshal<JsonTest>(marshal, out var resultID, out var result);
             Assert.AreEqual(messageID, resultID);
             Assert.IsTrue(TestUtil.EqualsByJson(message, result));
         }
@@ -120,8 +119,8 @@ namespace Mizugo
         {
             get
             {
-                yield return new TestCaseData(1, new JsonTest() { Data = "test1" });
-                yield return new TestCaseData(2, new JsonTest() { Data = "test2" });
+                yield return new TestCaseData(1, new JsonTest { Data = "test1" });
+                yield return new TestCaseData(2, new JsonTest { Data = "test2" });
             }
         }
 
