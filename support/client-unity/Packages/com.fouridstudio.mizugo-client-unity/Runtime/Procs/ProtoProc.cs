@@ -69,7 +69,7 @@ namespace Mizugo
         public static ProtoMsg Marshal(MessageID messageID, IMessage message)
         {
             if (message == null)
-                throw new ArgumentNullException("input");
+                throw new ArgumentNullException("message");
 
             return new ProtoMsg { MessageID = messageID, Message = Any.Pack(message) };
         }
@@ -87,11 +87,11 @@ namespace Mizugo
             if (input == null)
                 throw new ArgumentNullException("input");
 
-            if (input is not ProtoMsg protoMsg)
+            if (input is not ProtoMsg data)
                 throw new InvalidMessageException("unmarshal");
 
-            messageID = protoMsg.MessageID;
-            message = protoMsg.Message.Unpack<T>();
+            messageID = data.MessageID;
+            message = data.Message.Unpack<T>();
         }
     }
 }

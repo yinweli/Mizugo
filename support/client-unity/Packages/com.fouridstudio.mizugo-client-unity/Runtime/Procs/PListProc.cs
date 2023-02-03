@@ -65,7 +65,7 @@ namespace Mizugo
                 var process = Get(itor.MessageID);
 
                 if (process != null)
-                    process(itor.Message);
+                    process(itor);
                 else
                     unprocess.Add(itor.MessageID);
             } // for
@@ -88,8 +88,8 @@ namespace Mizugo
         /// </summary>
         public string KeyStr
         {
-            set { key = Encoding.UTF8.GetBytes(value); }
-            get { return Encoding.UTF8.GetString(key); }
+            set { Key = Encoding.UTF8.GetBytes(value); }
+            get { return Encoding.UTF8.GetString(Key); }
         }
 
         /// <summary>
@@ -106,8 +106,8 @@ namespace Mizugo
         /// </summary>
         public string IVStr
         {
-            set { iv = Encoding.UTF8.GetBytes(value); }
-            get { return Encoding.UTF8.GetString(iv); }
+            set { IV = Encoding.UTF8.GetBytes(value); }
+            get { return Encoding.UTF8.GetString(IV); }
         }
 
         /// <summary>
@@ -124,21 +124,53 @@ namespace Mizugo
     public partial class PListProc
     {
         /// <summary>
-        /// proto訊息序列化
+        /// plist訊息序列化
         /// </summary>
-        /// <param name="messageID">訊息編號</param>
-        /// <param name="message">訊息物件</param>
+        /// <param name="sender">plist傳送器</param>
         /// <returns>訊息物件</returns>
-        public static ProtoMsg Marshal(MessageID messageID, IMessage message)
+        public static PListMsg Marshal(PListSender sender)
         {
-            if (message == null)
-                throw new ArgumentNullException("input");
+            if (sender == null)
+                throw new ArgumentNullException("sender");
 
-            return new ProtoMsg { MessageID = messageID, Message = Any.Pack(message) };
+            return sender.Marshal();
         }
 
         /// <summary>
-        /// proto訊息反序列化
+        /// plist訊息序列化
+        /// </summary>
+        /// <param name="input">訊息列表, 必須以messageID, message...的方式排列</param>
+        /// <returns>訊息物件</returns>
+        public static PListMsg Marshal(params object[] input)
+        {
+            if (input == null)
+                throw new ArgumentNullException("input");
+
+            if (input.Length % 2 != 0)
+                throw new ArgumentOutOfRangeException("input");
+
+            var sender = new PListSender();
+
+            for (var i = 0; i < input.Length; )
+            {
+                var itor = input[i++];
+
+                if (itor is not MessageID messageID)
+                    throw new InvalidCastException("not messageID");
+
+                itor = input[i++];
+
+                if (itor is not IMessage message)
+                    throw new InvalidCastException("not message");
+
+                sender.Add(messageID, message);
+            } // for
+
+            return Marshal(sender);
+        }
+
+        /// <summary>
+        /// plist訊息反序列化
         /// </summary>
         /// <typeparam name="T">訊息類型</typeparam>
         /// <param name="input">輸入物件</param>
@@ -150,11 +182,49 @@ namespace Mizugo
             if (input == null)
                 throw new ArgumentNullException("input");
 
-            if (input is not ProtoMsg protoMsg)
+            if (input is not PListUnit data)
                 throw new InvalidMessageException("unmarshal");
 
-            messageID = protoMsg.MessageID;
-            message = protoMsg.Message.Unpack<T>();
+            messageID = data.MessageID;
+            message = data.Message.Unpack<T>();
         }
+    }
+
+    /// <summary>
+    /// plist傳送器
+    /// </summary>
+    public partial class PListSender
+    {
+        /// <summary>
+        /// 新增訊息
+        /// </summary>
+        /// <param name="messageID">訊息編號</param>
+        /// <param name="message">訊息物件</param>
+        /// <returns>自己物件</returns>
+        public PListSender Add(MessageID messageID, IMessage message)
+        {
+            if (message == null)
+                throw new ArgumentNullException("message");
+
+            data.Add(new PListUnit { MessageID = messageID, Message = Any.Pack(message) });
+            return this;
+        }
+
+        /// <summary>
+        /// 訊息序列化
+        /// </summary>
+        /// <returns>訊息物件</returns>
+        public PListMsg Marshal()
+        {
+            var message = new PListMsg();
+
+            message.Messages.AddRange(data);
+            return message;
+        }
+
+        /// <summary>
+        /// 訊息單元列表
+        /// </summary>
+        private List<PListUnit> data = new List<PListUnit>();
     }
 }

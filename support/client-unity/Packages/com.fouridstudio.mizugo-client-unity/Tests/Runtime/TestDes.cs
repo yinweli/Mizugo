@@ -28,16 +28,8 @@ namespace Mizugo
             Assert.AreEqual(src, output);
         }
 
-        [SetUp]
-        public void SetUp()
-        {
-            key = Encoding.UTF8.GetBytes("thisakey"); // 密鑰必須為8位
-            iv = Encoding.UTF8.GetBytes("this-iv-"); // 初始向量必須為8位
-            src = Encoding.UTF8.GetBytes("testdata");
-        }
-
-        private byte[] key = null;
-        private byte[] iv = null;
-        private byte[] src = null;
+        private byte[] key = Encoding.UTF8.GetBytes("thisakey"); // 密鑰必須為8位
+        private byte[] iv = Encoding.UTF8.GetBytes("this-iv-"); // 初始向量必須為8位
+        private byte[] src = Encoding.UTF8.GetBytes("testdata");
     }
 }

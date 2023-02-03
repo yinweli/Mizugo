@@ -71,7 +71,7 @@ namespace Mizugo
         public static JsonMsg Marshal(MessageID messageID, object message)
         {
             if (message == null)
-                throw new ArgumentNullException("input");
+                throw new ArgumentNullException("message");
 
             var json = JsonConvert.SerializeObject(message);
             var jsonBytes = Encoding.UTF8.GetBytes(json);
@@ -90,12 +90,12 @@ namespace Mizugo
             if (input == null)
                 throw new ArgumentNullException("input");
 
-            if (input is not JsonMsg jsonMsg)
+            if (input is not JsonMsg data)
                 throw new InvalidMessageException("unmarshal");
 
-            var json = Encoding.UTF8.GetString(jsonMsg.Message);
+            var json = Encoding.UTF8.GetString(data.Message);
 
-            messageID = jsonMsg.MessageID;
+            messageID = data.MessageID;
             message = JsonConvert.DeserializeObject<T>(json);
         }
     }

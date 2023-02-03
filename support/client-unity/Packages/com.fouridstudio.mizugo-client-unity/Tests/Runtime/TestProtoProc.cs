@@ -13,66 +13,65 @@ namespace Mizugo
     {
         [Test]
         [TestCaseSource("EncodeCases")]
-        public void Encode(ProtoMsg input)
+        public void Encode(ProtoMsg message)
         {
-            var protoproc = new ProtoProc();
-            var encode = protoproc.Encode(input);
-            var decode = protoproc.Decode(encode);
+            var proc = new ProtoProc();
+            var encode = proc.Encode(message);
+            var decode = proc.Decode(encode);
 
-            Assert.IsTrue(TestUtil.EqualsByJson(input, decode));
+            Assert.IsTrue(TestUtil.EqualsByJson(message, decode));
         }
 
         public static IEnumerable EncodeCases
         {
             get
             {
-                yield return new TestCaseData(ProtoProc.Marshal(1, new ProtoTest() { Data = "test1" }));
-                yield return new TestCaseData(ProtoProc.Marshal(2, new ProtoTest() { Data = "test2" }));
+                yield return new TestCaseData(ProtoProc.Marshal(1, new ProtoTest { Data = "test1" }));
+                yield return new TestCaseData(ProtoProc.Marshal(2, new ProtoTest { Data = "test2" }));
             }
         }
 
         [Test]
         public void EncodeFailed()
         {
-            var protoproc = new ProtoProc();
+            var proc = new ProtoProc();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                protoproc.Encode(null);
+                proc.Encode(null);
             });
             Assert.Throws<InvalidMessageException>(() =>
             {
-                protoproc.Encode(new object());
+                proc.Encode(new object());
             });
         }
 
         [Test]
         public void DecodeFailed()
         {
-            var protoproc = new ProtoProc();
+            var proc = new ProtoProc();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                protoproc.Decode(null);
+                proc.Decode(null);
             });
         }
 
         [Test]
         [TestCaseSource("ProcessCases")]
-        public void Process(ProtoMsg protoMsg)
+        public void Process(ProtoMsg message)
         {
-            var protoproc = new ProtoProc();
-            var expected = protoMsg;
+            var proc = new ProtoProc();
             var valid = false;
 
-            protoproc.Add(
-                protoMsg.MessageID,
+            proc.Add(
+                message.MessageID,
                 (object param) =>
                 {
-                    valid = expected == param;
+                    valid = TestUtil.EqualsByJson(message, param);
                 }
             );
-            protoproc.Process(protoMsg);
+            proc.Process(message);
             Assert.IsTrue(valid);
         }
 
@@ -80,27 +79,27 @@ namespace Mizugo
         {
             get
             {
-                yield return new TestCaseData(ProtoProc.Marshal(1, new ProtoTest() { Data = "test1" }));
-                yield return new TestCaseData(ProtoProc.Marshal(2, new ProtoTest() { Data = "test2" }));
+                yield return new TestCaseData(ProtoProc.Marshal(1, new ProtoTest { Data = "test1" }));
+                yield return new TestCaseData(ProtoProc.Marshal(2, new ProtoTest { Data = "test2" }));
             }
         }
 
         [Test]
         public void ProcessFailed()
         {
-            var protoproc = new ProtoProc();
+            var proc = new ProtoProc();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                protoproc.Process(null);
+                proc.Process(null);
             });
             Assert.Throws<InvalidMessageException>(() =>
             {
-                protoproc.Process(new object());
+                proc.Process(new object());
             });
             Assert.Throws<UnprocessException>(() =>
             {
-                protoproc.Process(new ProtoMsg() { MessageID = 1 });
+                proc.Process(new ProtoMsg { MessageID = 1 });
             });
         }
 
@@ -109,8 +108,8 @@ namespace Mizugo
         public void Marshal(MessageID messageID, ProtoTest message)
         {
             var marshal = ProtoProc.Marshal(messageID, message);
-            ProtoProc.Unmarshal<ProtoTest>(marshal, out var resultID, out var result);
 
+            ProtoProc.Unmarshal<ProtoTest>(marshal, out var resultID, out var result);
             Assert.AreEqual(messageID, resultID);
             Assert.IsTrue(TestUtil.EqualsByJson(message, result));
         }
@@ -119,8 +118,8 @@ namespace Mizugo
         {
             get
             {
-                yield return new TestCaseData(1, new ProtoTest() { Data = "test1" });
-                yield return new TestCaseData(2, new ProtoTest() { Data = "test2" });
+                yield return new TestCaseData(1, new ProtoTest { Data = "test1" });
+                yield return new TestCaseData(2, new ProtoTest { Data = "test2" });
             }
         }
 
