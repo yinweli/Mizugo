@@ -13,15 +13,11 @@ import (
 
 // TCP會話器, 負責傳送/接收訊息等相關的功能
 
-const tcpHeaderSize = 2               // 標頭長度
-const tcpPacketSize = int(^uint16(0)) // 封包長度
-const tcpMessageSize = 1000           // 訊息通道大小設為1000, 避免因為爆滿而卡住
-
 // NewTCPSession 建立TCP會話器
 func NewTCPSession(conn net.Conn) *TCPSession {
 	return &TCPSession{
 		conn:    conn,
-		message: make(chan any, tcpMessageSize),
+		message: make(chan any, ChannelSize),
 	}
 }
 
@@ -56,9 +52,11 @@ func (this *TCPSession) Start(bind Bind, unbind Unbind, wrong Wrong) {
 		pools.DefaultPool.Submit(this.recvLoop)
 		pools.DefaultPool.Submit(this.sendLoop)
 
+		this.publish.Do(EventStart, this)
 		this.signal.Add(2)
 		this.signal.Wait() // 等待接收循環與傳送循環結束, 如果接收循環與傳送循環結束, 就會繼續進行結束處理
 		unbind.Do(this)
+		this.publish.Do(EventStop, this)
 	})
 }
 
@@ -130,7 +128,7 @@ func (this *TCPSession) recvLoop() {
 
 // recvPacket 接收封包
 func (this *TCPSession) recvPacket(reader io.Reader) (packet []byte, err error) {
-	header := make([]byte, tcpHeaderSize)
+	header := make([]byte, HeaderSize)
 
 	if _, err := io.ReadFull(reader, header); err != nil {
 		return nil, fmt.Errorf("tcp session recv packet: %w", err)
@@ -189,11 +187,11 @@ func (this *TCPSession) sendPacket(writer io.Writer, packet []byte) error {
 		return nil
 	} // if
 
-	if size > tcpPacketSize {
+	if size > PacketSize {
 		return fmt.Errorf("tcp session send packet: packet too large")
 	} // if
 
-	header := make([]byte, tcpHeaderSize)
+	header := make([]byte, HeaderSize)
 	binary.LittleEndian.PutUint16(header, uint16(size))
 
 	if _, err := writer.Write(header); err != nil {

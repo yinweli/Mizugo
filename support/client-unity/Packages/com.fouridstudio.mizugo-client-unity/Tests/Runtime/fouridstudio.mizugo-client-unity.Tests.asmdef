@@ -1,0 +1,25 @@
+{
+    "name": "fouridstudio.mizugo-client-unity.Tests",
+    "rootNamespace": "",
+    "references": [
+        "Undefined.MizugoClientUnity",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "fouridstudio.mizugo-client-unity"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "Google.Protobuf.dll",
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

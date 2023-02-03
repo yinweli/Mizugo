@@ -28,7 +28,7 @@ proto:
   ip:
   port: 10002
 
-stack:
+plist:
   ip:
   port: 10003
   keyinit: key-init

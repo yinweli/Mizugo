@@ -39,7 +39,7 @@ func (this *Metrics) Initialize() error {
 	Key = mizugos.Metricsmgr().NewRuntime("key")
 	Json = mizugos.Metricsmgr().NewRuntime("json")
 	Proto = mizugos.Metricsmgr().NewRuntime("proto")
-	Stack = mizugos.Metricsmgr().NewRuntime("stack")
+	PList = mizugos.Metricsmgr().NewRuntime("plist")
 	return nil
 }
 
@@ -49,6 +49,6 @@ func (this *Metrics) Finalize() {
 }
 
 var Key *metrics.Runtime   // 密鑰訊息統計物件
-var Json *metrics.Runtime  // json訊息統計物件
-var Proto *metrics.Runtime // proto訊息統計物件
-var Stack *metrics.Runtime // stack訊息統計物件
+var Json *metrics.Runtime  // Json訊息統計物件
+var Proto *metrics.Runtime // Proto訊息統計物件
+var PList *metrics.Runtime // PList訊息統計物件

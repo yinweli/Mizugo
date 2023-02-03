@@ -15,5 +15,5 @@ const ( // 配置定義
 const ( // 模組編號
 	ModuleIDJson entitys.ModuleID = iota + 1
 	ModuleIDProto
-	ModuleIDStack
+	ModuleIDPList
 )

@@ -4,11 +4,11 @@ tasks:
   # 進行程式碼檢查
   lint:
     cmds:
-      - gofmt -s -w -l . # 程式碼格式化
-      - go install github.com/bufbuild/buf/cmd/buf@latest # 安裝/更新proto格式化工具
-      - buf format -w . # proto格式化
-      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest # 安裝/更新golangci-lint
-      - golangci-lint -v run # 程式碼檢查
+      - task: fmt-mizugo
+      - task: fmt-cs-client-unity
+      - task: fmt-cs-proto
+      - task: fmt-proto
+      - task: lint-mizugo
 
   # 進行程式碼測試
   test:
@@ -19,3 +19,52 @@ tasks:
   bench:
     cmds:
       - go test ./... -bench=. -benchmem
+
+  # 進行proto轉換
+  proto:
+    cmds:
+      - task: proto-mizugo
+      - task: proto-test
+
+  # mizugo的proto轉換
+  proto-mizugo:
+    dir: support\proto\mizugo
+    cmds:
+      - build.bat
+
+  # 測試訊息的proto轉換
+  proto-test:
+    dir: support\proto\test
+    cmds:
+      - build.bat
+
+  # mizugo程式碼格式化
+  fmt-mizugo:
+    cmds:
+      - gofmt -s -w -l .
+
+  # client-unity格式化
+  fmt-cs-client-unity:
+    dir: support/client-unity/Packages/com.fouridstudio.mizugo-client-unity
+    cmds:
+      - dotnet csharpier .
+
+  # cs-proto訊息格式化
+  fmt-cs-proto:
+    dir: support/proto
+    cmds:
+      - dotnet csharpier .
+
+  # TODO: 等開始做test-client-cs後, 裡面的cs code也得格式化
+
+  # proto格式化
+  fmt-proto:
+    cmds:
+      - go install github.com/bufbuild/buf/cmd/buf@latest
+      - buf format -w .
+
+  # mizugo程式碼檢查
+  lint-mizugo:
+    cmds:
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+      - golangci-lint -v run

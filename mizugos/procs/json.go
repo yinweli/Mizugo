@@ -4,13 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/yinweli/Mizugo/mizugos/cryptos"
 	"github.com/yinweli/Mizugo/mizugos/msgs"
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
-// json處理器, 封包結構使用msgs.JsonMsg
+// json處理器, 封包結構使用JsonMsg
 // 沒有使用加密技術, 所以安全性很低, 僅用於傳送簡單訊息或是傳送密鑰使用
-// 訊息內容: mizugos/msgs/jsonmsg.proto
+// 訊息內容: support/proto/mizugo/msg-go/msgs-json/jsonmsg.go
+// 訊息內容: support/proto/mizugo/msg-cs/msgs-json/Jsonmsg.cs
 // 封包編碼: json編碼成位元陣列, 再通過base64編碼
 // 封包解碼: base64解碼, 再通過json解碼成訊息結構
 
@@ -40,13 +42,13 @@ func (this *Json) Encode(input any) (output []byte, err error) {
 		return nil, fmt.Errorf("json encode: %w", err)
 	} // if
 
-	output = utils.Base64Encode(bytes)
+	output = cryptos.Base64Encode(bytes)
 	return output, nil
 }
 
 // Decode 封包解碼
 func (this *Json) Decode(input []byte) (output any, err error) {
-	bytes, err := utils.Base64Decode(input)
+	bytes, err := cryptos.Base64Decode(input)
 
 	if err != nil {
 		return nil, fmt.Errorf("json decode: %w", err)

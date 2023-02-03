@@ -4,9 +4,17 @@ import (
 	"net"
 )
 
+const ( // 網路定義
+	HeaderSize  = 2               // 標頭長度
+	PacketSize  = int(^uint16(0)) // 封包長度
+	ChannelSize = 1000            // 訊息通道大小設為1000, 避免因為爆滿而卡住
+)
+
 const ( // 網路事件名稱
-	EventRecv = "recv" // 接收訊息事件, 當接收訊息後觸發, 參數是訊息物件
-	EventSend = "send" // 傳送訊息事件, 當傳送訊息後觸發, 參數是訊息物件
+	EventStart = "start" // 啟動會話事件, 當會話啟動後觸發, 參數是會話物件
+	EventStop  = "stop"  // 停止會話事件, 當會話停止後觸發, 參數是會話物件
+	EventRecv  = "recv"  // 接收訊息事件, 當接收訊息後觸發, 參數是訊息物件
+	EventSend  = "send"  // 傳送訊息事件, 當傳送訊息後觸發, 參數是訊息物件
 )
 
 // Connecter 連接介面

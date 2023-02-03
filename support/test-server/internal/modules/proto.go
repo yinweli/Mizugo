@@ -6,7 +6,7 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-server/internal/features"
-	"github.com/yinweli/Mizugo/support/test-server/internal/messages"
+	"github.com/yinweli/Mizugo/support/test-server/internal/msgs"
 )
 
 // NewProto 建立Proto模組
@@ -27,7 +27,7 @@ type Proto struct {
 
 // Awake 喚醒事件
 func (this *Proto) Awake() error {
-	this.Entity().AddMessage(procs.MessageID(messages.MsgID_ProtoQ), this.procMProtoQ)
+	this.Entity().AddMessage(procs.MessageID(msgs.MsgID_ProtoQ), this.procMProtoQ)
 	return nil
 }
 
@@ -36,7 +36,7 @@ func (this *Proto) procMProtoQ(message any) {
 	rec := features.Proto.Rec()
 	defer rec()
 
-	_, msg, err := procs.ProtoUnmarshal[messages.MProtoQ](message)
+	_, msg, err := procs.ProtoUnmarshal[msgs.MProtoQ](message)
 
 	if err != nil {
 		mizugos.Error(this.name).Message("procMProtoQ").EndError(err)
@@ -49,8 +49,8 @@ func (this *Proto) procMProtoQ(message any) {
 }
 
 // sendMProtoA 傳送回應Proto
-func (this *Proto) sendMProtoA(from *messages.MProtoQ, count int64) {
-	msg, err := procs.ProtoMarshal(procs.MessageID(messages.MsgID_ProtoA), &messages.MProtoA{
+func (this *Proto) sendMProtoA(from *msgs.MProtoQ, count int64) {
+	msg, err := procs.ProtoMarshal(procs.MessageID(msgs.MsgID_ProtoA), &msgs.MProtoA{
 		From:  from,
 		Count: count,
 	})

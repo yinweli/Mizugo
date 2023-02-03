@@ -6,6 +6,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 
+	"github.com/yinweli/Mizugo/mizugos/cryptos"
 	"github.com/yinweli/Mizugo/mizugos/msgs"
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
@@ -42,7 +43,7 @@ func (this *Proto) Encode(input any) (output []byte, err error) {
 		return nil, fmt.Errorf("proto encode: %w", err)
 	} // if
 
-	output = utils.Base64Encode(bytes)
+	output = cryptos.Base64Encode(bytes)
 	return output, nil
 }
 
@@ -52,7 +53,7 @@ func (this *Proto) Decode(input []byte) (output any, err error) {
 		return nil, fmt.Errorf("proto decode: input nil")
 	} // if
 
-	bytes, err := utils.Base64Decode(input)
+	bytes, err := cryptos.Base64Decode(input)
 
 	if err != nil {
 		return nil, fmt.Errorf("proto decode: %w", err)

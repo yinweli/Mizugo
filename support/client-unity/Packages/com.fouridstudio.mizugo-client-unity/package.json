@@ -1,0 +1,8 @@
+{
+  "name": "com.fouridstudio.mizugo-client-unity",
+  "displayName": "mizugo-client-unity",
+  "version": "0.1.0",
+  "unity": "2021.3",
+  "license": "MIT",
+  "description": "mizugo-client-unity"
+}

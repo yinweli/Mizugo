@@ -20,7 +20,7 @@ func initialize() error {
 	server.metrics = features.NewMetrics()
 	server.Json = entrys.NewJson()
 	server.Proto = entrys.NewProto()
-	server.Stack = entrys.NewStack()
+	server.PList = entrys.NewPList()
 
 	mizugos.Configmgr().AddPath(defines.ConfigPath)
 
@@ -48,7 +48,7 @@ func initialize() error {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := server.Stack.Initialize(); err != nil {
+	if err := server.PList.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
@@ -59,7 +59,7 @@ func initialize() error {
 func finalize() {
 	server.Json.Finalize()
 	server.Proto.Finalize()
-	server.Stack.Finalize()
+	server.PList.Finalize()
 	server.metrics.Finalize()
 	server.pool.Finalize()
 	server.logger.Finalize()
@@ -72,5 +72,5 @@ var server struct {
 	metrics *features.Metrics // 統計資料
 	Json    *entrys.Json      // Json入口
 	Proto   *entrys.Proto     // Proto入口
-	Stack   *entrys.Stack     // Stack入口
+	PList   *entrys.PList     // PList入口
 }

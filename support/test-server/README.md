@@ -7,8 +7,8 @@ expvarmon -ports="http://localhost:20001" -i 1s -vars="time:json.time,time(max):
 # 使用expvarmon查看proto訊息狀況
 expvarmon -ports="http://localhost:20001" -i 1s -vars="time:proto.time,time(max):proto.time(max),time(avg):proto.time(avg),count:proto.count,count(1m):proto.count(1m),count(5m):proto.count(5m),count(10m):proto.count(10m),count(60m):proto.count(60m)"
 
-# 使用expvarmon查看stack訊息狀況
-expvarmon -ports="http://localhost:20001" -i 1s -vars="time:stack.time,time(max):stack.time(max),time(avg):stack.time(avg),count:stack.count,count(1m):stack.count(1m),count(5m):stack.count(5m),count(10m):stack.count(10m),count(60m):stack.count(60m)"
+# 使用expvarmon查看plist訊息狀況
+expvarmon -ports="http://localhost:20001" -i 1s -vars="time:plist.time,time(max):plist.time(max),time(avg):plist.time(avg),count:plist.count,count(1m):plist.count(1m),count(5m):plist.count(5m),count(10m):plist.count(10m),count(60m):plist.count(60m)"
 
 # 使用expvarmon查看記憶體狀況
 expvarmon -ports="http://localhost:20001" -i 1s

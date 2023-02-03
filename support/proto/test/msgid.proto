@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "/messages;messages";
+option go_package = "/msgs;msgs";
 
 // 訊息編號
 enum MsgID {
@@ -11,6 +11,6 @@ enum MsgID {
   JsonA = 4; // 回應Json
   ProtoQ = 5; // 要求Proto
   ProtoA = 6; // 回應Proto
-  StackQ = 7; // 要求Stack
-  StackA = 8; // 回應Stack
+  PListQ = 7; // 要求PList
+  PListA = 8; // 回應PList
 }

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "/messages;messages";
+option go_package = "/msgs;msgs";
 
 // 要求密鑰
 message MKeyQ {}
@@ -22,13 +22,13 @@ message MProtoA {
   int64 count = 2; // 封包計數
 }
 
-// 要求Stack
-message MStackQ {
+// 要求PList
+message MPListQ {
   int64 time = 1; // 傳送時間
 }
 
-// 回應Stack
-message MStackA {
-  MStackQ from = 1; // 來源訊息
+// 回應PList
+message MPListA {
+  MPListQ from = 1; // 來源訊息
   int64 count = 2; // 封包計數
 }
