@@ -1,10 +1,20 @@
 using Newtonsoft.Json;
 using System.Threading;
+using UnityEngine;
 
 namespace Mizugo
 {
     internal class TestUtil
     {
+        /// <summary>
+        /// 記錄訊息
+        /// </summary>
+        /// <param name="message">訊息物件</param>
+        public static void Log(object message)
+        {
+            Debug.Log(message);
+        }
+
         /// <summary>
         /// 共用的暫停函式
         /// </summary>
@@ -23,7 +33,6 @@ namespace Mizugo
         {
             var jsonExpected = JsonConvert.SerializeObject(expected);
             var jsonActual = JsonConvert.SerializeObject(actual);
-
             return jsonExpected.Equals(jsonActual);
         }
     }
