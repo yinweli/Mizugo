@@ -49,7 +49,7 @@ func padZero(source []byte, blockSize int) []byte {
 
 // unpadZero zeropad反填充
 func unpadZero(source []byte) []byte {
-	return bytes.TrimRightFunc(source, func(r rune) bool {
+	return bytes.TrimFunc(source, func(r rune) bool {
 		return r == rune(0)
 	})
 }
