@@ -82,7 +82,7 @@ func (this *PList) procMKeyA(message any) {
 		return
 	} // if
 
-	process.Key([]byte(msg.Key))
+	process.KeyStr(msg.Key).IVStr(msg.Key) // 這裡偷懶把key跟iv都設為key
 	this.Entity().PublishDelay(defines.EventBegin, nil, this.delayTime)
 	mizugos.Info(this.name).Message("procMKeyA").KV("key", msg.Key).End()
 }

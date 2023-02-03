@@ -4,12 +4,12 @@ import (
 	"bytes"
 )
 
-const ( // 填充模式編號
+const ( // 填充模式
 	PaddingZero  Padding = iota // zeropad填充
 	PaddingPKCS7                // pkcs7填充
 )
 
-// Padding 填充模式編號
+// Padding 填充模式
 type Padding = int
 
 // pad 填充

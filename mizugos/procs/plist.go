@@ -12,12 +12,14 @@ import (
 )
 
 // plist處理器, 封包結構使用PListMsg
-// 由於使用到des加密, 安全性較高, 適合用來傳送一般封包, 使用時需要設定傳送函式以及密鑰
+// 由於使用到des-cbc加密, 安全性較高, 適合用來傳送一般封包, 使用時需要設定傳送函式, 密鑰以及初始向量
 // 由於採用複數訊息設計, 因此使用plist上下文與使用者溝通(json/proto處理器則使用訊息結構與使用者溝通)
 // 當使用者需要回應訊息給客戶端時, 把回應訊息新增到plist上下文中, 在處理的最後會一次性傳送所有回應訊息給客戶端
 // 訊息內容: support/proto/mizugo/plistmsg.proto
 // 封包編碼: protobuf編碼成位元陣列, 再通過des加密
 // 封包解碼: des解密, 再通過protobuf解碼成訊息結構
+
+const plistPadding = cryptos.PaddingPKCS7 // plist使用的填充模式
 
 // NewPList 建立plist處理器
 func NewPList() *PList {
@@ -31,6 +33,7 @@ type PList struct {
 	*procmgr                        // 管理器
 	send     utils.SyncAttr[Send]   // 傳送函式
 	key      utils.SyncAttr[[]byte] // 密鑰
+	iv       utils.SyncAttr[[]byte] // 初始向量
 }
 
 // Send 傳送函式類型
@@ -48,6 +51,22 @@ func (this *PList) Key(key []byte) *PList {
 	return this
 }
 
+// KeyStr 設定密鑰
+func (this *PList) KeyStr(key string) *PList {
+	return this.Key([]byte(key))
+}
+
+// IV 設定初始向量
+func (this *PList) IV(iv []byte) *PList {
+	this.iv.Set(iv)
+	return this
+}
+
+// IVStr 設定初始向量
+func (this *PList) IVStr(iv string) *PList {
+	return this.IV([]byte(iv))
+}
+
 // Encode 封包編碼
 func (this *PList) Encode(input any) (output []byte, err error) {
 	message, err := utils.CastPointer[msgs.PListMsg](input)
@@ -62,7 +81,7 @@ func (this *PList) Encode(input any) (output []byte, err error) {
 		return nil, fmt.Errorf("plist encode: %w", err)
 	} // if
 
-	output, err = cryptos.DesECBEncrypt(cryptos.PaddingPKCS7, this.key.Get(), bytes)
+	output, err = cryptos.DesCBCEncrypt(plistPadding, this.key.Get(), this.iv.Get(), bytes)
 
 	if err != nil {
 		return nil, fmt.Errorf("plist encode: %w", err)
@@ -77,7 +96,7 @@ func (this *PList) Decode(input []byte) (output any, err error) {
 		return nil, fmt.Errorf("plist decode: input nil")
 	} // if
 
-	bytes, err := cryptos.DesECBDecrypt(cryptos.PaddingPKCS7, this.key.Get(), input)
+	bytes, err := cryptos.DesCBCDecrypt(plistPadding, this.key.Get(), this.iv.Get(), input)
 
 	if err != nil {
 		return nil, fmt.Errorf("plist decode: %w", err)

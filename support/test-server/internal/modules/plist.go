@@ -48,7 +48,7 @@ func (this *PList) eventSend(_ any) {
 		return
 	} // if
 
-	process.Key([]byte(this.key))
+	process.KeyStr(this.key).IVStr(this.key) // 這裡偷懶把key跟iv都設為key
 	this.Entity().Unsubscribe(this.subID)
 }
 

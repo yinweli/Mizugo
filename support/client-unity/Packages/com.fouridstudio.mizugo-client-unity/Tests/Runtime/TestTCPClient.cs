@@ -174,16 +174,15 @@ namespace Mizugo
                     vaildSend = true;
                 }
             );
-            client.AddEvent(EventID.Error, UnityEngine.Debug.Log);
+            client.AddEvent(EventID.Error, TestUtil.Log);
             client.AddProcess(
                 (int)MsgID.JsonA,
                 (object param) =>
                 {
                     JsonProc.Unmarshal<MJsonA>(param, out var messageID, out var message);
-
+                    TestUtil.Log("duration: " + (stopwatch.ElapsedMilliseconds - message.From.Time));
+                    TestUtil.Log("count: " + message.Count);
                     validMessage = true;
-                    UnityEngine.Debug.Log("duration: " + (stopwatch.ElapsedMilliseconds - message.From.Time));
-                    UnityEngine.Debug.Log("count: " + message.Count);
                 }
             );
 
@@ -250,7 +249,7 @@ namespace Mizugo
                     vaildSend = true;
                 }
             );
-            client.AddEvent(EventID.Error, UnityEngine.Debug.Log);
+            client.AddEvent(EventID.Error, TestUtil.Log);
             client.AddProcess(
                 (int)MsgID.ProtoA,
                 (object param) =>
@@ -258,8 +257,8 @@ namespace Mizugo
                     ProtoProc.Unmarshal<MProtoA>(param, out var messageID, out var message);
 
                     validMessage = true;
-                    UnityEngine.Debug.Log("duration: " + (stopwatch.ElapsedMilliseconds - message.From.Time));
-                    UnityEngine.Debug.Log("count: " + message.Count);
+                    TestUtil.Log("duration: " + (stopwatch.ElapsedMilliseconds - message.From.Time));
+                    TestUtil.Log("count: " + message.Count);
                 }
             );
 

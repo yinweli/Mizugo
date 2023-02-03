@@ -38,7 +38,7 @@ copy %source%\msgs-json\*.* %targetc%
 REM Generate the message for Unity Test
 echo #### Generate the message for Unity Test
 set source=msg-cs
-set targetc=..\..\..\support\client-unity\Packages\com.fouridstudio.mizugo-client-unity\Tests\Runtime\msgs
+set targetc=..\..\..\support\client-unity\Packages\com.fouridstudio.mizugo-client-unity\Tests\Runtime\Msgs
 
 rm -r %targetc%
 mkdir %targetc%

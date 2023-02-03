@@ -76,7 +76,7 @@ func (this *PList) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.SetProcess(procs.NewPList().Send(entity.Send).Key([]byte(this.config.KeyInit))); err != nil {
+	if err := entity.SetProcess(procs.NewPList().Send(entity.Send).KeyStr(this.config.KeyInit).IVStr(this.config.KeyInit)); err != nil { // 這裡偷懶把key跟iv都設為key
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if

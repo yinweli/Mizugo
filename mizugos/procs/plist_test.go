@@ -20,14 +20,14 @@ type SuitePList struct {
 	suite.Suite
 	testdata.TestEnv
 	testdata.TestLeak
-	key       []byte
+	key       string
 	messageID MessageID
 	message   *msgs.PListTest
 }
 
 func (this *SuitePList) SetupSuite() {
 	this.Change("test-procs-plist")
-	this.key = cryptos.RandDesKey()
+	this.key = cryptos.RandDesKeyString()
 	this.messageID = MessageID(1)
 	this.message = &msgs.PListTest{
 		Data: "plist test",
@@ -47,7 +47,7 @@ func (this *SuitePList) TestNewPList() {
 }
 
 func (this *SuitePList) TestEncode() {
-	target := NewPList().Key(this.key)
+	target := NewPList().KeyStr(this.key).IVStr(this.key) // 這裡偷懶把key跟iv都設為key
 	input := MarshalPListMsg([]TestMsg{
 		{MessageID: this.messageID, Message: this.message},
 	})
@@ -75,7 +75,7 @@ func (this *SuitePList) TestEncode() {
 }
 
 func (this *SuitePList) TestProcess() {
-	target := NewPList().Key(this.key)
+	target := NewPList().KeyStr(this.key).IVStr(this.key) // 這裡偷懶把key跟iv都設為key
 	input := MarshalPListMsg([]TestMsg{
 		{MessageID: this.messageID, Message: this.message},
 	})
