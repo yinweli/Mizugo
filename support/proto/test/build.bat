@@ -23,7 +23,7 @@ copy %source%\msgs-json\*.* %targetc%
 REM Generate the message for Unity
 echo #### Generate the message for Unity
 set source=msg-cs
-set targetc=..\..\..\support\test-client-cs\internal\msgs
+set targetc=..\..\..\support\test-client-cs\Assets\Scripts\Msgs
 
 rm -r %source%\msgs
 mkdir %source%\msgs

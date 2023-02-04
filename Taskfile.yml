@@ -5,9 +5,10 @@ tasks:
   lint:
     cmds:
       - task: fmt-mizugo
-      - task: fmt-cs-client-unity
-      - task: fmt-cs-proto
+      - task: fmt-client-unity
+      - task: fmt-client-unity-sample
       - task: fmt-proto
+      - task: fmt-proto-cs
       - task: lint-mizugo
 
   # 進行程式碼測試
@@ -25,6 +26,12 @@ tasks:
     cmds:
       - task: proto-mizugo
       - task: proto-test
+
+  # 更新客戶端組件分支
+  clientunity:
+    cmds:
+      - git subtree split --prefix=support/client-unity/Packages/com.fouridstudio.mizugo-client-unity --branch clientunity
+      - git subtree split --prefix=support/test-client-cs --branch clientunity-sample
 
   # mizugo的proto轉換
   proto-mizugo:
@@ -44,24 +51,28 @@ tasks:
       - gofmt -s -w -l .
 
   # client-unity格式化
-  fmt-cs-client-unity:
+  fmt-client-unity:
     dir: support/client-unity/Packages/com.fouridstudio.mizugo-client-unity
     cmds:
       - dotnet csharpier .
-
-  # cs-proto訊息格式化
-  fmt-cs-proto:
-    dir: support/proto
+      
+  # client-unity-sample格式化
+  fmt-client-unity-sample:
+    dir: support/test-client-cs/Assets/Scripts
     cmds:
       - dotnet csharpier .
-
-  # TODO: 等開始做test-client-cs後, 裡面的cs code也得格式化
 
   # proto格式化
   fmt-proto:
     cmds:
       - go install github.com/bufbuild/buf/cmd/buf@latest
       - buf format -w .
+
+  # proto-cs訊息格式化
+  fmt-proto-cs:
+    dir: support/proto
+    cmds:
+      - dotnet csharpier .
 
   # mizugo程式碼檢查
   lint-mizugo:
