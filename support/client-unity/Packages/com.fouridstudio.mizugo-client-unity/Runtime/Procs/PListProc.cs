@@ -14,11 +14,11 @@ namespace Mizugo
 
     /// <summary>
     /// plist處理器, 封包結構使用PListMsg
-    /// 由於使用到des-cbc加密, 安全性較高, 適合用來傳送一般封包, 使用時需要設定傳送函式, 密鑰以及初始向量
-    /// 由於採用複數訊息設計, 因此封包內可以填入多個訊息來跟伺服器溝通(json/proto處理器則使用訊息結構與伺服器溝通)
-    /// 訊息內容: support/proto/mizugo/plistmsg.proto
+    /// 採用des-cbc加密, 安全性較高, 適合用來傳送一般封包, 使用時需要設定密鑰以及初始向量
+    /// 採用複數訊息設計, 因此封包內可以填入多個訊息來跟伺服器溝通
+    /// 封包結構: support/proto/mizugo/plistmsg.proto
     /// 封包編碼: protobuf編碼成位元陣列, 再通過des加密
-    /// 封包解碼: des解密, 再通過protobuf解碼成訊息結構
+    /// 封包解碼: des解密, 再通過protobuf解碼
     /// </summary>
     public partial class PListProc : Procmgr
     {
@@ -151,7 +151,7 @@ namespace Mizugo
 
             var sender = new PListSender();
 
-            for (var i = 0; i < input.Length; )
+            for (var i = 0; i < input.Length;)
             {
                 var itor = input[i++];
 

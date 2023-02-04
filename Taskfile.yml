@@ -21,7 +21,7 @@ tasks:
     cmds:
       - go test ./... -bench=. -benchmem
 
-  # 進行proto轉換
+  # 產生proto message
   proto:
     cmds:
       - task: proto-mizugo

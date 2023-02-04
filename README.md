@@ -51,6 +51,13 @@
 | support/proto/mizugo     | 內部proto定義檔 |
 | support/proto/test       | 測試proto定義檔 |
 
+# Taskfile命令速查
+* lint: 進行程式碼檢查
+* test: 進行程式碼測試
+* bench: 進行效能測試
+* proto: 產生proto message
+* clientunity: 更新客戶端組件分支
+
 [go]: https://go.dev/dl/
 [proto]: https://github.com/protocolbuffers/protobuf
 [protoc-go]: https://github.com/protocolbuffers/protobuf-go
