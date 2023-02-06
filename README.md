@@ -22,8 +22,16 @@
     * 開啟protobuf專案目錄中的`csharp/src/Google.Protobuf.sln`檔案
     * 選擇功能列中的`建置/批次建置`, 並把`Google.Protobuf`的Release打勾, 並建置專案
         * 如果建置過程中有發生問題, 得要自己排除問題了QQ
-        * 通常是.Net Framework的版本不符合
-        * 或是要修改protobuf專案根目錄底下的global.json檔案內容設置
+        * 如果有輸出如下錯誤
+          ```sh
+          Detailed Information: Unable to locate the .NET Core SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.
+          ```
+          這是因為Visual Studio Community使用的dotnet core sdk版本與protobuf專案裡使用的sdk版本不一致導致的
+          可通過在命令行中執行
+          ```sh
+          dotnet --version
+          ```
+          來查看當前系統使用的dotnet core sdk版本, 然後以此修改protobuf專案根目錄底下的global.json檔案中的sdk版號來解決
     * 完成後, 編譯完成的檔案會放在`csharp/src/Google.Protobuf/bin/Release`中
     * 依照需求(Unity應該會用`net45`)把該版本的檔案複製到Unity專案中`Assets/Plugins'目錄下
         * 由於各個Unity專案的目錄結構都不太一樣, 因此複製目的地不一定會跟此步驟相同

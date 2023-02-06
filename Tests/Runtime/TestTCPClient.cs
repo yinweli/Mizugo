@@ -127,6 +127,57 @@ namespace Mizugo
         }
     }
 
+    internal class TestTCPClientCycle
+    {
+        /// <summary>
+        /// 這項測試需要啟動測試伺服器才能執行
+        /// </summary>
+        [Test]
+        [TestCase("127.0.0.1", 10003, "key-init", 1000)]
+        public void Test(string host, int port, string key, int count)
+        {
+            var client = new TCPClient(new Eventmgr(), new PListProc { KeyStr = key, IVStr = key, });
+            var stopwatch = new Stopwatch();
+            var actual = 0;
+
+            void SendMPListQ()
+            {
+                client.Send(PListProc.Marshal((int)MsgID.PlistQ, new MPListQ { Time = stopwatch.ElapsedMilliseconds }));
+                actual++;
+            }
+
+            client.AddEvent(
+                EventID.Connect,
+                (object _) =>
+                {
+                    SendMPListQ();
+                }
+            );
+            client.AddEvent(EventID.Error, TestUtil.Log);
+            client.AddProcess(
+                (int)MsgID.PlistA,
+                (object param) =>
+                {
+                    PListProc.Unmarshal<MPListA>(param, out var messageID, out var message);
+                    TestUtil.Log("duration: " + (stopwatch.ElapsedMilliseconds - message.From.Time));
+                    TestUtil.Log("count: " + message.Count);
+
+                    if (actual < count)
+                        SendMPListQ();
+                }
+            );
+
+            stopwatch.Start();
+            client.Connect(host, port);
+            TestUtil.Sleep();
+
+            while (client.IsUpdate() || actual < count)
+                client.Update();
+
+            Assert.AreEqual(count, actual);
+        }
+    }
+
     internal class TestTCPClientJson
     {
         /// <summary>
