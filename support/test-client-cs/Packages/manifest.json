@@ -1,6 +1,7 @@
 {
   "dependencies": {
-    "com.fouridstudio.mizugo-client-unity": "https://github.com/yinweli/Mizugo.git#clientunity",
+    "com.fouridstudio.mizugo-client-unity": "https://github.com/yinweli/Mizugo.git#client-unity",
+    "com.fouridstudio.mizugo-proto-unity": "https://github.com/yinweli/Mizugo.git#proto-unity",
     "com.unity.collab-proxy": "1.17.2",
     "com.unity.feature.2d": "1.0.0",
     "com.unity.ide.rider": "3.0.15",

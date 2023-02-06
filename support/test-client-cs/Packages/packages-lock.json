@@ -1,11 +1,18 @@
 {
   "dependencies": {
     "com.fouridstudio.mizugo-client-unity": {
-      "version": "https://github.com/yinweli/Mizugo.git#clientunity",
+      "version": "https://github.com/yinweli/Mizugo.git#client-unity",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "37f124b4d8fa4962ef08eac495964296fb51c43f"
+      "hash": "2cd16918d3ffcb1b8f0afa5c2a0b0d4f4d243bc2"
+    },
+    "com.fouridstudio.mizugo-proto-unity": {
+      "version": "https://github.com/yinweli/Mizugo.git#proto-unity",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "e92943f24792b4cd94c7105c4ae8f3c0741161ae"
     },
     "com.unity.2d.animation": {
       "version": "7.0.6",
