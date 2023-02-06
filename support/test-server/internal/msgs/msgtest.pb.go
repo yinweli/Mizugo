@@ -20,101 +20,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// 要求密鑰
-type MKeyQ struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *MKeyQ) Reset() {
-	*x = MKeyQ{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_msgtest_proto_msgTypes[0]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *MKeyQ) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*MKeyQ) ProtoMessage() {}
-
-func (x *MKeyQ) ProtoReflect() protoreflect.Message {
-	mi := &file_msgtest_proto_msgTypes[0]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use MKeyQ.ProtoReflect.Descriptor instead.
-func (*MKeyQ) Descriptor() ([]byte, []int) {
-	return file_msgtest_proto_rawDescGZIP(), []int{0}
-}
-
-// 回應密鑰
-type MKeyA struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	From *MKeyQ `protobuf:"bytes,1,opt,name=from,proto3" json:"from,omitempty"` // 來源訊息
-	Key  string `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`   // 密鑰
-}
-
-func (x *MKeyA) Reset() {
-	*x = MKeyA{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_msgtest_proto_msgTypes[1]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *MKeyA) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*MKeyA) ProtoMessage() {}
-
-func (x *MKeyA) ProtoReflect() protoreflect.Message {
-	mi := &file_msgtest_proto_msgTypes[1]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use MKeyA.ProtoReflect.Descriptor instead.
-func (*MKeyA) Descriptor() ([]byte, []int) {
-	return file_msgtest_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *MKeyA) GetFrom() *MKeyQ {
-	if x != nil {
-		return x.From
-	}
-	return nil
-}
-
-func (x *MKeyA) GetKey() string {
-	if x != nil {
-		return x.Key
-	}
-	return ""
-}
-
 // 要求Proto
 type MProtoQ struct {
 	state         protoimpl.MessageState
@@ -127,7 +32,7 @@ type MProtoQ struct {
 func (x *MProtoQ) Reset() {
 	*x = MProtoQ{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_msgtest_proto_msgTypes[2]
+		mi := &file_msgtest_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -140,7 +45,7 @@ func (x *MProtoQ) String() string {
 func (*MProtoQ) ProtoMessage() {}
 
 func (x *MProtoQ) ProtoReflect() protoreflect.Message {
-	mi := &file_msgtest_proto_msgTypes[2]
+	mi := &file_msgtest_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -153,7 +58,7 @@ func (x *MProtoQ) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MProtoQ.ProtoReflect.Descriptor instead.
 func (*MProtoQ) Descriptor() ([]byte, []int) {
-	return file_msgtest_proto_rawDescGZIP(), []int{2}
+	return file_msgtest_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *MProtoQ) GetTime() int64 {
@@ -176,7 +81,7 @@ type MProtoA struct {
 func (x *MProtoA) Reset() {
 	*x = MProtoA{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_msgtest_proto_msgTypes[3]
+		mi := &file_msgtest_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -189,7 +94,7 @@ func (x *MProtoA) String() string {
 func (*MProtoA) ProtoMessage() {}
 
 func (x *MProtoA) ProtoReflect() protoreflect.Message {
-	mi := &file_msgtest_proto_msgTypes[3]
+	mi := &file_msgtest_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -202,7 +107,7 @@ func (x *MProtoA) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MProtoA.ProtoReflect.Descriptor instead.
 func (*MProtoA) Descriptor() ([]byte, []int) {
-	return file_msgtest_proto_rawDescGZIP(), []int{3}
+	return file_msgtest_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *MProtoA) GetFrom() *MProtoQ {
@@ -231,7 +136,7 @@ type MPListQ struct {
 func (x *MPListQ) Reset() {
 	*x = MPListQ{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_msgtest_proto_msgTypes[4]
+		mi := &file_msgtest_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -244,7 +149,7 @@ func (x *MPListQ) String() string {
 func (*MPListQ) ProtoMessage() {}
 
 func (x *MPListQ) ProtoReflect() protoreflect.Message {
-	mi := &file_msgtest_proto_msgTypes[4]
+	mi := &file_msgtest_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -257,7 +162,7 @@ func (x *MPListQ) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MPListQ.ProtoReflect.Descriptor instead.
 func (*MPListQ) Descriptor() ([]byte, []int) {
-	return file_msgtest_proto_rawDescGZIP(), []int{4}
+	return file_msgtest_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *MPListQ) GetTime() int64 {
@@ -280,7 +185,7 @@ type MPListA struct {
 func (x *MPListA) Reset() {
 	*x = MPListA{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_msgtest_proto_msgTypes[5]
+		mi := &file_msgtest_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -293,7 +198,7 @@ func (x *MPListA) String() string {
 func (*MPListA) ProtoMessage() {}
 
 func (x *MPListA) ProtoReflect() protoreflect.Message {
-	mi := &file_msgtest_proto_msgTypes[5]
+	mi := &file_msgtest_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -306,7 +211,7 @@ func (x *MPListA) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MPListA.ProtoReflect.Descriptor instead.
 func (*MPListA) Descriptor() ([]byte, []int) {
-	return file_msgtest_proto_rawDescGZIP(), []int{5}
+	return file_msgtest_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *MPListA) GetFrom() *MPListQ {
@@ -327,10 +232,6 @@ var File_msgtest_proto protoreflect.FileDescriptor
 
 var file_msgtest_proto_rawDesc = []byte{
 	0x0a, 0x0d, 0x6d, 0x73, 0x67, 0x74, 0x65, 0x73, 0x74, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22,
-	0x07, 0x0a, 0x05, 0x4d, 0x4b, 0x65, 0x79, 0x51, 0x22, 0x35, 0x0a, 0x05, 0x4d, 0x4b, 0x65, 0x79,
-	0x41, 0x12, 0x1a, 0x0a, 0x04, 0x66, 0x72, 0x6f, 0x6d, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
-	0x06, 0x2e, 0x4d, 0x4b, 0x65, 0x79, 0x51, 0x52, 0x04, 0x66, 0x72, 0x6f, 0x6d, 0x12, 0x10, 0x0a,
-	0x03, 0x6b, 0x65, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x22,
 	0x1d, 0x0a, 0x07, 0x4d, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x51, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x69,
 	0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x04, 0x74, 0x69, 0x6d, 0x65, 0x22, 0x3d,
 	0x0a, 0x07, 0x4d, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x41, 0x12, 0x1c, 0x0a, 0x04, 0x66, 0x72, 0x6f,
@@ -359,24 +260,21 @@ func file_msgtest_proto_rawDescGZIP() []byte {
 	return file_msgtest_proto_rawDescData
 }
 
-var file_msgtest_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_msgtest_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_msgtest_proto_goTypes = []interface{}{
-	(*MKeyQ)(nil),   // 0: MKeyQ
-	(*MKeyA)(nil),   // 1: MKeyA
-	(*MProtoQ)(nil), // 2: MProtoQ
-	(*MProtoA)(nil), // 3: MProtoA
-	(*MPListQ)(nil), // 4: MPListQ
-	(*MPListA)(nil), // 5: MPListA
+	(*MProtoQ)(nil), // 0: MProtoQ
+	(*MProtoA)(nil), // 1: MProtoA
+	(*MPListQ)(nil), // 2: MPListQ
+	(*MPListA)(nil), // 3: MPListA
 }
 var file_msgtest_proto_depIdxs = []int32{
-	0, // 0: MKeyA.from:type_name -> MKeyQ
-	2, // 1: MProtoA.from:type_name -> MProtoQ
-	4, // 2: MPListA.from:type_name -> MPListQ
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	0, // 0: MProtoA.from:type_name -> MProtoQ
+	2, // 1: MPListA.from:type_name -> MPListQ
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_msgtest_proto_init() }
@@ -386,30 +284,6 @@ func file_msgtest_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_msgtest_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MKeyQ); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_msgtest_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MKeyA); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_msgtest_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*MProtoQ); i {
 			case 0:
 				return &v.state
@@ -421,7 +295,7 @@ func file_msgtest_proto_init() {
 				return nil
 			}
 		}
-		file_msgtest_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+		file_msgtest_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*MProtoA); i {
 			case 0:
 				return &v.state
@@ -433,7 +307,7 @@ func file_msgtest_proto_init() {
 				return nil
 			}
 		}
-		file_msgtest_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+		file_msgtest_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*MPListQ); i {
 			case 0:
 				return &v.state
@@ -445,7 +319,7 @@ func file_msgtest_proto_init() {
 				return nil
 			}
 		}
-		file_msgtest_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+		file_msgtest_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*MPListA); i {
 			case 0:
 				return &v.state
@@ -464,7 +338,7 @@ func file_msgtest_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_msgtest_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

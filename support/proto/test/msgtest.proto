@@ -2,15 +2,6 @@ syntax = "proto3";
 
 option go_package = "/msgs;msgs";
 
-// 要求密鑰
-message MKeyQ {}
-
-// 回應密鑰
-message MKeyA {
-  MKeyQ from = 1; // 來源訊息
-  string key = 2; // 密鑰
-}
-
 // 要求Proto
 message MProtoQ {
   int64 time = 1; // 傳送時間

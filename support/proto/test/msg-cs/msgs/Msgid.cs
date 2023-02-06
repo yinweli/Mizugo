@@ -22,10 +22,9 @@ public static partial class MsgidReflection {
   static MsgidReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "Cgttc2dpZC5wcm90bypuCgVNc2dJRBILCgdVbmtub3duEAASCAoES2V5URAB",
-          "EggKBEtleUEQAhIJCgVKc29uURADEgkKBUpzb25BEAQSCgoGUHJvdG9REAUS",
-          "CgoGUHJvdG9BEAYSCgoGUExpc3RREAcSCgoGUExpc3RBEAhCDFoKL21zZ3M7",
-          "bXNnc2IGcHJvdG8z"));
+          "Cgttc2dpZC5wcm90bypaCgVNc2dJRBILCgdVbmtub3duEAASCQoFSnNvblEQ",
+          "ARIJCgVKc29uQRACEgoKBlByb3RvURADEgoKBlByb3RvQRAEEgoKBlBMaXN0",
+          "URAFEgoKBlBMaXN0QRAGQgxaCi9tc2dzO21zZ3NiBnByb3RvMw=="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(new[] {typeof(global::MsgID), }, null, null));
@@ -43,37 +42,29 @@ public enum MsgID {
   /// </summary>
   [pbr::OriginalName("Unknown")] Unknown = 0,
   /// <summary>
-  /// 要求密鑰
-  /// </summary>
-  [pbr::OriginalName("KeyQ")] KeyQ = 1,
-  /// <summary>
-  /// 回應密鑰
-  /// </summary>
-  [pbr::OriginalName("KeyA")] KeyA = 2,
-  /// <summary>
   /// 要求Json
   /// </summary>
-  [pbr::OriginalName("JsonQ")] JsonQ = 3,
+  [pbr::OriginalName("JsonQ")] JsonQ = 1,
   /// <summary>
   /// 回應Json
   /// </summary>
-  [pbr::OriginalName("JsonA")] JsonA = 4,
+  [pbr::OriginalName("JsonA")] JsonA = 2,
   /// <summary>
   /// 要求Proto
   /// </summary>
-  [pbr::OriginalName("ProtoQ")] ProtoQ = 5,
+  [pbr::OriginalName("ProtoQ")] ProtoQ = 3,
   /// <summary>
   /// 回應Proto
   /// </summary>
-  [pbr::OriginalName("ProtoA")] ProtoA = 6,
+  [pbr::OriginalName("ProtoA")] ProtoA = 4,
   /// <summary>
   /// 要求PList
   /// </summary>
-  [pbr::OriginalName("PListQ")] PlistQ = 7,
+  [pbr::OriginalName("PListQ")] PlistQ = 5,
   /// <summary>
   /// 回應PList
   /// </summary>
-  [pbr::OriginalName("PListA")] PlistA = 8,
+  [pbr::OriginalName("PListA")] PlistA = 6,
 }
 
 #endregion
