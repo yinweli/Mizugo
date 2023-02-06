@@ -151,7 +151,7 @@ namespace Mizugo
 
             var sender = new PListSender();
 
-            for (var i = 0; i < input.Length;)
+            for (var i = 0; i < input.Length; )
             {
                 var itor = input[i++];
 
