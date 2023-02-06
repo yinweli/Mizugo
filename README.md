@@ -51,6 +51,15 @@
 | support/proto/mizugo     | 內部proto定義檔 |
 | support/proto/test       | 測試proto定義檔 |
 
+# 專案分支說明
+
+| 分支                | 說明                                                   |
+|:--------------------|:-------------------------------------------------------|
+| main                | 主分支                                                 |
+| client-unity        | 客戶端組件分支, 提供給[unity]的package manager安裝用   |
+| client-unity-sample | 客戶端組件範例分支                                     |
+| proto-unity         | protobuf組件分支, 提供給[unity]的package manager安裝用 |
+
 # Taskfile命令速查
 * lint: 進行程式碼檢查
 * test: 進行程式碼測試
@@ -62,5 +71,6 @@
 [proto]: https://github.com/protocolbuffers/protobuf
 [protoc-go]: https://github.com/protocolbuffers/protobuf-go
 [protoc]: https://github.com/protocolbuffers/protobuf
+[unity]: https://unity.com/
 
 [client-unity]: support/client-unity/Packages/com.fouridstudio.mizugo-client-unity/README.md

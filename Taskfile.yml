@@ -27,11 +27,12 @@ tasks:
       - task: proto-mizugo
       - task: proto-test
 
-  # 更新客戶端組件分支
-  clientunity:
+  # 更新子專案分支
+  subtree:
     cmds:
-      - git subtree split --prefix=support/client-unity/Packages/com.fouridstudio.mizugo-client-unity --branch clientunity
-      - git subtree split --prefix=support/test-client-cs --branch clientunity-sample
+      - git subtree split --prefix=support/client-unity/Packages/com.fouridstudio.mizugo-client-unity --branch client-unity
+      - git subtree split --prefix=support/test-client-cs --branch client-unity-sample
+      - git subtree split --prefix=support/client-unity/Packages/com.fouridstudio.mizugo-proto-unity --branch proto-unity
 
   # mizugo的proto轉換
   proto-mizugo:

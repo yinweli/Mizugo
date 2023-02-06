@@ -6,6 +6,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "com.fouridstudio.mizugo-proto-unity": {
+      "version": "file:com.fouridstudio.mizugo-proto-unity",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.unity.2d.animation": {
       "version": "7.0.9",
       "depth": 1,

@@ -1,5 +1,5 @@
 # Mizugo Client Unity
-用於與[mizugo]伺服器連線的Unity客戶端網路組件  
+用於與[mizugo]伺服器連線的[unity]客戶端網路組件  
 
 # 系統需求
 * [unity]2021.3.9f1以上
@@ -8,37 +8,44 @@
 # 安裝說明
 * 安裝`Google Protobuf`組件
     * 如果專案中已經有該組件, 可以跳過此步驟
-    * 此步驟需要事先安裝Visual Studio Community, 可以到以下位址下載
-      ```sh
-      https://visualstudio.microsoft.com/zh-hant/vs/community/
-      ```
-    * 使用瀏覽器到達`Google Protobuf`的Github主頁
-      ```sh
-      https://github.com/protocolbuffers/protobuf
-      ```
-    * 從右邊的`Release`找到所需的版本, 目前使用`Protocol Buffers v21.12`
-    * 從Assets列表中下載`protobuf-all-xx.xx.zip`, 目前使用`protobuf-all-21.12.zip`
-    * 解壓縮檔案
-    * 開啟protobuf專案目錄中的`csharp/src/Google.Protobuf.sln`檔案
-    * 選擇功能列中的`建置/批次建置`, 並把`Google.Protobuf`的Release打勾, 並建置專案
-        * 如果建置過程中有發生問題, 得要自己排除問題了QQ
-        * 如果有輸出如下錯誤
+    * 第一種方法: 自行編譯
+        * 此步驟需要事先安裝Visual Studio Community, 可以到以下位址下載
           ```sh
-          Detailed Information: Unable to locate the .NET Core SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.
+          https://visualstudio.microsoft.com/zh-hant/vs/community/
           ```
-          這是因為Visual Studio Community使用的dotnet core sdk版本與protobuf專案裡使用的sdk版本不一致導致的
-          可通過在命令行中執行
+        * 使用瀏覽器到達`Google Protobuf`的Github主頁
           ```sh
-          dotnet --version
+          https://github.com/protocolbuffers/protobuf
           ```
-          來查看當前系統使用的dotnet core sdk版本, 然後以此修改protobuf專案根目錄底下的global.json檔案中的sdk版號來解決
-    * 完成後, 編譯完成的檔案會放在`csharp/src/Google.Protobuf/bin/Release`中
-    * 依照需求(Unity應該會用`net45`)把該版本的檔案複製到Unity專案中`Assets/Plugins'目錄下
-        * 由於各個Unity專案的目錄結構都不太一樣, 因此複製目的地不一定會跟此步驟相同
-    * 安裝完成
+        * 從右邊的`Release`找到所需的版本, 目前使用`Protocol Buffers v21.12`
+        * 從Assets列表中下載`protobuf-all-xx.xx.zip`, 目前使用`protobuf-all-21.12.zip`
+        * 解壓縮檔案
+        * 開啟protobuf專案目錄中的`csharp/src/Google.Protobuf.sln`檔案
+        * 選擇功能列中的`建置/批次建置`, 並把`Google.Protobuf`的Release打勾, 並建置專案
+            * 如果建置過程中有發生問題, 得要自己排除問題了QQ
+            * 如果有輸出如下錯誤
+              ```sh
+              Detailed Information: Unable to locate the .NET Core SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.
+              ```
+              這是因為Visual Studio Community使用的dotnet core sdk版本與protobuf專案裡使用的sdk版本不一致導致的
+              可通過在命令行中執行
+              ```sh
+              dotnet --version
+              ```
+              來查看當前系統使用的dotnet core sdk版本, 然後以此修改protobuf專案根目錄底下的global.json檔案中的sdk版號來解決
+        * 完成後, 編譯完成的檔案會放在`csharp/src/Google.Protobuf/bin/Release`中
+        * 依照需求([unity]應該會用`net45`)把該版本的檔案複製到[unity]專案中`Assets/Plugins'目錄下
+            * 由於各個[unity]專案的目錄結構都不太一樣, 因此複製目的地不一定會跟此步驟相同
+        * 安裝完成
+    * 第一種方法: 從[mizugo]專案下載
+        * 下載[mizugo]專案
+        * 切換到proto-unity分支
+        * 把分支內的檔案複製到[unity]專案中`Assets/Plugins'目錄下
+            * 由於各個[unity]專案的目錄結構都不太一樣, 因此複製目的地不一定會跟此步驟相同
+        * 安裝完成
 * 安裝`Newtonsoft Json`組件
     * 如果專案中已經有該組件, 可以跳過此步驟
-    * 開啟Unity的Package Manager
+    * 開啟[unity]的Package Manager
     * 點擊Package Manager的左上角的`+`號
     * 點擊`Add package by name...`
     * 輸入組件名稱
@@ -48,12 +55,12 @@
     * 點擊add按鈕
     * 等待安裝完成
 * 安裝`Mizugo Client Unity`組件
-    * 開啟Unity的Package Manager
+    * 開啟[unity]的Package Manager
     * 點擊Package Manager的左上角的`+`號
     * 點擊`Add package from git URL...`
     * 輸入安裝路徑
       ```sh
-      https://github.com/yinweli/Mizugo.git#clientunity
+      https://github.com/yinweli/Mizugo.git#client-unity
       ```
     * 點擊add按鈕
     * 等待安裝完成
