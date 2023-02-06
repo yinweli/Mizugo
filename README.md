@@ -6,7 +6,7 @@
 * [proto]3以上
 
 # 安裝說明
-* 安裝`Google Protobuf`組件
+* 安裝`Google Protobuf`組件: 自行編譯
     * 如果專案中已經有該組件, 可以跳過此步驟
     * 第一種方法: 自行編譯
         * 此步驟需要事先安裝Visual Studio Community, 可以到以下位址下載
@@ -37,12 +37,16 @@
         * 依照需求([unity]應該會用`net45`)把該版本的檔案複製到[unity]專案中`Assets/Plugins'目錄下
             * 由於各個[unity]專案的目錄結構都不太一樣, 因此複製目的地不一定會跟此步驟相同
         * 安裝完成
-    * 第一種方法: 從[mizugo]專案下載
-        * 下載[mizugo]專案
-        * 切換到proto-unity分支
-        * 把分支內的檔案複製到[unity]專案中`Assets/Plugins'目錄下
-            * 由於各個[unity]專案的目錄結構都不太一樣, 因此複製目的地不一定會跟此步驟相同
-        * 安裝完成
+    * 第二種方法: 從Package Manager安裝
+        * 開啟[unity]的Package Manager
+        * 點擊Package Manager的左上角的`+`號
+        * 點擊`Add package from git URL...`
+        * 輸入安裝路徑
+          ```sh
+          https://github.com/yinweli/Mizugo.git#proto-unity
+          ```
+        * 點擊add按鈕
+        * 等待安裝完成
 * 安裝`Newtonsoft Json`組件
     * 如果專案中已經有該組件, 可以跳過此步驟
     * 開啟[unity]的Package Manager
