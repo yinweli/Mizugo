@@ -73,7 +73,7 @@
 
 # 範例專案
 簡單的範例位於`Tests/Runtime/TestTCPClient.cs`, 這是單元測試程式碼  
-完整的範例位於[mizugo]專案的`clientunity-sample`分支  
+完整的範例位於[mizugo]專案的`client-unity-sample`分支  
 
 # 專案說明
 客戶端組件由三個核心組件組成: [網路組件](#網路組件), [事件組件](#事件組件), [訊息處理組件](#訊息處理組件)  
@@ -159,7 +159,7 @@
 | Tests/Runtime           | 單元測試                         |
 | Tests/Runtime/Msgs      | 單元測試使用的測試訊息           |
 
-[mizugo]: https://github.com/yinweli/sheeter
+[mizugo]: https://github.com/yinweli/mizugo
 [proto]: https://github.com/protocolbuffers/protobuf
 [unity]: https://unity.com/
 
