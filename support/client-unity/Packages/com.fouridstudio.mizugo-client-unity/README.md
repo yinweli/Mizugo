@@ -6,7 +6,7 @@
 * [proto]3以上
 
 # 安裝說明
-* 安裝`Google Protobuf`組件: 自行編譯
+* 安裝`Google Protobuf`組件
     * 如果專案中已經有該組件, 可以跳過此步驟
     * 第一種方法: 自行編譯
         * 此步驟需要事先安裝Visual Studio Community, 可以到以下位址下載
