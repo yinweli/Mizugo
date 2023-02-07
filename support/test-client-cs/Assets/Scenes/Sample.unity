@@ -253,7 +253,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 055cb88c6dab3a142a1f4a44ff5483cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  host: 127.0.0.1
+  host: 122.116.171.174
   port: 10001
 --- !u!114 &745669695
 MonoBehaviour:
@@ -267,7 +267,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e1ead4b281aa9a46908c6b3418e63c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  host: 127.0.0.1
+  host: 122.116.171.174
   port: 10002
 --- !u!114 &745669696
 MonoBehaviour:
@@ -282,6 +282,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   key: key-init
-  host: 127.0.0.1
+  host: 122.116.171.174
   port: 10003
   mode: 0
