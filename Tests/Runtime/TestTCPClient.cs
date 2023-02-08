@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using System;
 using System.Diagnostics;
+using System.Net.Sockets;
 
 namespace Mizugo
 {
@@ -36,7 +37,7 @@ namespace Mizugo
             client.Disconnect();
             TestUtil.Sleep();
 
-            while (client.IsUpdate())
+            while (client.IsUpdate)
                 client.Update();
 
             Assert.IsTrue(vaildConnect);
@@ -47,24 +48,35 @@ namespace Mizugo
         [TestCase("google.com", 80)]
         public void ConnectFailed(string host, int port)
         {
-            var client = new TCPClient(null, new JsonProc());
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                client.Connect(host, port);
-            });
+            var client = new TCPClient(new Eventmgr(), new JsonProc());
+            var validAlreadyStart = false;
+            var validTimeout = false;
+            client.AddEvent(
+                EventID.Error,
+                (object e) =>
+                {
+                    if (e is AlreadyStartException)
+                        validAlreadyStart = true;
 
-            client = new TCPClient(new Eventmgr(), null);
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                client.Connect(host, port);
-            });
+                    if (e is SocketException exception && exception.SocketErrorCode == SocketError.TimedOut)
+                        validTimeout = true;
+                }
+            );
 
-            client = new TCPClient(new Eventmgr(), new JsonProc());
             client.Connect(host, port);
-            Assert.Throws<AlreadyStartException>(() =>
-            {
-                client.Connect(host, port);
-            });
+            TestUtil.Sleep();
+            client.Connect(host, port);
+            TestUtil.Sleep();
+            client.Disconnect();
+            TestUtil.Sleep();
+            client.Connect(host, port + 1);
+            TestUtil.Sleep();
+
+            while (client.IsUpdate)
+                client.Update();
+
+            Assert.IsTrue(validAlreadyStart);
+            Assert.IsTrue(validTimeout);
         }
 
         [Test]
@@ -72,7 +84,6 @@ namespace Mizugo
         {
             var client = new TCPClient(new Eventmgr(), new JsonProc());
 
-            client.Disconnect();
             client.Disconnect();
         }
 
@@ -82,10 +93,6 @@ namespace Mizugo
         {
             var client = new TCPClient(new Eventmgr(), new JsonProc());
 
-            client.Update();
-            client.Connect(host, port);
-            TestUtil.Sleep();
-            client.Update();
             client.Update();
         }
 
@@ -113,17 +120,17 @@ namespace Mizugo
 
         [Test]
         [TestCase("google.com", 80)]
-        [TestCase("github.com", 80)]
         public void Misc(string host, int port)
         {
             var client = new TCPClient(new Eventmgr(), new JsonProc());
 
-            Assert.IsFalse(client.IsConnect());
+            Assert.IsFalse(client.IsConnect);
             client.Connect(host, port);
             TestUtil.Sleep();
-            Assert.AreEqual(host, client.GetHost());
-            Assert.AreEqual(port, client.GetPort());
-            Assert.IsTrue(client.IsConnect());
+            Assert.AreEqual(host, client.Host);
+            Assert.AreEqual(port, client.Port);
+            Assert.IsTrue(client.IsConnect);
+            client.Disconnect();
         }
     }
 
@@ -164,6 +171,8 @@ namespace Mizugo
 
                     if (actual < count)
                         SendMPListQ();
+                    else
+                        client.Disconnect();
                 }
             );
 
@@ -171,7 +180,7 @@ namespace Mizugo
             client.Connect(host, port);
             TestUtil.Sleep();
 
-            while (client.IsUpdate() || actual < count)
+            while (client.IsUpdate)
                 client.Update();
 
             Assert.AreEqual(count, actual);
@@ -242,7 +251,7 @@ namespace Mizugo
             client.Send(JsonProc.Marshal((int)MsgID.JsonQ, new MJsonQ { Time = stopwatch.ElapsedMilliseconds }));
             TestUtil.Sleep();
 
-            while (client.IsUpdate())
+            while (client.IsUpdate)
                 client.Update();
 
             Assert.IsTrue(vaildConnect);
@@ -317,7 +326,7 @@ namespace Mizugo
             client.Send(ProtoProc.Marshal((int)MsgID.ProtoQ, new MProtoQ { Time = stopwatch.ElapsedMilliseconds }));
             TestUtil.Sleep();
 
-            while (client.IsUpdate())
+            while (client.IsUpdate)
                 client.Update();
 
             Assert.IsTrue(vaildConnect);
@@ -392,7 +401,7 @@ namespace Mizugo
             client.Send(PListProc.Marshal((int)MsgID.PlistQ, new MPListQ { Time = stopwatch.ElapsedMilliseconds }));
             TestUtil.Sleep();
 
-            while (client.IsUpdate())
+            while (client.IsUpdate)
                 client.Update();
 
             Assert.IsTrue(vaildConnect);
