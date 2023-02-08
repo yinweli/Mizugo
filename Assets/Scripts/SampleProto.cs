@@ -1,4 +1,5 @@
 using Mizugo;
+using System;
 using System.Diagnostics;
 using UnityEngine;
 
@@ -25,7 +26,14 @@ public class SampleProto : MonoBehaviour
 
     private void Start()
     {
-        client?.Connect(host, port);
+        try
+        {
+            client?.Connect(host, port);
+        } // try
+        catch (Exception e)
+        {
+            Log("connect to " + host + ":" + port + " failed: " + e);
+        } // catch
     }
 
     private void Update()
