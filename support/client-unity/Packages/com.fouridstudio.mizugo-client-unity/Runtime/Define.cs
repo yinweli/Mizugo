@@ -68,6 +68,11 @@ namespace Mizugo
         /// 封包長度
         /// </summary>
         public const int packetSize = ushort.MaxValue;
+
+        /// <summary>
+        /// 緩衝區長度
+        /// </summary>
+        public const int bufferSize = (headerSize + packetSize) * 10;
     }
 
     /// <summary>
@@ -127,26 +132,22 @@ namespace Mizugo
         /// <summary>
         /// 取得連線位址
         /// </summary>
-        /// <returns>連線位址</returns>
-        public string GetHost();
+        public string Host { get; }
 
         /// <summary>
         /// 取得連線埠號
         /// </summary>
-        /// <returns>連線埠號</returns>
-        public int GetPort();
+        public int Port { get; }
 
         /// <summary>
-        /// 取得是否連線中
+        /// 取得是否連線
         /// </summary>
-        /// <returns>true表示連線中, false則否</returns>
-        public bool IsConnect();
+        public bool IsConnect { get; }
 
         /// <summary>
-        /// 取得是否需要處理事件
+        /// 取得是否需要處理事件, 連線中或是事件佇列中有事件都會需要處理事件
         /// </summary>
-        /// <returns>true表示需要處理事件, false則否</returns>
-        public bool IsUpdate();
+        public bool IsUpdate { get; }
     }
 
     /// <summary>

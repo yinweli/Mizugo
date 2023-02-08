@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using System;
 using System.Threading;
 using UnityEngine;
 
@@ -6,6 +7,11 @@ namespace Mizugo
 {
     internal class TestUtil
     {
+        /// <summary>
+        /// 睡眠時間
+        /// </summary>
+        public readonly static TimeSpan sleeptime = TimeSpan.FromSeconds(0.2);
+
         /// <summary>
         /// 記錄訊息
         /// </summary>
@@ -20,7 +26,7 @@ namespace Mizugo
         /// </summary>
         public static void Sleep()
         {
-            Thread.Sleep(200);
+            Thread.Sleep(sleeptime);
         }
 
         /// <summary>
