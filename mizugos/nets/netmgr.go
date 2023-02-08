@@ -7,13 +7,6 @@ import (
 	"github.com/emirpasic/gods/sets/hashset"
 )
 
-// 網路管理器, 用於管理接聽或是連接, 管理器也會儲存使用中的會話, 但是不開放給外部使用
-// * TCP
-//   - AddConnectTCP: 新增TCP連接
-//   - AddListenTCP: 新增TCP接聽
-// * 停止網路
-//   執行停止網路後, 會釋放所有的接聽/連接/會話
-
 // NewNetmgr 建立網路管理器
 func NewNetmgr() *Netmgr {
 	return &Netmgr{
@@ -23,7 +16,30 @@ func NewNetmgr() *Netmgr {
 	}
 }
 
-// Netmgr 網路管理器
+// Netmgr 網路管理器, 用於管理接聽或是連接, 以及使用中的會話, 但是會話不開放給外部使用
+//
+// 當新增連接時, 使用者須提供以下參數
+//   - timeout: 連接超時時間, 連接若超過此時間會連接失敗
+//   - bind: 連接成功時要執行的初始化流程
+//   - unbind: 中斷連接時要執行的釋放流程
+//   - wrong: 錯誤處理函式
+//
+// Bind 通常要做的流程如下
+//   - 建立實體
+//   - 實體設置
+//   - 模組設置
+//   - 會話設置
+//   - 處理(與處理函式)設置
+//   - 實體初始化
+//   - 標籤設置
+//   - 為會話物件設置實體
+//   - 回傳 Bundle 物件, 其中要設置好編碼/解碼/發布事件函式, 可以直接回傳實體的Bundle函式結果
+//   - 錯誤處理
+//
+// Unbind 通常要做的流程如下
+//   - 釋放實體
+//   - 刪除實體
+//   - 刪除標籤
 type Netmgr struct {
 	connectmgr *connectmgr // 連接管理器
 	listenmgr  *listenmgr  // 接聽管理器

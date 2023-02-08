@@ -8,8 +8,6 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/pools"
 )
 
-// TCP接聽器, 負責用TCP協議建立接聽, 並等待客戶端連接以取得會話物件
-
 // NewTCPListen 建立TCP接聽器
 func NewTCPListen(ip, port string) *TCPListen {
 	return &TCPListen{
@@ -17,7 +15,7 @@ func NewTCPListen(ip, port string) *TCPListen {
 	}
 }
 
-// TCPListen TCP接聽器
+// TCPListen TCP接聽器, 負責用TCP協議建立接聽, 並等待客戶端連接以取得會話物件
 type TCPListen struct {
 	address string       // 位址字串
 	listen  net.Listener // 接聽物件

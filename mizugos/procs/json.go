@@ -9,23 +9,20 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
-// json處理器, 封包結構使用JsonMsg
-// 沒有使用加密技術, 所以安全性很低, 僅用於傳送簡單訊息或是傳送密鑰使用
-// 訊息內容: support/proto/mizugo/msg-go/msgs-json/jsonmsg.go
-// 訊息內容: support/proto/mizugo/msg-cs/msgs-json/Jsonmsg.cs
-// 封包編碼: json編碼成位元陣列, 再通過base64編碼
-// 封包解碼: base64解碼, 再通過json解碼成訊息結構
-
 // NewJson 建立json處理器
 func NewJson() *Json {
 	return &Json{
-		procmgr: newProcmgr(),
+		Procmgr: NewProcmgr(),
 	}
 }
 
-// Json json處理器
+// Json json處理器, 封包結構使用JsonMsg, 沒有使用加密技術, 所以安全性很低, 僅用於傳送簡單訊息或是傳送密鑰使用
+//   - 訊息內容: support/proto/mizugo/msg-go/msgs-json/jsonmsg.go
+//   - 訊息內容: support/proto/mizugo/msg-cs/msgs-json/Jsonmsg.cs
+//   - 封包編碼: json編碼成位元陣列, 再通過base64編碼
+//   - 封包解碼: base64解碼, 再通過json解碼成訊息結構
 type Json struct {
-	*procmgr // 管理器
+	*Procmgr // 管理器
 }
 
 // Encode 封包編碼

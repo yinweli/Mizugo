@@ -8,9 +8,9 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
-const DesKeySize = 8 // Des密鑰長度
+const DesKeySize = 8 // des密鑰長度
 
-// DesECBEncrypt Des-ECB加密, 注意key只能是8位陣列
+// DesECBEncrypt des-ecb加密, 注意key的長度必須是 DesKeySize
 func DesECBEncrypt(padding Padding, key, src []byte) (out []byte, err error) {
 	if len(key) != DesKeySize {
 		return nil, fmt.Errorf("des-ecb encrypt: key len must %v", DesKeySize)
@@ -36,7 +36,7 @@ func DesECBEncrypt(padding Padding, key, src []byte) (out []byte, err error) {
 	return out, nil
 }
 
-// DesECBDecrypt Des-ECB解密, 注意key只能是8位陣列
+// DesECBDecrypt des-ecb解密, 注意key的長度必須是 DesKeySize
 func DesECBDecrypt(padding Padding, key, src []byte) (out []byte, err error) {
 	if len(key) != DesKeySize {
 		return nil, fmt.Errorf("des-ecb decrypt: key len must %v", DesKeySize)
@@ -67,7 +67,7 @@ func DesECBDecrypt(padding Padding, key, src []byte) (out []byte, err error) {
 	return out, nil
 }
 
-// DesCBCEncrypt Des-CBC加密, 注意key只能是8位陣列
+// DesCBCEncrypt des-cbc加密, 注意key的長度必須是 DesKeySize
 func DesCBCEncrypt(padding Padding, key, iv, src []byte) (out []byte, err error) {
 	if len(key) != DesKeySize {
 		return nil, fmt.Errorf("des-cbc encrypt: key len must %v", DesKeySize)
@@ -92,7 +92,7 @@ func DesCBCEncrypt(padding Padding, key, iv, src []byte) (out []byte, err error)
 	return out, nil
 }
 
-// DesCBCDecrypt Des-CBC解密, 注意key只能是8位陣列
+// DesCBCDecrypt des-cbc解密, 注意key的長度必須是 DesKeySize
 func DesCBCDecrypt(padding Padding, key, iv, src []byte) (out []byte, err error) {
 	if len(key) != DesKeySize {
 		return nil, fmt.Errorf("des-cbc decrypt: key len must %v", DesKeySize)
@@ -121,12 +121,12 @@ func DesCBCDecrypt(padding Padding, key, iv, src []byte) (out []byte, err error)
 	return out, nil
 }
 
-// RandDesKey 產生隨機Des密鑰
+// RandDesKey 產生隨機des密鑰
 func RandDesKey() []byte {
 	return []byte(utils.RandString(DesKeySize))
 }
 
-// RandDesKeyString 產生隨機Des密鑰字串
+// RandDesKeyString 產生隨機des密鑰字串
 func RandDesKeyString() string {
 	return string(RandDesKey())
 }

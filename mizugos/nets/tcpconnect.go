@@ -8,8 +8,6 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/pools"
 )
 
-// TCP連接器, 負責用TCP協議建立連接以取得會話物件
-
 // NewTCPConnect 建立TCP連接器
 func NewTCPConnect(ip, port string, timeout time.Duration) *TCPConnect {
 	return &TCPConnect{
@@ -18,10 +16,10 @@ func NewTCPConnect(ip, port string, timeout time.Duration) *TCPConnect {
 	}
 }
 
-// TCPConnect TCP連接器
+// TCPConnect TCP連接器, 負責用TCP協議建立連接以取得會話物件
 type TCPConnect struct {
 	address string        // 位址字串
-	timeout time.Duration // 逾時時間
+	timeout time.Duration // 超時時間
 }
 
 // Connect 啟動連接

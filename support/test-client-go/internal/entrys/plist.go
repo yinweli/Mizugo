@@ -32,7 +32,7 @@ type PListConfig struct {
 	Enable     bool          `yaml:"enable"`     // 啟用旗標
 	IP         string        `yaml:"ip"`         // 位址
 	Port       string        `yaml:"port"`       // 埠號
-	Timeout    time.Duration `yaml:"timeout"`    // 逾期時間(秒)
+	Timeout    time.Duration `yaml:"timeout"`    // 超期時間(秒)
 	Count      int           `yaml:"count"`      // 總連線數
 	Batch      int           `yaml:"batch"`      // 批次連線數
 	Interval   time.Duration `yaml:"interval"`   // 間隔時間

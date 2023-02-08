@@ -6,13 +6,6 @@ import (
 	"github.com/emirpasic/gods/sets/hashset"
 )
 
-// 標籤管理器, 用來關聯標籤與物件
-// * 標籤
-//   標籤一律為字串, 一個標籤可以關連到多個物件, 而物件也可以擁有多個標籤
-// * 物件
-//   物件必須符合Labeler介面
-//   物件可以選擇包含Labelobj或*Labelobj來符合Labeler介面
-
 // NewLabelmgr 建立標籤管理器
 func NewLabelmgr() *Labelmgr {
 	return &Labelmgr{
@@ -20,7 +13,9 @@ func NewLabelmgr() *Labelmgr {
 	}
 }
 
-// Labelmgr 標籤管理器, 必須是能轉換成Labeler介面的物件才能新增或是刪除標籤, 這表示該物件必須包含Labelobj結構或指標
+// Labelmgr 標籤管理器, 讓使用者可以在可管理物件上新增/刪除標籤, 也可以通過標籤來取得管理中的物件;
+// 建立可管理物件需要定義標籤結構, 並且把 Labelobj 作為結構的第一個成員;
+// 標籤必須是字串, 標籤可以關連到多個物件, 而物件也可以擁有多個標籤
 type Labelmgr struct {
 	data map[string]*hashset.Set // 標籤列表
 	lock sync.RWMutex            // 執行緒鎖

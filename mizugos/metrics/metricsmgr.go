@@ -12,32 +12,34 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
-// 度量管理器, 其中包括兩部分
-//   效能數據(來自pprof)
-//   自訂數據或統計數據(來自expvar)
-// 如果想查看效能數據, 可以參考以下網址
-//   https://blog.csdn.net/skh2015java/article/details/102748222
-//   http://www.zyiz.net/tech/detail-112761.html
-//   https://www.iargs.cn/?p=62
-//   https://www.readfog.com/a/1635446409103773696
-// 如果想查看自訂數據或統計數據, 可以通過以下工具
-//   https://github.com/divan/expvarmon
-// 此工具同時也可以查看記憶體使用情況, 可使用以下參數
-//   -ports="http://網址:埠號"
-//   -i 間隔時間
-//   範例: expvarmon -ports="http://localhost:8080" -i 1s
-//   範例: expvarmon -ports="http://localhost:8080" -vars="...自訂數據..." -i 1s
-// 度量管理器同時還提供執行統計工具, 只要建立 Metricsmgr.NewRuntime(統計名稱) 就可以記錄特定區段的執行數據
-// 如果要用expvarmon查看執行數據, 可以添加以下參數
-//   假設執行數據的名稱為 'echo'
-//   -vars="time:echo.time,time(max):echo.time(max),time(avg):echo.time(avg),count:echo.count,count(1m):echo.count(1m),count(5m):echo.count(5m),count(10m):echo.count(10m),count(60m):echo.count(60m)"
-
 // NewMetricsmgr 建立度量管理器
 func NewMetricsmgr() *Metricsmgr {
 	return &Metricsmgr{}
 }
 
-// Metricsmgr 度量管理器
+// Metricsmgr 度量管理器, 其中包括兩部分: 效能數據(來自pprof), 自訂統計或統計數據(來自expvar)
+//
+// 如果想查看效能數據, 可以參考以下網址
+//   - https://blog.csdn.net/skh2015java/article/details/102748222
+//   - http://www.zyiz.net/tech/detail-112761.html
+//   - https://www.iargs.cn/?p=62
+//   - https://www.readfog.com/a/1635446409103773696
+//
+// 如果想建立自訂統計, 執行 NewInt, NewFloat, NewString, NewMap, 就可以獲得自訂記錄器;
+// 如果想建立執行統計, 執行 NewRuntime 就可以獲得執行記錄器
+//
+// 如果想查看自訂統計或統計數據, 可以從 https://github.com/divan/expvarmon 安裝expvarmon工具;
+// 工具參數說明如下:
+//   - ports="http://網址:埠號"
+//   - vars="監控名稱:記錄名稱,..."
+//   - i 間隔時間
+//
+// 如果想用expvarmon工具查看執行統計數據, 假設執行記錄器的名稱為'echo', 則改變var參數為
+// vars="time:echo.time,time(max):echo.time(max),time(avg):echo.time(avg),count:echo.count,count(1m):echo.count(1m),count(5m):echo.count(5m),count(10m):echo.count(10m),count(60m):echo.count(60m)"
+//
+// expvarmon範例如下:
+//   - expvarmon -ports="http://localhost:8080" -i 1s
+//   - expvarmon -ports="http://localhost:8080" -vars="count:count,total:total,money:value" -i 1s
 type Metricsmgr struct {
 	once   utils.SyncOnce     // 單次執行物件
 	ctx    context.Context    // ctx物件

@@ -11,8 +11,6 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/pools"
 )
 
-// TCP會話器, 負責傳送/接收訊息等相關的功能
-
 // NewTCPSession 建立TCP會話器
 func NewTCPSession(conn net.Conn) *TCPSession {
 	return &TCPSession{
@@ -21,7 +19,7 @@ func NewTCPSession(conn net.Conn) *TCPSession {
 	}
 }
 
-// TCPSession TCP會話器
+// TCPSession TCP會話器, 負責傳送/接收訊息等相關的功能
 type TCPSession struct {
 	conn    net.Conn       // 連接物件
 	message chan any       // 訊息通道

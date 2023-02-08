@@ -6,32 +6,19 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
-// 日誌管理器, 用來管理日誌相關功能
-// * 初始化處理
-//   以選定的日誌物件來執行初始化處理即可
-// * 結束處理
-//   執行日誌管理器的結束處理
-// * 日誌物件
-//   使用者可以選擇使用哪種日誌
-//   - EmptyLogger: 空日誌, 不會輸出任何訊息
-//   - ZapLogger: uber實現的高效能日誌功能
-// * 自訂日誌
-//   如果使用者想要自訂日誌, 需要完成以下工作
-//   - 建立日誌結構, 此結構必須實現Logger介面
-//   - 建立記錄結構, 此結構必須實現Stream介面
-// * 日誌等級
-//   目前提供以下四種日誌等級
-//   - Debug
-//   - Info
-//   - Warn
-//   - Error
-
 // NewLogmgr 建立日誌管理器
 func NewLogmgr() *Logmgr {
 	return &Logmgr{}
 }
 
-// Logmgr 日誌管理器
+// Logmgr 日誌管理器, 用於執行管理日誌相關功能; 使用前需要執行 Initialize, 使用完畢需要執行 Finalize
+//
+// 使用者可以選擇要使用以下哪種日誌
+//   - EmptyLogger: 空日誌, 不會輸出任何訊息
+//   - ZapLogger: uber實現的高效能日誌功能
+//   - 自訂日誌: 如果使用者想要自訂日誌, 需要實現 Logger 介面與 Stream 介面
+//
+// 目前提供以下日誌等級: Debug, Info, Warn, Error
 type Logmgr struct {
 	once   utils.SyncOnce         // 單次執行物件
 	logger utils.SyncAttr[Logger] // 日誌物件

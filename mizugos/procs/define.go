@@ -1,21 +1,18 @@
 package procs
 
-// 訊息處理, 核心由Processor介面與處理器組成
-// * 簡介
-//   負責封包編碼/封包解碼, 收到訊息時的處理流程, 管理訊息處理函式等
-//   封包的加密與解密都會在封包編碼/封包解碼中實行
-// * 處理機制
-//   使用者可以選擇使用哪種處理機制
-//   - Proto: 使用protobuf的簡單訊息處理機制
-//   - Complex: 使用protobuf的複合訊息處理機制
-// * 自訂處理機制
-//   如果使用者想要自訂處理機制, 需要完成以下工作
-//   - 建立訊息結構, 此結構最少必須包含MessageID
-//     訊息結構如果要使用protobuf, 可以把定義檔放在support/proto/mizugo中
-//   - 建立處理器, 此結構必須實現Processor介面
-//     procs中有個procmgr, 可以用於負責Add/Del的處理, 可以在建立處理器時將procmgr組合進去
-
-// Processor 處理介面
+// Processor 處理介面, 負責以下功能
+//   - 封包編碼: 在 Encode 中實現
+//   - 封包解碼: 在 Decode 中實現
+//   - 收到訊息時的處理: 在 Process 中實現
+//   - 管理訊息處理函式: 在 Add, Del 中實現
+//
+// 如果想要建立新的處理結構, 需要遵循以下流程
+//   - 定義訊息結構, 訊息結構必須包含 MessageID
+//   - 訊息結構如果要使用protobuf, 可以把定義檔放在support/proto/mizugo中
+//   - 定義處理結構, 處理結構需要繼承 Processor 介面, 並實現所有函式;
+//     在處理結構中包含 Procmgr 結構來實現訊息處理功能, 這樣只要實作 Encode, Decode, Process 三個函式就可以了
+//
+// mizugo提供的預設處理器有 Json, Proto, PList
 type Processor interface {
 	// Encode 封包編碼
 	Encode(input any) (output []byte, err error)

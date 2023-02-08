@@ -1,8 +1,6 @@
 package logs
 
-// 空日誌, 作為預設的日誌使用, 不會輸出任何訊息
-
-// EmptyLogger 空日誌
+// EmptyLogger 空日誌, 作為預設的日誌使用, 不會輸出任何訊息
 type EmptyLogger struct {
 }
 

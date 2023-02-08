@@ -12,11 +12,10 @@ const ( // 內部事件名稱
 	EventShutdown = "shutdown"     // 關閉事件, 實體結束時第二個執行, 參數是nil, 這時連線已經中斷
 	EventRecv     = nets.EventRecv // 接收訊息事件, 當接收訊息後觸發, 參數是訊息物件
 	EventSend     = nets.EventSend // 傳送訊息事件, 當傳送訊息後觸發, 參數是訊息物件
-
 )
 
 const (
-	updateInterval = time.Second // 定時事件間隔時間
+	UpdateInterval = time.Second // 定時事件間隔時間
 )
 
 // EntityID 實體編號
