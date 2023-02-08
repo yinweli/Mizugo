@@ -28,7 +28,7 @@ public class DebugLog : MonoBehaviour
 
     void HandleLog(string logString, string stackTrace, LogType type)
     {
-        if(CheckNeedFilter(logString))
+        if (CheckNeedFilter(logString))
             return;
 
         GameObject obj = Instantiate(objLog, Content);
@@ -39,15 +39,15 @@ public class DebugLog : MonoBehaviour
         output = logString;
         stack = stackTrace;
 
-        if(Content.childCount > saveLimit)
-            ClearTrashLog();            
+        if (Content.childCount > saveLimit)
+            ClearTrashLog();
     }
 
     bool CheckNeedFilter(string logstr)
     {
-        foreach(string filter in FilterStrs)
+        foreach (string filter in FilterStrs)
         {
-            if(logstr.Contains(filter))
+            if (logstr.Contains(filter))
                 return true;
         }
 
@@ -58,7 +58,7 @@ public class DebugLog : MonoBehaviour
     {
         int count = Content.childCount - saveLimit;
 
-        for (int i=1;i< count;i++)
+        for (int i = 1; i < count; i++)
             Destroy(Content.GetChild(i).gameObject);
     }
 

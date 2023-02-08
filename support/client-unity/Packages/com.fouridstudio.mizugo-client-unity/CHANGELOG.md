@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [0.1.4] - 2023-02-08
+### Changed
+- 變更接收與傳送程序, 改用NetworkStream的原始功能
+
+### Added
+- 新增RecvHeaderException異常
+- 新增RecvPacketException異常
+
+### Removed
+- 移除ReceiveException異常
+
 ## [0.1.3] - 2023-02-06
 ### Changed
 - 更新說明文件
