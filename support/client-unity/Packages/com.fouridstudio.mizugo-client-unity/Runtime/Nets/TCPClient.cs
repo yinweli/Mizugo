@@ -16,292 +16,97 @@ namespace Mizugo
     /// </summary>
     public class TCPClient : IClient
     {
-        /// <summary>
-        /// 接收處理器
-        /// </summary>
-        private class RecvHandler
-        {
-            /// <summary>
-            /// 啟動處理
-            /// </summary>
-            /// <param name="stream">網路流物件</param>
-            /// <param name="procmgr">訊息處理器</param>
-            /// <param name="equeue">事件佇列</param>
-            public void Start(NetworkStream stream, IProcmgr procmgr, EQueue equeue)
-            {
-                try
-                {
-                    if (stream == null)
-                        throw new ArgumentNullException("stream");
-
-                    if (procmgr == null)
-                        throw new ArgumentNullException("procmgr");
-
-                    if (equeue == null)
-                        throw new ArgumentNullException("equeue");
-
-                    if (thread != null)
-                        throw new AlreadyStartException("recv handler");
-
-                    thread = new Thread(() =>
-                    {
-                        // 如果想要改用ArrayPool, 需要改到IProcmgr.Encode, IProcmgr.Decode, Des加密/解密的函式以及相關的函式等, 影響很大, 所以現在先不動
-
-                        var bufferOfHeader = new byte[Define.headerSize];
-                        var bufferOfPacket = (byte[])null;
-                        var size = (ushort)0;
-
-                        while (true)
-                        {
-                            try
-                            {
-                                if (stream.Read(bufferOfHeader, 0, Define.headerSize) != Define.headerSize)
-                                    throw new RecvHeaderException();
-
-                                size = BitConverter.ToUInt16(bufferOfHeader, 0);
-
-                                if (size <= 0)
-                                    throw new PacketZeroException("recv");
-
-                                if (size > Define.packetSize)
-                                    throw new PacketLimitException("recv");
-
-                                bufferOfPacket = new byte[size];
-
-                                if (stream.Read(bufferOfPacket, 0, size) != size)
-                                    throw new RecvPacketException();
-
-                                var message = procmgr.Decode(bufferOfPacket);
-
-                                equeue.Enqueue(EventID.Message, message);
-                                equeue.Enqueue(EventID.Recv, null);
-                            } // try
-                            catch (Exception e)
-                            {
-                                equeue.Enqueue(EventID.Error, e);
-                                equeue.Enqueue(EventID.Disconnect, null);
-                                return;
-                            } // catch
-                        } // while
-                    });
-                    thread.IsBackground = true;
-                    thread.Start();
-                    this.stream = stream;
-                } // try
-                catch (Exception e)
-                {
-                    equeue.Enqueue(EventID.Error, e);
-                } // catch
-            }
-
-            /// <summary>
-            /// 關閉處理
-            /// </summary>
-            public void Close()
-            {
-                stream?.Close();
-                stream = null;
-                thread?.Join();
-                thread = null;
-            }
-
-            /// <summary>
-            /// 執行緒物件
-            /// </summary>
-            private Thread thread = null;
-
-            /// <summary>
-            /// 網路流物件
-            /// </summary>
-            private NetworkStream stream = null;
-        }
-
-        /// <summary>
-        /// 傳送處理器
-        /// </summary>
-        private class SendHandler
-        {
-            /// <summary>
-            /// 啟動處理
-            /// </summary>
-            /// <param name="stream">網路流物件</param>
-            /// <param name="procmgr">訊息處理器</param>
-            /// <param name="equeue">事件佇列</param>
-            public void Start(NetworkStream stream, IProcmgr procmgr, EQueue equeue)
-            {
-                try
-                {
-                    if (stream == null)
-                        throw new ArgumentNullException("stream");
-
-                    if (procmgr == null)
-                        throw new ArgumentNullException("procmgr");
-
-                    if (equeue == null)
-                        throw new ArgumentNullException("equeue");
-
-                    if (thread != null)
-                        throw new AlreadyStartException("send handler");
-
-                    queue = new BlockingCollection<object>();
-                    thread = new Thread(() =>
-                    {
-                        while (true)
-                        {
-                            try
-                            {
-                                var message = queue.Take();
-
-                                if (message == null)
-                                    continue;
-
-                                var packet = procmgr.Encode(message);
-
-                                if (packet.Length <= 0)
-                                    throw new PacketZeroException("send");
-
-                                if (packet.Length > Define.packetSize)
-                                    throw new PacketLimitException("send");
-
-                                var buffer = BitConverter.GetBytes((ushort)packet.Length);
-
-                                stream.Write(buffer, 0, buffer.Length);
-                                stream.Write(packet, 0, packet.Length);
-                                equeue.Enqueue(EventID.Send, null);
-                            } // try
-                            catch (InvalidOperationException) // 這是因為關閉處理的CompleteAdding引發的, 所以不算錯誤
-                            {
-                                return;
-                            } // catch
-                            catch (Exception e)
-                            {
-                                equeue.Enqueue(EventID.Error, e);
-                                return;
-                            } // catch
-                        } // while
-                    });
-                    thread.IsBackground = true;
-                    thread.Start();
-                } // try
-                catch (Exception e)
-                {
-                    equeue.Enqueue(EventID.Error, e);
-                } // catch
-            }
-
-            /// <summary>
-            /// 關閉處理
-            /// </summary>
-            public void Close()
-            {
-                queue?.CompleteAdding(); // 佇列必須先結束才可能結束執行緒
-                queue = null;
-                thread?.Join();
-                thread = null;
-            }
-
-            /// <summary>
-            /// 新增訊息
-            /// </summary>
-            /// <param name="message">訊息物件</param>
-            public void Add(object message)
-            {
-                if (queue == null)
-                    return;
-
-                if (queue.IsAddingCompleted)
-                    return;
-
-                queue.Add(message);
-            }
-
-            /// <summary>
-            /// 執行緒物件
-            /// </summary>
-            private Thread thread = null;
-
-            /// <summary>
-            /// 封包佇列
-            /// </summary>
-            private BlockingCollection<object> queue = null;
-        }
-
         public TCPClient(IEventmgr eventmgr, IProcmgr procmgr)
         {
             this.eventmgr = eventmgr;
             this.procmgr = procmgr;
+            this.equeue = new EQueue();
         }
 
         public void Connect(string host, int port)
         {
-            if (eventmgr == null)
-                throw new ArgumentNullException("eventmgr");
+            try
+            {
+                if (eventmgr == null)
+                    throw new ArgumentNullException("eventmgr");
 
-            if (procmgr == null)
-                throw new ArgumentNullException("procmgr");
+                if (procmgr == null)
+                    throw new ArgumentNullException("procmgr");
 
-            if (client != null)
-                throw new AlreadyStartException("tcp client");
+                if (client != null)
+                    throw new AlreadyStartException("tcp client");
 
-            this.host = host;
-            this.port = port;
+                this.host = host;
+                this.port = port;
 
-            equeue = new EQueue();
-            client = new TcpClient();
-            client.NoDelay = true;
-            client.ReceiveBufferSize = Define.packetSize;
-            client.SendBufferSize = Define.packetSize;
+                client = new TcpClient();
+                client.NoDelay = true;
+                client.ReceiveBufferSize = Define.bufferSize;
+                client.SendBufferSize = Define.bufferSize;
+                connecting = true;
 
-            var addr = Dns.GetHostAddresses(host);
-            var callback = new AsyncCallback(
-                (IAsyncResult result) =>
-                {
-                    client.EndConnect(result);
-                    stream = client.GetStream();
-                    recvHandler = new RecvHandler();
-                    recvHandler.Start(stream, procmgr, equeue);
-                    sendHandler = new SendHandler();
-                    sendHandler.Start(stream, procmgr, equeue);
-                    equeue.Enqueue(EventID.Connect, null);
-                }
-            );
+                var addr = Dns.GetHostAddresses(host);
+                var callback = new AsyncCallback(
+                    (IAsyncResult result) =>
+                    {
+                        try
+                        {
+                            client.EndConnect(result);
 
-            client.BeginConnect(addr, port, callback, this);
+                            if (client.Connected)
+                            {
+                                stream = client.GetStream();
+                                recvHandler = new RecvHandler();
+                                recvHandler.Start(equeue, stream, procmgr);
+                                sendHandler = new SendHandler();
+                                sendHandler.Start(equeue, stream, procmgr);
+                                equeue.Enqueue(EventID.Connect, null);
+                            } // if
+                        } // try
+                        catch (Exception e)
+                        {
+                            equeue?.Enqueue(EventID.Error, e);
+                        } // catch
+
+                        connecting = false;
+                    }
+                );
+
+                client.BeginConnect(addr, port, callback, client);
+            } // try
+            catch (Exception e)
+            {
+                equeue?.Enqueue(EventID.Error, e);
+            } // catch
         }
 
         public void Disconnect()
         {
+            stream?.Close();
+            stream = null;
             recvHandler?.Close();
             recvHandler = null;
             sendHandler?.Close();
             sendHandler = null;
-            stream?.Close();
-            stream = null;
             client?.Close();
             client = null;
         }
 
         public void Update()
         {
-            if (equeue == null)
-                return;
-
             if (equeue.Dequeue(out var data) == false)
                 return;
 
-            if (data.eventID != EventID.Message)
-            {
-                eventmgr.Process(data.eventID, data.param);
-                return;
-            } // if
-
             try
             {
-                procmgr.Process(data.param);
+                if (data.eventID != EventID.Message)
+                    eventmgr?.Process(data.eventID, data.param);
+                else
+                    procmgr?.Process(data.param);
             } // try
             catch (Exception e)
             {
-                equeue.Enqueue(EventID.Error, e);
+                equeue?.Enqueue(EventID.Error, e);
             } // catch
         }
 
@@ -332,24 +137,24 @@ namespace Mizugo
             procmgr?.Del(messageID);
         }
 
-        public string GetHost()
+        public string Host
         {
-            return host;
+            get { return host; }
         }
 
-        public int GetPort()
+        public int Port
         {
-            return port;
+            get { return port; }
         }
 
-        public bool IsConnect()
+        public bool IsConnect
         {
-            return client != null && client.Connected;
+            get { return (client != null && client.Connected) || connecting; }
         }
 
-        public bool IsUpdate()
+        public bool IsUpdate
         {
-            return equeue?.IsEmpty == false;
+            get { return IsConnect || equeue.IsEmpty == false; }
         }
 
         /// <summary>
@@ -378,7 +183,7 @@ namespace Mizugo
         private EQueue equeue = null;
 
         /// <summary>
-        /// 連線物件
+        /// 客戶端物件
         /// </summary>
         private TcpClient client = null;
 
@@ -396,5 +201,180 @@ namespace Mizugo
         /// 傳送處理物件
         /// </summary>
         private SendHandler sendHandler = null;
+
+        /// <summary>
+        /// 連線中旗標
+        /// </summary>
+        private bool connecting = false;
+
+        /// <summary>
+        /// 接收處理器
+        /// </summary>
+        private class RecvHandler
+        {
+            /// <summary>
+            /// 啟動處理
+            /// </summary>
+            /// <param name="equeue">事件佇列</param>
+            /// <param name="stream">網路流物件</param>
+            /// <param name="procmgr">訊息處理器</param>
+            public void Start(EQueue equeue, NetworkStream stream, IProcmgr procmgr)
+            {
+                if (thread != null)
+                    throw new AlreadyStartException("recv handler");
+
+                thread = new Thread(() =>
+                {
+                    // 如果想要改用ArrayPool, 需要改到IProcmgr.Encode, IProcmgr.Decode, Des加密/解密的函式以及相關的函式等, 影響很大, 所以現在先不動
+
+                    var bufferOfHeader = new byte[Define.headerSize];
+                    var bufferOfPacket = (byte[])null;
+                    var size = (ushort)0;
+
+                    while (true)
+                    {
+                        try
+                        {
+                            if (stream.Read(bufferOfHeader, 0, Define.headerSize) != Define.headerSize)
+                                throw new RecvHeaderException();
+
+                            size = BitConverter.ToUInt16(bufferOfHeader, 0);
+
+                            if (size <= 0)
+                                throw new PacketZeroException("recv");
+
+                            if (size > Define.packetSize)
+                                throw new PacketLimitException("recv");
+
+                            bufferOfPacket = new byte[size];
+
+                            if (stream.Read(bufferOfPacket, 0, size) != size)
+                                throw new RecvPacketException();
+
+                            var message = procmgr.Decode(bufferOfPacket);
+
+                            equeue.Enqueue(EventID.Message, message);
+                            equeue.Enqueue(EventID.Recv, null);
+                        } // try
+                        catch (Exception e)
+                        {
+                            equeue.Enqueue(EventID.Error, e);
+                            equeue.Enqueue(EventID.Disconnect, null);
+                            return;
+                        } // catch
+                    } // while
+                });
+                thread.IsBackground = true;
+                thread.Start();
+            }
+
+            /// <summary>
+            /// 關閉處理
+            /// </summary>
+            public void Close()
+            {
+                thread?.Join();
+                thread = null;
+            }
+
+            /// <summary>
+            /// 執行緒物件
+            /// </summary>
+            private Thread thread = null;
+        }
+
+        /// <summary>
+        /// 傳送處理器
+        /// </summary>
+        private class SendHandler
+        {
+            /// <summary>
+            /// 啟動處理
+            /// </summary>
+            /// <param name="equeue">事件佇列</param>
+            /// <param name="stream">網路流物件</param>
+            /// <param name="procmgr">訊息處理器</param>
+            public void Start(EQueue equeue, NetworkStream stream, IProcmgr procmgr)
+            {
+                if (thread != null)
+                    throw new AlreadyStartException("send handler");
+
+                queue = new BlockingCollection<object>();
+                thread = new Thread(() =>
+                {
+                    while (true)
+                    {
+                        try
+                        {
+                            var message = queue.Take();
+
+                            if (message == null)
+                                continue;
+
+                            var packet = procmgr.Encode(message);
+
+                            if (packet.Length <= 0)
+                                throw new PacketZeroException("send");
+
+                            if (packet.Length > Define.packetSize)
+                                throw new PacketLimitException("send");
+
+                            var buffer = BitConverter.GetBytes((ushort)packet.Length);
+
+                            stream.Write(buffer, 0, buffer.Length);
+                            stream.Write(packet, 0, packet.Length);
+                            equeue.Enqueue(EventID.Send, null);
+                        } // try
+                        catch (InvalidOperationException) // 這是因為關閉處理的CompleteAdding引發的, 所以不算錯誤
+                        {
+                            return;
+                        } // catch
+                        catch (Exception e)
+                        {
+                            equeue.Enqueue(EventID.Error, e);
+                            return;
+                        } // catch
+                    } // while
+                });
+                thread.IsBackground = true;
+                thread.Start();
+            }
+
+            /// <summary>
+            /// 關閉處理
+            /// </summary>
+            public void Close()
+            {
+                queue?.CompleteAdding(); // 佇列必須先結束才可能結束執行緒
+                queue = null;
+                thread?.Join();
+                thread = null;
+            }
+
+            /// <summary>
+            /// 新增訊息
+            /// </summary>
+            /// <param name="message">訊息物件</param>
+            public void Add(object message)
+            {
+                if (queue == null)
+                    return;
+
+                if (queue.IsAddingCompleted)
+                    return;
+
+                queue.Add(message);
+            }
+
+            /// <summary>
+            /// 封包佇列
+            /// </summary>
+            private BlockingCollection<object> queue = null;
+
+            /// <summary>
+            /// 執行緒物件
+            /// </summary>
+            private Thread thread = null;
+        }
     }
 }

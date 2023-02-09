@@ -81,14 +81,20 @@
 ## 網路組件
 網路組件繼承了IClient介面, 是最核心的組件  
 負責連線處理, 斷線處理, 更新處理, 傳送訊息, 新增/刪除事件處理, 新增/刪除訊息處理  
-建立網路組件時需要指定使用哪個事件組件與訊息處理組件  
+建立網路組件時需要選定事件組件與訊息處理組件  
 連線後需要定時執行Update函式來執行事件與訊息處理  
 目前有下列網路組件可選  
 * TCPClient: 
     - 使用TCP來連線到伺服器
-    - 建立範例
+    - 使用範例
       ```cs
       var client = new TCPClient(new Eventmgr(), new JsonProc());
+      
+      client.AddEvent(...); // 註冊事件處理
+      client.AddProcess(...); // 註冊訊息處理
+      client.Connect(...); // 進行連線
+      client.Update(); // 更新處理
+      client.Disconnect(); // 進行斷線
       ```
 
 ## 事件組件
@@ -146,6 +152,8 @@
 | UnprocessException      | 訊息未處理異常       | 發生在接收訊息但沒有對應的訊息處理函式時, 這個錯誤看情況是可以忽略的 |
 
 除了UnprocessException以外, 其他的異常都是嚴重的錯誤, 應該要中斷連線  
+另外執行中如果網路失敗, 會收到內建的SocketException異常, 可以通過把異常轉型為SocketException並且判讀其中的SocketErrorCode來決定處理方式  
+SocketErrorCode是個列舉, 內容可以參考[socket-error-enum]或是[socket-error-code]  
 
 # 專案目錄說明
 
@@ -163,5 +171,7 @@
 [mizugo]: https://github.com/yinweli/mizugo
 [proto]: https://github.com/protocolbuffers/protobuf
 [unity]: https://unity.com/
+[socket-error-enum]: https://learn.microsoft.com/zh-tw/dotnet/api/system.net.sockets.socketerror?view=netframework-4.8
+[socket-error-code]: https://learn.microsoft.com/zh-tw/windows/win32/winsock/windows-sockets-error-codes-2
 
 [install-client-unity]: Documentation/Images/install-client-unity.gif
