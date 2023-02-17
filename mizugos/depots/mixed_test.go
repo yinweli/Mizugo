@@ -20,20 +20,22 @@ type SuiteMixed struct {
 	suite.Suite
 	testdata.TestEnv
 	testdata.TestLeak
-	testdata.TestRedis
+	testdata.TestDB
 	major *Major
 	minor *Minor
+	name  string
 }
 
 func (this *SuiteMixed) SetupSuite() {
 	this.Change("test-depots-mixed")
-	this.major, _ = newMajor(contexts.Ctx(), "redisdb://127.0.0.1:6379/")
-	this.minor, _ = newMinor(contexts.Ctx(), "mongodb://127.0.0.1:27017/")
+	this.major, _ = newMajor(contexts.Ctx(), testdata.RedisURI)
+	this.minor, _ = newMinor(contexts.Ctx(), testdata.MongoURI)
+	this.name = "mixed"
 }
 
 func (this *SuiteMixed) TearDownSuite() {
 	this.Restore()
-	this.RestoreRedis(contexts.Ctx(), this.major.Client())
+	this.RedisClear(contexts.Ctx(), this.major.Client())
 	this.major.stop()
 	this.minor.stop(contexts.Ctx())
 }
@@ -48,33 +50,33 @@ func (this *SuiteMixed) TestNewMixed() {
 
 func (this *SuiteMixed) TestRunner() {
 	target := newMixed(this.major, this.minor)
-	assert.NotNil(this.T(), target.Runner(contexts.Ctx(), "", ""))
+	assert.NotNil(this.T(), target.Runner(contexts.Ctx(), this.name, this.name))
 }
 
 func (this *SuiteMixed) TestExec() {
 	target := newMixed(this.major, this.minor)
 	key := this.Key("lock")
-	assert.Nil(this.T(), target.Runner(contexts.Ctx(), "", "").Add(newTester(true, true)).Exec())
-	assert.Nil(this.T(), target.Runner(contexts.Ctx(), "", "").Lock(key).Unlock(key).Exec())
-	assert.NotNil(this.T(), target.Runner(contexts.Ctx(), "", "").Add(newTester(false, true)).Exec())
-	assert.NotNil(this.T(), target.Runner(contexts.Ctx(), "", "").Add(newTester(true, false)).Exec())
+	assert.Nil(this.T(), target.Runner(contexts.Ctx(), this.name, this.name).Add(newMixedTester(true, true)).Exec())
+	assert.Nil(this.T(), target.Runner(contexts.Ctx(), this.name, this.name).Lock(key).Unlock(key).Exec())
+	assert.NotNil(this.T(), target.Runner(contexts.Ctx(), this.name, this.name).Add(newMixedTester(false, true)).Exec())
+	assert.NotNil(this.T(), target.Runner(contexts.Ctx(), this.name, this.name).Add(newMixedTester(true, false)).Exec())
 }
 
-func newTester(prepare, result bool) *tester {
-	return &tester{
+func newMixedTester(prepare, result bool) *mixedTester {
+	return &mixedTester{
 		prepare: prepare,
 		result:  result,
 	}
 }
 
-type tester struct {
+type mixedTester struct {
 	prepare      bool
 	result       bool
 	validPrepare bool
 	validResult  bool
 }
 
-func (this *tester) Prepare(ctx context.Context, majorRunner MajorRunner, minorRunner MinorRunner) error {
+func (this *mixedTester) Prepare(ctx context.Context, majorRunner MajorRunner, minorRunner MinorRunner) error {
 	if ctx == nil {
 		return fmt.Errorf("ctx nil")
 	} // if
@@ -95,7 +97,7 @@ func (this *tester) Prepare(ctx context.Context, majorRunner MajorRunner, minorR
 	return nil
 }
 
-func (this *tester) Result() error {
+func (this *mixedTester) Result() error {
 	if this.result == false {
 		return fmt.Errorf("result failed")
 	} // if

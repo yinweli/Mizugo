@@ -18,18 +18,18 @@ type SuiteLock struct {
 	suite.Suite
 	testdata.TestEnv
 	testdata.TestLeak
-	testdata.TestRedis
+	testdata.TestDB
 	major *Major
 }
 
 func (this *SuiteLock) SetupSuite() {
 	this.Change("test-depots-lock")
-	this.major, _ = newMajor(contexts.Ctx(), "redisdb://127.0.0.1:6379/")
+	this.major, _ = newMajor(contexts.Ctx(), testdata.RedisURI)
 }
 
 func (this *SuiteLock) TearDownSuite() {
 	this.Restore()
-	this.RestoreRedis(contexts.Ctx(), this.major.Client())
+	this.RedisClear(contexts.Ctx(), this.major.Client())
 	this.major.stop()
 }
 

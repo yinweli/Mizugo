@@ -37,18 +37,18 @@ func (this *SuiteDepotmgr) TestNewDepotmgr() {
 
 func (this *SuiteDepotmgr) TestDepotmgr() {
 	target := NewDepotmgr()
-	majorName := "major"
-	minorName := "minor"
-	mixedName := "mixed"
+	majorName := "majorName"
+	minorName := "minorName"
+	mixedName := "mixedName"
 	unknownName := "unknown"
-	assert.Nil(this.T(), target.AddMajor(majorName, "redisdb://127.0.0.1:6379/"))
+	assert.Nil(this.T(), target.AddMajor(majorName, testdata.RedisURI))
 	assert.NotNil(this.T(), target.AddMajor(majorName, ""))
-	assert.NotNil(this.T(), target.AddMajor(unknownName, "redisdb://127.0.0.1:10001/?dialTimeout=1s"))
+	assert.NotNil(this.T(), target.AddMajor(unknownName, testdata.RedisURIInvalid))
 	assert.NotNil(this.T(), target.GetMajor(majorName))
 	assert.Nil(this.T(), target.GetMajor(unknownName))
-	assert.Nil(this.T(), target.AddMinor(minorName, "mongodb://127.0.0.1:27017/"))
+	assert.Nil(this.T(), target.AddMinor(minorName, testdata.MongoURI))
 	assert.NotNil(this.T(), target.AddMinor(minorName, ""))
-	assert.NotNil(this.T(), target.AddMinor(unknownName, "mongodb://127.0.0.1:10001/?timeoutMS=1000"))
+	assert.NotNil(this.T(), target.AddMinor(unknownName, testdata.MongoURIInvalid))
 	assert.NotNil(this.T(), target.GetMinor(minorName))
 	assert.Nil(this.T(), target.GetMinor(unknownName))
 	assert.Nil(this.T(), target.AddMixed(mixedName, majorName, minorName))

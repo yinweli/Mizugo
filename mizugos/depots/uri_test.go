@@ -34,13 +34,13 @@ func (this *SuiteURI) TearDownTest() {
 }
 
 func (this *SuiteURI) TestRedisURIConnect() {
-	_, err := RedisURI("redisdb://127.0.0.1:6379/").Connect(contexts.Ctx())
+	_, err := RedisURI(testdata.RedisURI).Connect(contexts.Ctx())
 	assert.Nil(this.T(), err)
 
 	_, err = RedisURI("unknown://").Connect(contexts.Ctx())
 	assert.NotNil(this.T(), err)
 
-	_, err = RedisURI("redisdb://127.0.0.1:10001/?dialTimeout=1s").Connect(contexts.Ctx())
+	_, err = RedisURI(testdata.RedisURIInvalid).Connect(contexts.Ctx())
 	assert.NotNil(this.T(), err)
 }
 
@@ -136,13 +136,13 @@ func (this *SuiteURI) TestRedisURIOption() {
 }
 
 func (this *SuiteURI) TestMongoURIConnect() {
-	_, err := MongoURI("mongodb://127.0.0.1:27017/").Connect(contexts.Ctx())
+	_, err := MongoURI(testdata.MongoURI).Connect(contexts.Ctx())
 	assert.Nil(this.T(), err)
 
 	_, err = MongoURI("unknown://").Connect(contexts.Ctx())
 	assert.NotNil(this.T(), err)
 
-	_, err = MongoURI("mongodb://127.0.0.1:10001/?timeoutMS=1000").Connect(contexts.Ctx())
+	_, err = MongoURI(testdata.MongoURIInvalid).Connect(contexts.Ctx())
 	assert.NotNil(this.T(), err)
 }
 
