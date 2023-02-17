@@ -22,12 +22,18 @@ public static partial class MsgidReflection {
   static MsgidReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "Cgttc2dpZC5wcm90bypaCgVNc2dJRBILCgdVbmtub3duEAASCQoFSnNvblEQ",
-          "ARIJCgVKc29uQRACEgoKBlByb3RvURADEgoKBlByb3RvQRAEEgoKBlBMaXN0",
-          "URAFEgoKBlBMaXN0QRAGQgxaCi9tc2dzO21zZ3NiBnByb3RvMw=="));
+          "Cgttc2dpZC5wcm90byqMAQoFTXNnSUQSCwoHVW5rbm93bhAAEgkKBUpzb25R",
+          "EAESCQoFSnNvbkEQAhIKCgZQcm90b1EQAxIKCgZQcm90b0EQBBIKCgZQTGlz",
+          "dFEQBRIKCgZQTGlzdEEQBhIKCgZMb2dpblEQBxIKCgZMb2dpbkEQCBILCgdV",
+          "cGRhdGVREAkSCwoHVXBkYXRlQRAKKrsBCgVFcnJJRBILCgdTdWNjZXNzEAAS",
+          "EQoNSnNvblVubWFyc2hhbBABEhIKDlByb3RvVW5tYXJzaGFsEAISEgoOUExp",
+          "c3RVbm1hcnNoYWwQAxIQCgxQTGlzdENvbnRleHQQBBIPCgtEYXRhYmFzZU5p",
+          "bBAFEg0KCVN1Ym1pdE5pbBAGEhAKDFN1Ym1pdEZhaWxlZBAHEhMKD0FjY291",
+          "bnROb3RFeGlzdBAIEhEKDVRva2VuTm90TWF0Y2gQCUIMWgovbXNnczttc2dz",
+          "YgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
-        new pbr::GeneratedClrTypeInfo(new[] {typeof(global::MsgID), }, null, null));
+        new pbr::GeneratedClrTypeInfo(new[] {typeof(global::MsgID), typeof(global::ErrID), }, null, null));
   }
   #endregion
 
@@ -65,6 +71,68 @@ public enum MsgID {
   /// 回應PList
   /// </summary>
   [pbr::OriginalName("PListA")] PlistA = 6,
+  /// <summary>
+  /// 要求登入(使用Json處理器)
+  /// </summary>
+  [pbr::OriginalName("LoginQ")] LoginQ = 7,
+  /// <summary>
+  /// 回應登入(使用Json處理器)
+  /// </summary>
+  [pbr::OriginalName("LoginA")] LoginA = 8,
+  /// <summary>
+  /// 要求更新(使用Json處理器)
+  /// </summary>
+  [pbr::OriginalName("UpdateQ")] UpdateQ = 9,
+  /// <summary>
+  /// 回應更新(使用Json處理器)
+  /// </summary>
+  [pbr::OriginalName("UpdateA")] UpdateA = 10,
+}
+
+/// <summary>
+/// 錯誤編號
+/// </summary>
+public enum ErrID {
+  /// <summary>
+  /// 成功
+  /// </summary>
+  [pbr::OriginalName("Success")] Success = 0,
+  /// <summary>
+  /// json反序列化失敗
+  /// </summary>
+  [pbr::OriginalName("JsonUnmarshal")] JsonUnmarshal = 1,
+  /// <summary>
+  /// proto反序列化失敗
+  /// </summary>
+  [pbr::OriginalName("ProtoUnmarshal")] ProtoUnmarshal = 2,
+  /// <summary>
+  /// plist反序列化失敗
+  /// </summary>
+  [pbr::OriginalName("PListUnmarshal")] PlistUnmarshal = 3,
+  /// <summary>
+  /// plist上下文失敗
+  /// </summary>
+  [pbr::OriginalName("PListContext")] PlistContext = 4,
+  /// <summary>
+  /// 資料庫為空
+  /// </summary>
+  [pbr::OriginalName("DatabaseNil")] DatabaseNil = 5,
+  /// <summary>
+  /// 資料庫執行器為空
+  /// </summary>
+  [pbr::OriginalName("SubmitNil")] SubmitNil = 6,
+  /// <summary>
+  /// 資料庫執行失敗
+  /// </summary>
+  [pbr::OriginalName("SubmitFailed")] SubmitFailed = 7,
+  /// <summary>
+  /// 帳號不存在
+  /// </summary>
+  [pbr::OriginalName("AccountNotExist")] AccountNotExist = 8,
+  /// <summary>
+  /// token不匹配
+  /// </summary>
+  [pbr::OriginalName("TokenNotMatch")] TokenNotMatch = 9,
 }
 
 #endregion
