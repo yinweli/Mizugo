@@ -39,6 +39,10 @@ func (this *streamTester) Message(_ string, _ ...any) Stream {
 	return this
 }
 
+func (this *streamTester) Caller(_ int) Stream {
+	return this
+}
+
 func (this *streamTester) KV(_ string, _ any) Stream {
 	return this
 }

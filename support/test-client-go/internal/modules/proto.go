@@ -5,6 +5,7 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
+	"github.com/yinweli/Mizugo/mizugos/errs"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/features"
@@ -12,12 +13,12 @@ import (
 )
 
 // NewProto 建立Proto模組
-func NewProto(disconnect bool, delayTime time.Duration) *Proto {
+func NewProto(delay time.Duration, disconnect bool) *Proto {
 	return &Proto{
 		Module:     entitys.NewModule(defines.ModuleIDProto),
 		name:       "module proto",
+		delay:      delay,
 		disconnect: disconnect,
-		delayTime:  delayTime,
 	}
 }
 
@@ -25,20 +26,20 @@ func NewProto(disconnect bool, delayTime time.Duration) *Proto {
 type Proto struct {
 	*entitys.Module               // 模組資料
 	name            string        // 模組名稱
+	delay           time.Duration // 延遲時間
 	disconnect      bool          // 斷線旗標
-	delayTime       time.Duration // 延遲時間
 }
 
-// Awake 喚醒事件
+// Awake 喚醒處理
 func (this *Proto) Awake() error {
 	this.Entity().Subscribe(defines.EventBegin, this.eventBegin)
 	this.Entity().AddMessage(procs.MessageID(msgs.MsgID_ProtoA), this.procMProtoA)
 	return nil
 }
 
-// Start 啟動事件
+// Start 啟動處理
 func (this *Proto) Start() error {
-	this.Entity().PublishDelay(defines.EventBegin, nil, this.delayTime)
+	this.Entity().PublishDelay(defines.EventBegin, nil, this.delay)
 	return nil
 }
 
@@ -52,7 +53,12 @@ func (this *Proto) procMProtoA(message any) {
 	_, msg, err := procs.ProtoUnmarshal[msgs.MProtoA](message)
 
 	if err != nil {
-		mizugos.Error(this.name).Message("procMProtoA").EndError(err)
+		mizugos.Warn(this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_ProtoUnmarshal, err))
+		return
+	} // if
+
+	if msg.ErrID != msgs.ErrID_Success {
+		mizugos.Warn(this.name).Caller(0).EndError(errs.Errort(msg.ErrID))
 		return
 	} // if
 
@@ -65,10 +71,7 @@ func (this *Proto) procMProtoA(message any) {
 		this.sendMProtoQ()
 	} // if
 
-	mizugos.Info(this.name).Message("procMProtoA").
-		KV("duration", duration).
-		KV("count", msg.Count).
-		End()
+	mizugos.Info(this.name).Caller(0).KV("duration", duration).KV("count", msg.Count).End()
 }
 
 // sendMProtoQ 傳送要求Proto
@@ -78,7 +81,7 @@ func (this *Proto) sendMProtoQ() {
 	})
 
 	if err != nil {
-		mizugos.Error(this.name).Message("sendMProtoQ").EndError(err)
+		mizugos.Warn(this.name).Caller(0).EndError(err)
 		return
 	} // if
 

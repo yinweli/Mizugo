@@ -1,22 +1,19 @@
 package depots
 
 import (
-	"context"
 	"fmt"
 	"sync"
 
-	"github.com/yinweli/Mizugo/mizugos/contexts"
+	"github.com/yinweli/Mizugo/mizugos/ctxs"
 )
 
 // NewDepotmgr 建立資料庫管理器
 func NewDepotmgr() *Depotmgr {
-	ctx, cancel := context.WithCancel(contexts.Ctx())
 	return &Depotmgr{
-		ctx:    ctx,
-		cancel: cancel,
-		major:  map[string]*Major{},
-		minor:  map[string]*Minor{},
-		mixed:  map[string]*Mixed{},
+		ctx:   ctxs.Root().WithCancel(),
+		major: map[string]*Major{},
+		minor: map[string]*Minor{},
+		mixed: map[string]*Mixed{},
 	}
 }
 
@@ -31,12 +28,11 @@ func NewDepotmgr() *Depotmgr {
 //
 // 若要執行資料庫操作時, 呼叫 Get... 系列函式來取得資料庫物件
 type Depotmgr struct {
-	ctx    context.Context    // ctx物件
-	cancel context.CancelFunc // 取消物件
-	major  map[string]*Major  // 主要資料庫列表
-	minor  map[string]*Minor  // 次要資料庫列表
-	mixed  map[string]*Mixed  // 混合資料庫列表
-	lock   sync.RWMutex       // 執行緒鎖
+	ctx   ctxs.Ctx          // ctx物件
+	major map[string]*Major // 主要資料庫列表
+	minor map[string]*Minor // 次要資料庫列表
+	mixed map[string]*Mixed // 混合資料庫列表
+	lock  sync.RWMutex      // 執行緒鎖
 }
 
 // AddMajor 新增主要資料庫, 需要提供 RedisURI 來指定要連接的資料庫以及連接選項
@@ -70,8 +66,9 @@ func (this *Depotmgr) GetMajor(majorName string) *Major {
 	return nil
 }
 
-// AddMinor 新增次要資料庫, 需要提供 MongoURI 來指定要連接的資料庫以及連接選項
-func (this *Depotmgr) AddMinor(minorName string, uri MongoURI) error {
+// AddMinor 新增次要資料庫, 需要提供 MongoURI 來指定要連接的資料庫以及連接選項;
+// 另外需要指定mongo資料庫名稱, 簡化後面取得執行器的流程, 但也因此限制次要資料庫不能在多個mongo資料庫間切換
+func (this *Depotmgr) AddMinor(minorName string, uri MongoURI, dbName string) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -79,7 +76,7 @@ func (this *Depotmgr) AddMinor(minorName string, uri MongoURI) error {
 		return fmt.Errorf("depotmgr addMinor: duplicate database")
 	} // if
 
-	minor, err := newMinor(this.ctx, uri)
+	minor, err := newMinor(this.ctx, uri, dbName)
 
 	if err != nil {
 		return fmt.Errorf("depotmgr addMinor: %w", err)
@@ -154,7 +151,7 @@ func (this *Depotmgr) Stop() {
 		itor.stop(this.ctx)
 	} // if
 
-	this.cancel()
+	this.ctx.Cancel()
 	this.major = map[string]*Major{}
 	this.minor = map[string]*Minor{}
 	this.mixed = map[string]*Mixed{}

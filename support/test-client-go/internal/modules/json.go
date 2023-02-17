@@ -5,6 +5,7 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
+	"github.com/yinweli/Mizugo/mizugos/errs"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/features"
@@ -12,12 +13,12 @@ import (
 )
 
 // NewJson 建立Json模組
-func NewJson(disconnect bool, delayTime time.Duration) *Json {
+func NewJson(delay time.Duration, disconnect bool) *Json {
 	return &Json{
 		Module:     entitys.NewModule(defines.ModuleIDJson),
 		name:       "module json",
+		delay:      delay,
 		disconnect: disconnect,
-		delayTime:  delayTime,
 	}
 }
 
@@ -25,20 +26,20 @@ func NewJson(disconnect bool, delayTime time.Duration) *Json {
 type Json struct {
 	*entitys.Module               // 模組資料
 	name            string        // 模組名稱
+	delay           time.Duration // 延遲時間
 	disconnect      bool          // 斷線旗標
-	delayTime       time.Duration // 延遲時間
 }
 
-// Awake 喚醒事件
+// Awake 喚醒處理
 func (this *Json) Awake() error {
 	this.Entity().Subscribe(defines.EventBegin, this.eventBegin)
 	this.Entity().AddMessage(procs.MessageID(msgs.MsgID_JsonA), this.procMJsonA)
 	return nil
 }
 
-// Start 啟動事件
+// Start 啟動處理
 func (this *Json) Start() error {
-	this.Entity().PublishDelay(defines.EventBegin, nil, this.delayTime)
+	this.Entity().PublishDelay(defines.EventBegin, nil, this.delay)
 	return nil
 }
 
@@ -52,7 +53,12 @@ func (this *Json) procMJsonA(message any) {
 	_, msg, err := procs.JsonUnmarshal[msgs.MJsonA](message)
 
 	if err != nil {
-		mizugos.Error(this.name).Message("procMJsonA").EndError(err)
+		mizugos.Warn(this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		return
+	} // if
+
+	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success {
+		mizugos.Warn(this.name).Caller(0).EndError(errs.Errort(msg.ErrID))
 		return
 	} // if
 
@@ -65,10 +71,7 @@ func (this *Json) procMJsonA(message any) {
 		this.sendMJsonQ()
 	} // if
 
-	mizugos.Info(this.name).Message("procMJsonA").
-		KV("duration", duration).
-		KV("count", msg.Count).
-		End()
+	mizugos.Info(this.name).Caller(0).KV("duration", duration).KV("count", msg.Count).End()
 }
 
 // sendMJsonQ 傳送要求Json
@@ -78,7 +81,7 @@ func (this *Json) sendMJsonQ() {
 	})
 
 	if err != nil {
-		mizugos.Error(this.name).Message("sendMJsonQ").EndError(err)
+		mizugos.Warn(this.name).Caller(0).EndError(err)
 		return
 	} // if
 

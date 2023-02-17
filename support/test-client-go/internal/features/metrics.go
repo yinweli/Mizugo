@@ -35,8 +35,8 @@ func (this *Metrics) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	mizugos.Info(this.name).Message("initialize").KV("config", this.config).End()
-	Key = mizugos.Metricsmgr().NewRuntime("key")
+	mizugos.Info(this.name).Caller(0).Message("initialize").KV("config", this.config).End()
+	Auth = mizugos.Metricsmgr().NewRuntime("auth")
 	Json = mizugos.Metricsmgr().NewRuntime("json")
 	Proto = mizugos.Metricsmgr().NewRuntime("proto")
 	PList = mizugos.Metricsmgr().NewRuntime("plist")
@@ -49,7 +49,7 @@ func (this *Metrics) Finalize() {
 	mizugos.Metricsmgr().Finalize()
 }
 
-var Key *metrics.Runtime   // 密鑰訊息統計物件
+var Auth *metrics.Runtime  // auth訊息統計物件
 var Json *metrics.Runtime  // json訊息統計物件
 var Proto *metrics.Runtime // proto訊息統計物件
 var PList *metrics.Runtime // plist訊息統計物件

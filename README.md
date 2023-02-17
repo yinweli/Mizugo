@@ -4,10 +4,10 @@
 ![codecov](https://codecov.io/gh/yinweli/Mizugo/branch/main/graph/badge.svg?token=1DGCDV1S69)
 
 # Mizugo
-以[go]做成的遊戲伺服器框架, 包括TCP網路通訊, 資料庫組件等  
+以[go]做成的遊戲伺服器框架, 包括TCP網路通訊, 資料庫組件等
 
 # 系統需求
-* [go]1.18以上
+* [go]1.20以上
 * [proto]3以上
 
 # 安裝說明

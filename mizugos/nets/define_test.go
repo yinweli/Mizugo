@@ -188,7 +188,7 @@ func (this *tester) unbind(_ Sessioner) {
 	this.session = nil
 }
 
-func (this *tester) wrong(err error) {
+func (this *tester) wrong(_ bool, err error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 

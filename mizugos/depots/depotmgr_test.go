@@ -37,6 +37,7 @@ func (this *SuiteDepotmgr) TestNewDepotmgr() {
 
 func (this *SuiteDepotmgr) TestDepotmgr() {
 	target := NewDepotmgr()
+	dbName := "dbName"
 	majorName := "majorName"
 	minorName := "minorName"
 	mixedName := "mixedName"
@@ -46,9 +47,10 @@ func (this *SuiteDepotmgr) TestDepotmgr() {
 	assert.NotNil(this.T(), target.AddMajor(unknownName, testdata.RedisURIInvalid))
 	assert.NotNil(this.T(), target.GetMajor(majorName))
 	assert.Nil(this.T(), target.GetMajor(unknownName))
-	assert.Nil(this.T(), target.AddMinor(minorName, testdata.MongoURI))
-	assert.NotNil(this.T(), target.AddMinor(minorName, ""))
-	assert.NotNil(this.T(), target.AddMinor(unknownName, testdata.MongoURIInvalid))
+	assert.Nil(this.T(), target.AddMinor(minorName, testdata.MongoURI, dbName))
+	assert.NotNil(this.T(), target.AddMinor(minorName, "", dbName))
+	assert.NotNil(this.T(), target.AddMinor(minorName, testdata.MongoURI, ""))
+	assert.NotNil(this.T(), target.AddMinor(unknownName, testdata.MongoURIInvalid, dbName))
 	assert.NotNil(this.T(), target.GetMinor(minorName))
 	assert.Nil(this.T(), target.GetMinor(unknownName))
 	assert.Nil(this.T(), target.AddMixed(mixedName, majorName, minorName))

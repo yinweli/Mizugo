@@ -18,9 +18,11 @@ func initialize() error {
 	server.logger = features.NewLogger()
 	server.pool = features.NewPool()
 	server.metrics = features.NewMetrics()
-	server.Json = entrys.NewJson()
-	server.Proto = entrys.NewProto()
-	server.PList = entrys.NewPList()
+	server.depot = features.NewDepot()
+	server.auth = entrys.NewAuth()
+	server.json = entrys.NewJson()
+	server.proto = entrys.NewProto()
+	server.plist = entrys.NewPList()
 
 	mizugos.Configmgr().AddPath(defines.ConfigPath)
 
@@ -40,15 +42,23 @@ func initialize() error {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := server.Json.Initialize(); err != nil {
+	if err := server.depot.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := server.Proto.Initialize(); err != nil {
+	if err := server.auth.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := server.PList.Initialize(); err != nil {
+	if err := server.json.Initialize(); err != nil {
+		return fmt.Errorf("initialize: %w", err)
+	} // if
+
+	if err := server.proto.Initialize(); err != nil {
+		return fmt.Errorf("initialize: %w", err)
+	} // if
+
+	if err := server.plist.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
@@ -57,9 +67,11 @@ func initialize() error {
 
 // finalize 結束處理
 func finalize() {
-	server.Json.Finalize()
-	server.Proto.Finalize()
-	server.PList.Finalize()
+	server.auth.Finalize()
+	server.json.Finalize()
+	server.proto.Finalize()
+	server.plist.Finalize()
+	server.depot.Finalize()
 	server.metrics.Finalize()
 	server.pool.Finalize()
 	server.logger.Finalize()
@@ -70,7 +82,9 @@ var server struct {
 	logger  *features.Logger  // 日誌資料
 	pool    *features.Pool    // 執行緒池資料
 	metrics *features.Metrics // 統計資料
-	Json    *entrys.Json      // Json入口
-	Proto   *entrys.Proto     // Proto入口
-	PList   *entrys.PList     // PList入口
+	depot   *features.Depot   // 資料庫資料
+	auth    *entrys.Auth      // Auth入口
+	json    *entrys.Json      // Json入口
+	proto   *entrys.Proto     // Proto入口
+	plist   *entrys.PList     // PList入口
 }

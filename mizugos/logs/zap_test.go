@@ -74,6 +74,7 @@ func (this *SuiteZap) TestZapStream() {
 
 	target := logger.New("log", LevelDebug)
 	assert.Equal(this.T(), target, target.Message("message"))
+	assert.Equal(this.T(), target, target.Caller(0))
 	assert.Equal(this.T(), target, target.Error(fmt.Errorf("error")))
 	target.End()
 

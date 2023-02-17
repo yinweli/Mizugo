@@ -22,18 +22,19 @@ public static partial class MsgtestReflection {
   static MsgtestReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "Cg1tc2d0ZXN0LnByb3RvIhcKB01Qcm90b1ESDAoEdGltZRgBIAEoAyIwCgdN",
-          "UHJvdG9BEhYKBGZyb20YASABKAsyCC5NUHJvdG9REg0KBWNvdW50GAIgASgD",
-          "IhcKB01QTGlzdFESDAoEdGltZRgBIAEoAyIwCgdNUExpc3RBEhYKBGZyb20Y",
-          "ASABKAsyCC5NUExpc3RREg0KBWNvdW50GAIgASgDQgxaCi9tc2dzO21zZ3Ni",
-          "BnByb3RvMw=="));
+          "Cg1tc2d0ZXN0LnByb3RvGgttc2dpZC5wcm90byIXCgdNUHJvdG9REgwKBHRp",
+          "bWUYASABKAMiRwoHTVByb3RvQRIWCgRmcm9tGAEgASgLMgguTVByb3RvURIV",
+          "CgVlcnJJRBgCIAEoDjIGLkVycklEEg0KBWNvdW50GAMgASgDIhcKB01QTGlz",
+          "dFESDAoEdGltZRgBIAEoAyJHCgdNUExpc3RBEhYKBGZyb20YASABKAsyCC5N",
+          "UExpc3RREhUKBWVycklEGAIgASgOMgYuRXJySUQSDQoFY291bnQYAyABKANC",
+          "DFoKL21zZ3M7bXNnc2IGcHJvdG8z"));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-        new pbr::FileDescriptor[] { },
+        new pbr::FileDescriptor[] { global::MsgidReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
           new pbr::GeneratedClrTypeInfo(typeof(global::MProtoQ), global::MProtoQ.Parser, new[]{ "Time" }, null, null, null, null),
-          new pbr::GeneratedClrTypeInfo(typeof(global::MProtoA), global::MProtoA.Parser, new[]{ "From", "Count" }, null, null, null, null),
+          new pbr::GeneratedClrTypeInfo(typeof(global::MProtoA), global::MProtoA.Parser, new[]{ "From", "ErrID", "Count" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::MPListQ), global::MPListQ.Parser, new[]{ "Time" }, null, null, null, null),
-          new pbr::GeneratedClrTypeInfo(typeof(global::MPListA), global::MPListA.Parser, new[]{ "From", "Count" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::MPListA), global::MPListA.Parser, new[]{ "From", "ErrID", "Count" }, null, null, null, null)
         }));
   }
   #endregion
@@ -273,6 +274,7 @@ public sealed partial class MProtoA : pb::IMessage<MProtoA>
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public MProtoA(MProtoA other) : this() {
     from_ = other.from_ != null ? other.from_.Clone() : null;
+    errID_ = other.errID_;
     count_ = other.count_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
@@ -298,8 +300,23 @@ public sealed partial class MProtoA : pb::IMessage<MProtoA>
     }
   }
 
+  /// <summary>Field number for the "errID" field.</summary>
+  public const int ErrIDFieldNumber = 2;
+  private global::ErrID errID_ = global::ErrID.Success;
+  /// <summary>
+  /// 錯誤編號
+  /// </summary>
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::ErrID ErrID {
+    get { return errID_; }
+    set {
+      errID_ = value;
+    }
+  }
+
   /// <summary>Field number for the "count" field.</summary>
-  public const int CountFieldNumber = 2;
+  public const int CountFieldNumber = 3;
   private long count_;
   /// <summary>
   /// 封包計數
@@ -329,6 +346,7 @@ public sealed partial class MProtoA : pb::IMessage<MProtoA>
       return true;
     }
     if (!object.Equals(From, other.From)) return false;
+    if (ErrID != other.ErrID) return false;
     if (Count != other.Count) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
@@ -338,6 +356,7 @@ public sealed partial class MProtoA : pb::IMessage<MProtoA>
   public override int GetHashCode() {
     int hash = 1;
     if (from_ != null) hash ^= From.GetHashCode();
+    if (ErrID != global::ErrID.Success) hash ^= ErrID.GetHashCode();
     if (Count != 0L) hash ^= Count.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
@@ -361,8 +380,12 @@ public sealed partial class MProtoA : pb::IMessage<MProtoA>
       output.WriteRawTag(10);
       output.WriteMessage(From);
     }
-    if (Count != 0L) {
+    if (ErrID != global::ErrID.Success) {
       output.WriteRawTag(16);
+      output.WriteEnum((int) ErrID);
+    }
+    if (Count != 0L) {
+      output.WriteRawTag(24);
       output.WriteInt64(Count);
     }
     if (_unknownFields != null) {
@@ -379,8 +402,12 @@ public sealed partial class MProtoA : pb::IMessage<MProtoA>
       output.WriteRawTag(10);
       output.WriteMessage(From);
     }
-    if (Count != 0L) {
+    if (ErrID != global::ErrID.Success) {
       output.WriteRawTag(16);
+      output.WriteEnum((int) ErrID);
+    }
+    if (Count != 0L) {
+      output.WriteRawTag(24);
       output.WriteInt64(Count);
     }
     if (_unknownFields != null) {
@@ -395,6 +422,9 @@ public sealed partial class MProtoA : pb::IMessage<MProtoA>
     int size = 0;
     if (from_ != null) {
       size += 1 + pb::CodedOutputStream.ComputeMessageSize(From);
+    }
+    if (ErrID != global::ErrID.Success) {
+      size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) ErrID);
     }
     if (Count != 0L) {
       size += 1 + pb::CodedOutputStream.ComputeInt64Size(Count);
@@ -416,6 +446,9 @@ public sealed partial class MProtoA : pb::IMessage<MProtoA>
         From = new global::MProtoQ();
       }
       From.MergeFrom(other.From);
+    }
+    if (other.ErrID != global::ErrID.Success) {
+      ErrID = other.ErrID;
     }
     if (other.Count != 0L) {
       Count = other.Count;
@@ -443,6 +476,10 @@ public sealed partial class MProtoA : pb::IMessage<MProtoA>
           break;
         }
         case 16: {
+          ErrID = (global::ErrID) input.ReadEnum();
+          break;
+        }
+        case 24: {
           Count = input.ReadInt64();
           break;
         }
@@ -469,6 +506,10 @@ public sealed partial class MProtoA : pb::IMessage<MProtoA>
           break;
         }
         case 16: {
+          ErrID = (global::ErrID) input.ReadEnum();
+          break;
+        }
+        case 24: {
           Count = input.ReadInt64();
           break;
         }
@@ -712,6 +753,7 @@ public sealed partial class MPListA : pb::IMessage<MPListA>
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public MPListA(MPListA other) : this() {
     from_ = other.from_ != null ? other.from_.Clone() : null;
+    errID_ = other.errID_;
     count_ = other.count_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
@@ -737,8 +779,23 @@ public sealed partial class MPListA : pb::IMessage<MPListA>
     }
   }
 
+  /// <summary>Field number for the "errID" field.</summary>
+  public const int ErrIDFieldNumber = 2;
+  private global::ErrID errID_ = global::ErrID.Success;
+  /// <summary>
+  /// 錯誤編號
+  /// </summary>
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::ErrID ErrID {
+    get { return errID_; }
+    set {
+      errID_ = value;
+    }
+  }
+
   /// <summary>Field number for the "count" field.</summary>
-  public const int CountFieldNumber = 2;
+  public const int CountFieldNumber = 3;
   private long count_;
   /// <summary>
   /// 封包計數
@@ -768,6 +825,7 @@ public sealed partial class MPListA : pb::IMessage<MPListA>
       return true;
     }
     if (!object.Equals(From, other.From)) return false;
+    if (ErrID != other.ErrID) return false;
     if (Count != other.Count) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
@@ -777,6 +835,7 @@ public sealed partial class MPListA : pb::IMessage<MPListA>
   public override int GetHashCode() {
     int hash = 1;
     if (from_ != null) hash ^= From.GetHashCode();
+    if (ErrID != global::ErrID.Success) hash ^= ErrID.GetHashCode();
     if (Count != 0L) hash ^= Count.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
@@ -800,8 +859,12 @@ public sealed partial class MPListA : pb::IMessage<MPListA>
       output.WriteRawTag(10);
       output.WriteMessage(From);
     }
-    if (Count != 0L) {
+    if (ErrID != global::ErrID.Success) {
       output.WriteRawTag(16);
+      output.WriteEnum((int) ErrID);
+    }
+    if (Count != 0L) {
+      output.WriteRawTag(24);
       output.WriteInt64(Count);
     }
     if (_unknownFields != null) {
@@ -818,8 +881,12 @@ public sealed partial class MPListA : pb::IMessage<MPListA>
       output.WriteRawTag(10);
       output.WriteMessage(From);
     }
-    if (Count != 0L) {
+    if (ErrID != global::ErrID.Success) {
       output.WriteRawTag(16);
+      output.WriteEnum((int) ErrID);
+    }
+    if (Count != 0L) {
+      output.WriteRawTag(24);
       output.WriteInt64(Count);
     }
     if (_unknownFields != null) {
@@ -834,6 +901,9 @@ public sealed partial class MPListA : pb::IMessage<MPListA>
     int size = 0;
     if (from_ != null) {
       size += 1 + pb::CodedOutputStream.ComputeMessageSize(From);
+    }
+    if (ErrID != global::ErrID.Success) {
+      size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) ErrID);
     }
     if (Count != 0L) {
       size += 1 + pb::CodedOutputStream.ComputeInt64Size(Count);
@@ -855,6 +925,9 @@ public sealed partial class MPListA : pb::IMessage<MPListA>
         From = new global::MPListQ();
       }
       From.MergeFrom(other.From);
+    }
+    if (other.ErrID != global::ErrID.Success) {
+      ErrID = other.ErrID;
     }
     if (other.Count != 0L) {
       Count = other.Count;
@@ -882,6 +955,10 @@ public sealed partial class MPListA : pb::IMessage<MPListA>
           break;
         }
         case 16: {
+          ErrID = (global::ErrID) input.ReadEnum();
+          break;
+        }
+        case 24: {
           Count = input.ReadInt64();
           break;
         }
@@ -908,6 +985,10 @@ public sealed partial class MPListA : pb::IMessage<MPListA>
           break;
         }
         case 16: {
+          ErrID = (global::ErrID) input.ReadEnum();
+          break;
+        }
+        case 24: {
           Count = input.ReadInt64();
           break;
         }

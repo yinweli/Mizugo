@@ -3,7 +3,8 @@ package depots
 import (
 	"context"
 	"fmt"
-	"time"
+
+	"github.com/yinweli/Mizugo/mizugos/ctxs"
 )
 
 // newMixed 建立混合資料庫
@@ -21,76 +22,113 @@ type Mixed struct {
 	minor *Minor // 次要資料庫物件
 }
 
-// Runner 取得執行物件
-func (this *Mixed) Runner(ctx context.Context, dbName, tableName string) *Runner {
-	return &Runner{
-		ctx:         ctx,
-		majorRunner: this.major.Runner(),
-		minorRunner: this.minor.Runner(dbName, tableName),
+// Submit 取得執行物件
+func (this *Mixed) Submit(ctx ctxs.Ctx, tableName string) *Submit {
+	return &Submit{
+		ctx:   ctx,
+		major: this.major.Submit(),
+		minor: this.minor.Submit(tableName),
 	}
 }
 
-// Runner 混合資料庫執行器, 執行命令時需要遵循以下流程
-//   - 定義繼承了 Action 的行為結構
-//   - 建立行為資料, 並且填寫內容(例如索引值, 資料內容等)
+// Submit 混合資料庫執行器, 執行命令時需要遵循以下流程
+//   - 定義包含了 Behave 的行為結構 / 定義繼承了 Behavior 的行為結構
+//   - 建立行為資料, 並且填寫內容(例如索引值, 資料內容, 結果成員等)
 //   - 取得執行物件
 //   - 新增行為到執行物件中
 //   - 執行命令 Exec
 //   - 檢查執行命令結果以及進行後續處理
-type Runner struct {
-	ctx         context.Context // context物件
-	majorRunner MajorRunner     // 主要執行物件
-	minorRunner MinorRunner     // 次要執行物件
-	action      []Action        // 行為列表
+//
+// 目前已經實作了幾個預設行為 Lock, Unlock, Getter, Setter 可以幫助使用者作行為設計
+type Submit struct {
+	ctx      ctxs.Ctx    // ctx物件
+	major    MajorSubmit // 主要執行物件
+	minor    MinorSubmit // 次要執行物件
+	behavior []Behavior  // 行為列表
 }
 
 // Add 新增行為
-func (this *Runner) Add(action Action) *Runner {
-	this.action = append(this.action, action)
+func (this *Submit) Add(behavior Behavior) *Submit {
+	behavior.Initialize(this.ctx, this.major, this.minor)
+	this.behavior = append(this.behavior, behavior)
 	return this
 }
 
 // Lock 新增鎖定行為
-func (this *Runner) Lock(key string) *Runner {
-	return this.Add(&Lock{Key: key, time: time.Second * 30}) // 預設鎖定超時時間為30秒
+func (this *Submit) Lock(key string) *Submit {
+	return this.Add(&Lock{Key: key, time: Timeout})
 }
 
 // Unlock 新增解鎖行為
-func (this *Runner) Unlock(key string) *Runner {
+func (this *Submit) Unlock(key string) *Submit {
 	return this.Add(&Unlock{Key: key})
 }
 
 // Exec 執行命令, 執行命令時, 會以下列順序執行
 //   - 執行所有行為的 Prepare 函式, 如果有錯誤就中止執行
 //   - 執行主要資料庫的管線處理
-//   - 執行所有行為的 Result 函式, 如果有錯誤就中止執行
-func (this *Runner) Exec() error {
-	for _, itor := range this.action {
-		if err := itor.Prepare(this.ctx, this.majorRunner, this.minorRunner); err != nil {
-			return fmt.Errorf("runner exec: %w", err)
+//   - 執行所有行為的 Complete 函式, 如果有錯誤就中止執行
+//   - 清除管線資料
+func (this *Submit) Exec() error {
+	for _, itor := range this.behavior {
+		if err := itor.Prepare(); err != nil {
+			return fmt.Errorf("submit exec prepare: %w", err)
 		} // if
 	} // for
 
-	if _, err := this.majorRunner.Exec(this.ctx); err != nil {
-		return fmt.Errorf("runner exec: %w", err)
-	} // if
+	_, _ = this.major.Exec(this.ctx.Ctx())
 
-	for _, itor := range this.action {
-		if err := itor.Result(); err != nil {
-			return fmt.Errorf("runner exec: %w", err)
+	for _, itor := range this.behavior {
+		if err := itor.Complete(); err != nil {
+			return fmt.Errorf("submit exec complete: %w", err)
 		} // if
 	} // for
 
+	this.behavior = nil
 	return nil
 }
 
-// Action 行為介面, 在進行行為設計時, 針對主要/次要資料庫, 有以下的設計規範
-//   - 主要資料庫的情況下: 由於主要資料庫會用管線機制執行, 因此通常會在 Prepare 新增管線命令, 然後在 Result 檢查執行結果是否符合預期
-//   - 次要資料庫的情況下: 由於次要資料庫會以常規方式執行, 因此通常 Prepare 不會有內容, 然後在 Result 執行資料庫命令並且檢查執行結果是否符合預期
-type Action interface {
-	// Prepare 前置處理
-	Prepare(ctx context.Context, majorRunner MajorRunner, minorRunner MinorRunner) error
+// Behavior 行為介面, 當建立行為時, 需要實現此介面, 建議可以把 Behave 組合進行為結構中, 可以省去初始處理的實作;
+// 設計行為時, 有以下的設計規範
+//   - 主要資料庫的情況下: 由於主要資料庫會用管線機制執行, 因此通常會在 Prepare 新增管線命令, 然後在 Complete 檢查執行是否符合預期
+//   - 次要資料庫的情況下: 由於次要資料庫會以常規方式執行, 因此通常 Prepare 不會有內容, 然後在 Complete 執行資料庫命令並且檢查執行是否符合預期
+//   - 錯誤處理: 當資料庫失敗時才會回傳錯誤, 若是邏輯錯誤(例如資料不存在), 就不應該回傳錯誤, 而是把結果記錄下來提供外部使用
+type Behavior interface {
+	// Initialize 初始處理
+	Initialize(ctx ctxs.Ctx, major MajorSubmit, minor MinorSubmit)
 
-	// Result 結果處理
-	Result() error
+	// Prepare 準備處理
+	Prepare() error
+
+	// Complete 完成處理
+	Complete() error
+}
+
+// Behave 行為資料
+type Behave struct {
+	ctx   ctxs.Ctx    // ctx物件
+	major MajorSubmit // 主要執行物件
+	minor MinorSubmit // 次要執行物件
+}
+
+// Initialize 初始處理
+func (this *Behave) Initialize(ctx ctxs.Ctx, major MajorSubmit, minor MinorSubmit) {
+	this.ctx = ctx
+	this.major = major
+	this.minor = minor
+}
+
+// Ctx 取得ctx物件
+func (this *Behave) Ctx() context.Context {
+	return this.ctx.Ctx()
+}
+
+// Major 取得主要執行物件
+func (this *Behave) Major() MajorSubmit {
+	return this.major
+}
+
+// Minor 取得次要執行物件
+func (this *Behave) Minor() MinorSubmit {
+	return this.minor
 }

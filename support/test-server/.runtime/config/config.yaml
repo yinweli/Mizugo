@@ -20,6 +20,14 @@ pool:
 metrics:
   port: 20001
 
+depot:
+  majorURI: redisdb://127.0.0.1:6379/
+  minorURI: mongodb://127.0.0.1:27017/
+
+auth:
+  ip:
+  port: 10000
+
 json:
   ip:
   port: 10001

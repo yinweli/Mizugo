@@ -1,10 +1,10 @@
 package metrics
 
 import (
-	"context"
 	"sync"
 	"time"
 
+	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/pools"
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
@@ -85,53 +85,53 @@ func (this *Runtime) String() string {
 }
 
 // start 開始統計
-func (this *Runtime) start(ctx context.Context) {
+func (this *Runtime) start(ctx ctxs.Ctx) {
 	pools.DefaultPool.Submit(func() {
-		timeout := time.NewTicker(time.Second)
-		timeout1 := time.NewTicker(time.Second * interval1)
-		timeout5 := time.NewTicker(time.Second * interval5)
-		timeout10 := time.NewTicker(time.Second * interval10)
-		timeout60 := time.NewTicker(time.Second * interval60)
+		ticker := time.NewTicker(time.Second)
+		ticker1 := time.NewTicker(time.Second * interval1)
+		ticker5 := time.NewTicker(time.Second * interval5)
+		ticker10 := time.NewTicker(time.Second * interval10)
+		ticker60 := time.NewTicker(time.Second * interval60)
 
 		for {
 			select {
-			case <-timeout.C:
+			case <-ticker.C:
 				this.lock.Lock()
 				this.last.time = this.curr.time
 				this.last.timeMax = this.curr.timeMax
 				this.last.count = this.curr.count
 				this.lock.Unlock()
 
-			case <-timeout1.C:
+			case <-ticker1.C:
 				this.lock.Lock()
 				this.last.count1 = this.curr.count1
 				this.curr.count1 = 0
 				this.lock.Unlock()
 
-			case <-timeout5.C:
+			case <-ticker5.C:
 				this.lock.Lock()
 				this.last.count5 = this.curr.count5
 				this.curr.count5 = 0
 				this.lock.Unlock()
 
-			case <-timeout10.C:
+			case <-ticker10.C:
 				this.lock.Lock()
 				this.last.count10 = this.curr.count10
 				this.curr.count10 = 0
 				this.lock.Unlock()
 
-			case <-timeout60.C:
+			case <-ticker60.C:
 				this.lock.Lock()
 				this.last.count60 = this.curr.count60
 				this.curr.count60 = 0
 				this.lock.Unlock()
 
 			case <-ctx.Done():
-				timeout.Stop()
-				timeout1.Stop()
-				timeout5.Stop()
-				timeout10.Stop()
-				timeout60.Stop()
+				ticker.Stop()
+				ticker1.Stop()
+				ticker5.Stop()
+				ticker10.Stop()
+				ticker60.Stop()
 				return
 			} // select
 		} // for

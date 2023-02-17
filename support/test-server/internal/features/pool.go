@@ -32,7 +32,7 @@ func (this *Pool) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	mizugos.Info(this.name).Message("initialize").KV("config", &this.config).End()
+	mizugos.Info(this.name).Caller(0).Message("initialize").KV("config", &this.config).End()
 	return nil
 }
 
@@ -47,5 +47,5 @@ type poolLogger struct {
 
 // Printf 輸出日誌
 func (this *poolLogger) Printf(format string, args ...any) {
-	mizugos.Logmgr().Error("pool").Message(format, args...).End()
+	mizugos.Logmgr().Error("pool").Caller(1).Message(format, args...).End()
 }

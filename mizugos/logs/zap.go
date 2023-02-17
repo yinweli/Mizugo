@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
@@ -127,8 +128,17 @@ func (this *ZapStream) Message(format string, a ...any) Stream {
 	return this
 }
 
+// Caller 記錄呼叫訊息
+func (this *ZapStream) Caller(skip int) Stream {
+	if pc, _, _, ok := runtime.Caller(skip + 1); ok { // 這裡把skip+1的原因是為了多跳過現在這層, 這樣外部使用時就可以指定0為呼叫起點, 比較直覺
+		return this.KV("caller", runtime.FuncForPC(pc).Name())
+	} // if
+
+	return this
+}
+
 // KV 記錄索引與數值
-func (this *ZapStream) KV(key string, value any) Stream { //nolint
+func (this *ZapStream) KV(key string, value any) Stream { //nolint:gocyclo
 	switch v := value.(type) {
 	case int8:
 		this.field = append(this.field, zap.Int8(key, v))

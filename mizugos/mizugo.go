@@ -1,12 +1,11 @@
 package mizugos
 
 import (
-	"context"
 	"fmt"
 	"sync"
 
 	"github.com/yinweli/Mizugo/mizugos/configs"
-	"github.com/yinweli/Mizugo/mizugos/contexts"
+	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/depots"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/labels"
@@ -16,33 +15,22 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/pools"
 )
 
-// Initialize 初始化處理函式類型
-type Initialize func() error
-
-// Do 執行處理
-func (this Initialize) Do() error {
-	if this != nil {
-		return this()
-	} // if
-
-	return nil
-}
-
-// Finalize 結束處理函式類型
-type Finalize func()
-
-// Do 執行處理
-func (this Finalize) Do() {
-	if this != nil {
-		this()
-	} // if
-}
-
-// Start 啟動伺服器, 為了讓程式持續執行, 此函式不能用執行緒執行; 也請不要執行此函式兩次
+// Start 啟動伺服器, 用於啟動mizugo伺服器, 需要指定 Initialize 與 Finalize 來執行使用者的初始化與結束處理;
+// 啟動伺服器執行的順序為
+//   - 設置內部成員
+//   - 建立各管理器, 注意! 這裡只建立而沒有對各管理器進行初始化
+//   - 執行 Initialize
+//   - 進入無限迴圈, 直到關閉伺服器(呼叫 Stop 後)
+//   - 執行 Finalize
+//   - 釋放內部成員
+//   - 釋放各管理器
+//   - 最後呼叫 ctxs.Root().Cancel() 讓由contexts.Ctx()衍生出來的執行緒最後都能被終止, 避免goroutine洩漏
+//
+// 為了讓程式持續執行, 此函式不能用執行緒執行, 也請不要執行此函式兩次
 func Start(name string, initialize Initialize, finalize Finalize) {
 	server.lock.Lock()
 	server.name = name
-	server.ctx, server.cancel = context.WithCancel(contexts.Ctx())
+	server.ctx = ctxs.Root().WithCancel()
 	server.configmgr = configs.NewConfigmgr()
 	server.metricsmgr = metrics.NewMetricsmgr()
 	server.logmgr = logs.NewLogmgr()
@@ -73,7 +61,7 @@ Finalize: // 結束處理
 	fmt.Printf("%v finalize\n", name)
 	server.lock.Lock()
 	server.name = ""
-	server.cancel()
+	server.ctx.Cancel()
 	server.configmgr = nil
 	server.metricsmgr = nil
 	server.logmgr = nil
@@ -83,7 +71,7 @@ Finalize: // 結束處理
 	server.labelmgr = nil
 	server.poolmgr = nil
 	server.lock.Unlock()
-	contexts.Cancel() // 關閉伺服器, 並且保證由contexts.Ctx()衍生出來的執行緒最後都能被終止, 避免goroutine洩漏
+	ctxs.Root().Cancel() // 關閉伺服器, 並且保證由contexts.Ctx()衍生出來的執行緒最後都能被終止, 避免goroutine洩漏
 }
 
 // Stop 關閉伺服器
@@ -91,9 +79,7 @@ func Stop() {
 	server.lock.RLock()
 	defer server.lock.RUnlock()
 
-	if server.cancel != nil {
-		server.cancel()
-	} // if
+	server.ctx.Cancel()
 }
 
 // Name 取得伺服器名稱
@@ -103,6 +89,8 @@ func Name() string {
 
 	return server.name
 }
+
+// ===== 管理器功能 =====
 
 // Configmgr 取得配置管理器
 func Configmgr() *configs.Configmgr {
@@ -168,6 +156,8 @@ func Poolmgr() *pools.Poolmgr {
 	return server.poolmgr
 }
 
+// ===== 日誌功能 =====
+
 // Debug 記錄除錯訊息
 func Debug(label string) logs.Stream {
 	server.lock.RLock()
@@ -200,11 +190,34 @@ func Error(label string) logs.Stream {
 	return server.logmgr.Error(label)
 }
 
+// ===== 其他定義 =====
+
+// Initialize 初始化處理函式類型
+type Initialize func() error
+
+// Do 執行處理
+func (this Initialize) Do() error {
+	if this != nil {
+		return this()
+	} // if
+
+	return nil
+}
+
+// Finalize 結束處理函式類型
+type Finalize func()
+
+// Do 執行處理
+func (this Finalize) Do() {
+	if this != nil {
+		this()
+	} // if
+}
+
 // server 伺服器資料
 var server struct {
 	name       string              // 伺服器名稱
-	ctx        context.Context     // ctx物件
-	cancel     context.CancelFunc  // 取消物件
+	ctx        ctxs.Ctx            // ctx物件
 	configmgr  *configs.Configmgr  // 配置管理器
 	metricsmgr *metrics.Metricsmgr // 統計管理器
 	logmgr     *logs.Logmgr        // 日誌管理器

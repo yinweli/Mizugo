@@ -95,8 +95,9 @@ public class SampleJson : MonoBehaviour
         JsonProc.Unmarshal<MJsonA>(param, out var messageID, out var message);
         var duration = stopwatch.ElapsedMilliseconds - message.From.Time;
         var count = message.Count;
+        var errID = message.ErrID;
 
-        Log(">>> duration: " + duration + ", count: " + count);
+        Log(">>> duration: " + duration + ", count: " + count + ", errID: " + errID);
         client.Disconnect();
     }
 

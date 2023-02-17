@@ -45,6 +45,7 @@ func (this *SuiteEmpty) TestEmptyStream() {
 
 	target := logger.New("log", LevelDebug)
 	assert.Equal(this.T(), target, target.Message("message"))
+	assert.Equal(this.T(), target, target.Caller(0))
 	assert.Equal(this.T(), target, target.KV("key", "value"))
 	assert.Equal(this.T(), target, target.Error(fmt.Errorf("error")))
 	target.EndError(fmt.Errorf("end error"))

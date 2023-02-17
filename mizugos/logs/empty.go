@@ -27,6 +27,11 @@ func (this *EmptyStream) Message(_ string, _ ...any) Stream {
 	return this
 }
 
+// Caller 記錄呼叫訊息
+func (this *EmptyStream) Caller(_ int) Stream {
+	return this
+}
+
 // KV 記錄索引與數值
 func (this *EmptyStream) KV(_ string, _ any) Stream {
 	return this

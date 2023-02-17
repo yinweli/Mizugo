@@ -1,5 +1,5 @@
 /// <summary>
-/// MJsonQ 要求Json
+/// 要求Json
 /// </summary>
 public class MJsonQ
 {
@@ -10,7 +10,7 @@ public class MJsonQ
 }
 
 /// <summary>
-/// MJsonA 回應Json
+/// 回應Json
 /// </summary>
 public class MJsonA
 {
@@ -18,6 +18,11 @@ public class MJsonA
     /// 來源訊息
     /// </summary>
     public MJsonQ From;
+
+    /// <summary>
+    /// 錯誤編號
+    /// </summary>
+    public int ErrID;
 
     /// <summary>
     /// 封包計數

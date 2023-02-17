@@ -13,7 +13,19 @@ const ( // 配置定義
 )
 
 const ( // 模組編號
-	ModuleIDJson entitys.ModuleID = iota + 1
+	ModuleIDAuth entitys.ModuleID = iota + 1
+	ModuleIDJson
 	ModuleIDProto
 	ModuleIDPList
+)
+
+const ( // 資料庫名稱
+	MajorName = "major" // 主要資料庫名稱
+	MinorName = "minor" // 次要資料庫名稱
+	MixedName = "mixed" // 混合資料庫名稱
+)
+
+const ( // mongo資料庫名稱
+	MongoDB    = "auth" // mongo資料庫名稱
+	MongoTable = "auth" // mongo資料表名稱
 )
