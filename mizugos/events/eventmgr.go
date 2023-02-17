@@ -14,11 +14,6 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
-// 事件管理器, 提供了事件相關功能, 在mizugo中作為實體的附屬功能提供
-// * 事件執行緒
-//   所有要觸發的事件都會加入事件管理器中的通知通道
-//   因此事件會在單一的事件執行緒中被執行, 以此保證了事件有序執行
-
 const separateSubID = "@" // 訂閱索引分隔字串
 
 // NewEventmgr 建立事件管理器
@@ -32,7 +27,8 @@ func NewEventmgr(capacity int) *Eventmgr {
 	}
 }
 
-// Eventmgr 事件管理器
+// Eventmgr 事件管理器, 提供了事件訂閱/發布等功能, 事件管理器本身是執行緒安全的,
+// 但是發布的事件會在單一的事件執行緒中被執行, 以此保證了事件有序執行
 type Eventmgr struct {
 	ctx    context.Context    // ctx物件
 	cancel context.CancelFunc // 取消物件

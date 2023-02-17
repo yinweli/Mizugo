@@ -6,8 +6,6 @@ import (
 	"sync"
 )
 
-// 模組管理器, 用於管理模組
-
 // NewModulemgr 建立模組管理器
 func NewModulemgr() *Modulemgr {
 	return &Modulemgr{
@@ -15,7 +13,7 @@ func NewModulemgr() *Modulemgr {
 	}
 }
 
-// Modulemgr 模組管理器
+// Modulemgr 模組管理器, 負責新增/刪除/取得模組等功能
 type Modulemgr struct {
 	data map[ModuleID]Moduler // 模組列表
 	lock sync.RWMutex         // 執行緒鎖

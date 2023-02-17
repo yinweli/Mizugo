@@ -5,8 +5,6 @@ import (
 	"sync"
 )
 
-// 實體管理器, 用於管理實體
-
 // NewEntitymgr 建立實體管理器
 func NewEntitymgr() *Entitymgr {
 	return &Entitymgr{
@@ -14,7 +12,7 @@ func NewEntitymgr() *Entitymgr {
 	}
 }
 
-// Entitymgr 實體管理器
+// Entitymgr 實體管理器, 負責新增/刪除/取得實體等功能
 type Entitymgr struct {
 	entityID EntityID             // 實體編號
 	data     map[EntityID]*Entity // 實體列表

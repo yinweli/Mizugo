@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 更新說明文件
 
 ### Fixed
-- 修正連線逾時檢測
+- 修正連線超時檢測
 
 ## [0.1.4] - 2023-02-08
 ### Changed

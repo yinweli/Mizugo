@@ -12,30 +12,6 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
-// 實體, mizugo中用於儲存對象的基礎物件, 對象可以是個連線, 也可以用於表示遊戲物件
-// * 建立實體
-//   從實體管理器新增實體, 取得實體物件
-//   如果實體需要使用模組相關功能, 則設置模組管理器
-//   如果實體需要使用事件相關功能, 則設置事件管理器
-//   如果實體將要代表某個連線, 則要繼續以下設置
-//   - 設置處理物件
-//   - 設置會話物件
-//   新增模組到實體中
-//   執行實體的初始化處理
-// * 結束實體
-//   執行實體的結束處理
-// * 模組功能
-//   使用者可以新增模組到實體上, 但是必須在實體初始化之前完成
-// * 事件功能
-//   使用者可以訂閱或是取消訂閱事件, 發布只執行一次的事件, 或是發布會定時觸發的事件(由於不能刪除定時事件, 因此發布定時事件前請多想想)
-//   事件可以被訂閱多次, 發布事件時會每個訂閱者都會執行一次
-// * 內部事件
-//   實體提供了內部事件可供訂閱, 內部事件請參考define.go中的說明
-// * 處理功能
-//   當實體設置了處理物件與會話物件後, 可以通過處理功能來新增或是刪除訊息處理函式
-// * 會話功能
-//   當實體設置了處理物件與會話物件後, 可以通過會話功能來傳送封包到遠端
-
 // NewEntity 建立實體資料
 func NewEntity(entityID EntityID) *Entity {
 	return &Entity{
@@ -44,7 +20,42 @@ func NewEntity(entityID EntityID) *Entity {
 	}
 }
 
-// Entity 實體資料
+// Entity 實體資料, mizugo中用於儲存對象的基礎物件, 對象可以是個連線, 也可以用於表示遊戲物件
+//
+// 建立實體時, 需要遵循以下流程
+//   - 到實體管理器新增實體
+//   - 取得實體物件
+//   - 如果實體需要使用模組相關功能, 則呼叫 SetModulemgr 設置 entitys.Modulemgr
+//   - 如果實體需要使用事件相關功能, 則呼叫 SetEventmgr 設置 events.Eventmgr
+//   - 如果實體將要代表某個連線, 則呼叫 則需要設置 procs.Processor 與 nets.Sessioner
+//   - 新增模組到實體中
+//   - 執行實體的初始化處理
+//
+// 結束實體時, 會依序發布 EventDispose 與 EventShutdown 事件
+//
+// 實體可以新增模組, 用於分類與實作遊戲功能/訊息處理等; 如果想要新增模組, 需要在實體初始化之前完成;
+// 需要在實體初始化之前設置 entitys.Modulemgr
+//
+// 使用者可以到實體訂閱事件, 事件可以被訂閱多次, 發布事件時會每個訂閱者都會執行一次;
+// 需要在實體初始化之前設置 events.Eventmgr
+//
+// 使用者可以到實體發布事件, 發布事件有以下模式
+//   - 單次事件: 事件只執行一次
+//   - 延遲事件: 事件只執行一次, 且會延遲一段時間才發布
+//   - 定時事件: 事件會定時執行, 由於不能刪除定時事件, 因此發布定時事件前請多想想
+//
+// 實體會發布以下內部事件
+//   - EventUpdate: 定時事件, 實體定時觸發, 參數是nil, 間隔時間為 UpdateInterval
+//   - EventDispose: 結束事件, 實體結束時第一個執行, 參數是nil
+//   - EventShutdown: 關閉事件, 實體結束時第二個執行, 參數是nil, 這時連線已經中斷
+//   - EventRecv: 接收訊息事件, 當接收訊息後觸發, 參數是訊息物件
+//   - EventSend: 傳送訊息事件, 當傳送訊息後觸發, 參數是訊息物件
+//
+// 實體可以設置處理功能, 負責封包編/解碼, 管理訊息處理函式;
+// 需要在實體初始化之前設置 procs.Processor
+//
+// 實體可以設置會話功能, 負責網路相關功能;
+// 需要在實體初始化之前設置 nets.Sessioner
 type Entity struct {
 	*labels.Labelobj                                  // 標籤物件
 	entityID         EntityID                         // 實體編號
@@ -108,7 +119,7 @@ func (this *Entity) Initialize(wrong Wrong) (err error) {
 				session.Stop()
 			} // if
 		})
-		eventmgr.PubFixed(EventUpdate, nil, updateInterval)
+		eventmgr.PubFixed(EventUpdate, nil, UpdateInterval)
 
 		if err = eventmgr.Initialize(); err != nil {
 			err = fmt.Errorf("entity initialize: %w", err)

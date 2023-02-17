@@ -12,10 +12,8 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
-// zap日誌, uber實現的高效能日誌功能
-// 使用前必須填寫好ZapLogger中的公開成員, 可以選擇從yaml格式的配置檔案來填寫ZapLogger結構
-
-// ZapLogger zap日誌
+// ZapLogger zap日誌, uber實現的高效能日誌功能;
+// // 使用前必須填寫好 ZapLogger 中的公開成員, 可以選擇從yaml格式的配置檔案來填寫 ZapLogger 結構
 type ZapLogger struct {
 	Name       string `yaml:"name"`       // 日誌名稱, 會被用到日誌檔案名稱上
 	Path       string `yaml:"path"`       // 日誌路徑, 指定日誌檔案的位置

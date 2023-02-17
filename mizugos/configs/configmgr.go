@@ -11,36 +11,24 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
-// 配置管理器, 其實是對viper配置函式庫的包裝, 有以下幾種讀取配置的模式
-// * 從檔案讀取配置
-//   從設定好的路徑中讀取符合檔名與副檔名的檔案內容作為配置資料
-//   首先用AddPath函式設置路徑, 可多次設置來指定多個路徑來源
-//   接著用ReadFile函式設置檔案名稱與副檔名來嘗試讀取配置
-// * 從字串讀取配置
-//   從外部提供字串作為配置來源, 由於內部仍然用讀取檔案的方式來處理字串, 所以必須提供來源使用的檔案格式的副檔名
-//   用ReadString函式設置字串與副檔名來嘗試讀取配置
-// * 從讀取器讀取配置
-//   從外部提供讀取器作為配置來源, 由於內部仍然用讀取檔案的方式來處理字串, 所以必須提供來源使用的檔案格式的副檔名
-// * 支援的副檔名如下(可以參考viper.SupportedExts陣列)
-//   - dotenv
-//   - env
-//   - hcl
-//   - ini
-//   - json
-//   - prop
-//   - properties
-//   - props
-//   - tfvars
-//   - toml
-//   - yaml
-//   - yml
-
 // NewConfigmgr 建立配置管理器
 func NewConfigmgr() *Configmgr {
 	return &Configmgr{}
 }
 
-// Configmgr 配置管理器
+// Configmgr 配置管理器, 內部使用viper實現功能, 有以下幾種讀取配置的模式
+//   - 從檔案讀取配置: 從設定好的路徑中讀取符合檔名與副檔名的檔案內容作為配置資料;
+//     需要配合 AddPath 函式設置路徑(可多次設置來指定多個路徑來源)
+//   - 從字串讀取配置: 從外部提供字串作為配置來源, 由於內部仍然用讀取檔案的方式來處理字串,
+//     所以必須提供來源使用的檔案格式的副檔名
+//   - 從讀取器讀取配置: 從外部提供讀取器作為配置來源, 由於內部仍然用讀取檔案的方式來處理字串,
+//     所以必須提供來源使用的檔案格式的副檔名
+//
+// 以上讀取配置的模式內部都是用讀取檔案的方式來處理字串, 所以必須提供來源使用的檔案格式的副檔名,
+// 支援的副檔名可以參考 viper.SupportedExts
+//
+// 當配置讀取完畢後, 需要從管理器中取得配置值時, 可以用索引字串來呼叫 Get.. 系列函式來取得配置值;
+// 或是用索引字串來呼叫 Unmarshal 來取得反序列化到結構的配置資料
 type Configmgr struct {
 	once utils.SyncOnce // 單次執行物件
 }
@@ -50,14 +38,14 @@ func (this *Configmgr) Reset() {
 	viper.Reset()
 }
 
-// AddPath 新增配置路徑
+// AddPath 新增配置路徑, 與 ReadFile 搭配使用, 可多次設置來指定多個路徑來源
 func (this *Configmgr) AddPath(path ...string) {
 	for _, itor := range path {
 		viper.AddConfigPath(itor)
 	} // for
 }
 
-// ReadFile 從檔案讀取配置, ext可選擇的項目可以參考viper.SupportedExts陣列
+// ReadFile 從檔案讀取配置, 需要事先用 AddPath 設置路徑, 支援的副檔名可以參考 viper.SupportedExts
 func (this *Configmgr) ReadFile(name, ext string) (err error) {
 	viper.SetConfigName(name)
 	viper.SetConfigType(ext)
@@ -75,7 +63,7 @@ func (this *Configmgr) ReadFile(name, ext string) (err error) {
 	return nil
 }
 
-// ReadString 從字串讀取配置
+// ReadString 從字串讀取配置, 支援的副檔名可以參考 viper.SupportedExts
 func (this *Configmgr) ReadString(value, ext string) (err error) {
 	reader := bytes.NewBuffer([]byte(value))
 	viper.SetConfigType(ext)
@@ -93,7 +81,7 @@ func (this *Configmgr) ReadString(value, ext string) (err error) {
 	return nil
 }
 
-// ReadBuffer 從讀取器讀取配置
+// ReadBuffer 從讀取器讀取配置, 支援的副檔名可以參考 viper.SupportedExts
 func (this *Configmgr) ReadBuffer(reader io.Reader, ext string) (err error) {
 	viper.SetConfigType(ext)
 
@@ -111,7 +99,7 @@ func (this *Configmgr) ReadBuffer(reader io.Reader, ext string) (err error) {
 }
 
 // Get 取得配置
-func (this *Configmgr) Get(key string) interface{} {
+func (this *Configmgr) Get(key string) any {
 	return viper.Get(key)
 }
 
@@ -186,7 +174,7 @@ func (this *Configmgr) GetSizeInBytes(key string) uint {
 }
 
 // Unmarshal 反序列化為資料物件
-func (this *Configmgr) Unmarshal(key string, obj interface{}) error {
+func (this *Configmgr) Unmarshal(key string, obj any) error {
 	if viper.InConfig(key) == false {
 		return fmt.Errorf("configmgr unmarshal: %v: not exist", key)
 	} // if

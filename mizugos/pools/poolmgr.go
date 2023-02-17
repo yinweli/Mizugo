@@ -90,13 +90,13 @@ func (this *Poolmgr) Status() Stat {
 
 // Config 配置資料
 type Config struct {
-	Capacity     int               `yaml:"capacity"`    // 執行緒池容量, 0表示容量無限
-	Expire       time.Duration     `yaml:"expire"`      // 執行緒逾時時間, 詳細說明請查看ants.Options.ExpiryDuration的說明
-	PreAlloc     bool              `yaml:"preAlloc"`    // 是否預先分配記憶體, 詳細說明請查看ants.Options.PreAlloc的說明
-	Nonblocking  bool              `yaml:"nonblocking"` // 是否在執行緒耗盡時阻塞Submit的執行, 詳細說明請查看ants.Options.Nonblocking的說明
-	MaxBlocking  int               `yaml:"maxBlocking"` // 最大阻塞執行緒數量, 0表示無限制, 詳細說明請查看ants.Options.MaxBlockingTasks的說明
-	PanicHandler func(interface{}) `yaml:"-" json:"-"`  // 失敗處理函式, 詳細說明請查看ants.Options.PanicHandler的說明
-	Logger       ants.Logger       `yaml:"-" json:"-"`  // 日誌物件, 詳細說明請查看ants.Options.Logger的說明
+	Capacity     int           `yaml:"capacity"`    // 執行緒池容量, 0表示容量無限
+	Expire       time.Duration `yaml:"expire"`      // 執行緒超時時間, 詳細說明請查看ants.Options.ExpiryDuration的說明
+	PreAlloc     bool          `yaml:"preAlloc"`    // 是否預先分配記憶體, 詳細說明請查看ants.Options.PreAlloc的說明
+	Nonblocking  bool          `yaml:"nonblocking"` // 是否在執行緒耗盡時阻塞Submit的執行, 詳細說明請查看ants.Options.Nonblocking的說明
+	MaxBlocking  int           `yaml:"maxBlocking"` // 最大阻塞執行緒數量, 0表示無限制, 詳細說明請查看ants.Options.MaxBlockingTasks的說明
+	PanicHandler func(any)     `yaml:"-" json:"-"`  // 失敗處理函式, 詳細說明請查看ants.Options.PanicHandler的說明
+	Logger       ants.Logger   `yaml:"-" json:"-"`  // 日誌物件, 詳細說明請查看ants.Options.Logger的說明
 }
 
 // String 取得字串
@@ -124,9 +124,6 @@ func (this Stat) String() string {
 		{Name: "available", Data: this.Available},
 		{Name: "capacity", Data: this.Capacity},
 	})
-}
-
-type Logger interface {
 }
 
 func init() { //nolint

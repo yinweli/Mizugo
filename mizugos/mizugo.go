@@ -7,6 +7,7 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos/configs"
 	"github.com/yinweli/Mizugo/mizugos/contexts"
+	"github.com/yinweli/Mizugo/mizugos/depots"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/labels"
 	"github.com/yinweli/Mizugo/mizugos/logs"
@@ -46,6 +47,7 @@ func Start(name string, initialize Initialize, finalize Finalize) {
 	server.metricsmgr = metrics.NewMetricsmgr()
 	server.logmgr = logs.NewLogmgr()
 	server.netmgr = nets.NewNetmgr()
+	server.depotmgr = depots.NewDepotmgr()
 	server.entitymgr = entitys.NewEntitymgr()
 	server.labelmgr = labels.NewLabelmgr()
 	server.poolmgr = pools.DefaultPool // 執行緒池管理器直接用預設的
@@ -76,11 +78,12 @@ Finalize: // 結束處理
 	server.metricsmgr = nil
 	server.logmgr = nil
 	server.netmgr = nil
+	server.depotmgr = nil
 	server.entitymgr = nil
 	server.labelmgr = nil
 	server.poolmgr = nil
 	server.lock.Unlock()
-	contexts.Cancel() // 用來保證由contexts.Ctx()衍生出來的執行緒最後都能被終止, 避免goroutine洩漏
+	contexts.Cancel() // 關閉伺服器, 並且保證由contexts.Ctx()衍生出來的執行緒最後都能被終止, 避免goroutine洩漏
 }
 
 // Stop 關閉伺服器
@@ -131,6 +134,14 @@ func Netmgr() *nets.Netmgr {
 	defer server.lock.RUnlock()
 
 	return server.netmgr
+}
+
+// Depotmgr 取得資料庫管理器
+func Depotmgr() *depots.Depotmgr {
+	server.lock.RLock()
+	defer server.lock.RUnlock()
+
+	return server.depotmgr
 }
 
 // Entitymgr 實體管理器
@@ -198,6 +209,7 @@ var server struct {
 	metricsmgr *metrics.Metricsmgr // 統計管理器
 	logmgr     *logs.Logmgr        // 日誌管理器
 	netmgr     *nets.Netmgr        // 網路管理器
+	depotmgr   *depots.Depotmgr    // 資料庫管理器
 	entitymgr  *entitys.Entitymgr  // 實體管理器
 	labelmgr   *labels.Labelmgr    // 標籤管理器
 	poolmgr    *pools.Poolmgr      // 執行緒池管理器

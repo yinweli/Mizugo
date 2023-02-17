@@ -46,6 +46,6 @@ type poolLogger struct {
 }
 
 // Printf 輸出日誌
-func (this *poolLogger) Printf(format string, args ...interface{}) {
+func (this *poolLogger) Printf(format string, args ...any) {
 	mizugos.Logmgr().Error("pool").Message(format, args...).End()
 }

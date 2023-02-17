@@ -109,7 +109,7 @@ func (this *SuitePoolmgr) TestStat() {
 type loggerTester struct {
 }
 
-func (this *loggerTester) Printf(format string, args ...interface{}) {
+func (this *loggerTester) Printf(format string, args ...any) {
 	fmt.Printf(format, args...)
 	fmt.Printf("\n")
 }

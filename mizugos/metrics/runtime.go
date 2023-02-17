@@ -9,7 +9,14 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
-// Runtime 執行統計
+// Runtime 執行統計, 記錄了以下數據
+//   - 總執行時間
+//   - 最大執行時間
+//   - 總執行次數
+//   - 每分鐘執行次數
+//   - 每5分鐘執行次數
+//   - 每10分鐘執行次數
+//   - 每60分鐘執行次數
 type Runtime struct {
 	curr runtime      // 當前資料
 	last runtime      // 上次資料
@@ -27,7 +34,7 @@ type runtime struct {
 	count60 int64         // 每60分鐘執行次數
 }
 
-// Add 新增紀錄
+// Add 新增記錄
 func (this *Runtime) Add(delta time.Duration) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -45,7 +52,7 @@ func (this *Runtime) Add(delta time.Duration) {
 	this.curr.count60++
 }
 
-// Rec 執行紀錄, 使用時把回傳的函式指標記錄下來, 直到執行區間結束再執行
+// Rec 執行記錄, 使用時把回傳的函式指標記錄下來, 直到執行區間結束再執行
 func (this *Runtime) Rec() func() {
 	start := time.Now()
 	return func() {
