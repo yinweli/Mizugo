@@ -30,7 +30,7 @@ func (this *Logger) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	mizugos.Info(this.name).Message("initialize").KV("config", &this.config).End()
+	mizugos.Info(this.name).Caller(0).Message("initialize").KV("config", &this.config).End()
 	return nil
 }
 

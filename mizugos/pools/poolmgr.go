@@ -126,7 +126,7 @@ func (this Stat) String() string {
 	})
 }
 
-func init() { //nolint
+func init() { //nolint:gochecknoinits
 	DefaultPool = NewPoolmgr()
 }
 

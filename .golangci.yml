@@ -75,6 +75,8 @@ linters-settings:
     # If this set, it will override the default set of ignored signatures.
     # See https://github.com/tomarrell/wrapcheck#configuration for more information.
     ignoreSigs:
+      - .Errore(
+      - .Errort(
       - .Errorf(
       - errors.New(
       - errors.Unwrap(

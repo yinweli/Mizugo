@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "msgid.proto";
+
 option go_package = "/msgs;msgs";
 
 // 要求Proto
@@ -10,7 +12,8 @@ message MProtoQ {
 // 回應Proto
 message MProtoA {
   MProtoQ from = 1; // 來源訊息
-  int64 count = 2; // 封包計數
+  ErrID errID = 2; // 錯誤編號
+  int64 count = 3; // 封包計數
 }
 
 // 要求PList
@@ -21,5 +24,6 @@ message MPListQ {
 // 回應PList
 message MPListA {
   MPListQ from = 1; // 來源訊息
-  int64 count = 2; // 封包計數
+  ErrID errID = 2; // 錯誤編號
+  int64 count = 3; // 封包計數
 }

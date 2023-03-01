@@ -1,7 +1,6 @@
 package events
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -9,7 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos/contexts"
+	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/pools"
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
@@ -18,10 +17,8 @@ const separateSubID = "@" // 訂閱索引分隔字串
 
 // NewEventmgr 建立事件管理器
 func NewEventmgr(capacity int) *Eventmgr {
-	ctx, cancel := context.WithCancel(contexts.Ctx()) // 由於可能會在初始化前就先發布事件, 所以ctx, cancel必須在此產生並設值
 	return &Eventmgr{
-		ctx:    ctx,
-		cancel: cancel,
+		ctx:    ctxs.Root().WithCancel(),
 		notify: make(chan notify, capacity),
 		pubsub: newPubsub(),
 	}
@@ -30,12 +27,11 @@ func NewEventmgr(capacity int) *Eventmgr {
 // Eventmgr 事件管理器, 提供了事件訂閱/發布等功能, 事件管理器本身是執行緒安全的,
 // 但是發布的事件會在單一的事件執行緒中被執行, 以此保證了事件有序執行
 type Eventmgr struct {
-	ctx    context.Context    // ctx物件
-	cancel context.CancelFunc // 取消物件
-	notify chan notify        // 通知通道
-	pubsub *pubsub            // 訂閱/發布資料
-	once   utils.SyncOnce     // 單次執行物件
-	close  atomic.Bool        // 關閉旗標
+	ctx    ctxs.Ctx       // ctx物件
+	notify chan notify    // 通知通道
+	pubsub *pubsub        // 訂閱/發布資料
+	once   utils.SyncOnce // 單次執行物件
+	close  atomic.Bool    // 關閉旗標
 }
 
 // Initialize 初始化處理
@@ -81,7 +77,7 @@ func (this *Eventmgr) Finalize() {
 	} // if
 
 	this.close.Store(true)
-	this.cancel()
+	this.ctx.Cancel()
 }
 
 // Sub 訂閱事件

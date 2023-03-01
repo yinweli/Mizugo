@@ -13,12 +13,13 @@ const ( // 配置定義
 )
 
 const ( // 模組編號
-	ModuleIDJson entitys.ModuleID = iota + 1
+	ModuleIDAuth entitys.ModuleID = iota + 1
+	ModuleIDJson
 	ModuleIDProto
 	ModuleIDPList
 )
 
 const ( // 事件名稱
-	EventKey   = "key"
-	EventBegin = "begin"
+	EventBegin  = "begin"
+	EventUpdate = "update"
 )

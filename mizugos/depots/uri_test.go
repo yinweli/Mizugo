@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/contexts"
+	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -34,13 +34,13 @@ func (this *SuiteURI) TearDownTest() {
 }
 
 func (this *SuiteURI) TestRedisURIConnect() {
-	_, err := RedisURI(testdata.RedisURI).Connect(contexts.Ctx())
+	_, err := RedisURI(testdata.RedisURI).Connect(ctxs.Root())
 	assert.Nil(this.T(), err)
 
-	_, err = RedisURI("unknown://").Connect(contexts.Ctx())
+	_, err = RedisURI("unknown://").Connect(ctxs.Root())
 	assert.NotNil(this.T(), err)
 
-	_, err = RedisURI(testdata.RedisURIInvalid).Connect(contexts.Ctx())
+	_, err = RedisURI(testdata.RedisURIInvalid).Connect(ctxs.Root())
 	assert.NotNil(this.T(), err)
 }
 
@@ -136,13 +136,13 @@ func (this *SuiteURI) TestRedisURIOption() {
 }
 
 func (this *SuiteURI) TestMongoURIConnect() {
-	_, err := MongoURI(testdata.MongoURI).Connect(contexts.Ctx())
+	_, err := MongoURI(testdata.MongoURI).Connect(ctxs.Root())
 	assert.Nil(this.T(), err)
 
-	_, err = MongoURI("unknown://").Connect(contexts.Ctx())
+	_, err = MongoURI("unknown://").Connect(ctxs.Root())
 	assert.NotNil(this.T(), err)
 
-	_, err = MongoURI(testdata.MongoURIInvalid).Connect(contexts.Ctx())
+	_, err = MongoURI(testdata.MongoURIInvalid).Connect(ctxs.Root())
 	assert.NotNil(this.T(), err)
 }
 

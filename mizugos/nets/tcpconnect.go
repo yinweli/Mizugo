@@ -30,7 +30,7 @@ func (this *TCPConnect) Connect(bind Bind, unbind Unbind, wrong Wrong) {
 		conn, err := net.DialTimeout("tcp", this.address, this.timeout)
 
 		if err != nil {
-			wrong.Do(fmt.Errorf("tcp connect: %v: %w", this.address, err))
+			wrong.Do(true, fmt.Errorf("tcp connect: %v: %w", this.address, err))
 			return
 		} // if
 

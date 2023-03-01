@@ -3,6 +3,7 @@ package modules
 import (
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
+	"github.com/yinweli/Mizugo/mizugos/errs"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-server/internal/features"
@@ -25,7 +26,7 @@ type Json struct {
 	incr func() int64 // 計數函式
 }
 
-// Awake 喚醒事件
+// Awake 喚醒處理
 func (this *Json) Awake() error {
 	this.Entity().AddMessage(procs.MessageID(msgs.MsgID_JsonQ), this.procMJsonQ)
 	return nil
@@ -39,24 +40,26 @@ func (this *Json) procMJsonQ(message any) {
 	_, msg, err := procs.JsonUnmarshal[msgs.MJsonQ](message)
 
 	if err != nil {
-		mizugos.Error(this.name).Message("procMJsonQ").EndError(err)
+		this.sendMJsonA(nil, msgs.ErrID_JsonUnmarshal, 0)
+		mizugos.Warn(this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
 		return
 	} // if
 
 	count := this.incr()
-	this.sendMJsonA(msg, count)
-	mizugos.Info(this.name).Message("procMJsonQ").KV("count", count).End()
+	this.sendMJsonA(msg, msgs.ErrID_Success, count)
+	mizugos.Info(this.name).Caller(0).KV("count", count).End()
 }
 
 // sendMJsonA 傳送回應Json
-func (this *Json) sendMJsonA(from *msgs.MJsonQ, count int64) {
+func (this *Json) sendMJsonA(from *msgs.MJsonQ, errID msgs.ErrID, count int64) {
 	msg, err := procs.JsonMarshal(procs.MessageID(msgs.MsgID_JsonA), &msgs.MJsonA{
 		From:  from,
+		ErrID: int(errID),
 		Count: count,
 	})
 
 	if err != nil {
-		mizugos.Error(this.name).Message("sendMJsonA").EndError(err)
+		mizugos.Warn(this.name).Caller(0).EndError(err)
 		return
 	} // if
 

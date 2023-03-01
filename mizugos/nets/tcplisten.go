@@ -27,7 +27,7 @@ func (this *TCPListen) Listen(bind Bind, unbind Unbind, wrong Wrong) {
 	listen, err := net.Listen("tcp", this.address)
 
 	if err != nil {
-		wrong.Do(fmt.Errorf("tcp listen: %v: %w", this.address, err))
+		wrong.Do(true, fmt.Errorf("tcp listen: %v: %w", this.address, err))
 		return
 	} // if
 
@@ -43,7 +43,7 @@ func (this *TCPListen) Listen(bind Bind, unbind Unbind, wrong Wrong) {
 				if this.closed.Load() {
 					return // 停止接聽, 這不算是錯誤, 但要結束接聽器了
 				} else {
-					wrong.Do(fmt.Errorf("tcp listen: %v: %w", this.address, err))
+					wrong.Do(true, fmt.Errorf("tcp listen: %v: %w", this.address, err))
 					continue // 這次連接出了問題, 但我們還是繼續接聽
 				} // if
 			} // if

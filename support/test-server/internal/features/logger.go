@@ -16,7 +16,7 @@ func NewLogger() *Logger {
 
 // Logger 日誌資料
 type Logger struct {
-	name   string         // 日誌名稱
+	name   string         // 特性名稱
 	config logs.ZapLogger // 配置資料
 }
 
@@ -30,7 +30,7 @@ func (this *Logger) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	mizugos.Info(this.name).Message("initialize").KV("config", &this.config).End()
+	mizugos.Info(this.name).Caller(0).Message("initialize").KV("config", &this.config).End()
 	return nil
 }
 

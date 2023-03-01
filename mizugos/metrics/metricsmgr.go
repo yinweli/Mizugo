@@ -1,13 +1,12 @@
 package metrics
 
 import (
-	"context"
 	"expvar"
 	"fmt"
 	"net/http"
 	"net/http/pprof"
 
-	"github.com/yinweli/Mizugo/mizugos/contexts"
+	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/pools"
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
@@ -41,10 +40,9 @@ func NewMetricsmgr() *Metricsmgr {
 //   - expvarmon -ports="http://localhost:8080" -i 1s
 //   - expvarmon -ports="http://localhost:8080" -vars="count:count,total:total,money:value" -i 1s
 type Metricsmgr struct {
-	once   utils.SyncOnce     // 單次執行物件
-	ctx    context.Context    // ctx物件
-	cancel context.CancelFunc // 取消物件
-	server *http.Server       // http伺服器物件
+	once   utils.SyncOnce // 單次執行物件
+	ctx    ctxs.Ctx       // ctx物件
+	server *http.Server   // http伺服器物件
 }
 
 // Initialize 初始化處理
@@ -62,10 +60,10 @@ func (this *Metricsmgr) Initialize(port int) error {
 		handler.HandleFunc("/debug/pprof/trace", pprof.Trace)
 		handler.Handle("/debug/vars", expvar.Handler())
 
-		this.ctx, this.cancel = context.WithCancel(contexts.Ctx())
+		this.ctx = ctxs.Root().WithCancel()
 		this.server = &http.Server{
 			Addr:              fmt.Sprintf(":%v", port),
-			ReadHeaderTimeout: serverTimeout,
+			ReadHeaderTimeout: timeout,
 			Handler:           handler,
 		}
 
@@ -87,7 +85,7 @@ func (this *Metricsmgr) Finalize() {
 		_ = this.server.Close()
 	} // if
 
-	this.cancel()
+	this.ctx.Cancel()
 }
 
 // NewInt 建立整數統計

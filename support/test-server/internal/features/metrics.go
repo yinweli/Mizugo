@@ -16,13 +16,13 @@ func NewMetrics() *Metrics {
 
 // Metrics 統計資料
 type Metrics struct {
-	name   string        // 統計名稱
+	name   string        // 特性名稱
 	config MetricsConfig // 配置資料
 }
 
 // MetricsConfig 配置資料
 type MetricsConfig struct {
-	Port int // 埠號
+	Port int `yaml:"port"` // 埠號
 }
 
 // Initialize 初始化處理
@@ -35,8 +35,9 @@ func (this *Metrics) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	mizugos.Info(this.name).Message("initialize").KV("config", this.config).End()
-	Key = mizugos.Metricsmgr().NewRuntime("key")
+	mizugos.Info(this.name).Caller(0).Message("initialize").KV("config", this.config).End()
+	Login = mizugos.Metricsmgr().NewRuntime("login")
+	Update = mizugos.Metricsmgr().NewRuntime("update")
 	Json = mizugos.Metricsmgr().NewRuntime("json")
 	Proto = mizugos.Metricsmgr().NewRuntime("proto")
 	PList = mizugos.Metricsmgr().NewRuntime("plist")
@@ -48,7 +49,8 @@ func (this *Metrics) Finalize() {
 	mizugos.Metricsmgr().Finalize()
 }
 
-var Key *metrics.Runtime   // 密鑰訊息統計物件
-var Json *metrics.Runtime  // Json訊息統計物件
-var Proto *metrics.Runtime // Proto訊息統計物件
-var PList *metrics.Runtime // PList訊息統計物件
+var Login *metrics.Runtime  // Login訊息統計物件
+var Update *metrics.Runtime // Update訊息統計物件
+var Json *metrics.Runtime   // Json訊息統計物件
+var Proto *metrics.Runtime  // Proto訊息統計物件
+var PList *metrics.Runtime  // PList訊息統計物件

@@ -1,14 +1,15 @@
 package depots
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/redis/go-redis/v9"
+
+	"github.com/yinweli/Mizugo/mizugos/ctxs"
 )
 
 // newMajor 建立主要資料庫, 並且連線到 RedisURI 指定的資料庫
-func newMajor(ctx context.Context, uri RedisURI) (major *Major, err error) {
+func newMajor(ctx ctxs.Ctx, uri RedisURI) (major *Major, err error) {
 	client, err := uri.Connect(ctx)
 
 	if err != nil {
@@ -25,11 +26,11 @@ type Major struct {
 	client redis.UniversalClient // 客戶端物件
 }
 
-// MajorRunner 資料庫執行器, 實際上就是redis管線
-type MajorRunner = redis.Pipeliner
+// MajorSubmit 資料庫執行器, 實際上就是redis管線
+type MajorSubmit = redis.Pipeliner
 
-// Runner 取得執行物件
-func (this *Major) Runner() MajorRunner {
+// Submit 取得執行物件
+func (this *Major) Submit() MajorSubmit {
 	if this.client != nil {
 		return this.client.Pipeline()
 	} // if
