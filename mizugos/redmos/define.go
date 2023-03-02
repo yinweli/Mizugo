@@ -1,4 +1,4 @@
-package depots
+package redmos
 
 import (
 	"time"

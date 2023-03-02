@@ -18,7 +18,7 @@ func initialize() error {
 	server.logger = features.NewLogger()
 	server.pool = features.NewPool()
 	server.metrics = features.NewMetrics()
-	server.depot = features.NewDepot()
+	server.redmo = features.NewRedmo()
 	server.auth = entrys.NewAuth()
 	server.json = entrys.NewJson()
 	server.proto = entrys.NewProto()
@@ -42,7 +42,7 @@ func initialize() error {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := server.depot.Initialize(); err != nil {
+	if err := server.redmo.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
@@ -71,7 +71,7 @@ func finalize() {
 	server.json.Finalize()
 	server.proto.Finalize()
 	server.plist.Finalize()
-	server.depot.Finalize()
+	server.redmo.Finalize()
 	server.metrics.Finalize()
 	server.pool.Finalize()
 	server.logger.Finalize()
@@ -82,7 +82,7 @@ var server struct {
 	logger  *features.Logger  // 日誌資料
 	pool    *features.Pool    // 執行緒池資料
 	metrics *features.Metrics // 統計資料
-	depot   *features.Depot   // 資料庫資料
+	redmo   *features.Redmo   // 資料庫資料
 	auth    *entrys.Auth      // Auth入口
 	json    *entrys.Json      // Json入口
 	proto   *entrys.Proto     // Proto入口

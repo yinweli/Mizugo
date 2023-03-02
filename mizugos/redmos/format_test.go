@@ -1,4 +1,4 @@
-package depots
+package redmos
 
 import (
 	"testing"
@@ -20,7 +20,7 @@ type SuiteFormat struct {
 }
 
 func (this *SuiteFormat) SetupSuite() {
-	this.Change("test-depots-format")
+	this.Change("test-redmos-format")
 }
 
 func (this *SuiteFormat) TearDownSuite() {

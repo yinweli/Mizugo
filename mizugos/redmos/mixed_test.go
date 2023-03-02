@@ -1,4 +1,4 @@
-package depots
+package redmos
 
 import (
 	"testing"
@@ -25,7 +25,7 @@ type SuiteMixed struct {
 }
 
 func (this *SuiteMixed) SetupSuite() {
-	this.Change("test-depots-mixed")
+	this.Change("test-redmos-mixed")
 	this.name = "mixed"
 	this.major, _ = newMajor(ctxs.Root(), testdata.RedisURI)
 	this.minor, _ = newMinor(ctxs.Root(), testdata.MongoURI, this.name)

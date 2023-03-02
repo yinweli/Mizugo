@@ -1,4 +1,4 @@
-package depots
+package redmos
 
 import (
 	"testing"
@@ -22,7 +22,7 @@ type SuiteURI struct {
 }
 
 func (this *SuiteURI) SetupSuite() {
-	this.Change("test-depots-uri")
+	this.Change("test-redmos-uri")
 }
 
 func (this *SuiteURI) TearDownSuite() {

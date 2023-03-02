@@ -7,10 +7,10 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/mizugos/depots"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/errs"
 	"github.com/yinweli/Mizugo/mizugos/procs"
+	"github.com/yinweli/Mizugo/mizugos/redmos"
 	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-server/internal/features"
 	"github.com/yinweli/Mizugo/support/test-server/internal/miscs"
@@ -30,7 +30,7 @@ func NewAuth() *Auth {
 type Auth struct {
 	*entitys.Module
 	name     string        // 模組名稱
-	database *depots.Mixed // 資料庫物件
+	database *redmos.Mixed // 資料庫物件
 }
 
 // Awake 喚醒處理
@@ -42,7 +42,7 @@ func (this *Auth) Awake() error {
 
 // Start 啟動處理
 func (this *Auth) Start() error {
-	if this.database = mizugos.Depotmgr().GetMixed(defines.MixedName); this.database == nil {
+	if this.database = mizugos.Redmomgr().GetMixed(defines.MixedName); this.database == nil {
 		return fmt.Errorf("auth start: database nil")
 	} // if
 

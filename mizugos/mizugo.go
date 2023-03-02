@@ -6,13 +6,13 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos/configs"
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
-	"github.com/yinweli/Mizugo/mizugos/depots"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/labels"
 	"github.com/yinweli/Mizugo/mizugos/logs"
 	"github.com/yinweli/Mizugo/mizugos/metrics"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/pools"
+	"github.com/yinweli/Mizugo/mizugos/redmos"
 )
 
 // TODO: 遊戲伺服器間的網絡若出現問題 (DB設備斷線、應用程序斷線)，會自動嘗試重新連線嗎？
@@ -38,7 +38,7 @@ func Start(name string, initialize Initialize, finalize Finalize) {
 	server.metricsmgr = metrics.NewMetricsmgr()
 	server.logmgr = logs.NewLogmgr()
 	server.netmgr = nets.NewNetmgr()
-	server.depotmgr = depots.NewDepotmgr()
+	server.redmomgr = redmos.NewRedmomgr()
 	server.entitymgr = entitys.NewEntitymgr()
 	server.labelmgr = labels.NewLabelmgr()
 	server.poolmgr = pools.DefaultPool // 執行緒池管理器直接用預設的
@@ -69,7 +69,7 @@ Finalize: // 結束處理
 	server.metricsmgr = nil
 	server.logmgr = nil
 	server.netmgr = nil
-	server.depotmgr = nil
+	server.redmomgr = nil
 	server.entitymgr = nil
 	server.labelmgr = nil
 	server.poolmgr = nil
@@ -127,12 +127,12 @@ func Netmgr() *nets.Netmgr {
 	return server.netmgr
 }
 
-// Depotmgr 取得資料庫管理器
-func Depotmgr() *depots.Depotmgr {
+// Redmomgr 取得資料庫管理器
+func Redmomgr() *redmos.Redmomgr {
 	server.lock.RLock()
 	defer server.lock.RUnlock()
 
-	return server.depotmgr
+	return server.redmomgr
 }
 
 // Entitymgr 實體管理器
@@ -225,7 +225,7 @@ var server struct {
 	metricsmgr *metrics.Metricsmgr // 統計管理器
 	logmgr     *logs.Logmgr        // 日誌管理器
 	netmgr     *nets.Netmgr        // 網路管理器
-	depotmgr   *depots.Depotmgr    // 資料庫管理器
+	redmomgr   *redmos.Redmomgr    // 資料庫管理器
 	entitymgr  *entitys.Entitymgr  // 實體管理器
 	labelmgr   *labels.Labelmgr    // 標籤管理器
 	poolmgr    *pools.Poolmgr      // 執行緒池管理器

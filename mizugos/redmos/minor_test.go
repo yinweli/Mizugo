@@ -1,4 +1,4 @@
-package depots
+package redmos
 
 import (
 	"testing"
@@ -26,7 +26,7 @@ type SuiteMinor struct {
 }
 
 func (this *SuiteMinor) SetupSuite() {
-	this.Change("test-depots-minor")
+	this.Change("test-redmos-minor")
 	this.name = "minor"
 }
 

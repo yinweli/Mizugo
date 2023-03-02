@@ -1,4 +1,4 @@
-package depots
+package redmos
 
 import (
 	"testing"
@@ -9,34 +9,34 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestDepotmgr(t *testing.T) {
-	suite.Run(t, new(SuiteDepotmgr))
+func TestRedmomgr(t *testing.T) {
+	suite.Run(t, new(SuiteRedmomgr))
 }
 
-type SuiteDepotmgr struct {
+type SuiteRedmomgr struct {
 	suite.Suite
 	testdata.TestEnv
 	testdata.TestLeak
 }
 
-func (this *SuiteDepotmgr) SetupSuite() {
-	this.Change("test-depots-depotmgr")
+func (this *SuiteRedmomgr) SetupSuite() {
+	this.Change("test-redmos-redmomgr")
 }
 
-func (this *SuiteDepotmgr) TearDownSuite() {
+func (this *SuiteRedmomgr) TearDownSuite() {
 	this.Restore()
 }
 
-func (this *SuiteDepotmgr) TearDownTest() {
+func (this *SuiteRedmomgr) TearDownTest() {
 	this.GoLeak(this.T(), true)
 }
 
-func (this *SuiteDepotmgr) TestNewDepotmgr() {
-	assert.NotNil(this.T(), NewDepotmgr())
+func (this *SuiteRedmomgr) TestNewRedmomgr() {
+	assert.NotNil(this.T(), NewRedmomgr())
 }
 
-func (this *SuiteDepotmgr) TestDepotmgr() {
-	target := NewDepotmgr()
+func (this *SuiteRedmomgr) TestRedmomgr() {
+	target := NewRedmomgr()
 	dbName := "dbName"
 	majorName := "majorName"
 	minorName := "minorName"
