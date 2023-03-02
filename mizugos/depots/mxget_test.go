@@ -46,44 +46,47 @@ func (this *SuiteMxGet) TearDownTest() {
 	this.GoLeak(this.T(), true)
 }
 
-func (this *SuiteMxGet) TestGetter() {
+func (this *SuiteMxGet) TestGet() {
 	data := &dataTester{
 		Key:  this.Key(this.name),
 		Data: utils.RandString(testdata.RandStringLength),
 	}
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit(this.name)
-	getter := &Getter[dataTester]{}
-	getter.Initialize(ctxs.Root(), majorSubmit, minorSubmit)
-	setter := &Setter[dataTester]{}
-	setter.Initialize(ctxs.Root(), majorSubmit, minorSubmit)
+	get := &Get[dataTester]{}
+	get.Initialize(ctxs.Root(), majorSubmit, minorSubmit)
+	set := &Set[dataTester]{}
+	set.Initialize(ctxs.Root(), majorSubmit, minorSubmit)
 
-	setter.Field = this.field
-	setter.Key = data.Key
-	setter.Data = data
-	assert.Nil(this.T(), setter.Prepare())
+	set.Field = this.field
+	set.Key = data.Key
+	set.Data = data
+	assert.Nil(this.T(), set.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.RootCtx())
-	assert.Nil(this.T(), setter.Complete())
+	assert.Nil(this.T(), set.Complete())
 
-	getter.Key = data.Key
-	assert.Nil(this.T(), getter.Prepare())
+	get.Key = data.Key
+	assert.Nil(this.T(), get.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.RootCtx())
-	assert.Nil(this.T(), getter.Complete())
-	assert.True(this.T(), getter.Result)
-	assert.Equal(this.T(), data, getter.Data)
+	assert.Nil(this.T(), get.Complete())
+	assert.True(this.T(), get.Result)
+	assert.Equal(this.T(), data, get.Data)
 
-	getter.Key = ""
-	assert.NotNil(this.T(), getter.Prepare())
+	get.Key = ""
+	assert.NotNil(this.T(), get.Prepare())
 
-	setter.Field = ""
-	assert.NotNil(this.T(), setter.Prepare())
+	set.Field = ""
+	set.Key = data.Key
+	set.Data = data
+	assert.NotNil(this.T(), set.Prepare())
 
-	setter.Field = this.field
-	setter.Key = ""
-	assert.NotNil(this.T(), setter.Prepare())
+	set.Field = this.field
+	set.Key = ""
+	set.Data = data
+	assert.NotNil(this.T(), set.Prepare())
 
-	setter.Field = this.field
-	setter.Key = data.Key
-	setter.Data = nil
-	assert.NotNil(this.T(), setter.Prepare())
+	set.Field = this.field
+	set.Key = data.Key
+	set.Data = nil
+	assert.NotNil(this.T(), set.Prepare())
 }
