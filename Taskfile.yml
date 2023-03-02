@@ -56,7 +56,7 @@ tasks:
     dir: support/client-unity/Packages/com.fouridstudio.mizugo-client-unity
     cmds:
       - dotnet csharpier .
-      
+
   # client-unity-sample格式化
   fmt-client-unity-sample:
     dir: support/test-client-cs/Assets/Scripts
