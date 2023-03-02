@@ -28,8 +28,9 @@ func (this *Getter[T]) Prepare() error {
 		return fmt.Errorf("getter prepare: key empty")
 	} // if
 
+	key := FormatKey(this.Key)
 	this.Result = false
-	this.get = this.Major().Get(this.Ctx(), this.Key)
+	this.get = this.Major().Get(this.Ctx(), key)
 	return nil
 }
 
@@ -41,7 +42,7 @@ func (this *Getter[T]) Complete() error {
 		return fmt.Errorf("getter complete: %w", err)
 	} // if
 
-	if value != "" {
+	if value != RedisNil {
 		if this.Data == nil {
 			this.Data = new(T)
 		} // if
@@ -55,8 +56,6 @@ func (this *Getter[T]) Complete() error {
 
 	return nil
 }
-
-// TODO: 考慮一下怎麼讓redis的set跟mongo的upsert一起執行, 並且要等待全部執行完成後才回傳
 
 // Setter 設值行為, 以索引字串與資料到主要/次要資料庫中儲存資料, 使用上有以下幾點須注意
 //   - 此行為結構需與泛型共同運作, 填入的泛型類型 T 需要是結構型別, 請不要填入指標型別
@@ -91,7 +90,8 @@ func (this *Setter[T]) Prepare() error {
 		return fmt.Errorf("setter prepare: %w", err)
 	} //
 
-	this.set = this.Major().Set(this.Ctx(), this.Key, value, 0)
+	key := FormatKey(this.Key)
+	this.set = this.Major().Set(this.Ctx(), key, value, 0)
 	return nil
 }
 
@@ -103,11 +103,13 @@ func (this *Setter[T]) Complete() error {
 		return fmt.Errorf("setter complete: %w", err)
 	} // if
 
-	if value != Ok {
-		return fmt.Errorf("setter complete: set to redis failed")
+	if value != RedisOk {
+		return fmt.Errorf("setter complete: save to redis failed")
 	} // if
 
-	filter := bson.D{{Key: this.Field, Value: this.Key}}
+	field := FormatField(this.Field)
+	key := FormatKey(this.Key)
+	filter := bson.D{{Key: field, Value: key}}
 	opt := options.Replace().SetUpsert(true)
 
 	if _, err = this.Minor().ReplaceOne(this.Ctx(), filter, this.Data, opt); err != nil {
@@ -116,3 +118,5 @@ func (this *Setter[T]) Complete() error {
 
 	return nil
 }
+
+// TODO: 考慮一下怎麼讓redis的set跟mongo的upsert一起執行, 並且要等待全部執行完成後才回傳

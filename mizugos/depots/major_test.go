@@ -63,7 +63,7 @@ func (this *SuiteMajor) TestClient() {
 	data := utils.RandString(testdata.RandStringLength)
 	set, err := client.Set(ctxs.RootCtx(), key, data, testdata.RedisTimeout).Result()
 	assert.Nil(this.T(), err)
-	assert.Equal(this.T(), Ok, set)
+	assert.Equal(this.T(), RedisOk, set)
 
 	del, err := client.Del(ctxs.RootCtx(), key).Result()
 	assert.Nil(this.T(), err)

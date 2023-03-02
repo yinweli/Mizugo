@@ -7,6 +7,8 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+const prefixLock = "lock" // 鎖定/解鎖索引前綴詞
+
 // Lock 鎖定行為, 以索引字串到redis中執行分布式鎖定, 主要用於避免同時執行客戶端動作, 使用上有以下幾點須注意
 //   - 使用前必須設定好 Key 並且不能為空字串
 //   - 鎖定完成後, 需要執行 Unlock 行為來解除鎖定
@@ -22,10 +24,10 @@ type Lock struct {
 // Prepare 前置處理
 func (this *Lock) Prepare() error {
 	if this.Key == "" {
-		return fmt.Errorf("lock prepare: key empty")
+		return fmt.Errorf("lock set key: key empty")
 	} // if
 
-	key := modifyLock(this.Key)
+	key := FormatKey(prefixLock, this.Key)
 	this.incr = this.Major().Incr(this.Ctx(), key)
 	this.expire = this.Major().Expire(this.Ctx(), key, this.time)
 	return nil
@@ -64,7 +66,7 @@ func (this *Unlock) Prepare() error {
 		return fmt.Errorf("unlock prepare: key empty")
 	} // if
 
-	key := modifyLock(this.Key)
+	key := FormatKey(prefixLock, this.Key)
 	this.del = this.Major().Del(this.Ctx(), key)
 	return nil
 }
@@ -76,9 +78,4 @@ func (this *Unlock) Complete() error {
 	} // if
 
 	return nil
-}
-
-// modifyLock 鎖定/解鎖行為索引前綴
-func modifyLock(key string) string {
-	return prefixLock + key
 }

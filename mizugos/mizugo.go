@@ -15,6 +15,9 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/pools"
 )
 
+// TODO: 遊戲伺服器間的網絡若出現問題 (DB設備斷線、應用程序斷線)，會自動嘗試重新連線嗎？
+// TODO: 遊戲伺服器應用程式在發生問題或故障時有自動修復的功能嗎？
+
 // Start 啟動伺服器, 用於啟動mizugo伺服器, 需要指定 Initialize 與 Finalize 來執行使用者的初始化與結束處理;
 // 啟動伺服器執行的順序為
 //   - 設置內部成員
