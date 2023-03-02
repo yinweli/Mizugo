@@ -39,7 +39,8 @@ func (this *Mixed) Submit(ctx ctxs.Ctx, tableName string) *Submit {
 //   - 執行命令 Exec
 //   - 檢查執行命令結果以及進行後續處理
 //
-// 目前已經實作了幾個預設行為 Lock, Unlock, Getter, Setter 可以幫助使用者作行為設計
+// 目前已經實作了幾個預設行為 Lock, Unlock, Get, Set, Index 可以幫助使用者作行為設計;
+// 其中 Lock, Unlock 已經直接整合到 Submit 提供的函式
 type Submit struct {
 	ctx      ctxs.Ctx    // ctx物件
 	major    MajorSubmit // 主要執行物件

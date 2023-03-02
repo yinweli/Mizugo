@@ -13,6 +13,7 @@ const prefixLock = "lock" // 鎖定/解鎖索引前綴詞
 //   - 使用前必須設定好 Key 並且不能為空字串
 //   - 鎖定完成後, 需要執行 Unlock 行為來解除鎖定
 //   - 鎖定後預設會在 Timeout 之後自動解鎖, 避免死鎖
+//   - 在內部執行過程中, 索引字串會被轉為小寫
 type Lock struct {
 	Behave
 	Key    string         // 索引字串
@@ -54,6 +55,7 @@ func (this *Lock) Complete() error {
 
 // Unlock 解鎖行為, 解除被 Lock 行為鎖定的索引, 使用上有以下幾點須注意
 //   - 使用前必須設定好 Key 並且不能為空字串
+//   - 在內部執行過程中, 索引字串會被轉為小寫
 type Unlock struct {
 	Behave
 	Key string        // 索引字串

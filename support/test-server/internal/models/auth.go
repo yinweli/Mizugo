@@ -14,16 +14,16 @@ type Auth struct {
 }
 
 // NewAuthGet 建立取得認證資料行為
-func NewAuthGet(key string, data *Auth) *depots.Getter[Auth] {
-	return &depots.Getter[Auth]{
+func NewAuthGet(key string, data *Auth) *depots.Get[Auth] {
+	return &depots.Get[Auth]{
 		Key:  key,
 		Data: data,
 	}
 }
 
 // NewAuthSet 建立設定認證資料行為
-func NewAuthSet(key string, data *Auth) *depots.Setter[Auth] {
-	return &depots.Setter[Auth]{
+func NewAuthSet(key string, data *Auth) *depots.Set[Auth] {
+	return &depots.Set[Auth]{
 		Field: "Account",
 		Key:   key,
 		Data:  data,
