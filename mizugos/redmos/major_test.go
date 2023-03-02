@@ -1,4 +1,4 @@
-package depots
+package redmos
 
 import (
 	"testing"
@@ -23,7 +23,7 @@ type SuiteMajor struct {
 }
 
 func (this *SuiteMajor) SetupSuite() {
-	this.Change("test-depots-major")
+	this.Change("test-redmos-major")
 }
 
 func (this *SuiteMajor) TearDownSuite() {

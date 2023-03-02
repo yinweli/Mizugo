@@ -1,4 +1,4 @@
-package depots
+package redmos
 
 import (
 	"fmt"
@@ -7,9 +7,9 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
 )
 
-// NewDepotmgr 建立資料庫管理器
-func NewDepotmgr() *Depotmgr {
-	return &Depotmgr{
+// NewRedmomgr 建立資料庫管理器
+func NewRedmomgr() *Redmomgr {
+	return &Redmomgr{
 		ctx:   ctxs.Root().WithCancel(),
 		major: map[string]*Major{},
 		minor: map[string]*Minor{},
@@ -17,7 +17,7 @@ func NewDepotmgr() *Depotmgr {
 	}
 }
 
-// Depotmgr 資料庫管理器, 用於管理雙層式資料庫架構
+// Redmomgr 資料庫管理器, 用於管理雙層式資料庫架構
 //   - 主要資料庫: 用redis實作
 //   - 次要資料庫: 用mongo實作
 //
@@ -27,7 +27,7 @@ func NewDepotmgr() *Depotmgr {
 //     要注意的是, 混合資料庫必定是一個主要資料庫加上一個次要資料庫的組合, 若是缺少了任何一方則會失敗
 //
 // 若要執行資料庫操作時, 呼叫 Get... 系列函式來取得資料庫物件
-type Depotmgr struct {
+type Redmomgr struct {
 	ctx   ctxs.Ctx          // ctx物件
 	major map[string]*Major // 主要資料庫列表
 	minor map[string]*Minor // 次要資料庫列表
@@ -36,18 +36,18 @@ type Depotmgr struct {
 }
 
 // AddMajor 新增主要資料庫, 需要提供 RedisURI 來指定要連接的資料庫以及連接選項
-func (this *Depotmgr) AddMajor(majorName string, uri RedisURI) error {
+func (this *Redmomgr) AddMajor(majorName string, uri RedisURI) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	if _, ok := this.major[majorName]; ok {
-		return fmt.Errorf("depotmgr addMajor: duplicate database")
+		return fmt.Errorf("redmomgr addMajor: duplicate database")
 	} // if
 
 	major, err := newMajor(this.ctx, uri)
 
 	if err != nil {
-		return fmt.Errorf("depotmgr addMajor: %w", err)
+		return fmt.Errorf("redmomgr addMajor: %w", err)
 	} // if
 
 	this.major[majorName] = major
@@ -55,7 +55,7 @@ func (this *Depotmgr) AddMajor(majorName string, uri RedisURI) error {
 }
 
 // GetMajor 取得主要資料庫
-func (this *Depotmgr) GetMajor(majorName string) *Major {
+func (this *Redmomgr) GetMajor(majorName string) *Major {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 
@@ -68,18 +68,18 @@ func (this *Depotmgr) GetMajor(majorName string) *Major {
 
 // AddMinor 新增次要資料庫, 需要提供 MongoURI 來指定要連接的資料庫以及連接選項;
 // 另外需要指定mongo資料庫名稱, 簡化後面取得執行器的流程, 但也因此限制次要資料庫不能在多個mongo資料庫間切換
-func (this *Depotmgr) AddMinor(minorName string, uri MongoURI, dbName string) error {
+func (this *Redmomgr) AddMinor(minorName string, uri MongoURI, dbName string) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	if _, ok := this.minor[minorName]; ok {
-		return fmt.Errorf("depotmgr addMinor: duplicate database")
+		return fmt.Errorf("redmomgr addMinor: duplicate database")
 	} // if
 
 	minor, err := newMinor(this.ctx, uri, dbName)
 
 	if err != nil {
-		return fmt.Errorf("depotmgr addMinor: %w", err)
+		return fmt.Errorf("redmomgr addMinor: %w", err)
 	} // if
 
 	this.minor[minorName] = minor
@@ -87,7 +87,7 @@ func (this *Depotmgr) AddMinor(minorName string, uri MongoURI, dbName string) er
 }
 
 // GetMinor 取得次要資料庫
-func (this *Depotmgr) GetMinor(minorName string) *Minor {
+func (this *Redmomgr) GetMinor(minorName string) *Minor {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 
@@ -99,24 +99,24 @@ func (this *Depotmgr) GetMinor(minorName string) *Minor {
 }
 
 // AddMixed 新增混合資料庫, 必須確保 majorName 與 minorName 必須是先前建立好的資料庫, 否則會失敗
-func (this *Depotmgr) AddMixed(mixedName, majorName, minorName string) error {
+func (this *Redmomgr) AddMixed(mixedName, majorName, minorName string) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	if _, ok := this.mixed[mixedName]; ok {
-		return fmt.Errorf("depotmgr addMixed: duplicate database")
+		return fmt.Errorf("redmomgr addMixed: duplicate database")
 	} // if
 
 	major, ok := this.major[majorName]
 
 	if ok == false {
-		return fmt.Errorf("depotmgr addMixed: major not exist")
+		return fmt.Errorf("redmomgr addMixed: major not exist")
 	} // if
 
 	minor, ok := this.minor[minorName]
 
 	if ok == false {
-		return fmt.Errorf("depotmgr addMixed: minor not exist")
+		return fmt.Errorf("redmomgr addMixed: minor not exist")
 	} // if
 
 	this.mixed[mixedName] = &Mixed{
@@ -127,7 +127,7 @@ func (this *Depotmgr) AddMixed(mixedName, majorName, minorName string) error {
 }
 
 // GetMixed 取得混合資料庫
-func (this *Depotmgr) GetMixed(mixedName string) *Mixed {
+func (this *Redmomgr) GetMixed(mixedName string) *Mixed {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 
@@ -139,7 +139,7 @@ func (this *Depotmgr) GetMixed(mixedName string) *Mixed {
 }
 
 // Stop 停止資料庫
-func (this *Depotmgr) Stop() {
+func (this *Redmomgr) Stop() {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 

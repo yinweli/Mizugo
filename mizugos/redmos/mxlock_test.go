@@ -1,4 +1,4 @@
-package depots
+package redmos
 
 import (
 	"testing"
@@ -25,7 +25,7 @@ type SuiteMxLock struct {
 }
 
 func (this *SuiteMxLock) SetupSuite() {
-	this.Change("test-depots-mxlock")
+	this.Change("test-redmos-mxlock")
 	this.name = "mxlock"
 	this.major, _ = newMajor(ctxs.Root(), testdata.RedisURI)
 	this.minor, _ = newMinor(ctxs.Root(), testdata.MongoURI, this.name)

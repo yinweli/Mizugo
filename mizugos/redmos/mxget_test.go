@@ -1,4 +1,4 @@
-package depots
+package redmos
 
 import (
 	"testing"
@@ -27,7 +27,7 @@ type SuiteMxGet struct {
 }
 
 func (this *SuiteMxGet) SetupSuite() {
-	this.Change("test-depots-mxget")
+	this.Change("test-redmos-mxget")
 	this.name = "mxget"
 	this.field = "key"
 	this.major, _ = newMajor(ctxs.Root(), testdata.RedisURI)
