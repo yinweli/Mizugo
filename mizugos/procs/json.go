@@ -16,13 +16,17 @@ func NewJson() *Json {
 	}
 }
 
-// Json json處理器, 封包結構使用JsonMsg, 沒有使用加密技術, 所以安全性很低, 僅用於傳送簡單訊息或是傳送密鑰使用
-//   - 訊息內容: support/proto/mizugo/msg-go/msgs-json/jsonmsg.go
-//   - 訊息內容: support/proto/mizugo/msg-cs/msgs-json/Jsonmsg.cs
-//   - 封包編碼: json編碼成位元陣列, 再通過base64編碼
-//   - 封包解碼: base64解碼, 再通過json解碼成訊息結構
+// Json json處理器, 封包結構使用JsonMsg, 可以選擇是否啟用base64編碼或是des-cbc加密
+//   - 訊息定義: support/proto/mizugo/msg-go/msgs-json/jsonmsg.go
+//   - 訊息定義: support/proto/mizugo/msg-cs/msgs-json/Jsonmsg.cs
+//   - 封包編碼: json編碼成位元陣列, (可選)des-cbc加密, (可選)base64編碼
+//   - 封包解碼: (可選)base64解碼, (可選)des-cbc解密, json解碼成訊息結構
 type Json struct {
-	*Procmgr // 管理器
+	*Procmgr        // 管理器
+	base64   bool   // 是否啟用base64
+	desCBC   bool   // 是否啟用des-cbc加密
+	desKey   []byte // des密鑰
+	desIV    []byte // des初始向量
 }
 
 // Encode 封包編碼
@@ -33,27 +37,50 @@ func (this *Json) Encode(input any) (output []byte, err error) {
 		return nil, fmt.Errorf("json encode: %w", err)
 	} // if
 
-	bytes, err := json.Marshal(message)
+	output, err = json.Marshal(message)
 
 	if err != nil {
 		return nil, fmt.Errorf("json encode: %w", err)
 	} // if
 
-	output = cryptos.Base64Encode(bytes)
+	if this.desCBC {
+		if output, err = cryptos.DesCBCEncrypt(cryptos.PaddingPKCS7, this.desKey, this.desIV, output); err != nil {
+			return nil, fmt.Errorf("json encode: %w", err)
+		} // if
+	} // if
+
+	if this.base64 {
+		output = cryptos.Base64Encode(output)
+	} // if
+
 	return output, nil
 }
 
 // Decode 封包解碼
 func (this *Json) Decode(input []byte) (output any, err error) {
-	bytes, err := cryptos.Base64Decode(input)
+	if input == nil {
+		return nil, fmt.Errorf("json decode: input nil")
+	} // if
 
-	if err != nil {
-		return nil, fmt.Errorf("json decode: %w", err)
+	if this.base64 {
+		input, err = cryptos.Base64Decode(input)
+
+		if err != nil {
+			return nil, fmt.Errorf("json decode: %w", err)
+		} // if
+	} // if
+
+	if this.desCBC {
+		input, err = cryptos.DesCBCDecrypt(cryptos.PaddingPKCS7, this.desKey, this.desIV, input)
+
+		if err != nil {
+			return nil, fmt.Errorf("json decode: %w", err)
+		} // if
 	} // if
 
 	message := &msgs.JsonMsg{}
 
-	if err = json.Unmarshal(bytes, message); err != nil {
+	if err = json.Unmarshal(input, message); err != nil {
 		return nil, fmt.Errorf("json decode: %w", err)
 	} // if
 
@@ -76,6 +103,20 @@ func (this *Json) Process(input any) error {
 
 	process(message)
 	return nil
+}
+
+// Base64 設定是否啟用base64
+func (this *Json) Base64(enable bool) *Json {
+	this.base64 = enable
+	return this
+}
+
+// DesCBC 是否啟用des-cbc加密
+func (this *Json) DesCBC(enable bool, key, iv string) *Json {
+	this.desCBC = enable
+	this.desKey = []byte(key)
+	this.desIV = []byte(iv)
+	return this
 }
 
 // JsonMarshal json訊息序列化
