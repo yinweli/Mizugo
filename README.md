@@ -108,21 +108,16 @@
 不同的訊息處理組件使用的封包結構不同, 因此訊息處理函式也無法通用  
 目前有下列訊息處理組件可選  
 * JsonProc
-    - 沒有使用加密技術, 所以安全性很低, 僅用於傳送簡單訊息或是傳送密鑰使用
-    - 封包結構: support/proto/mizugo/msg-cs/msgs-json/Jsonmsg.cs
-    - 編碼方式: json編碼成位元陣列, 再通過base64編碼
-    - 解碼方式: base64解碼, 再通過json解碼
+    - json處理器, 封包結構使用JsonMsg, 可以選擇是否啟用base64編碼或是des-cbc加密
+    - 訊息定義: support/proto/mizugo/msg-go/msgs-json/jsonmsg.go
+    - 訊息定義: support/proto/mizugo/msg-cs/msgs-json/Jsonmsg.cs
+    - 封包編碼: json編碼成位元陣列, (可選)des-cbc加密, (可選)base64編碼
+    - 封包解碼: (可選)base64解碼, (可選)des-cbc解密, json解碼成訊息結構
 * ProtoProc
-    - 沒有使用加密技術, 所以安全性很低, 僅用於傳送簡單訊息或是傳送密鑰使用
-    - 封包結構: support/proto/mizugo/protomsg.proto
-    - 編碼方式: protobuf編碼成位元陣列, 再通過base64編碼
-    - 解碼方式: base64解碼, 再通過protobuf解碼
-* PListProc
-    - 採用des-cbc加密, 安全性較高, 適合用來傳送一般封包, 使用時需要設定密鑰以及初始向量
-    - 採用複數訊息設計, 因此封包內可以填入多個訊息來跟伺服器溝通
-    - 封包結構: support/proto/mizugo/plistmsg.proto
-    - 編碼方式: protobuf編碼成位元陣列, 再通過des加密
-    - 解碼方式: des解密, 再通過protobuf解碼
+    - proto處理器, 封包結構使用ProtoMsg, 可以選擇是否啟用base64編碼或是des-cbc加密
+    - 訊息定義: support/proto/mizugo/protomsg.proto
+    - 封包編碼: protobuf編碼成位元陣列, (可選)des-cbc加密, (可選)base64編碼
+    - 封包解碼: (可選)base64解碼, (可選)des-cbc解密, protobuf解碼成訊息結構
 
 ## 封包限制
 [mizugo]的封包長度最大不能超過65535個位元組, 相當於64K位元資料  

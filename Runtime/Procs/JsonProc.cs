@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using System;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Mizugo
@@ -10,14 +11,19 @@ namespace Mizugo
     using MessageID = Int32;
 
     /// <summary>
-    /// json處理器, 封包結構使用JsonMsg
-    /// 沒有使用加密技術, 所以安全性很低, 僅用於傳送簡單訊息或是傳送密鑰使用
-    /// 封包結構: support/proto/mizugo/msg-cs/msgs-json/Jsonmsg.cs
-    /// 封包編碼: json編碼成位元陣列, 再通過base64編碼
-    /// 封包解碼: base64解碼, 再通過json解碼
+    /// json處理器, 封包結構使用JsonMsg, 可以選擇是否啟用base64編碼或是des-cbc加密
+    /// 訊息定義: support/proto/mizugo/msg-go/msgs-json/jsonmsg.go
+    /// 訊息定義: support/proto/mizugo/msg-cs/msgs-json/Jsonmsg.cs
+    /// 封包編碼: json編碼成位元陣列, (可選)des-cbc加密, (可選)base64編碼
+    /// 封包解碼: (可選)base64解碼, (可選)des-cbc解密, json解碼成訊息結構
     /// </summary>
     public partial class JsonProc : Procmgr
     {
+        /// <summary>
+        /// json使用的填充模式
+        /// </summary>
+        private const PaddingMode padding = PaddingMode.PKCS7;
+
         public override byte[] Encode(object input)
         {
             if (input == null)
@@ -27,9 +33,15 @@ namespace Mizugo
                 throw new InvalidMessageException("encode");
 
             var json = JsonConvert.SerializeObject(message);
-            var jsonBytes = Encoding.UTF8.GetBytes(json);
-            var encode = Base64.Encode(jsonBytes);
-            return encode;
+            var output = Encoding.UTF8.GetBytes(json);
+
+            if (desCBC)
+                output = DesCBC.Encrypt(padding, desKey, desIV, output);
+
+            if (base64)
+                output = Base64.Encode(output);
+
+            return output;
         }
 
         public override object Decode(byte[] input)
@@ -37,8 +49,13 @@ namespace Mizugo
             if (input == null)
                 throw new ArgumentNullException("input");
 
-            var decode = Base64.Decode(input);
-            var json = Encoding.UTF8.GetString(decode);
+            if (base64)
+                input = Base64.Decode(input);
+
+            if (desCBC)
+                input = DesCBC.Decrypt(padding, desKey, desIV, input);
+
+            var json = Encoding.UTF8.GetString(input);
             var message = JsonConvert.DeserializeObject<JsonMsg>(json);
             return message;
         }
@@ -58,6 +75,40 @@ namespace Mizugo
 
             process(message);
         }
+
+        public JsonProc SetBase64(bool enable)
+        {
+            base64 = enable;
+            return this;
+        }
+
+        public JsonProc SetDesCBC(bool enable, string key, string iv)
+        {
+            desCBC = enable;
+            desKey = Encoding.UTF8.GetBytes(key);
+            desIV = Encoding.UTF8.GetBytes(iv);
+            return this;
+        }
+
+        /// <summary>
+        /// 是否啟用base64
+        /// </summary>
+        private bool base64 = false;
+
+        /// <summary>
+        /// 是否啟用des-cbc加密
+        /// </summary>
+        private bool desCBC = false;
+
+        /// <summary>
+        /// des密鑰
+        /// </summary>
+        private byte[] desKey = null;
+
+        /// <summary>
+        /// des初始向量
+        /// </summary>
+        private byte[] desIV = null;
     }
 
     public partial class JsonProc

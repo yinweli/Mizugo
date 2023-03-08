@@ -140,16 +140,16 @@ namespace Mizugo
         /// 這項測試需要啟動測試伺服器才能執行
         /// </summary>
         [Test]
-        [TestCase("127.0.0.1", 10003, "key-init", 1000)]
+        [TestCase("127.0.0.1", 10001, "key-@@@@", 1000)]
         public void Test(string host, int port, string key, int count)
         {
-            var client = new TCPClient(new Eventmgr(), new PListProc { KeyStr = key, IVStr = key, });
+            var client = new TCPClient(new Eventmgr(), new JsonProc().SetBase64(true).SetDesCBC(true, key, key));
             var stopwatch = new Stopwatch();
             var actual = 0;
 
             void SendMPListQ()
             {
-                client.Send(PListProc.Marshal((int)MsgID.PlistQ, new MPListQ { Time = stopwatch.ElapsedMilliseconds }));
+                client.Send(JsonProc.Marshal((int)MsgID.JsonQ, new MJsonQ { Time = stopwatch.ElapsedMilliseconds }));
                 actual++;
             }
 
@@ -162,10 +162,10 @@ namespace Mizugo
             );
             client.AddEvent(EventID.Error, TestUtil.Log);
             client.AddProcess(
-                (int)MsgID.PlistA,
+                (int)MsgID.JsonA,
                 (object param) =>
                 {
-                    PListProc.Unmarshal<MPListA>(param, out var messageID, out var message);
+                    JsonProc.Unmarshal<MJsonA>(param, out var messageID, out var message);
                     TestUtil.Log("duration: " + (stopwatch.ElapsedMilliseconds - message.From.Time));
                     TestUtil.Log("count: " + message.Count);
 
@@ -193,10 +193,10 @@ namespace Mizugo
         /// 這項測試需要啟動測試伺服器才能執行
         /// </summary>
         [Test]
-        [TestCase("127.0.0.1", 10001)]
-        public void Test(string host, int port)
+        [TestCase("127.0.0.1", 10001, "key-@@@@")]
+        public void Test(string host, int port, string key)
         {
-            var client = new TCPClient(new Eventmgr(), new JsonProc());
+            var client = new TCPClient(new Eventmgr(), new JsonProc().SetBase64(true).SetDesCBC(true, key, key));
             var stopwatch = new Stopwatch();
             var vaildConnect = false;
             var vaildDisconnect = false;
@@ -268,10 +268,10 @@ namespace Mizugo
         /// 這項測試需要啟動測試伺服器才能執行
         /// </summary>
         [Test]
-        [TestCase("127.0.0.1", 10002)]
-        public void Test(string host, int port)
+        [TestCase("127.0.0.1", 10002, "key-####")]
+        public void Test(string host, int port, string key)
         {
-            var client = new TCPClient(new Eventmgr(), new ProtoProc());
+            var client = new TCPClient(new Eventmgr(), new ProtoProc().SetBase64(true).SetDesCBC(true, key, key));
             var stopwatch = new Stopwatch();
             var vaildConnect = false;
             var vaildDisconnect = false;
@@ -324,81 +324,6 @@ namespace Mizugo
             client.Connect(host, port);
             TestUtil.Sleep();
             client.Send(ProtoProc.Marshal((int)MsgID.ProtoQ, new MProtoQ { Time = stopwatch.ElapsedMilliseconds }));
-            TestUtil.Sleep();
-
-            while (client.IsUpdate)
-                client.Update();
-
-            Assert.IsTrue(vaildConnect);
-            Assert.IsTrue(vaildDisconnect);
-            Assert.IsTrue(vaildRecv);
-            Assert.IsTrue(vaildSend);
-            Assert.IsTrue(validMessage);
-        }
-    }
-
-    internal class TestTCPClientPList
-    {
-        /// <summary>
-        /// 這項測試需要啟動測試伺服器才能執行
-        /// </summary>
-        [Test]
-        [TestCase("127.0.0.1", 10003, "key-init")]
-        public void Test(string host, int port, string key)
-        {
-            var client = new TCPClient(new Eventmgr(), new PListProc { KeyStr = key, IVStr = key, });
-            var stopwatch = new Stopwatch();
-            var vaildConnect = false;
-            var vaildDisconnect = false;
-            var vaildRecv = false;
-            var vaildSend = false;
-            var validMessage = false;
-
-            client.AddEvent(
-                EventID.Connect,
-                (object _) =>
-                {
-                    vaildConnect = true;
-                }
-            );
-            client.AddEvent(
-                EventID.Disconnect,
-                (object _) =>
-                {
-                    vaildDisconnect = true;
-                }
-            );
-            client.AddEvent(
-                EventID.Recv,
-                (object _) =>
-                {
-                    vaildRecv = true;
-                    client.Disconnect();
-                }
-            );
-            client.AddEvent(
-                EventID.Send,
-                (object _) =>
-                {
-                    vaildSend = true;
-                }
-            );
-            client.AddEvent(EventID.Error, TestUtil.Log);
-            client.AddProcess(
-                (int)MsgID.PlistA,
-                (object param) =>
-                {
-                    PListProc.Unmarshal<MPListA>(param, out var messageID, out var message);
-                    TestUtil.Log("duration: " + (stopwatch.ElapsedMilliseconds - message.From.Time));
-                    TestUtil.Log("count: " + message.Count);
-                    validMessage = true;
-                }
-            );
-
-            stopwatch.Start();
-            client.Connect(host, port);
-            TestUtil.Sleep();
-            client.Send(PListProc.Marshal((int)MsgID.PlistQ, new MPListQ { Time = stopwatch.ElapsedMilliseconds }));
             TestUtil.Sleep();
 
             while (client.IsUpdate)
