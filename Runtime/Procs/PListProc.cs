@@ -1,7 +1,6 @@
-﻿using Google.Protobuf;
+using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using System;
-using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -58,20 +57,12 @@ namespace Mizugo
             if (input is not PListMsg message)
                 throw new InvalidMessageException("process");
 
-            var unprocess = new List<MessageID>();
+            var process = Get(message.MessageID);
 
-            foreach (var itor in message.Messages)
-            {
-                var process = Get(itor.MessageID);
+            if (process == null)
+                throw new UnprocessException(message.MessageID);
 
-                if (process != null)
-                    process(itor);
-                else
-                    unprocess.Add(itor.MessageID);
-            } // for
-
-            if (unprocess.Count > 0)
-                throw new UnprocessException(unprocess.ToArray());
+            process(message);
         }
 
         /// <summary>
@@ -139,34 +130,15 @@ namespace Mizugo
         /// <summary>
         /// plist訊息序列化
         /// </summary>
-        /// <param name="input">訊息列表, 必須以messageID, message...的方式排列</param>
+        /// <param name="messageID">訊息編號</param>
+        /// <param name="message">訊息物件</param>
         /// <returns>訊息物件</returns>
-        public static PListMsg Marshal(params object[] input)
+        public static PListMsg Marshal(MessageID messageID, IMessage message)
         {
-            if (input == null)
-                throw new ArgumentNullException("input");
+            if (message == null)
+                throw new ArgumentNullException("message");
 
-            if (input.Length % 2 != 0)
-                throw new ArgumentOutOfRangeException("input");
-
-            var sender = new PListSender();
-
-            for (var i = 0; i < input.Length; )
-            {
-                var itor = input[i++];
-
-                if (itor is not MessageID messageID)
-                    throw new InvalidCastException("not messageID");
-
-                itor = input[i++];
-
-                if (itor is not IMessage message)
-                    throw new InvalidCastException("not message");
-
-                sender.Add(messageID, message);
-            } // for
-
-            return Marshal(sender);
+            return new PListMsg { MessageID = messageID, Message = Any.Pack(message) };
         }
 
         /// <summary>
@@ -182,49 +154,11 @@ namespace Mizugo
             if (input == null)
                 throw new ArgumentNullException("input");
 
-            if (input is not PListUnit data)
+            if (input is not PListMsg data)
                 throw new InvalidMessageException("unmarshal");
 
             messageID = data.MessageID;
             message = data.Message.Unpack<T>();
         }
-    }
-
-    /// <summary>
-    /// plist傳送器
-    /// </summary>
-    public partial class PListSender
-    {
-        /// <summary>
-        /// 新增訊息
-        /// </summary>
-        /// <param name="messageID">訊息編號</param>
-        /// <param name="message">訊息物件</param>
-        /// <returns>自己物件</returns>
-        public PListSender Add(MessageID messageID, IMessage message)
-        {
-            if (message == null)
-                throw new ArgumentNullException("message");
-
-            data.Add(new PListUnit { MessageID = messageID, Message = Any.Pack(message) });
-            return this;
-        }
-
-        /// <summary>
-        /// 訊息序列化
-        /// </summary>
-        /// <returns>訊息物件</returns>
-        public PListMsg Marshal()
-        {
-            var message = new PListMsg();
-
-            message.Messages.AddRange(data);
-            return message;
-        }
-
-        /// <summary>
-        /// 訊息單元列表
-        /// </summary>
-        private List<PListUnit> data = new List<PListUnit>();
     }
 }
