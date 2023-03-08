@@ -23,6 +23,39 @@ namespace Mizugo
             Assert.IsTrue(TestUtil.EqualsByJson(message, decode));
         }
 
+        [Test]
+        [TestCaseSource("EncodeCases")]
+        public void EncodeBase64(JsonMsg message)
+        {
+            var proc = new JsonProc().SetBase64(true);
+            var encode = proc.Encode(message);
+            var decode = proc.Decode(encode);
+
+            Assert.IsTrue(TestUtil.EqualsByJson(message, decode));
+        }
+
+        [Test]
+        [TestCaseSource("EncodeCases")]
+        public void EncodeDesCBC(JsonMsg message)
+        {
+            var proc = new JsonProc().SetDesCBC(true, key, key);
+            var encode = proc.Encode(message);
+            var decode = proc.Decode(encode);
+
+            Assert.IsTrue(TestUtil.EqualsByJson(message, decode));
+        }
+
+        [Test]
+        [TestCaseSource("EncodeCases")]
+        public void EncodeAll(JsonMsg message)
+        {
+            var proc = new JsonProc().SetBase64(true).SetDesCBC(true, key, key);
+            var encode = proc.Encode(message);
+            var decode = proc.Decode(encode);
+
+            Assert.IsTrue(TestUtil.EqualsByJson(message, decode));
+        }
+
         public static IEnumerable EncodeCases
         {
             get
@@ -145,5 +178,7 @@ namespace Mizugo
                 JsonProc.Unmarshal<JsonTest>(new object(), out var _, out var _);
             });
         }
+
+        private string key = "thisakey";
     }
 }
