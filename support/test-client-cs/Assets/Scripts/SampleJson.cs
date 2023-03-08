@@ -14,7 +14,7 @@ public class SampleJson : MonoBehaviour
 {
     private void Awake()
     {
-        client = new TCPClient(new Eventmgr(), new JsonProc());
+        client = new TCPClient(new Eventmgr(), new JsonProc().SetBase64(true).SetDesCBC(true, key, key));
         client.AddEvent(EventID.Connect, OnConnect);
         client.AddEvent(EventID.Disconnect, OnDisconnect);
         client.AddEvent(EventID.Recv, OnRecv);
@@ -137,7 +137,13 @@ public class SampleJson : MonoBehaviour
     /// 伺服器埠號
     /// </summary>
     [SerializeField]
-    private int port = 0;
+    private int port = 10001;
+
+    /// <summary>
+    /// 密鑰
+    /// </summary>
+    [SerializeField]
+    private string key = "key-@@@@";
 
     /// <summary>
     /// 客戶端組件
