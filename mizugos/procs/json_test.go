@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/cryptos"
 	"github.com/yinweli/Mizugo/mizugos/msgs"
 	"github.com/yinweli/Mizugo/testdata"
 )
@@ -18,12 +19,14 @@ type SuiteJson struct {
 	suite.Suite
 	testdata.TestEnv
 	testdata.TestLeak
+	key       string
 	messageID MessageID
 	message   *msgs.JsonTest
 }
 
 func (this *SuiteJson) SetupSuite() {
 	this.Change("test-procs-json")
+	this.key = cryptos.RandDesKeyString()
 	this.messageID = MessageID(1)
 	this.message = &msgs.JsonTest{
 		Data: "json test",
@@ -44,6 +47,84 @@ func (this *SuiteJson) TestNewJson() {
 
 func (this *SuiteJson) TestEncode() {
 	target := NewJson()
+	input, _ := JsonMarshal(this.messageID, this.message)
+
+	encode, err := target.Encode(input)
+	assert.Nil(this.T(), err)
+	assert.NotNil(this.T(), encode)
+
+	_, err = target.Encode(nil)
+	assert.NotNil(this.T(), err)
+
+	_, err = target.Encode("!?")
+	assert.NotNil(this.T(), err)
+
+	decode, err := target.Decode(encode)
+	assert.Nil(this.T(), err)
+	assert.NotNil(this.T(), decode)
+	assert.Equal(this.T(), input, decode)
+
+	_, err = target.Decode(nil)
+	assert.NotNil(this.T(), err)
+
+	_, err = target.Decode([]byte("unknown encode"))
+	assert.NotNil(this.T(), err)
+}
+
+func (this *SuiteJson) TestEncodeBase64() {
+	target := NewJson().Base64(true)
+	input, _ := JsonMarshal(this.messageID, this.message)
+
+	encode, err := target.Encode(input)
+	assert.Nil(this.T(), err)
+	assert.NotNil(this.T(), encode)
+
+	_, err = target.Encode(nil)
+	assert.NotNil(this.T(), err)
+
+	_, err = target.Encode("!?")
+	assert.NotNil(this.T(), err)
+
+	decode, err := target.Decode(encode)
+	assert.Nil(this.T(), err)
+	assert.NotNil(this.T(), decode)
+	assert.Equal(this.T(), input, decode)
+
+	_, err = target.Decode(nil)
+	assert.NotNil(this.T(), err)
+
+	_, err = target.Decode([]byte("unknown encode"))
+	assert.NotNil(this.T(), err)
+}
+
+func (this *SuiteJson) TestEncodeDesCBC() {
+	target := NewJson().DesCBC(true, this.key, this.key) // 這裡偷懶把key跟iv都設為key
+	input, _ := JsonMarshal(this.messageID, this.message)
+
+	encode, err := target.Encode(input)
+	assert.Nil(this.T(), err)
+	assert.NotNil(this.T(), encode)
+
+	_, err = target.Encode(nil)
+	assert.NotNil(this.T(), err)
+
+	_, err = target.Encode("!?")
+	assert.NotNil(this.T(), err)
+
+	decode, err := target.Decode(encode)
+	assert.Nil(this.T(), err)
+	assert.NotNil(this.T(), decode)
+	assert.Equal(this.T(), input, decode)
+
+	_, err = target.Decode(nil)
+	assert.NotNil(this.T(), err)
+
+	_, err = target.Decode([]byte("unknown encode"))
+	assert.NotNil(this.T(), err)
+}
+
+func (this *SuiteJson) TestEncodeAll() {
+	target := NewJson().Base64(true).DesCBC(true, this.key, this.key) // 這裡偷懶把key跟iv都設為key
 	input, _ := JsonMarshal(this.messageID, this.message)
 
 	encode, err := target.Encode(input)
@@ -116,8 +197,81 @@ func BenchmarkJsonEncode(b *testing.B) {
 	} // for
 }
 
+func BenchmarkJsonEncodeBase64(b *testing.B) {
+	target := NewJson().Base64(true)
+	input, _ := JsonMarshal(1, &msgs.JsonTest{
+		Data: "benchmark encode",
+	})
+
+	for i := 0; i < b.N; i++ {
+		_, _ = target.Encode(input)
+	} // for
+}
+
+func BenchmarkJsonEncodeDesCBC(b *testing.B) {
+	key := cryptos.RandDesKeyString()
+	target := NewJson().DesCBC(true, key, key)
+	input, _ := JsonMarshal(1, &msgs.JsonTest{
+		Data: "benchmark encode",
+	})
+
+	for i := 0; i < b.N; i++ {
+		_, _ = target.Encode(input)
+	} // for
+}
+
+func BenchmarkJsonEncodeAll(b *testing.B) {
+	key := cryptos.RandDesKeyString()
+	target := NewJson().Base64(true).DesCBC(true, key, key)
+	input, _ := JsonMarshal(1, &msgs.JsonTest{
+		Data: "benchmark encode",
+	})
+
+	for i := 0; i < b.N; i++ {
+		_, _ = target.Encode(input)
+	} // for
+}
+
 func BenchmarkJsonDecode(b *testing.B) {
 	target := NewJson()
+	input, _ := JsonMarshal(1, &msgs.JsonTest{
+		Data: "benchmark decode",
+	})
+	encode, _ := target.Encode(input)
+
+	for i := 0; i < b.N; i++ {
+		_, _ = target.Decode(encode)
+	} // for
+}
+
+func BenchmarkJsonDecodeBase64(b *testing.B) {
+	target := NewJson().Base64(true)
+	input, _ := JsonMarshal(1, &msgs.JsonTest{
+		Data: "benchmark decode",
+	})
+	encode, _ := target.Encode(input)
+
+	for i := 0; i < b.N; i++ {
+		_, _ = target.Decode(encode)
+	} // for
+}
+
+func BenchmarkJsonDecodeDesCBC(b *testing.B) {
+	key := cryptos.RandDesKeyString()
+	target := NewJson().DesCBC(true, key, key)
+	input, _ := JsonMarshal(1, &msgs.JsonTest{
+		Data: "benchmark decode",
+	})
+	encode, _ := target.Encode(input)
+
+	for i := 0; i < b.N; i++ {
+		_, _ = target.Decode(encode)
+	} // for
+}
+
+func BenchmarkJsonDecodeAll(b *testing.B) {
+	key := cryptos.RandDesKeyString()
+	target := NewJson().Base64(true).DesCBC(true, key, key)
 	input, _ := JsonMarshal(1, &msgs.JsonTest{
 		Data: "benchmark decode",
 	})

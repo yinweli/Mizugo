@@ -16,10 +16,8 @@ const ( // 模組編號
 	ModuleIDAuth entitys.ModuleID = iota + 1
 	ModuleIDJson
 	ModuleIDProto
-	ModuleIDPList
 )
 
 const ( // 事件名稱
-	EventBegin  = "begin"
-	EventUpdate = "update"
+	EventBegin = "begin"
 )

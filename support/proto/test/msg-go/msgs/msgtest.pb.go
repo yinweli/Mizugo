@@ -132,118 +132,6 @@ func (x *MProtoA) GetCount() int64 {
 	return 0
 }
 
-// 要求PList
-type MPListQ struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Time int64 `protobuf:"varint,1,opt,name=time,proto3" json:"time,omitempty"` // 傳送時間
-}
-
-func (x *MPListQ) Reset() {
-	*x = MPListQ{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_msgtest_proto_msgTypes[2]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *MPListQ) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*MPListQ) ProtoMessage() {}
-
-func (x *MPListQ) ProtoReflect() protoreflect.Message {
-	mi := &file_msgtest_proto_msgTypes[2]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use MPListQ.ProtoReflect.Descriptor instead.
-func (*MPListQ) Descriptor() ([]byte, []int) {
-	return file_msgtest_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *MPListQ) GetTime() int64 {
-	if x != nil {
-		return x.Time
-	}
-	return 0
-}
-
-// 回應PList
-type MPListA struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	From  *MPListQ `protobuf:"bytes,1,opt,name=from,proto3" json:"from,omitempty"`               // 來源訊息
-	ErrID ErrID    `protobuf:"varint,2,opt,name=errID,proto3,enum=ErrID" json:"errID,omitempty"` // 錯誤編號
-	Count int64    `protobuf:"varint,3,opt,name=count,proto3" json:"count,omitempty"`            // 封包計數
-}
-
-func (x *MPListA) Reset() {
-	*x = MPListA{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_msgtest_proto_msgTypes[3]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *MPListA) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*MPListA) ProtoMessage() {}
-
-func (x *MPListA) ProtoReflect() protoreflect.Message {
-	mi := &file_msgtest_proto_msgTypes[3]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use MPListA.ProtoReflect.Descriptor instead.
-func (*MPListA) Descriptor() ([]byte, []int) {
-	return file_msgtest_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *MPListA) GetFrom() *MPListQ {
-	if x != nil {
-		return x.From
-	}
-	return nil
-}
-
-func (x *MPListA) GetErrID() ErrID {
-	if x != nil {
-		return x.ErrID
-	}
-	return ErrID_Success
-}
-
-func (x *MPListA) GetCount() int64 {
-	if x != nil {
-		return x.Count
-	}
-	return 0
-}
-
 var File_msgtest_proto protoreflect.FileDescriptor
 
 var file_msgtest_proto_rawDesc = []byte{
@@ -256,16 +144,8 @@ var file_msgtest_proto_rawDesc = []byte{
 	0x66, 0x72, 0x6f, 0x6d, 0x12, 0x1c, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x49, 0x44, 0x18, 0x02, 0x20,
 	0x01, 0x28, 0x0e, 0x32, 0x06, 0x2e, 0x45, 0x72, 0x72, 0x49, 0x44, 0x52, 0x05, 0x65, 0x72, 0x72,
 	0x49, 0x44, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28,
-	0x03, 0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x22, 0x1d, 0x0a, 0x07, 0x4d, 0x50, 0x4c, 0x69,
-	0x73, 0x74, 0x51, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x69, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x03, 0x52, 0x04, 0x74, 0x69, 0x6d, 0x65, 0x22, 0x5b, 0x0a, 0x07, 0x4d, 0x50, 0x4c, 0x69, 0x73,
-	0x74, 0x41, 0x12, 0x1c, 0x0a, 0x04, 0x66, 0x72, 0x6f, 0x6d, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
-	0x32, 0x08, 0x2e, 0x4d, 0x50, 0x4c, 0x69, 0x73, 0x74, 0x51, 0x52, 0x04, 0x66, 0x72, 0x6f, 0x6d,
-	0x12, 0x1c, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0e, 0x32,
-	0x06, 0x2e, 0x45, 0x72, 0x72, 0x49, 0x44, 0x52, 0x05, 0x65, 0x72, 0x72, 0x49, 0x44, 0x12, 0x14,
-	0x0a, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x63,
-	0x6f, 0x75, 0x6e, 0x74, 0x42, 0x0c, 0x5a, 0x0a, 0x2f, 0x6d, 0x73, 0x67, 0x73, 0x3b, 0x6d, 0x73,
-	0x67, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x03, 0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x42, 0x0c, 0x5a, 0x0a, 0x2f, 0x6d, 0x73, 0x67,
+	0x73, 0x3b, 0x6d, 0x73, 0x67, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -280,24 +160,20 @@ func file_msgtest_proto_rawDescGZIP() []byte {
 	return file_msgtest_proto_rawDescData
 }
 
-var file_msgtest_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_msgtest_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_msgtest_proto_goTypes = []interface{}{
 	(*MProtoQ)(nil), // 0: MProtoQ
 	(*MProtoA)(nil), // 1: MProtoA
-	(*MPListQ)(nil), // 2: MPListQ
-	(*MPListA)(nil), // 3: MPListA
-	(ErrID)(0),      // 4: ErrID
+	(ErrID)(0),      // 2: ErrID
 }
 var file_msgtest_proto_depIdxs = []int32{
 	0, // 0: MProtoA.from:type_name -> MProtoQ
-	4, // 1: MProtoA.errID:type_name -> ErrID
-	2, // 2: MPListA.from:type_name -> MPListQ
-	4, // 3: MPListA.errID:type_name -> ErrID
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	2, // 1: MProtoA.errID:type_name -> ErrID
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_msgtest_proto_init() }
@@ -331,30 +207,6 @@ func file_msgtest_proto_init() {
 				return nil
 			}
 		}
-		file_msgtest_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MPListQ); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_msgtest_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MPListA); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -362,7 +214,7 @@ func file_msgtest_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_msgtest_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

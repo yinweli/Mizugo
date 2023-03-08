@@ -12,7 +12,7 @@ package procs
 //   - 定義處理結構, 處理結構需要繼承 Processor 介面, 並實現所有函式;
 //     在處理結構中包含 Procmgr 結構來實現訊息處理功能, 這樣只要實作 Encode, Decode, Process 三個函式就可以了
 //
-// mizugo提供的預設處理器有 Json, Proto, PList
+// mizugo提供的預設處理器有 Json, Proto
 type Processor interface {
 	// Encode 封包編碼
 	Encode(input any) (output []byte, err error)

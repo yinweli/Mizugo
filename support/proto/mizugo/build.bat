@@ -7,7 +7,6 @@ set target=..\..\..\mizugos\msgs
 
 rm -r %source%\msgs
 protoc --go_out=%source% protomsg.proto
-protoc --go_out=%source% plistmsg.proto
 
 rm -r %target%
 mkdir %target%
@@ -22,7 +21,6 @@ set target=..\..\..\support\client-unity\Packages\com.fouridstudio.mizugo-client
 rm -r %source%\msgs
 mkdir %source%\msgs
 protoc --csharp_out=%source%\msgs protomsg.proto
-protoc --csharp_out=%source%\msgs plistmsg.proto
 
 rm -r %target%
 mkdir %target%

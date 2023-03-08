@@ -32,6 +32,7 @@ type Json struct {
 type JsonConfig struct {
 	IP   string `yaml:"ip"`   // 位址
 	Port string `yaml:"port"` // 埠號
+	Key  string `yaml:"key"`  // 密鑰
 }
 
 // Initialize 初始化處理
@@ -75,7 +76,7 @@ func (this *Json) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.SetProcess(procs.NewJson()); err != nil {
+	if err := entity.SetProcess(procs.NewJson().Base64(true).DesCBC(true, this.config.Key, this.config.Key)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if

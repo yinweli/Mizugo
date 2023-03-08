@@ -1,6 +1,8 @@
-﻿using Google.Protobuf;
+using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using System;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Mizugo
 {
@@ -10,14 +12,18 @@ namespace Mizugo
     using MessageID = Int32;
 
     /// <summary>
-    /// proto處理器, 封包結構使用ProtoMsg
-    /// 沒有使用加密技術, 所以安全性很低, 僅用於傳送簡單訊息或是傳送密鑰使用
-    /// 封包結構: support/proto/mizugo/protomsg.proto
-    /// 封包編碼: protobuf編碼成位元陣列, 再通過base64編碼
-    /// 封包解碼: base64解碼, 再通過protobuf解碼
+    /// proto處理器, 封包結構使用ProtoMsg, 可以選擇是否啟用base64編碼或是des-cbc加密
+    /// 訊息定義: support/proto/mizugo/protomsg.proto
+    /// 封包編碼: protobuf編碼成位元陣列, (可選)des-cbc加密, (可選)base64編碼
+    /// 封包解碼: (可選)base64解碼, (可選)des-cbc解密, protobuf解碼成訊息結構
     /// </summary>
     public partial class ProtoProc : Procmgr
     {
+        /// <summary>
+        /// proto使用的填充模式
+        /// </summary>
+        private const PaddingMode padding = PaddingMode.PKCS7;
+
         public override byte[] Encode(object input)
         {
             if (input == null)
@@ -26,9 +32,15 @@ namespace Mizugo
             if (input is not ProtoMsg message)
                 throw new InvalidMessageException("encode");
 
-            var protoBytes = message.ToByteArray();
-            var encode = Base64.Encode(protoBytes);
-            return encode;
+            var output = message.ToByteArray();
+
+            if (desCBC)
+                output = DesCBC.Encrypt(padding, desKey, desIV, output);
+
+            if (base64)
+                output = Base64.Encode(output);
+
+            return output;
         }
 
         public override object Decode(byte[] input)
@@ -36,8 +48,13 @@ namespace Mizugo
             if (input == null)
                 throw new ArgumentNullException("input");
 
-            var decode = Base64.Decode(input);
-            var message = ProtoMsg.Parser.ParseFrom(decode);
+            if (base64)
+                input = Base64.Decode(input);
+
+            if (desCBC)
+                input = DesCBC.Decrypt(padding, desKey, desIV, input);
+
+            var message = ProtoMsg.Parser.ParseFrom(input);
             return message;
         }
 
@@ -56,6 +73,40 @@ namespace Mizugo
 
             process(message);
         }
+
+        public ProtoProc SetBase64(bool enable)
+        {
+            base64 = enable;
+            return this;
+        }
+
+        public ProtoProc SetDesCBC(bool enable, string key, string iv)
+        {
+            desCBC = enable;
+            desKey = Encoding.UTF8.GetBytes(key);
+            desIV = Encoding.UTF8.GetBytes(iv);
+            return this;
+        }
+
+        /// <summary>
+        /// 是否啟用base64
+        /// </summary>
+        private bool base64 = false;
+
+        /// <summary>
+        /// 是否啟用des-cbc加密
+        /// </summary>
+        private bool desCBC = false;
+
+        /// <summary>
+        /// des密鑰
+        /// </summary>
+        private byte[] desKey = null;
+
+        /// <summary>
+        /// des初始向量
+        /// </summary>
+        private byte[] desIV = null;
     }
 
     public partial class ProtoProc

@@ -22,15 +22,13 @@ public static partial class MsgidReflection {
   static MsgidReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "Cgttc2dpZC5wcm90byqMAQoFTXNnSUQSCwoHVW5rbm93bhAAEgkKBUpzb25R",
-          "EAESCQoFSnNvbkEQAhIKCgZQcm90b1EQAxIKCgZQcm90b0EQBBIKCgZQTGlz",
-          "dFEQBRIKCgZQTGlzdEEQBhIKCgZMb2dpblEQBxIKCgZMb2dpbkEQCBILCgdV",
-          "cGRhdGVREAkSCwoHVXBkYXRlQRAKKrsBCgVFcnJJRBILCgdTdWNjZXNzEAAS",
-          "EQoNSnNvblVubWFyc2hhbBABEhIKDlByb3RvVW5tYXJzaGFsEAISEgoOUExp",
-          "c3RVbm1hcnNoYWwQAxIQCgxQTGlzdENvbnRleHQQBBIPCgtEYXRhYmFzZU5p",
-          "bBAFEg0KCVN1Ym1pdE5pbBAGEhAKDFN1Ym1pdEZhaWxlZBAHEhMKD0FjY291",
-          "bnROb3RFeGlzdBAIEhEKDVRva2VuTm90TWF0Y2gQCUIMWgovbXNnczttc2dz",
-          "YgZwcm90bzM="));
+          "Cgttc2dpZC5wcm90byp0CgVNc2dJRBILCgdVbmtub3duEAASCQoFSnNvblEQ",
+          "ARIJCgVKc29uQRACEgoKBlByb3RvURADEgoKBlByb3RvQRAEEgoKBkxvZ2lu",
+          "URAHEgoKBkxvZ2luQRAIEgsKB1VwZGF0ZVEQCRILCgdVcGRhdGVBEAoqlQEK",
+          "BUVycklEEgsKB1N1Y2Nlc3MQABIRCg1Kc29uVW5tYXJzaGFsEAESEgoOUHJv",
+          "dG9Vbm1hcnNoYWwQAhIPCgtEYXRhYmFzZU5pbBAFEg0KCVN1Ym1pdE5pbBAG",
+          "EhAKDFN1Ym1pdEZhaWxlZBAHEhMKD0FjY291bnROb3RFeGlzdBAIEhEKDVRv",
+          "a2VuTm90TWF0Y2gQCUIMWgovbXNnczttc2dzYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(new[] {typeof(global::MsgID), typeof(global::ErrID), }, null, null));
@@ -63,14 +61,6 @@ public enum MsgID {
   /// 回應Proto
   /// </summary>
   [pbr::OriginalName("ProtoA")] ProtoA = 4,
-  /// <summary>
-  /// 要求PList
-  /// </summary>
-  [pbr::OriginalName("PListQ")] PlistQ = 5,
-  /// <summary>
-  /// 回應PList
-  /// </summary>
-  [pbr::OriginalName("PListA")] PlistA = 6,
   /// <summary>
   /// 要求登入(使用Json處理器)
   /// </summary>
@@ -105,14 +95,6 @@ public enum ErrID {
   /// proto反序列化失敗
   /// </summary>
   [pbr::OriginalName("ProtoUnmarshal")] ProtoUnmarshal = 2,
-  /// <summary>
-  /// plist反序列化失敗
-  /// </summary>
-  [pbr::OriginalName("PListUnmarshal")] PlistUnmarshal = 3,
-  /// <summary>
-  /// plist上下文失敗
-  /// </summary>
-  [pbr::OriginalName("PListContext")] PlistContext = 4,
   /// <summary>
   /// 資料庫為空
   /// </summary>

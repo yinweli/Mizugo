@@ -21,7 +21,6 @@ func initialize() error {
 	server.auth = entrys.NewAuth()
 	server.json = entrys.NewJson()
 	server.proto = entrys.NewProto()
-	server.plist = entrys.NewPList()
 
 	mizugos.Configmgr().AddPath(defines.ConfigPath)
 
@@ -53,10 +52,6 @@ func initialize() error {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := server.plist.Initialize(); err != nil {
-		return fmt.Errorf("initialize: %w", err)
-	} // if
-
 	return nil
 }
 
@@ -65,7 +60,6 @@ func finalize() {
 	server.auth.Finalize()
 	server.json.Finalize()
 	server.proto.Finalize()
-	server.plist.Finalize()
 	server.metrics.Finalize()
 	server.pool.Finalize()
 	server.logger.Finalize()
@@ -79,5 +73,4 @@ var server struct {
 	auth    *entrys.Auth      // Auth入口
 	json    *entrys.Json      // Json入口
 	proto   *entrys.Proto     // Proto入口
-	plist   *entrys.PList     // PList入口
 }

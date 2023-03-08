@@ -33,6 +33,7 @@ type JsonConfig struct {
 	Enable     bool          `yaml:"enable"`     // 啟用旗標
 	IP         string        `yaml:"ip"`         // 位址
 	Port       string        `yaml:"port"`       // 埠號
+	Key        string        `yaml:"key"`        // 密鑰
 	Timeout    time.Duration `yaml:"timeout"`    // 超期時間
 	Interval   time.Duration `yaml:"interval"`   // 間隔時間
 	Count      int           `yaml:"count"`      // 總連線數
@@ -86,7 +87,7 @@ func (this *Json) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.SetProcess(procs.NewJson()); err != nil {
+	if err := entity.SetProcess(procs.NewJson().Base64(true).DesCBC(true, this.config.Key, this.config.Key)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if

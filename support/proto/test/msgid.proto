@@ -9,8 +9,6 @@ enum MsgID {
   JsonA = 2; // 回應Json
   ProtoQ = 3; // 要求Proto
   ProtoA = 4; // 回應Proto
-  PListQ = 5; // 要求PList
-  PListA = 6; // 回應PList
   LoginQ = 7; // 要求登入(使用Json處理器)
   LoginA = 8; // 回應登入(使用Json處理器)
   UpdateQ = 9; // 要求更新(使用Json處理器)
@@ -22,8 +20,6 @@ enum ErrID {
   Success = 0; // 成功
   JsonUnmarshal = 1; // json反序列化失敗
   ProtoUnmarshal = 2; // proto反序列化失敗
-  PListUnmarshal = 3; // plist反序列化失敗
-  PListContext = 4; // plist上下文失敗
   DatabaseNil = 5; // 資料庫為空
   SubmitNil = 6; // 資料庫執行器為空
   SubmitFailed = 7; // 資料庫執行失敗
