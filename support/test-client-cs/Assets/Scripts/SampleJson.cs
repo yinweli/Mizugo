@@ -14,7 +14,10 @@ public class SampleJson : MonoBehaviour
 {
     private void Awake()
     {
-        client = new TCPClient(new Eventmgr(), new JsonProc().SetBase64(true).SetDesCBC(true, key, key));
+        client = new TCPClient(
+            new Eventmgr(),
+            new JsonProc().SetBase64(true).SetDesCBC(true, key, key)
+        );
         client.AddEvent(EventID.Connect, OnConnect);
         client.AddEvent(EventID.Disconnect, OnDisconnect);
         client.AddEvent(EventID.Recv, OnRecv);
