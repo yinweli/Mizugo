@@ -6,7 +6,7 @@
     <package value="github.com/yinweli/Mizugo" />
     <directory value="$PROJECT_DIR$/support/test-server/cmd" />
     <filePath value="$PROJECT_DIR$" />
-    <output_directory value="$PROJECT_DIR$/bin" />
+    <output_directory value="$PROJECT_DIR$/support/test-server/.runtime/bin" />
     <method v="2" />
   </configuration>
 </component>

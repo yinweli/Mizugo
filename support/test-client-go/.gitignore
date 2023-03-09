@@ -16,4 +16,4 @@ bin/
 # vendor/
 
 # 自訂忽略列表
-.runtime/log
+.runtime/

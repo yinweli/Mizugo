@@ -2,7 +2,21 @@
 <module type="WEB_MODULE" version="4">
   <component name="Go" enabled="true" />
   <component name="NewModuleRootManager">
-    <content url="file://$MODULE_DIR$" />
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/support/client-unity/.vs" />
+      <excludeFolder url="file://$MODULE_DIR$/support/client-unity/CodeCoverage" />
+      <excludeFolder url="file://$MODULE_DIR$/support/client-unity/Library" />
+      <excludeFolder url="file://$MODULE_DIR$/support/client-unity/Logs" />
+      <excludeFolder url="file://$MODULE_DIR$/support/client-unity/obj" />
+      <excludeFolder url="file://$MODULE_DIR$/support/client-unity/UserSettings" />
+      <excludeFolder url="file://$MODULE_DIR$/support/test-client-cs/.vs" />
+      <excludeFolder url="file://$MODULE_DIR$/support/test-client-cs/Library" />
+      <excludeFolder url="file://$MODULE_DIR$/support/test-client-cs/Logs" />
+      <excludeFolder url="file://$MODULE_DIR$/support/test-client-cs/obj" />
+      <excludeFolder url="file://$MODULE_DIR$/support/test-client-cs/UserSettings" />
+      <excludeFolder url="file://$MODULE_DIR$/support/test-client-go/.runtime" />
+      <excludeFolder url="file://$MODULE_DIR$/support/test-server/.runtime" />
+    </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>

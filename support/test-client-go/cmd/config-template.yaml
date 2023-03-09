@@ -1,0 +1,54 @@
+logger:
+  name: test_server.log
+  path: log
+  json: false
+  console: true
+  file: true
+  level: 0
+  maxSize: 100
+  maxTime: 0
+  maxBackups: 0
+  compress: false
+
+pool:
+  capacity: 0
+  expire: 100ms
+  preAlloc: false
+  nonblocking: false
+  maxBlocking: 0
+
+metrics:
+  port: 20002
+
+auth:
+  enable: false
+  ip:
+  port: 10000
+  timeout: 1s
+  delay: 50ms
+  account: test-auth-0001
+  update: 10
+
+json:
+  enable: false
+  ip:
+  port: 10001
+  key: key-@@@@
+  timeout: 1s
+  interval: 10ms
+  count: 1000
+  batch: 100
+  delay: 50ms
+  disconnect: true
+
+proto:
+  enable: true
+  ip:
+  port: 10002
+  key: key-####
+  timeout: 1s
+  interval: 10ms
+  count: 1000
+  batch: 100
+  delay: 50ms
+  disconnect: true

@@ -1,0 +1,39 @@
+logger:
+  name: test_server.log
+  path: log
+  json: false
+  console: true
+  file: true
+  level: 0
+  maxSize: 100
+  maxTime: 0
+  maxBackups: 0
+  compress: false
+
+pool:
+  capacity: 0
+  expire: 100ms
+  preAlloc: false
+  nonblocking: false
+  maxBlocking: 0
+
+metrics:
+  port: 20001
+
+redmo:
+  majorURI: redisdb://127.0.0.1:6379/
+  minorURI: mongodb://127.0.0.1:27017/
+
+auth:
+  ip:
+  port: 10000
+
+json:
+  ip:
+  port: 10001
+  key: key-@@@@
+
+proto:
+  ip:
+  port: 10002
+  key: key-####
