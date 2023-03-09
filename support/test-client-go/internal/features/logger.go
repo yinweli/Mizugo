@@ -5,6 +5,7 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/logs"
+	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
 )
 
 // NewLogger 建立日誌資料
@@ -16,25 +17,40 @@ func NewLogger() *Logger {
 
 // Logger 日誌資料
 type Logger struct {
-	name   string         // 日誌名稱
-	config logs.ZapLogger // 配置資料
+	name         string         // 日誌名稱
+	configSystem logs.ZapLogger // 系統日誌配置資料
+	configCrash  logs.ZapLogger // 崩潰日誌配置資料
 }
 
 // Initialize 初始化處理
 func (this *Logger) Initialize() error {
-	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
+	if err := this.add(defines.LogSystem, &this.configSystem); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	if err := mizugos.Logmgr().Initialize(&this.config); err != nil {
+	if err := this.add(defines.LogCrash, &this.configCrash); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	mizugos.Info(this.name).Caller(0).Message("initialize").KV("config", &this.config).End()
+	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("initialize").KV("config system", &this.configSystem).End()
+	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("initialize").KV("config crash", &this.configCrash).End()
 	return nil
 }
 
 // Finalize 結束處理
 func (this *Logger) Finalize() {
 	mizugos.Logmgr().Finalize()
+}
+
+// add 新增日誌物件
+func (this *Logger) add(name string, logger logs.Logger) error {
+	if err := mizugos.Configmgr().Unmarshal(name, logger); err != nil {
+		return fmt.Errorf("add: %v: %w", name, err)
+	} // if
+
+	if err := mizugos.Logmgr().Add(name, logger); err != nil {
+		return fmt.Errorf("add: %v: %w", name, err)
+	} // if
+
+	return nil
 }

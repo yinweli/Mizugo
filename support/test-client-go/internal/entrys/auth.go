@@ -40,28 +40,28 @@ type AuthConfig struct {
 
 // Initialize 初始化處理
 func (this *Auth) Initialize() error {
-	mizugos.Info(this.name).Caller(0).Message("entry initialize").End()
+	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("entry initialize").End()
 
 	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
 	if this.config.Enable {
-		mizugos.Netmgr().AddConnectTCP(this.config.IP, this.config.Port, this.config.Timeout, this.bind, this.unbind, this.wrong)
+		mizugos.Netmgr().AddConnectTCP(this.config.IP, this.config.Port, this.config.Timeout, this.bind, this.unbind, this.connectWrong)
 	} // if
 
-	mizugos.Info(this.name).Caller(0).Message("entry start").KV("config", this.config).End()
+	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("entry start").KV("config", this.config).End()
 	return nil
 }
 
 // Finalize 結束處理
 func (this *Auth) Finalize() {
-	mizugos.Info(this.name).Caller(0).Message("entry finalize").End()
+	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("entry finalize").End()
 }
 
 // bind 綁定處理
 func (this *Auth) bind(session nets.Sessioner) *nets.Bundle {
-	mizugos.Info(this.name).Caller(0).Message("bind").End()
+	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("bind").End()
 	entity := mizugos.Entitymgr().Add()
 
 	var wrong error
@@ -96,7 +96,7 @@ func (this *Auth) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.Initialize(this.wrong); err != nil {
+	if err := entity.Initialize(this.bindWrong); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
@@ -114,7 +114,7 @@ Error:
 	} // if
 
 	session.Stop()
-	mizugos.Error(this.name).Caller(0).EndError(wrong)
+	mizugos.Error(defines.LogSystem, this.name).Caller(0).EndError(wrong)
 	return nil
 }
 
@@ -128,11 +128,12 @@ func (this *Auth) unbind(session nets.Sessioner) {
 	} // if
 }
 
-// wrong 錯誤處理
-func (this *Auth) wrong(fail bool, err error) {
-	if fail {
-		mizugos.Error(this.name).Caller(1).EndError(err)
-	} else {
-		mizugos.Warn(this.name).Caller(1).EndError(err)
-	} // if
+// connectWrong 連接錯誤處理
+func (this *Auth) connectWrong(err error) {
+	mizugos.Error(defines.LogSystem, this.name).Caller(1).EndError(err)
+}
+
+// bindWrong 綁定錯誤處理
+func (this *Auth) bindWrong(err error) {
+	mizugos.Warn(defines.LogSystem, this.name).Caller(1).EndError(err)
 }

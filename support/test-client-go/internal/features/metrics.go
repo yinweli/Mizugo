@@ -5,6 +5,7 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/metrics"
+	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
 )
 
 // NewMetrics 建立統計資料
@@ -35,12 +36,11 @@ func (this *Metrics) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	mizugos.Info(this.name).Caller(0).Message("initialize").KV("config", this.config).End()
 	Auth = mizugos.Metricsmgr().NewRuntime("auth")
 	Json = mizugos.Metricsmgr().NewRuntime("json")
 	Proto = mizugos.Metricsmgr().NewRuntime("proto")
-	PList = mizugos.Metricsmgr().NewRuntime("plist")
 	Connect = mizugos.Metricsmgr().NewInt("connect")
+	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("initialize").KV("config", this.config).End()
 	return nil
 }
 
@@ -52,5 +52,4 @@ func (this *Metrics) Finalize() {
 var Auth *metrics.Runtime  // auth訊息統計物件
 var Json *metrics.Runtime  // json訊息統計物件
 var Proto *metrics.Runtime // proto訊息統計物件
-var PList *metrics.Runtime // plist訊息統計物件
 var Connect *metrics.Int   // 連線統計物件

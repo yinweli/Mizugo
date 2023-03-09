@@ -2,75 +2,110 @@ package logs
 
 import (
 	"fmt"
-
-	"github.com/yinweli/Mizugo/mizugos/utils"
+	"sync"
 )
 
 // NewLogmgr 建立日誌管理器
 func NewLogmgr() *Logmgr {
-	return &Logmgr{}
+	return &Logmgr{
+		logger: map[string]Logger{},
+	}
 }
 
-// Logmgr 日誌管理器, 用於執行管理日誌相關功能; 使用前需要執行 Initialize, 使用完畢需要執行 Finalize
+// Logmgr 日誌管理器, 用於執行管理日誌相關功能;
+// 使用前需要執行 Add 新增日誌; 使用完畢需要執行 Finalize 結束所有日誌
 //
-// 使用者可以選擇要使用以下哪種日誌
+// 新增日誌時, 有以下預設日誌物件可用
 //   - EmptyLogger: 空日誌, 不會輸出任何訊息
 //   - ZapLogger: uber實現的高效能日誌功能
-//   - 自訂日誌: 如果使用者想要自訂日誌, 需要實現 Logger 介面與 Stream 介面
 //
-// 目前提供以下日誌等級: Debug, Info, Warn, Error
+// 如果使用者想要自訂日誌, 需要實現 Logger 介面與 Stream 介面
+//
+// Logmgr 提供以下日誌函式: Debug, Info, Warn, Error
 type Logmgr struct {
-	once   utils.SyncOnce         // 單次執行物件
-	logger utils.SyncAttr[Logger] // 日誌物件
+	logger map[string]Logger // 日誌列表
+	lock   sync.RWMutex      // 執行緒鎖
 }
 
-// Initialize 初始化處理
-func (this *Logmgr) Initialize(logger Logger) (err error) {
-	if this.once.Done() {
-		return fmt.Errorf("logmgr initialize: already initialize")
+// Add 新增日誌物件
+func (this *Logmgr) Add(name string, logger Logger) error {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	if name == "" {
+		return fmt.Errorf("logmgr add: name empty")
 	} // if
 
-	this.once.Do(func() {
-		if logger == nil {
-			logger = &EmptyLogger{} // 預設使用空日誌
-		} // if
+	if _, ok := this.logger[name]; ok {
+		return fmt.Errorf("logmgr add: name duplicate")
+	} // if
 
-		if err = logger.Initialize(); err != nil {
-			err = fmt.Errorf("logmgr initialize: %w", err)
-			return
-		} // if
+	if logger == nil {
+		return fmt.Errorf("logmgr add: logger nil")
+	} // if
 
-		this.logger.Set(logger)
-	})
+	if err := logger.Initialize(); err != nil {
+		return fmt.Errorf("logmgr add: %w", err)
+	} // if
 
-	return err
+	this.logger[name] = logger
+	return nil
+}
+
+// Debug 記錄除錯訊息, 用於記錄除錯訊息; 如果 name 不存在則取得空記錄物件
+func (this *Logmgr) Debug(name, label string) Stream {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+
+	if logger, ok := this.logger[name]; ok {
+		return logger.Debug(label)
+	} // if
+
+	return &EmptyStream{}
+}
+
+// Info 記錄一般訊息, 用於記錄一般訊息; 如果 name 不存在則取得空記錄物件
+func (this *Logmgr) Info(name, label string) Stream {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+
+	if logger, ok := this.logger[name]; ok {
+		return logger.Info(label)
+	} // if
+
+	return &EmptyStream{}
+}
+
+// Warn 記錄警告訊息, 用於記錄遊戲邏輯錯誤; 如果 name 不存在則取得空記錄物件
+func (this *Logmgr) Warn(name, label string) Stream {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+
+	if logger, ok := this.logger[name]; ok {
+		return logger.Warn(label)
+	} // if
+
+	return &EmptyStream{}
+}
+
+// Error 記錄錯誤訊息, 用於記錄伺服器錯誤; 如果 name 不存在則取得空記錄物件
+func (this *Logmgr) Error(name, label string) Stream {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+
+	if logger, ok := this.logger[name]; ok {
+		return logger.Error(label)
+	} // if
+
+	return &EmptyStream{}
 }
 
 // Finalize 結束處理
 func (this *Logmgr) Finalize() {
-	if this.once.Done() == false {
-		return
-	} // if
+	this.lock.Lock()
+	defer this.lock.Unlock()
 
-	this.logger.Get().Finalize()
-}
-
-// Debug 記錄除錯訊息
-func (this *Logmgr) Debug(label string) Stream {
-	return this.logger.Get().New(label, LevelDebug)
-}
-
-// Info 記錄一般訊息
-func (this *Logmgr) Info(label string) Stream {
-	return this.logger.Get().New(label, LevelInfo)
-}
-
-// Warn 記錄警告訊息
-func (this *Logmgr) Warn(label string) Stream {
-	return this.logger.Get().New(label, LevelWarn)
-}
-
-// Error 記錄錯誤訊息
-func (this *Logmgr) Error(label string) Stream {
-	return this.logger.Get().New(label, LevelError)
+	for _, itor := range this.logger {
+		itor.Finalize()
+	} // for
 }

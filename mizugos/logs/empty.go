@@ -13,8 +13,23 @@ func (this *EmptyLogger) Initialize() error {
 func (this *EmptyLogger) Finalize() {
 }
 
-// New 建立日誌
-func (this *EmptyLogger) New(_ string, _ Level) Stream {
+// Debug 記錄除錯訊息, 用於記錄除錯訊息
+func (this *EmptyLogger) Debug(_ string) Stream {
+	return &EmptyStream{}
+}
+
+// Info 記錄一般訊息, 用於記錄一般訊息
+func (this *EmptyLogger) Info(_ string) Stream {
+	return &EmptyStream{}
+}
+
+// Warn 記錄警告訊息, 用於記錄遊戲邏輯錯誤
+func (this *EmptyLogger) Warn(_ string) Stream {
+	return &EmptyStream{}
+}
+
+// Error 記錄錯誤訊息, 用於記錄伺服器錯誤
+func (this *EmptyLogger) Error(_ string) Stream {
 	return &EmptyStream{}
 }
 

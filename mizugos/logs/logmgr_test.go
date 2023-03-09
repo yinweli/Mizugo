@@ -35,24 +35,19 @@ func (this *SuiteLogmgr) TestNewLogmgr() {
 	assert.NotNil(this.T(), NewLogmgr())
 }
 
-func (this *SuiteLogmgr) TestInitialize() {
+func (this *SuiteLogmgr) TestLogmgr() {
 	target := NewLogmgr()
-	target.Finalize() // 初始化前執行, 這次應該不執行
-	assert.Nil(this.T(), target.Initialize(newLoggerTester(true)))
-	assert.NotNil(this.T(), target.Initialize(newLoggerTester(false))) // 故意啟動兩次, 這次應該失敗
+	name := "log"
+	assert.Nil(this.T(), target.Add(name, newLoggerTester(true)))
+	assert.NotNil(this.T(), target.Debug(name, name))
+	assert.NotNil(this.T(), target.Info(name, name))
+	assert.NotNil(this.T(), target.Warn(name, name))
+	assert.NotNil(this.T(), target.Error(name, name))
 	target.Finalize()
-	target.Finalize() // 故意結束兩次, 這次應該不執行
 
-	target = NewLogmgr()
-	assert.Nil(this.T(), target.Initialize(nil))
-}
-
-func (this *SuiteLogmgr) TestLog() {
-	target := NewLogmgr()
-	assert.Nil(this.T(), target.Initialize(newLoggerTester(true)))
-	assert.NotNil(this.T(), target.Debug(""))
-	assert.NotNil(this.T(), target.Info(""))
-	assert.NotNil(this.T(), target.Warn(""))
-	assert.NotNil(this.T(), target.Error(""))
-	target.Finalize()
+	assert.NotNil(this.T(), target.Add("", newLoggerTester(true)))
+	assert.Nil(this.T(), target.Add("log1", newLoggerTester(true)))
+	assert.NotNil(this.T(), target.Add("log1", newLoggerTester(true)))
+	assert.NotNil(this.T(), target.Add("log2", nil))
+	assert.NotNil(this.T(), target.Add("log3", newLoggerTester(false)))
 }

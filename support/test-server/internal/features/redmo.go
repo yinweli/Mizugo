@@ -33,19 +33,19 @@ func (this *Redmo) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	if err := mizugos.Redmomgr().AddMajor(defines.MajorName, this.config.MajorURI); err != nil {
+	if err := mizugos.Redmomgr().AddMajor(defines.RedmoMajor, this.config.MajorURI); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	if err := mizugos.Redmomgr().AddMinor(defines.MinorName, this.config.MinorURI, defines.MongoDB); err != nil {
+	if err := mizugos.Redmomgr().AddMinor(defines.RedmoMinor, this.config.MinorURI, defines.MongoDB); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	if err := mizugos.Redmomgr().AddMixed(defines.MixedName, defines.MajorName, defines.MinorName); err != nil {
+	if err := mizugos.Redmomgr().AddMixed(defines.RedmoMixed, defines.RedmoMajor, defines.RedmoMinor); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	mizugos.Info(this.name).Caller(0).Message("initialize").KV("config", this.config).End()
+	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("initialize").KV("config", this.config).End()
 	return nil
 }
 

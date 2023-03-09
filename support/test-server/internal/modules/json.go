@@ -41,13 +41,13 @@ func (this *Json) procMJsonQ(message any) {
 
 	if err != nil {
 		this.sendMJsonA(nil, msgs.ErrID_JsonUnmarshal, 0)
-		mizugos.Warn(this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
 		return
 	} // if
 
 	count := this.incr()
 	this.sendMJsonA(msg, msgs.ErrID_Success, count)
-	mizugos.Info(this.name).Caller(0).KV("count", count).End()
+	mizugos.Info(defines.LogSystem, this.name).Caller(0).KV("count", count).End()
 }
 
 // sendMJsonA 傳送回應Json
@@ -59,7 +59,7 @@ func (this *Json) sendMJsonA(from *msgs.MJsonQ, errID msgs.ErrID, count int64) {
 	})
 
 	if err != nil {
-		mizugos.Warn(this.name).Caller(0).EndError(err)
+		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(err)
 		return
 	} // if
 

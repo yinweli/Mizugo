@@ -27,7 +27,19 @@ func (this *loggerTester) Initialize() error {
 func (this *loggerTester) Finalize() {
 }
 
-func (this *loggerTester) New(label string, level Level) Stream {
+func (this *loggerTester) Debug(_ string) Stream {
+	return &streamTester{}
+}
+
+func (this *loggerTester) Info(_ string) Stream {
+	return &streamTester{}
+}
+
+func (this *loggerTester) Warn(_ string) Stream {
+	return &streamTester{}
+}
+
+func (this *loggerTester) Error(_ string) Stream {
 	return &streamTester{}
 }
 

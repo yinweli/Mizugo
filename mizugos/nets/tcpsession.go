@@ -106,14 +106,14 @@ func (this *TCPSession) recvLoop() {
 		packet, err := this.recvPacket(reader)
 
 		if err != nil {
-			this.wrong.Do(false, fmt.Errorf("tcp session recv loop: %w", err))
+			this.wrong.Do(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 
 		message, err := this.decode(packet)
 
 		if err != nil {
-			this.wrong.Do(false, fmt.Errorf("tcp session recv loop: %w", err))
+			this.wrong.Do(fmt.Errorf("tcp session recv loop: %w", err))
 			break
 		} // if
 
@@ -161,12 +161,12 @@ func (this *TCPSession) sendLoop() {
 		packet, err := this.encode(message)
 
 		if err != nil {
-			this.wrong.Do(false, fmt.Errorf("tcp session send loop: %w", err))
+			this.wrong.Do(fmt.Errorf("tcp session send loop: %w", err))
 			break
 		} // if
 
 		if err := this.sendPacket(this.conn, packet); err != nil {
-			this.wrong.Do(false, fmt.Errorf("tcp session send loop: %w", err))
+			this.wrong.Do(fmt.Errorf("tcp session send loop: %w", err))
 			break
 		} // if
 

@@ -53,12 +53,12 @@ func (this *Proto) procMProtoA(message any) {
 	_, msg, err := procs.ProtoUnmarshal[msgs.MProtoA](message)
 
 	if err != nil {
-		mizugos.Warn(this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_ProtoUnmarshal, err))
+		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_ProtoUnmarshal, err))
 		return
 	} // if
 
 	if msg.ErrID != msgs.ErrID_Success {
-		mizugos.Warn(this.name).Caller(0).EndError(errs.Errort(msg.ErrID))
+		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errort(msg.ErrID))
 		return
 	} // if
 
@@ -71,7 +71,7 @@ func (this *Proto) procMProtoA(message any) {
 		this.sendMProtoQ()
 	} // if
 
-	mizugos.Info(this.name).Caller(0).KV("duration", duration).KV("count", msg.Count).End()
+	mizugos.Info(defines.LogSystem, this.name).Caller(0).KV("duration", duration).KV("count", msg.Count).End()
 }
 
 // sendMProtoQ 傳送要求Proto
@@ -81,7 +81,7 @@ func (this *Proto) sendMProtoQ() {
 	})
 
 	if err != nil {
-		mizugos.Warn(this.name).Caller(0).EndError(err)
+		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(err)
 		return
 	} // if
 

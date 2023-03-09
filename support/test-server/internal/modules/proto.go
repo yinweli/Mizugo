@@ -41,13 +41,13 @@ func (this *Proto) procMProtoQ(message any) {
 
 	if err != nil {
 		this.sendMProtoA(nil, msgs.ErrID_ProtoUnmarshal, 0)
-		mizugos.Warn(this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_ProtoUnmarshal, err))
+		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_ProtoUnmarshal, err))
 		return
 	} // if
 
 	count := this.incr()
 	this.sendMProtoA(msg, msgs.ErrID_Success, count)
-	mizugos.Info(this.name).Caller(0).KV("count", count).End()
+	mizugos.Info(defines.LogSystem, this.name).Caller(0).KV("count", count).End()
 }
 
 // sendMProtoA 傳送回應Proto
@@ -59,7 +59,7 @@ func (this *Proto) sendMProtoA(from *msgs.MProtoQ, errID msgs.ErrID, count int64
 	})
 
 	if err != nil {
-		mizugos.Warn(this.name).Caller(0).EndError(err)
+		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(err)
 		return
 	} // if
 
