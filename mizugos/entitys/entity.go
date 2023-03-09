@@ -111,7 +111,7 @@ func (this *Entity) Initialize(wrong Wrong) (err error) {
 
 		eventmgr.Sub(EventRecv, func(param any) {
 			if err := this.process.Get().Process(param); err != nil {
-				wrong.Do(false, fmt.Errorf("entity recv: %w", err))
+				wrong.Do(fmt.Errorf("entity recv: %w", err))
 			} // if
 		})
 		eventmgr.Sub(EventShutdown, func(_ any) {

@@ -45,7 +45,10 @@ func (this *SuiteZap) TestZapLogger() {
 	target.Finalize() // 初始化前執行, 這次應該不執行
 	assert.Nil(this.T(), target.Initialize())
 	assert.NotNil(this.T(), target.Initialize()) // 故意啟動兩次, 這次應該失敗
-	assert.NotNil(this.T(), target.New("", LevelDebug))
+	assert.NotNil(this.T(), target.Debug(""))
+	assert.NotNil(this.T(), target.Info(""))
+	assert.NotNil(this.T(), target.Warn(""))
+	assert.NotNil(this.T(), target.Error(""))
 	target.Finalize()
 	target.Finalize() // 故意結束兩次, 這次應該不執行
 
@@ -58,7 +61,6 @@ func (this *SuiteZap) TestZapLogger() {
 		Level:   LevelDebug,
 	}
 	assert.Nil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.New("", LevelDebug))
 	target.Finalize()
 }
 
@@ -72,13 +74,13 @@ func (this *SuiteZap) TestZapStream() {
 	}
 	assert.Nil(this.T(), logger.Initialize())
 
-	target := logger.New("log", LevelDebug)
+	target := logger.Debug("log")
 	assert.Equal(this.T(), target, target.Message("message"))
 	assert.Equal(this.T(), target, target.Caller(0))
 	assert.Equal(this.T(), target, target.Error(fmt.Errorf("error")))
 	target.End()
 
-	target = logger.New("log", LevelDebug)
+	target = logger.Debug("log")
 	assert.Equal(this.T(), target, target.Message("message"))
 	target.EndError(fmt.Errorf("end error"))
 
@@ -133,7 +135,7 @@ func (this *SuiteZap) TestZapStreamKV() {
 		Value int
 	}{Name: "name", Value: 1}
 
-	target := logger.New("log", LevelDebug)
+	target := logger.Debug("log")
 	assert.Equal(this.T(), target, target.KV(key, i8))
 	assert.Equal(this.T(), target, target.KV(key, ui8))
 	assert.Equal(this.T(), target, target.KV(key, &i8))
@@ -193,5 +195,5 @@ func (this *SuiteZap) TestZapLevel() {
 	assert.Equal(this.T(), zapcore.InfoLevel, zapLevel(LevelInfo))
 	assert.Equal(this.T(), zapcore.WarnLevel, zapLevel(LevelWarn))
 	assert.Equal(this.T(), zapcore.ErrorLevel, zapLevel(LevelError))
-	assert.Equal(this.T(), zapcore.InvalidLevel, zapLevel(99999))
+	assert.Equal(this.T(), zapcore.InvalidLevel, zapLevel("!?"))
 }

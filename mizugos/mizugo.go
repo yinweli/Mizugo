@@ -15,10 +15,10 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/redmos"
 )
 
-// TODO: 遊戲伺服器間的網絡若出現問題 (DB設備斷線、應用程序斷線)，會自動嘗試重新連線嗎？
 // TODO: 遊戲伺服器應用程式在發生問題或故障時有自動修復的功能嗎？
 
-// Start 啟動伺服器, 用於啟動mizugo伺服器, 需要指定 Initialize 與 Finalize 來執行使用者的初始化與結束處理;
+// Start 啟動伺服器, 用於啟動mizugo伺服器, 需要指定 Initialize 執行初始化處理, Finalize 執行結束處理, Crashlize 執行崩潰處理
+//
 // 啟動伺服器執行的順序為
 //   - 設置內部成員
 //   - 建立各管理器, 注意! 這裡只建立而沒有對各管理器進行初始化
@@ -30,7 +30,13 @@ import (
 //   - 最後呼叫 ctxs.Root().Cancel() 讓由contexts.Ctx()衍生出來的執行緒最後都能被終止, 避免goroutine洩漏
 //
 // 為了讓程式持續執行, 此函式不能用執行緒執行, 也請不要執行此函式兩次
-func Start(name string, initialize Initialize, finalize Finalize) {
+func Start(name string, initialize Initialize, finalize Finalize, crashlize Crashlize) {
+	defer func() {
+		if cause := recover(); cause != nil {
+			crashlize(cause)
+		} // if
+	}()
+
 	server.lock.Lock()
 	server.name = name
 	server.ctx = ctxs.Root().WithCancel()
@@ -162,35 +168,35 @@ func Poolmgr() *pools.Poolmgr {
 // ===== 日誌功能 =====
 
 // Debug 記錄除錯訊息
-func Debug(label string) logs.Stream {
+func Debug(name, label string) logs.Stream {
 	server.lock.RLock()
 	defer server.lock.RUnlock()
 
-	return server.logmgr.Debug(label)
+	return server.logmgr.Debug(name, label)
 }
 
 // Info 記錄一般訊息
-func Info(label string) logs.Stream {
+func Info(name, label string) logs.Stream {
 	server.lock.RLock()
 	defer server.lock.RUnlock()
 
-	return server.logmgr.Info(label)
+	return server.logmgr.Info(name, label)
 }
 
 // Warn 記錄警告訊息
-func Warn(label string) logs.Stream {
+func Warn(name, label string) logs.Stream {
 	server.lock.RLock()
 	defer server.lock.RUnlock()
 
-	return server.logmgr.Warn(label)
+	return server.logmgr.Warn(name, label)
 }
 
 // Error 記錄錯誤訊息
-func Error(label string) logs.Stream {
+func Error(name, label string) logs.Stream {
 	server.lock.RLock()
 	defer server.lock.RUnlock()
 
-	return server.logmgr.Error(label)
+	return server.logmgr.Error(name, label)
 }
 
 // ===== 其他定義 =====
@@ -214,6 +220,16 @@ type Finalize func()
 func (this Finalize) Do() {
 	if this != nil {
 		this()
+	} // if
+}
+
+// Crashlize 崩潰處理函式類型
+type Crashlize func(cause any)
+
+// Do 執行處理
+func (this Crashlize) Do(cause any) {
+	if this != nil {
+		this(cause)
 	} // if
 }
 

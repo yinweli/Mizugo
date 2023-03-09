@@ -38,7 +38,7 @@ func (this *SuiteMizugo) TestMizugo() {
 	name := "mizugo"
 	tester := &mizugoTester{}
 
-	go Start(name, tester.initialize, tester.finalize)
+	go Start(name, tester.initialize, tester.finalize, tester.crashlize)
 	time.Sleep(testdata.Timeout)
 	assert.Equal(this.T(), name, Name())
 	assert.NotNil(this.T(), Configmgr())
@@ -49,10 +49,10 @@ func (this *SuiteMizugo) TestMizugo() {
 	assert.NotNil(this.T(), Entitymgr())
 	assert.NotNil(this.T(), Labelmgr())
 	assert.NotNil(this.T(), Poolmgr())
-	assert.NotNil(this.T(), Debug(""))
-	assert.NotNil(this.T(), Info(""))
-	assert.NotNil(this.T(), Warn(""))
-	assert.NotNil(this.T(), Error(""))
+	assert.NotNil(this.T(), Debug("", ""))
+	assert.NotNil(this.T(), Info("", ""))
+	assert.NotNil(this.T(), Warn("", ""))
+	assert.NotNil(this.T(), Error("", ""))
 	time.Sleep(testdata.Timeout)
 	Stop()
 	time.Sleep(testdata.Timeout)
@@ -61,11 +61,11 @@ func (this *SuiteMizugo) TestMizugo() {
 
 	go Start(name, func() error {
 		return fmt.Errorf("failed")
-	}, nil)
+	}, nil, nil)
 	time.Sleep(testdata.Timeout)
 	Stop()
 
-	go Start(name, nil, nil)
+	go Start(name, nil, nil, nil)
 	time.Sleep(testdata.Timeout)
 	Stop()
 }
@@ -77,12 +77,14 @@ type mizugoTester struct {
 
 func (this *mizugoTester) initialize() error {
 	this.countInit.Add(1)
-	_ = Logmgr().Initialize(nil)
 	return nil
 }
 
 func (this *mizugoTester) finalize() {
 	this.countFin.Add(1)
+}
+
+func (this *mizugoTester) crashlize(_ any) {
 }
 
 func (this *mizugoTester) validInit() bool {

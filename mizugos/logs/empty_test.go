@@ -35,7 +35,10 @@ func (this *SuiteEmpty) TearDownTest() {
 func (this *SuiteEmpty) TestEmptyLogger() {
 	target := &EmptyLogger{}
 	assert.Nil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.New("", LevelDebug))
+	assert.NotNil(this.T(), target.Debug(""))
+	assert.NotNil(this.T(), target.Info(""))
+	assert.NotNil(this.T(), target.Warn(""))
+	assert.NotNil(this.T(), target.Error(""))
 	target.Finalize()
 }
 
@@ -43,7 +46,7 @@ func (this *SuiteEmpty) TestEmptyStream() {
 	logger := &EmptyLogger{}
 	assert.Nil(this.T(), logger.Initialize())
 
-	target := logger.New("log", LevelDebug)
+	target := logger.Debug("")
 	assert.Equal(this.T(), target, target.Message("message"))
 	assert.Equal(this.T(), target, target.Caller(0))
 	assert.Equal(this.T(), target, target.KV("key", "value"))

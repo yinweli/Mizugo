@@ -53,12 +53,12 @@ func (this *Json) procMJsonA(message any) {
 	_, msg, err := procs.JsonUnmarshal[msgs.MJsonA](message)
 
 	if err != nil {
-		mizugos.Warn(this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
 		return
 	} // if
 
 	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success {
-		mizugos.Warn(this.name).Caller(0).EndError(errs.Errort(msg.ErrID))
+		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errort(msg.ErrID))
 		return
 	} // if
 
@@ -71,7 +71,7 @@ func (this *Json) procMJsonA(message any) {
 		this.sendMJsonQ()
 	} // if
 
-	mizugos.Info(this.name).Caller(0).KV("duration", duration).KV("count", msg.Count).End()
+	mizugos.Info(defines.LogSystem, this.name).Caller(0).KV("duration", duration).KV("count", msg.Count).End()
 }
 
 // sendMJsonQ 傳送要求Json
@@ -81,7 +81,7 @@ func (this *Json) sendMJsonQ() {
 	})
 
 	if err != nil {
-		mizugos.Warn(this.name).Caller(0).EndError(err)
+		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(err)
 		return
 	} // if
 

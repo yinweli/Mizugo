@@ -14,14 +14,14 @@ import (
 )
 
 // ZapLogger zap日誌, uber實現的高效能日誌功能;
-// // 使用前必須填寫好 ZapLogger 中的公開成員, 可以選擇從yaml格式的配置檔案來填寫 ZapLogger 結構
+// 使用前必須填寫好 ZapLogger 中的公開成員, 可以選擇從yaml格式的配置檔案來填寫 ZapLogger 結構
 type ZapLogger struct {
 	Name       string `yaml:"name"`       // 日誌名稱, 會被用到日誌檔案名稱上
 	Path       string `yaml:"path"`       // 日誌路徑, 指定日誌檔案的位置
 	Json       bool   `yaml:"json"`       // 是否使用json格式日誌, 建議正式環境使用json格式日誌
 	Console    bool   `yaml:"console"`    // 是否輸出到控制台
 	File       bool   `yaml:"file"`       // 是否輸出到日誌檔案
-	Level      Level  `yaml:"level"`      // 日誌等級
+	Level      string `yaml:"level"`      // 輸出日誌等級, 當記錄的日誌等級超過此值時才會儲存到檔案中; 有以下選擇: LevelDebug, LevelInfo, LevelWarn, LevelError
 	MaxSize    int    `yaml:"maxSize"`    // 日誌大小(MB), 當日誌檔案超過此大小時就會建立新檔案, 預設是100MB
 	MaxTime    int    `yaml:"maxTime"`    // 日誌保留時間(日), 當日誌檔案儲存超過此時間時會被刪除, 預設不會刪除檔案
 	MaxBackups int    `yaml:"maxBackups"` // 日誌保留數量, 當日誌檔案數量超過此數量時會刪除舊檔案, 預設不會刪除檔案
@@ -60,11 +60,31 @@ func (this *ZapLogger) Finalize() {
 	} // if
 }
 
-// New 建立日誌
-func (this *ZapLogger) New(label string, level Level) Stream {
+func (this *ZapLogger) Debug(label string) Stream {
 	return &ZapStream{
 		logger: this.logger.Named(label),
-		level:  zapLevel(level),
+		level:  zapcore.DebugLevel,
+	}
+}
+
+func (this *ZapLogger) Info(label string) Stream {
+	return &ZapStream{
+		logger: this.logger.Named(label),
+		level:  zapcore.InfoLevel,
+	}
+}
+
+func (this *ZapLogger) Warn(label string) Stream {
+	return &ZapStream{
+		logger: this.logger.Named(label),
+		level:  zapcore.WarnLevel,
+	}
+}
+
+func (this *ZapLogger) Error(label string) Stream {
+	return &ZapStream{
+		logger: this.logger.Named(label),
+		level:  zapcore.ErrorLevel,
 	}
 }
 
@@ -279,8 +299,8 @@ func (this *ZapStream) End() {
 	} // if
 }
 
-// zapLevel 日誌等級轉換為zap日誌等級
-func zapLevel(level Level) zapcore.Level {
+// zapLevel 日誌等級字串轉換為zap日誌等級
+func zapLevel(level string) zapcore.Level {
 	switch level {
 	case LevelDebug:
 		return zapcore.DebugLevel

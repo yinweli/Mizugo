@@ -12,12 +12,17 @@ const ( // 配置定義
 	ConfigType = "yaml"   // 配置類型
 )
 
-const ( // 模組編號
-	ModuleIDAuth entitys.ModuleID = iota + 1
-	ModuleIDJson
-	ModuleIDProto
+const ( // 日誌名稱
+	LogSystem = "log-system" // 系統日誌名稱
+	LogCrash  = "log-crash"  // 崩潰日誌名稱
 )
 
 const ( // 事件名稱
 	EventBegin = "begin"
+)
+
+const ( // 模組編號
+	ModuleIDAuth entitys.ModuleID = iota + 1
+	ModuleIDJson
+	ModuleIDProto
 )

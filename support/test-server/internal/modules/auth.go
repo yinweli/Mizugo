@@ -11,10 +11,10 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/errs"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/mizugos/redmos"
+	"github.com/yinweli/Mizugo/support/test-server/internal/access"
 	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-server/internal/features"
 	"github.com/yinweli/Mizugo/support/test-server/internal/miscs"
-	"github.com/yinweli/Mizugo/support/test-server/internal/models"
 	"github.com/yinweli/Mizugo/support/test-server/internal/msgs"
 )
 
@@ -42,7 +42,7 @@ func (this *Auth) Awake() error {
 
 // Start 啟動處理
 func (this *Auth) Start() error {
-	if this.database = mizugos.Redmomgr().GetMixed(defines.MixedName); this.database == nil {
+	if this.database = mizugos.Redmomgr().GetMixed(defines.RedmoMixed); this.database == nil {
 		return fmt.Errorf("auth start: database nil")
 	} // if
 
@@ -58,27 +58,27 @@ func (this *Auth) procMLoginQ(message any) {
 
 	if err != nil {
 		this.sendMLoginA(nil, msgs.ErrID_JsonUnmarshal, "")
-		mizugos.Warn(this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
 		return
 	} // if
 
-	submit, errID, err := miscs.HandleDatabase(defines.MixedName, defines.MongoTable)
+	submit, errID, err := miscs.HandleDatabase(defines.RedmoMixed, defines.MongoTable)
 
 	if err != nil {
 		this.sendMLoginA(msg, errID, "")
-		mizugos.Error(this.name).Caller(0).EndError(err)
+		mizugos.Error(defines.LogSystem, this.name).Caller(0).EndError(err)
 		return
 	} // if
 
-	authGet := models.NewAuthGet(msg.Account, nil)
+	authGet := access.NewAuthGet(msg.Account, nil)
 
 	if err = submit.Lock(msg.Account).Add(authGet).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
-		mizugos.Error(this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
+		mizugos.Error(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
 		return
 	} // if
 
-	authSet := models.NewAuthSet(msg.Account, &models.Auth{
+	authSet := access.NewAuthSet(msg.Account, &access.Auth{
 		Account: msg.Account,
 		Token:   uuid.NewString(),
 		Time:    time.Now(),
@@ -86,12 +86,12 @@ func (this *Auth) procMLoginQ(message any) {
 
 	if err = submit.Add(authSet).Unlock(msg.Account).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
-		mizugos.Error(this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
+		mizugos.Error(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
 		return
 	} // if
 
 	this.sendMLoginA(msg, msgs.ErrID_Success, authSet.Data.Token)
-	mizugos.Info(this.name).Caller(0).KV("account", authSet.Data.Account).KV("token", authSet.Data.Token).End()
+	mizugos.Info(defines.LogSystem, this.name).Caller(0).KV("account", authSet.Data.Account).KV("token", authSet.Data.Token).End()
 }
 
 // sendMLoginA 傳送回應登入
@@ -103,7 +103,7 @@ func (this *Auth) sendMLoginA(from *msgs.MLoginQ, errID msgs.ErrID, token string
 	})
 
 	if err != nil {
-		mizugos.Warn(this.name).Caller(0).EndError(err)
+		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(err)
 		return
 	} // if
 
@@ -119,39 +119,39 @@ func (this *Auth) procMUpdateQ(message any) {
 
 	if err != nil {
 		this.sendMUpdateA(nil, msgs.ErrID_JsonUnmarshal, "")
-		mizugos.Warn(this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
 		return
 	} // if
 
-	submit, errID, err := miscs.HandleDatabase(defines.MixedName, defines.MongoTable)
+	submit, errID, err := miscs.HandleDatabase(defines.RedmoMixed, defines.MongoTable)
 
 	if err != nil {
 		this.sendMUpdateA(msg, errID, "")
-		mizugos.Error(this.name).Caller(0).EndError(err)
+		mizugos.Error(defines.LogSystem, this.name).Caller(0).EndError(err)
 		return
 	} // if
 
-	authGet := models.NewAuthGet(msg.Account, nil)
+	authGet := access.NewAuthGet(msg.Account, nil)
 
 	if err = submit.Lock(msg.Account).Add(authGet).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
-		mizugos.Error(this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
+		mizugos.Error(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
 		return
 	} // if
 
 	if authGet.Result == false {
 		this.sendMUpdateA(msg, msgs.ErrID_AccountNotExist, "")
-		mizugos.Warn(this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_AccountNotExist, err))
+		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_AccountNotExist, err))
 		return
 	} // if
 
 	if authGet.Data.Token != msg.Token {
 		this.sendMUpdateA(msg, msgs.ErrID_TokenNotMatch, "")
-		mizugos.Warn(this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_TokenNotMatch, err))
+		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_TokenNotMatch, err))
 		return
 	} // if
 
-	authSet := models.NewAuthSet(msg.Account, &models.Auth{
+	authSet := access.NewAuthSet(msg.Account, &access.Auth{
 		Account: msg.Account,
 		Token:   uuid.NewString(),
 		Time:    time.Now(),
@@ -159,12 +159,12 @@ func (this *Auth) procMUpdateQ(message any) {
 
 	if err = submit.Add(authSet).Unlock(msg.Account).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
-		mizugos.Error(this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
+		mizugos.Error(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
 		return
 	} // if
 
 	this.sendMUpdateA(msg, msgs.ErrID_Success, authSet.Data.Token)
-	mizugos.Info(this.name).Caller(0).KV("account", authSet.Data.Account).KV("token", authSet.Data.Token).End()
+	mizugos.Info(defines.LogSystem, this.name).Caller(0).KV("account", authSet.Data.Account).KV("token", authSet.Data.Token).End()
 }
 
 // sendMUpdateA 傳送回應登入
@@ -176,7 +176,7 @@ func (this *Auth) sendMUpdateA(from *msgs.MUpdateQ, errID msgs.ErrID, token stri
 	})
 
 	if err != nil {
-		mizugos.Warn(this.name).Caller(0).EndError(err)
+		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(err)
 		return
 	} // if
 

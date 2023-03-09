@@ -24,12 +24,12 @@ type EntityID = uint64
 // ModuleID 模組編號
 type ModuleID = uint64
 
-// Wrong 錯誤處理函式類型, 當fail為true時表示錯誤, 否則為警告
-type Wrong func(fail bool, err error)
+// Wrong 錯誤處理函式類型
+type Wrong func(err error)
 
 // Do 執行處理
-func (this Wrong) Do(fail bool, err error) {
+func (this Wrong) Do(err error) {
 	if this != nil {
-		this(fail, err)
+		this(err)
 	} // if
 }
