@@ -10,11 +10,12 @@ import (
 	"github.com/yinweli/Mizugo/support/test-server/msgs"
 )
 
+const nameProto = "module-proto" // 模組名稱
+
 // NewProto 建立Proto模組
 func NewProto(incr func() int64) *Proto {
 	return &Proto{
 		Module: entitys.NewModule(defines.ModuleIDProto),
-		name:   "module proto",
 		incr:   incr,
 	}
 }
@@ -22,7 +23,6 @@ func NewProto(incr func() int64) *Proto {
 // Proto Proto模組
 type Proto struct {
 	*entitys.Module
-	name string       // 模組名稱
 	incr func() int64 // 計數函式
 }
 
@@ -41,13 +41,13 @@ func (this *Proto) procMProtoQ(message any) {
 
 	if err != nil {
 		this.sendMProtoA(nil, msgs.ErrID_ProtoUnmarshal, 0)
-		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_ProtoUnmarshal, err))
+		mizugos.Warn(defines.LogSystem, nameProto).Caller(0).EndError(errs.Errore(msgs.ErrID_ProtoUnmarshal, err))
 		return
 	} // if
 
 	count := this.incr()
 	this.sendMProtoA(msg, msgs.ErrID_Success, count)
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).KV("count", count).End()
+	mizugos.Info(defines.LogSystem, nameProto).Caller(0).KV("count", count).End()
 }
 
 // sendMProtoA 傳送回應Proto
@@ -59,7 +59,7 @@ func (this *Proto) sendMProtoA(from *msgs.MProtoQ, errID msgs.ErrID, count int64
 	})
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(err)
+		mizugos.Warn(defines.LogSystem, nameProto).Caller(0).EndError(err)
 		return
 	} // if
 

@@ -8,16 +8,15 @@ import (
 	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
 )
 
+const nameRedmo = "redmo" // 特性名稱
+
 // NewRedmo 建立資料庫資料
 func NewRedmo() *Redmo {
-	return &Redmo{
-		name: "redmo",
-	}
+	return &Redmo{}
 }
 
 // Redmo 資料庫資料
 type Redmo struct {
-	name   string      // 資料庫名稱
 	config RedmoConfig // 配置資料
 }
 
@@ -29,23 +28,23 @@ type RedmoConfig struct {
 
 // Initialize 初始化處理
 func (this *Redmo) Initialize() error {
-	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
+	if err := mizugos.Configmgr().Unmarshal(nameRedmo, &this.config); err != nil {
+		return fmt.Errorf("%v initialize: %w", nameRedmo, err)
 	} // if
 
 	if err := mizugos.Redmomgr().AddMajor(defines.RedmoMajor, this.config.MajorURI); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
+		return fmt.Errorf("%v initialize: %w", nameRedmo, err)
 	} // if
 
 	if err := mizugos.Redmomgr().AddMinor(defines.RedmoMinor, this.config.MinorURI, defines.MongoDB); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
+		return fmt.Errorf("%v initialize: %w", nameRedmo, err)
 	} // if
 
 	if err := mizugos.Redmomgr().AddMixed(defines.RedmoMixed, defines.RedmoMajor, defines.RedmoMinor); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
+		return fmt.Errorf("%v initialize: %w", nameRedmo, err)
 	} // if
 
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("initialize").KV("config", this.config).End()
+	mizugos.Info(defines.LogSystem, nameRedmo).Caller(0).Message("initialize").KV("config", this.config).End()
 	return nil
 }
 

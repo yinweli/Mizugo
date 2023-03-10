@@ -12,16 +12,15 @@ import (
 	"github.com/yinweli/Mizugo/support/test-server/internal/modules"
 )
 
+const nameAuth = "auth" // 入口名稱
+
 // NewAuth 建立Auth入口
 func NewAuth() *Auth {
-	return &Auth{
-		name: "auth",
-	}
+	return &Auth{}
 }
 
 // Auth Auth入口
 type Auth struct {
-	name     string        // 入口名稱
 	config   AuthConfig    // 配置資料
 	listenID nets.ListenID // 接聽編號
 }
@@ -34,26 +33,26 @@ type AuthConfig struct {
 
 // Initialize 初始化處理
 func (this *Auth) Initialize() error {
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("entry initialize").End()
+	mizugos.Info(defines.LogSystem, nameAuth).Caller(0).Message("entry initialize").End()
 
-	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
+	if err := mizugos.Configmgr().Unmarshal(nameAuth, &this.config); err != nil {
+		return fmt.Errorf("%v initialize: %w", nameAuth, err)
 	} // if
 
 	this.listenID = mizugos.Netmgr().AddListenTCP(this.config.IP, this.config.Port, this.bind, this.unbind, this.listenWrong)
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("entry start").KV("config", this.config).End()
+	mizugos.Info(defines.LogSystem, nameAuth).Caller(0).Message("entry start").KV("config", this.config).End()
 	return nil
 }
 
 // Finalize 結束處理
 func (this *Auth) Finalize() {
 	mizugos.Netmgr().DelListen(this.listenID)
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("entry finalize").End()
+	mizugos.Info(defines.LogSystem, nameAuth).Caller(0).Message("entry finalize").End()
 }
 
 // bind 綁定處理
 func (this *Auth) bind(session nets.Sessioner) *nets.Bundle {
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("bind").End()
+	mizugos.Info(defines.LogSystem, nameAuth).Caller(0).Message("bind").End()
 	entity := mizugos.Entitymgr().Add()
 
 	var wrong error
@@ -93,7 +92,7 @@ func (this *Auth) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	mizugos.Labelmgr().Add(entity, "auth")
+	mizugos.Labelmgr().Add(entity, nameAuth)
 	session.SetOwner(entity)
 	return entity.Bundle()
 
@@ -105,7 +104,7 @@ Error:
 	} // if
 
 	session.Stop()
-	mizugos.Error(defines.LogSystem, this.name).Caller(0).EndError(wrong)
+	mizugos.Error(defines.LogSystem, nameAuth).Caller(0).EndError(wrong)
 	return nil
 }
 
@@ -120,10 +119,10 @@ func (this *Auth) unbind(session nets.Sessioner) {
 
 // listenWrong 監聽錯誤處理
 func (this *Auth) listenWrong(err error) {
-	mizugos.Error(defines.LogSystem, this.name).Caller(1).EndError(err)
+	mizugos.Error(defines.LogSystem, nameAuth).Caller(1).EndError(err)
 }
 
 // bindWrong 綁定錯誤處理
 func (this *Auth) bindWrong(err error) {
-	mizugos.Warn(defines.LogSystem, this.name).Caller(1).EndError(err)
+	mizugos.Warn(defines.LogSystem, nameAuth).Caller(1).EndError(err)
 }

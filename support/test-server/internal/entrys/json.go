@@ -13,16 +13,15 @@ import (
 	"github.com/yinweli/Mizugo/support/test-server/internal/modules"
 )
 
+const nameJson = "json" // 入口名稱
+
 // NewJson 建立Json入口
 func NewJson() *Json {
-	return &Json{
-		name: "json",
-	}
+	return &Json{}
 }
 
 // Json Json入口
 type Json struct {
-	name     string        // 入口名稱
 	config   JsonConfig    // 配置資料
 	count    atomic.Int64  // 計數器
 	listenID nets.ListenID // 接聽編號
@@ -37,26 +36,26 @@ type JsonConfig struct {
 
 // Initialize 初始化處理
 func (this *Json) Initialize() error {
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("entry initialize").End()
+	mizugos.Info(defines.LogSystem, nameJson).Caller(0).Message("entry initialize").End()
 
-	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
+	if err := mizugos.Configmgr().Unmarshal(nameJson, &this.config); err != nil {
+		return fmt.Errorf("%v initialize: %w", nameJson, err)
 	} // if
 
 	this.listenID = mizugos.Netmgr().AddListenTCP(this.config.IP, this.config.Port, this.bind, this.unbind, this.listenWrong)
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("entry start").KV("config", this.config).End()
+	mizugos.Info(defines.LogSystem, nameJson).Caller(0).Message("entry start").KV("config", this.config).End()
 	return nil
 }
 
 // Finalize 結束處理
 func (this *Json) Finalize() {
 	mizugos.Netmgr().DelListen(this.listenID)
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("entry finalize").End()
+	mizugos.Info(defines.LogSystem, nameJson).Caller(0).Message("entry finalize").End()
 }
 
 // bind 綁定處理
 func (this *Json) bind(session nets.Sessioner) *nets.Bundle {
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("bind").End()
+	mizugos.Info(defines.LogSystem, nameJson).Caller(0).Message("bind").End()
 	entity := mizugos.Entitymgr().Add()
 
 	var wrong error
@@ -96,7 +95,7 @@ func (this *Json) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	mizugos.Labelmgr().Add(entity, "json")
+	mizugos.Labelmgr().Add(entity, nameJson)
 	session.SetOwner(entity)
 	return entity.Bundle()
 
@@ -108,7 +107,7 @@ Error:
 	} // if
 
 	session.Stop()
-	mizugos.Error(defines.LogSystem, this.name).Caller(0).EndError(wrong)
+	mizugos.Error(defines.LogSystem, nameJson).Caller(0).EndError(wrong)
 	return nil
 }
 
@@ -123,12 +122,12 @@ func (this *Json) unbind(session nets.Sessioner) {
 
 // listenWrong 監聽錯誤處理
 func (this *Json) listenWrong(err error) {
-	mizugos.Error(defines.LogSystem, this.name).Caller(1).EndError(err)
+	mizugos.Error(defines.LogSystem, nameJson).Caller(1).EndError(err)
 }
 
 // bindWrong 綁定錯誤處理
 func (this *Json) bindWrong(err error) {
-	mizugos.Warn(defines.LogSystem, this.name).Caller(1).EndError(err)
+	mizugos.Warn(defines.LogSystem, nameJson).Caller(1).EndError(err)
 }
 
 // incr 增加計數
