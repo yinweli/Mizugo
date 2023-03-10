@@ -18,18 +18,18 @@ import (
 	"github.com/yinweli/Mizugo/support/test-server/msgs"
 )
 
+const nameAuth = "module-auth" // 模組名稱
+
 // NewAuth 建立Auth模組
 func NewAuth() *Auth {
 	return &Auth{
 		Module: entitys.NewModule(defines.ModuleIDAuth),
-		name:   "module auth",
 	}
 }
 
 // Auth Auth模組
 type Auth struct {
 	*entitys.Module
-	name     string        // 模組名稱
 	database *redmos.Mixed // 資料庫物件
 }
 
@@ -58,7 +58,7 @@ func (this *Auth) procMLoginQ(message any) {
 
 	if err != nil {
 		this.sendMLoginA(nil, msgs.ErrID_JsonUnmarshal, "")
-		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		mizugos.Warn(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
 		return
 	} // if
 
@@ -66,7 +66,7 @@ func (this *Auth) procMLoginQ(message any) {
 
 	if err != nil {
 		this.sendMLoginA(msg, errID, "")
-		mizugos.Error(defines.LogSystem, this.name).Caller(0).EndError(err)
+		mizugos.Error(defines.LogSystem, nameAuth).Caller(0).EndError(err)
 		return
 	} // if
 
@@ -74,7 +74,7 @@ func (this *Auth) procMLoginQ(message any) {
 
 	if err = submit.Lock(msg.Account).Add(authGet).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
-		mizugos.Error(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
+		mizugos.Error(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
 		return
 	} // if
 
@@ -86,12 +86,12 @@ func (this *Auth) procMLoginQ(message any) {
 
 	if err = submit.Add(authSet).Unlock(msg.Account).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
-		mizugos.Error(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
+		mizugos.Error(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
 		return
 	} // if
 
 	this.sendMLoginA(msg, msgs.ErrID_Success, authSet.Data.Token)
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).KV("account", authSet.Data.Account).KV("token", authSet.Data.Token).End()
+	mizugos.Info(defines.LogSystem, nameAuth).Caller(0).KV("account", authSet.Data.Account).KV("token", authSet.Data.Token).End()
 }
 
 // sendMLoginA 傳送回應登入
@@ -103,7 +103,7 @@ func (this *Auth) sendMLoginA(from *msgs.MLoginQ, errID msgs.ErrID, token string
 	})
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(err)
+		mizugos.Warn(defines.LogSystem, nameAuth).Caller(0).EndError(err)
 		return
 	} // if
 
@@ -119,7 +119,7 @@ func (this *Auth) procMUpdateQ(message any) {
 
 	if err != nil {
 		this.sendMUpdateA(nil, msgs.ErrID_JsonUnmarshal, "")
-		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		mizugos.Warn(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
 		return
 	} // if
 
@@ -127,7 +127,7 @@ func (this *Auth) procMUpdateQ(message any) {
 
 	if err != nil {
 		this.sendMUpdateA(msg, errID, "")
-		mizugos.Error(defines.LogSystem, this.name).Caller(0).EndError(err)
+		mizugos.Error(defines.LogSystem, nameAuth).Caller(0).EndError(err)
 		return
 	} // if
 
@@ -135,19 +135,19 @@ func (this *Auth) procMUpdateQ(message any) {
 
 	if err = submit.Lock(msg.Account).Add(authGet).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
-		mizugos.Error(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
+		mizugos.Error(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
 		return
 	} // if
 
 	if authGet.Result == false {
 		this.sendMUpdateA(msg, msgs.ErrID_AccountNotExist, "")
-		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_AccountNotExist, err))
+		mizugos.Warn(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_AccountNotExist, err))
 		return
 	} // if
 
 	if authGet.Data.Token != msg.Token {
 		this.sendMUpdateA(msg, msgs.ErrID_TokenNotMatch, "")
-		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_TokenNotMatch, err))
+		mizugos.Warn(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_TokenNotMatch, err))
 		return
 	} // if
 
@@ -159,12 +159,12 @@ func (this *Auth) procMUpdateQ(message any) {
 
 	if err = submit.Add(authSet).Unlock(msg.Account).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
-		mizugos.Error(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
+		mizugos.Error(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
 		return
 	} // if
 
 	this.sendMUpdateA(msg, msgs.ErrID_Success, authSet.Data.Token)
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).KV("account", authSet.Data.Account).KV("token", authSet.Data.Token).End()
+	mizugos.Info(defines.LogSystem, nameAuth).Caller(0).KV("account", authSet.Data.Account).KV("token", authSet.Data.Token).End()
 }
 
 // sendMUpdateA 傳送回應登入
@@ -176,7 +176,7 @@ func (this *Auth) sendMUpdateA(from *msgs.MUpdateQ, errID msgs.ErrID, token stri
 	})
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(err)
+		mizugos.Warn(defines.LogSystem, nameAuth).Caller(0).EndError(err)
 		return
 	} // if
 

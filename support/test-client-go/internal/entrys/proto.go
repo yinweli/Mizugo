@@ -15,16 +15,15 @@ import (
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/modules"
 )
 
+const nameProto = "proto" // 入口名稱
+
 // NewProto 建立Proto入口
 func NewProto() *Proto {
-	return &Proto{
-		name: "proto",
-	}
+	return &Proto{}
 }
 
 // Proto Proto入口
 type Proto struct {
-	name   string      // 入口名稱
 	config ProtoConfig // 配置資料
 }
 
@@ -44,10 +43,10 @@ type ProtoConfig struct {
 
 // Initialize 初始化處理
 func (this *Proto) Initialize() error {
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("entry initialize").End()
+	mizugos.Info(defines.LogSystem, nameProto).Caller(0).Message("entry initialize").End()
 
-	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
+	if err := mizugos.Configmgr().Unmarshal(nameProto, &this.config); err != nil {
+		return fmt.Errorf("%v initialize: %w", nameProto, err)
 	} // if
 
 	if this.config.Enable {
@@ -56,18 +55,18 @@ func (this *Proto) Initialize() error {
 		})
 	} // if
 
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("entry start").KV("config", this.config).End()
+	mizugos.Info(defines.LogSystem, nameProto).Caller(0).Message("entry start").KV("config", this.config).End()
 	return nil
 }
 
 // Finalize 結束處理
 func (this *Proto) Finalize() {
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("entry finalize").End()
+	mizugos.Info(defines.LogSystem, nameProto).Caller(0).Message("entry finalize").End()
 }
 
 // bind 綁定處理
 func (this *Proto) bind(session nets.Sessioner) *nets.Bundle {
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("bind").End()
+	mizugos.Info(defines.LogSystem, nameProto).Caller(0).Message("bind").End()
 	entity := mizugos.Entitymgr().Add()
 
 	var wrong error
@@ -107,7 +106,7 @@ func (this *Proto) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	mizugos.Labelmgr().Add(entity, "proto")
+	mizugos.Labelmgr().Add(entity, nameProto)
 	features.Connect.Add(1)
 	session.SetOwner(entity)
 	return entity.Bundle()
@@ -120,7 +119,7 @@ Error:
 	} // if
 
 	session.Stop()
-	mizugos.Error(defines.LogSystem, this.name).Caller(0).EndError(wrong)
+	mizugos.Error(defines.LogSystem, nameProto).Caller(0).EndError(wrong)
 	return nil
 }
 
@@ -136,10 +135,10 @@ func (this *Proto) unbind(session nets.Sessioner) {
 
 // connectWrong 連接錯誤處理
 func (this *Proto) connectWrong(err error) {
-	mizugos.Error(defines.LogSystem, this.name).Caller(1).EndError(err)
+	mizugos.Error(defines.LogSystem, nameProto).Caller(1).EndError(err)
 }
 
 // bindWrong 綁定錯誤處理
 func (this *Proto) bindWrong(err error) {
-	mizugos.Warn(defines.LogSystem, this.name).Caller(1).EndError(err)
+	mizugos.Warn(defines.LogSystem, nameProto).Caller(1).EndError(err)
 }

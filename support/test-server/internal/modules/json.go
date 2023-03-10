@@ -10,11 +10,12 @@ import (
 	"github.com/yinweli/Mizugo/support/test-server/msgs"
 )
 
+const nameJson = "module-json" // 模組名稱
+
 // NewJson 建立Json模組
 func NewJson(incr func() int64) *Json {
 	return &Json{
 		Module: entitys.NewModule(defines.ModuleIDJson),
-		name:   "module json",
 		incr:   incr,
 	}
 }
@@ -22,7 +23,6 @@ func NewJson(incr func() int64) *Json {
 // Json Json模組
 type Json struct {
 	*entitys.Module
-	name string       // 模組名稱
 	incr func() int64 // 計數函式
 }
 
@@ -41,13 +41,13 @@ func (this *Json) procMJsonQ(message any) {
 
 	if err != nil {
 		this.sendMJsonA(nil, msgs.ErrID_JsonUnmarshal, 0)
-		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		mizugos.Warn(defines.LogSystem, nameJson).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
 		return
 	} // if
 
 	count := this.incr()
 	this.sendMJsonA(msg, msgs.ErrID_Success, count)
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).KV("count", count).End()
+	mizugos.Info(defines.LogSystem, nameJson).Caller(0).KV("count", count).End()
 }
 
 // sendMJsonA 傳送回應Json
@@ -59,7 +59,7 @@ func (this *Json) sendMJsonA(from *msgs.MJsonQ, errID msgs.ErrID, count int64) {
 	})
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(err)
+		mizugos.Warn(defines.LogSystem, nameJson).Caller(0).EndError(err)
 		return
 	} // if
 

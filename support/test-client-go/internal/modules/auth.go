@@ -12,11 +12,12 @@ import (
 	"github.com/yinweli/Mizugo/support/test-client-go/msgs"
 )
 
+const nameAuth = "module-auth" // 模組名稱
+
 // NewAuth 建立Auth模組
 func NewAuth(delay time.Duration, account string, update int) *Auth {
 	return &Auth{
 		Module:  entitys.NewModule(defines.ModuleIDAuth),
-		name:    "module auth",
 		delay:   delay,
 		account: account,
 		update:  update,
@@ -26,7 +27,6 @@ func NewAuth(delay time.Duration, account string, update int) *Auth {
 // Auth Auth模組
 type Auth struct {
 	*entitys.Module               // 模組資料
-	name            string        // 模組名稱
 	delay           time.Duration // 延遲時間
 	account         string        // 帳號
 	update          int           // 更新次數
@@ -57,18 +57,18 @@ func (this *Auth) procMLoginA(message any) {
 	_, msg, err := procs.JsonUnmarshal[msgs.MLoginA](message)
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		mizugos.Warn(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
 		return
 	} // if
 
 	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success {
-		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errort(msg.ErrID))
+		mizugos.Warn(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errort(msg.ErrID))
 		return
 	} // if
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
 	features.Auth.Add(duration)
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).KV("duration", duration).KV("token", msg.Token).End()
+	mizugos.Info(defines.LogSystem, nameAuth).Caller(0).KV("duration", duration).KV("token", msg.Token).End()
 
 	this.token = msg.Token
 	this.sendMUpdateQ()
@@ -82,7 +82,7 @@ func (this *Auth) sendMLoginQ() {
 	})
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(err)
+		mizugos.Warn(defines.LogSystem, nameAuth).Caller(0).EndError(err)
 		return
 	} // if
 
@@ -94,18 +94,18 @@ func (this *Auth) procMUpdateA(message any) {
 	_, msg, err := procs.JsonUnmarshal[msgs.MUpdateA](message)
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		mizugos.Warn(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
 		return
 	} // if
 
 	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success {
-		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errort(msg.ErrID))
+		mizugos.Warn(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errort(msg.ErrID))
 		return
 	} // if
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
 	features.Auth.Add(duration)
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).KV("duration", duration).KV("token", msg.Token).End()
+	mizugos.Info(defines.LogSystem, nameAuth).Caller(0).KV("duration", duration).KV("token", msg.Token).End()
 
 	this.token = msg.Token
 	this.sendMUpdateQ()
@@ -125,7 +125,7 @@ func (this *Auth) sendMUpdateQ() {
 	})
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(err)
+		mizugos.Warn(defines.LogSystem, nameAuth).Caller(0).EndError(err)
 		return
 	} // if
 

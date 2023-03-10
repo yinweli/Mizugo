@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"runtime/debug"
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
@@ -11,7 +10,7 @@ import (
 )
 
 func main() {
-	mizugos.Start("test_client-go", initialize, finalize, crashlize)
+	mizugos.Start(defines.CmdClient, initialize, finalize, defines.Crashlize)
 }
 
 // initialize 初始化處理
@@ -64,11 +63,6 @@ func finalize() {
 	server.metrics.Finalize()
 	server.pool.Finalize()
 	server.logger.Finalize()
-}
-
-// crashlize 崩潰處理
-func crashlize(cause any) {
-	mizugos.Error(defines.LogCrash, "crash").EndError(fmt.Errorf("%s: %s", cause, string(debug.Stack())))
 }
 
 // server 伺服器資料

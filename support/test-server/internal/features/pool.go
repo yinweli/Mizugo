@@ -8,32 +8,31 @@ import (
 	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
 )
 
+const namePool = "pool" // 特性名稱
+
 // NewPool 建立執行緒池資料
 func NewPool() *Pool {
-	return &Pool{
-		name: "pool",
-	}
+	return &Pool{}
 }
 
 // Pool 執行緒池資料
 type Pool struct {
-	name   string       // 特性名稱
 	config pools.Config // 配置資料
 }
 
 // Initialize 初始化處理
 func (this *Pool) Initialize() error {
-	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
+	if err := mizugos.Configmgr().Unmarshal(namePool, &this.config); err != nil {
+		return fmt.Errorf("%v initialize: %w", namePool, err)
 	} // if
 
 	this.config.Logger = &poolLogger{}
 
 	if err := mizugos.Poolmgr().Initialize(&this.config); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
+		return fmt.Errorf("%v initialize: %w", namePool, err)
 	} // if
 
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).Message("initialize").KV("config", &this.config).End()
+	mizugos.Info(defines.LogSystem, namePool).Caller(0).Message("initialize").KV("config", &this.config).End()
 	return nil
 }
 
@@ -48,5 +47,5 @@ type poolLogger struct {
 
 // Printf 輸出日誌
 func (this *poolLogger) Printf(format string, args ...any) {
-	mizugos.Error(defines.LogSystem, "pool").Caller(1).Message(format, args...).End()
+	mizugos.Error(defines.LogSystem, namePool).Caller(1).Message(format, args...).End()
 }
