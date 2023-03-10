@@ -5,7 +5,7 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/errs"
 	"github.com/yinweli/Mizugo/mizugos/redmos"
-	"github.com/yinweli/Mizugo/support/test-server/internal/msgs"
+	"github.com/yinweli/Mizugo/support/test-server/msgs"
 )
 
 // HandleDatabase 資料庫處理工具

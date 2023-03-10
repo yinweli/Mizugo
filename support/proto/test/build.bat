@@ -3,8 +3,8 @@ echo off
 REM Generate the message for GO
 echo #### Generate the message for GO
 set source=msg-go
-set targets=..\..\..\support\test-server\internal\msgs
-set targetc=..\..\..\support\test-client-go\internal\msgs
+set targets=..\..\..\support\test-server\msgs
+set targetc=..\..\..\support\test-client-go\msgs
 
 rm -r %source%\msgs
 protoc --go_out=%source% msgid.proto

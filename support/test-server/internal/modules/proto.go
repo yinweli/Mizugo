@@ -7,7 +7,7 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-server/internal/features"
-	"github.com/yinweli/Mizugo/support/test-server/internal/msgs"
+	"github.com/yinweli/Mizugo/support/test-server/msgs"
 )
 
 // NewProto 建立Proto模組

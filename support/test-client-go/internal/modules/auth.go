@@ -9,7 +9,7 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/features"
-	"github.com/yinweli/Mizugo/support/test-client-go/internal/msgs"
+	"github.com/yinweli/Mizugo/support/test-client-go/msgs"
 )
 
 // NewAuth 建立Auth模組
