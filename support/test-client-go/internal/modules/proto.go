@@ -12,11 +12,12 @@ import (
 	"github.com/yinweli/Mizugo/support/test-client-go/msgs"
 )
 
+const nameProto = "module-proto" // 模組名稱
+
 // NewProto 建立Proto模組
 func NewProto(delay time.Duration, disconnect bool) *Proto {
 	return &Proto{
 		Module:     entitys.NewModule(defines.ModuleIDProto),
-		name:       "module proto",
 		delay:      delay,
 		disconnect: disconnect,
 	}
@@ -25,7 +26,6 @@ func NewProto(delay time.Duration, disconnect bool) *Proto {
 // Proto Proto模組
 type Proto struct {
 	*entitys.Module               // 模組資料
-	name            string        // 模組名稱
 	delay           time.Duration // 延遲時間
 	disconnect      bool          // 斷線旗標
 }
@@ -53,12 +53,12 @@ func (this *Proto) procMProtoA(message any) {
 	_, msg, err := procs.ProtoUnmarshal[msgs.MProtoA](message)
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errore(msgs.ErrID_ProtoUnmarshal, err))
+		mizugos.Warn(defines.LogSystem, nameProto).Caller(0).EndError(errs.Errore(msgs.ErrID_ProtoUnmarshal, err))
 		return
 	} // if
 
 	if msg.ErrID != msgs.ErrID_Success {
-		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(errs.Errort(msg.ErrID))
+		mizugos.Warn(defines.LogSystem, nameProto).Caller(0).EndError(errs.Errort(msg.ErrID))
 		return
 	} // if
 
@@ -71,7 +71,7 @@ func (this *Proto) procMProtoA(message any) {
 		this.sendMProtoQ()
 	} // if
 
-	mizugos.Info(defines.LogSystem, this.name).Caller(0).KV("duration", duration).KV("count", msg.Count).End()
+	mizugos.Info(defines.LogSystem, nameProto).Caller(0).KV("duration", duration).KV("count", msg.Count).End()
 }
 
 // sendMProtoQ 傳送要求Proto
@@ -81,7 +81,7 @@ func (this *Proto) sendMProtoQ() {
 	})
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, this.name).Caller(0).EndError(err)
+		mizugos.Warn(defines.LogSystem, nameProto).Caller(0).EndError(err)
 		return
 	} // if
 

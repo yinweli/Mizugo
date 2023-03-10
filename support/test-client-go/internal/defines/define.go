@@ -4,7 +4,13 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 )
 
-const EventCapacity = 1000 // 事件容量
+const ( // 程式名稱
+	CmdClient = "test-client-go" // 測試客戶端名稱
+)
+
+const ( // 常數定義
+	EventCapacity = 1000 // 事件容量
+)
 
 const ( // 配置定義
 	ConfigPath = "config" // 配置路徑
