@@ -18,6 +18,14 @@
   go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
   ```
 
+# Task命令說明
+Task是一個運行/構建task的工具, 可以到[task]查看更多資訊; 可在命令列執行以下命令  
+* `task lint`: 進行程式碼檢查
+* `task proto`: 產生proto message
+* `task test`: 進行程式碼測試
+* `task bench`: 進行效能測試
+* `task subtree`: 更新子專案分支
+
 # 如何使用伺服器組件
 
 # 如何使用客戶端組件
@@ -70,11 +78,12 @@
 * clientunity: 更新客戶端組件分支
 
 [go]: https://go.dev/dl/
+[package manager]: https://docs.unity3d.com/Manual/Packages.html
 [proto]: https://github.com/protocolbuffers/protobuf
 [protoc-go]: https://github.com/protocolbuffers/protobuf-go
 [protoc]: https://github.com/protocolbuffers/protobuf
+[task]: https://taskfile.dev/
 [unity]: https://unity.com/
-[package manager]: https://docs.unity3d.com/Manual/Packages.html
 
 [client-unity]: support/client-unity/Packages/com.fouridstudio.mizugo-client-unity/README.md
 [proto-unity]: support/client-unity/Packages/com.fouridstudio.mizugo-proto-unity/README.md

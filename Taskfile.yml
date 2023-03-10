@@ -3,48 +3,16 @@ version: '3'
 tasks:
   # 進行程式碼檢查
   lint:
+    ignore_error: true
     cmds:
+      - dotnet tool install csharpier -g # 安裝cs格式化工具
+      - go install github.com/bufbuild/buf/cmd/buf@latest # 安裝proto格式化工具
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest # 安裝lint
       - task: fmt-mizugo
       - task: fmt-client-unity
       - task: fmt-client-unity-sample
       - task: fmt-proto
-      - task: fmt-proto-cs
       - task: lint-mizugo
-
-  # 進行程式碼測試
-  test:
-    cmds:
-      - go test ./... -cover
-
-  # 進行效能測試
-  bench:
-    cmds:
-      - go test ./... -bench=. -benchmem
-
-  # 產生proto message
-  proto:
-    cmds:
-      - task: proto-mizugo
-      - task: proto-test
-
-  # 更新子專案分支
-  subtree:
-    cmds:
-      - git subtree split --prefix=support/client-unity/Packages/com.fouridstudio.mizugo-client-unity --branch client-unity
-      - git subtree split --prefix=support/test-client-cs --branch client-unity-sample
-      - git subtree split --prefix=support/client-unity/Packages/com.fouridstudio.mizugo-proto-unity --branch proto-unity
-
-  # mizugo的proto轉換
-  proto-mizugo:
-    dir: support\proto\mizugo
-    cmds:
-      - build.bat
-
-  # 測試訊息的proto轉換
-  proto-test:
-    dir: support\proto\test
-    cmds:
-      - build.bat
 
   # mizugo程式碼格式化
   fmt-mizugo:
@@ -65,18 +33,47 @@ tasks:
 
   # proto格式化
   fmt-proto:
-    cmds:
-      - go install github.com/bufbuild/buf/cmd/buf@latest
-      - buf format -w .
-
-  # proto-cs訊息格式化
-  fmt-proto-cs:
     dir: support/proto
     cmds:
+      - buf format -w .
       - dotnet csharpier .
 
   # mizugo程式碼檢查
   lint-mizugo:
     cmds:
-      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
       - golangci-lint -v run
+
+  # 產生proto message
+  proto:
+    cmds:
+      - task: proto-mizugo
+      - task: proto-test
+
+  # mizugo的proto轉換
+  proto-mizugo:
+    dir: support\proto\mizugo
+    cmds:
+      - build.bat
+
+  # 測試訊息的proto轉換
+  proto-test:
+    dir: support\proto\test
+    cmds:
+      - build.bat
+
+  # 進行程式碼測試
+  test:
+    cmds:
+      - go test ./... -cover
+
+  # 進行效能測試
+  bench:
+    cmds:
+      - go test ./... -bench=. -benchmem
+
+  # 更新子專案分支
+  subtree:
+    cmds:
+      - git subtree split --prefix=support/client-unity/Packages/com.fouridstudio.mizugo-client-unity --branch client-unity
+      - git subtree split --prefix=support/test-client-cs --branch client-unity-sample
+      - git subtree split --prefix=support/client-unity/Packages/com.fouridstudio.mizugo-proto-unity --branch proto-unity
