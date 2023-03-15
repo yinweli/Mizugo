@@ -31,8 +31,8 @@ func (this *Logger) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", nameLogger, err)
 	} // if
 
-	mizugos.Info(defines.LogSystem, nameLogger).Caller(0).Message("initialize").KV("config system", &this.configSystem).End()
-	mizugos.Info(defines.LogSystem, nameLogger).Caller(0).Message("initialize").KV("config crash", &this.configCrash).End()
+	mizugos.Info(defines.LogSystem, nameLogger).Caller(0).Message("initialize system log").KV("config", &this.configSystem).End()
+	mizugos.Info(defines.LogSystem, nameLogger).Caller(0).Message("initialize crash log").KV("config", &this.configCrash).End()
 	return nil
 }
 
