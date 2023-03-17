@@ -74,6 +74,6 @@ tasks:
   # 更新子專案分支
   subtree:
     cmds:
-      - git subtree split --prefix=support/client-unity/Packages/com.fouridstudio.mizugo-client-unity --branch client-unity
-      - git subtree split --prefix=support/test-client-cs --branch client-unity-sample
-      - git subtree split --prefix=support/client-unity/Packages/com.fouridstudio.mizugo-proto-unity --branch proto-unity
+      - git subtree split --prefix support/client-unity/Packages/com.fouridstudio.mizugo-client-unity --branch client-unity
+      - git subtree split --prefix support/test-client-cs --branch client-unity-sample
+      - git subtree split --prefix support/client-unity/Packages/com.fouridstudio.mizugo-proto-unity --branch proto-unity
