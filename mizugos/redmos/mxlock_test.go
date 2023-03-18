@@ -34,7 +34,7 @@ func (this *SuiteMxLock) SetupSuite() {
 func (this *SuiteMxLock) TearDownSuite() {
 	this.Restore()
 	this.RedisClear(ctxs.RootCtx(), this.major.Client())
-	this.MongoClear(ctxs.RootCtx(), this.minor.Submit(this.name))
+	this.MongoClear(ctxs.RootCtx(), this.minor.Database().Collection(this.name))
 	this.major.stop()
 	this.minor.stop(ctxs.Root())
 }

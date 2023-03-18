@@ -42,52 +42,51 @@ func (this *SuiteMinor) TestNewMinor() {
 	target, err := newMinor(ctxs.Root(), testdata.MongoURI, this.name)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), target)
+
+	_, err = newMinor(ctxs.Root(), "", this.name)
+	assert.NotNil(this.T(), err)
+
+	_, err = newMinor(ctxs.Root(), testdata.MongoURI, "")
+	assert.NotNil(this.T(), err)
 }
 
 func (this *SuiteMinor) TestMinor() {
 	target, err := newMinor(ctxs.Root(), testdata.MongoURI, this.name)
 	assert.Nil(this.T(), err)
-	assert.NotNil(this.T(), target.Submit(this.name))
-	assert.NotNil(this.T(), target.Client())
+	assert.NotNil(this.T(), target.Submit())
+	client := target.Client()
+	assert.NotNil(this.T(), client)
+	assert.Nil(this.T(), client.Ping(ctxs.RootCtx(), nil))
+	database := target.Database()
+	assert.NotNil(this.T(), database)
+	assert.NotNil(this.T(), database.Client())
 	target.stop(ctxs.Root())
-	assert.Nil(this.T(), target.Submit(this.name))
+	assert.Nil(this.T(), target.Submit())
 	assert.Nil(this.T(), target.Client())
+	assert.Nil(this.T(), target.Database())
 
 	_, err = newMinor(ctxs.Root(), testdata.MongoURIInvalid, this.name)
 	assert.NotNil(this.T(), err)
 }
 
-func (this *SuiteMinor) TestClient() {
+func (this *SuiteMinor) TestMinorSubmit() {
 	target, err := newMinor(ctxs.Root(), testdata.MongoURI, this.name)
 	assert.Nil(this.T(), err)
-	client := target.Client()
-	assert.NotNil(this.T(), client)
-
-	data := &dataTester{
-		Key:  this.Key("minor client"),
-		Data: utils.RandString(testdata.RandStringLength),
-	}
-	table := client.Database(this.name).Collection(this.name)
-	assert.NotNil(this.T(), table)
-
-	_, err = table.InsertOne(ctxs.RootCtx(), data)
-	assert.Nil(this.T(), err)
-
-	_, err = table.DeleteOne(ctxs.RootCtx(), data)
-	assert.Nil(this.T(), err)
-
-	this.MongoClear(ctxs.RootCtx(), table)
+	submit := target.Submit()
+	assert.NotNil(this.T(), submit)
+	assert.NotNil(this.T(), submit.Table(this.name))
+	assert.NotNil(this.T(), submit.Database())
 	target.stop(ctxs.Root())
 }
 
 func BenchmarkMinorSet(b *testing.B) {
 	name := "benchmark minor"
 	target, _ := newMinor(ctxs.Root(), testdata.MongoURI, name)
-	submit := target.Submit(name)
+	submit := target.Submit()
 
 	for i := 0; i < b.N; i++ {
 		value := utils.RandString(testdata.RandStringLength)
-		_, _ = submit.ReplaceOne(
+		_, _ = submit.Table(name).ReplaceOne(
 			ctxs.RootCtx(),
 			bson.D{{Key: "key", Value: value}},
 			&dataTester{Key: value, Data: value},

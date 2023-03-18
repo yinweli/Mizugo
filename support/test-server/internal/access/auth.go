@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/yinweli/Mizugo/mizugos/redmos"
+	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
 )
 
 // Auth 認證資料
@@ -24,6 +25,7 @@ func NewAuthGet(key string, data *Auth) *redmos.Get[Auth] {
 // NewAuthSet 建立設定認證資料行為
 func NewAuthSet(key string, data *Auth) *redmos.Set[Auth] {
 	return &redmos.Set[Auth]{
+		Table: defines.MongoTable,
 		Field: "Account",
 		Key:   key,
 		Data:  data,

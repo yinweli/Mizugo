@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/yinweli/Mizugo/mizugos"
+	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/errs"
 	"github.com/yinweli/Mizugo/mizugos/procs"
@@ -14,7 +15,6 @@ import (
 	"github.com/yinweli/Mizugo/support/test-server/internal/access"
 	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-server/internal/features"
-	"github.com/yinweli/Mizugo/support/test-server/internal/miscs"
 	"github.com/yinweli/Mizugo/support/test-server/msgs"
 )
 
@@ -62,17 +62,17 @@ func (this *Auth) procMLoginQ(message any) {
 		return
 	} // if
 
-	submit, errID, err := miscs.HandleDatabase(defines.RedmoMixed, defines.MongoTable)
+	database := mizugos.Redmomgr().GetMixed(defines.RedmoMixed)
 
 	if err != nil {
-		this.sendMLoginA(msg, errID, "")
-		mizugos.Error(defines.LogSystem, nameAuth).Caller(0).EndError(err)
+		this.sendMLoginA(msg, msgs.ErrID_DatabaseNil, "")
+		mizugos.Error(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errort(msgs.ErrID_DatabaseNil))
 		return
 	} // if
 
 	authGet := access.NewAuthGet(msg.Account, nil)
 
-	if err = submit.Lock(msg.Account).Add(authGet).Exec(); err != nil {
+	if err = database.Submit(ctxs.Root()).Lock(msg.Account).Add(authGet).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
 		mizugos.Error(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
 		return
@@ -84,7 +84,7 @@ func (this *Auth) procMLoginQ(message any) {
 		Time:    time.Now(),
 	})
 
-	if err = submit.Add(authSet).Unlock(msg.Account).Exec(); err != nil {
+	if err = database.Submit(ctxs.Root()).Add(authSet).Unlock(msg.Account).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
 		mizugos.Error(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
 		return
@@ -123,17 +123,17 @@ func (this *Auth) procMUpdateQ(message any) {
 		return
 	} // if
 
-	submit, errID, err := miscs.HandleDatabase(defines.RedmoMixed, defines.MongoTable)
+	database := mizugos.Redmomgr().GetMixed(defines.RedmoMixed)
 
 	if err != nil {
-		this.sendMUpdateA(msg, errID, "")
-		mizugos.Error(defines.LogSystem, nameAuth).Caller(0).EndError(err)
+		this.sendMUpdateA(msg, msgs.ErrID_DatabaseNil, "")
+		mizugos.Error(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errort(msgs.ErrID_DatabaseNil))
 		return
 	} // if
 
 	authGet := access.NewAuthGet(msg.Account, nil)
 
-	if err = submit.Lock(msg.Account).Add(authGet).Exec(); err != nil {
+	if err = database.Submit(ctxs.Root()).Lock(msg.Account).Add(authGet).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
 		mizugos.Error(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
 		return
@@ -157,7 +157,7 @@ func (this *Auth) procMUpdateQ(message any) {
 		Time:    time.Now(),
 	})
 
-	if err = submit.Add(authSet).Unlock(msg.Account).Exec(); err != nil {
+	if err = database.Submit(ctxs.Root()).Add(authSet).Unlock(msg.Account).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
 		mizugos.Error(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
 		return

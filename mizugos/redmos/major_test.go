@@ -38,6 +38,9 @@ func (this *SuiteMajor) TestNewMajor() {
 	target, err := newMajor(ctxs.Root(), testdata.RedisURI)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), target)
+
+	_, err = newMajor(ctxs.Root(), "")
+	assert.NotNil(this.T(), err)
 }
 
 func (this *SuiteMajor) TestMajor() {
