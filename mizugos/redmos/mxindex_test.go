@@ -36,7 +36,7 @@ func (this *SuiteMxIndex) SetupSuite() {
 func (this *SuiteMxIndex) TearDownSuite() {
 	this.Restore()
 	this.RedisClear(ctxs.RootCtx(), this.major.Client())
-	this.MongoClear(ctxs.RootCtx(), this.minor.Submit(this.name))
+	this.MongoClear(ctxs.RootCtx(), this.minor.Database().Collection(this.name))
 	this.major.stop()
 	this.minor.stop(ctxs.Root())
 }
@@ -47,19 +47,27 @@ func (this *SuiteMxIndex) TearDownTest() {
 
 func (this *SuiteMxIndex) TestIndex() {
 	majorSubmit := this.major.Submit()
-	minorSubmit := this.minor.Submit(this.name)
+	minorSubmit := this.minor.Submit()
 	index := &Index{}
 	index.Initialize(ctxs.Root(), majorSubmit, minorSubmit)
 
+	index.Table = this.name
 	index.Field = this.field
 	index.Order = 1
 	assert.Nil(this.T(), index.Prepare())
 	assert.Nil(this.T(), index.Complete())
 
+	index.Table = ""
+	index.Field = this.field
+	index.Order = 1
+	assert.NotNil(this.T(), index.Prepare())
+
+	index.Table = this.name
 	index.Field = ""
 	index.Order = 1
 	assert.NotNil(this.T(), index.Prepare())
 
+	index.Table = this.name
 	index.Field = this.field
 	index.Order = 0
 	assert.NotNil(this.T(), index.Prepare())

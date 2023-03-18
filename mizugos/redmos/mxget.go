@@ -61,11 +61,12 @@ func (this *Get[T]) Complete() error {
 // Set 設值行為, 以索引字串與資料到主要/次要資料庫中儲存資料, 使用上有以下幾點須注意
 //   - 此行為結構需與泛型共同運作, 填入的泛型類型 T 需要是結構型別, 請不要填入指標型別
 //   - 由於會儲存到次要資料庫中, 因此泛型類型 T 的成員都需要設定好 `bson:name` 屬性
-//   - 使用前必須設定好 Field, Key 並且不能為空字串
+//   - 使用前必須設定好 Table, Field, Key 並且不能為空字串
 //   - 使用前必須設定好 Data, 並且不能為nil
 //   - 在內部執行過程中, 索引欄位與索引字串會被轉為小寫
 type Set[T any] struct {
 	Behave
+	Table string           // 表格名稱
 	Field string           // 索引欄位
 	Key   string           // 索引字串
 	Data  *T               // 資料物件
@@ -74,6 +75,10 @@ type Set[T any] struct {
 
 // Prepare 前置處理
 func (this *Set[T]) Prepare() error {
+	if this.Table == "" {
+		return fmt.Errorf("set prepare: table empty")
+	} // if
+
 	if this.Field == "" {
 		return fmt.Errorf("set prepare: field empty")
 	} // if
@@ -114,11 +119,9 @@ func (this *Set[T]) Complete() error {
 	filter := bson.D{{Key: field, Value: key}}
 	opt := options.Replace().SetUpsert(true)
 
-	if _, err = this.Minor().ReplaceOne(this.Ctx(), filter, this.Data, opt); err != nil {
+	if _, err = this.Minor().Table(this.Table).ReplaceOne(this.Ctx(), filter, this.Data, opt); err != nil {
 		return fmt.Errorf("set complete: %w", err)
 	} // if
 
 	return nil
 }
-
-// TODO: 考慮一下怎麼讓redis的set跟mongo的upsert一起執行, 並且要等待全部執行完成後才回傳

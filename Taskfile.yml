@@ -51,13 +51,13 @@ tasks:
   proto-mizugo:
     dir: support\proto\mizugo
     cmds:
-      - build.bat
+      - cmd /C build.bat
 
   # 測試訊息的proto轉換
   proto-test:
     dir: support\proto\test
     cmds:
-      - build.bat
+      - cmd /C build.bat
 
   # 進行程式碼測試
   test:

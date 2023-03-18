@@ -23,11 +23,11 @@ type Mixed struct {
 }
 
 // Submit 取得執行物件
-func (this *Mixed) Submit(ctx ctxs.Ctx, tableName string) *Submit {
+func (this *Mixed) Submit(ctx ctxs.Ctx) *Submit {
 	return &Submit{
 		ctx:   ctx,
 		major: this.major.Submit(),
-		minor: this.minor.Submit(tableName),
+		minor: this.minor.Submit(),
 	}
 }
 
@@ -42,10 +42,10 @@ func (this *Mixed) Submit(ctx ctxs.Ctx, tableName string) *Submit {
 // 目前已經實作了幾個預設行為 Lock, Unlock, Get, Set, Index 可以幫助使用者作行為設計;
 // 其中 Lock, Unlock 已經直接整合到 Submit 提供的函式
 type Submit struct {
-	ctx      ctxs.Ctx    // ctx物件
-	major    MajorSubmit // 主要執行物件
-	minor    MinorSubmit // 次要執行物件
-	behavior []Behavior  // 行為列表
+	ctx      ctxs.Ctx     // ctx物件
+	major    MajorSubmit  // 主要執行物件
+	minor    *MinorSubmit // 次要執行物件
+	behavior []Behavior   // 行為列表
 }
 
 // Add 新增行為
@@ -96,7 +96,7 @@ func (this *Submit) Exec() error {
 //   - 錯誤處理: 當資料庫失敗時才會回傳錯誤, 若是邏輯錯誤(例如資料不存在), 就不應該回傳錯誤, 而是把結果記錄下來提供外部使用
 type Behavior interface {
 	// Initialize 初始處理
-	Initialize(ctx ctxs.Ctx, major MajorSubmit, minor MinorSubmit)
+	Initialize(ctx ctxs.Ctx, major MajorSubmit, minor *MinorSubmit)
 
 	// Prepare 準備處理
 	Prepare() error
@@ -107,13 +107,13 @@ type Behavior interface {
 
 // Behave 行為資料
 type Behave struct {
-	ctx   ctxs.Ctx    // ctx物件
-	major MajorSubmit // 主要執行物件
-	minor MinorSubmit // 次要執行物件
+	ctx   ctxs.Ctx     // ctx物件
+	major MajorSubmit  // 主要執行物件
+	minor *MinorSubmit // 次要執行物件
 }
 
 // Initialize 初始處理
-func (this *Behave) Initialize(ctx ctxs.Ctx, major MajorSubmit, minor MinorSubmit) {
+func (this *Behave) Initialize(ctx ctxs.Ctx, major MajorSubmit, minor *MinorSubmit) {
 	this.ctx = ctx
 	this.major = major
 	this.minor = minor
@@ -130,6 +130,6 @@ func (this *Behave) Major() MajorSubmit {
 }
 
 // Minor 取得次要執行物件
-func (this *Behave) Minor() MinorSubmit {
+func (this *Behave) Minor() *MinorSubmit {
 	return this.minor
 }

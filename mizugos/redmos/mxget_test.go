@@ -37,7 +37,7 @@ func (this *SuiteMxGet) SetupSuite() {
 func (this *SuiteMxGet) TearDownSuite() {
 	this.Restore()
 	this.RedisClear(ctxs.RootCtx(), this.major.Client())
-	this.MongoClear(ctxs.RootCtx(), this.minor.Submit(this.name))
+	this.MongoClear(ctxs.RootCtx(), this.minor.Database().Collection(this.name))
 	this.major.stop()
 	this.minor.stop(ctxs.Root())
 }
@@ -52,12 +52,13 @@ func (this *SuiteMxGet) TestGet() {
 		Data: utils.RandString(testdata.RandStringLength),
 	}
 	majorSubmit := this.major.Submit()
-	minorSubmit := this.minor.Submit(this.name)
+	minorSubmit := this.minor.Submit()
 	get := &Get[dataTester]{}
 	get.Initialize(ctxs.Root(), majorSubmit, minorSubmit)
 	set := &Set[dataTester]{}
 	set.Initialize(ctxs.Root(), majorSubmit, minorSubmit)
 
+	set.Table = this.name
 	set.Field = this.field
 	set.Key = data.Key
 	set.Data = data
@@ -75,16 +76,25 @@ func (this *SuiteMxGet) TestGet() {
 	get.Key = ""
 	assert.NotNil(this.T(), get.Prepare())
 
+	set.Table = ""
+	set.Field = this.field
+	set.Key = data.Key
+	set.Data = data
+	assert.NotNil(this.T(), set.Prepare())
+
+	set.Table = this.name
 	set.Field = ""
 	set.Key = data.Key
 	set.Data = data
 	assert.NotNil(this.T(), set.Prepare())
 
+	set.Table = this.name
 	set.Field = this.field
 	set.Key = ""
 	set.Data = data
 	assert.NotNil(this.T(), set.Prepare())
 
+	set.Table = this.name
 	set.Field = this.field
 	set.Key = data.Key
 	set.Data = nil

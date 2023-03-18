@@ -34,7 +34,7 @@ func (this *SuiteMixed) SetupSuite() {
 func (this *SuiteMixed) TearDownSuite() {
 	this.Restore()
 	this.RedisClear(ctxs.RootCtx(), this.major.Client())
-	this.MongoClear(ctxs.RootCtx(), this.minor.Submit(this.name))
+	this.MongoClear(ctxs.RootCtx(), this.minor.Database().Collection(this.name))
 	this.major.stop()
 	this.minor.stop(ctxs.Root())
 }
@@ -49,23 +49,23 @@ func (this *SuiteMixed) TestNewMixed() {
 
 func (this *SuiteMixed) TestSubmit() {
 	target := newMixed(this.major, this.minor)
-	assert.NotNil(this.T(), target.Submit(ctxs.Root(), this.name))
+	assert.NotNil(this.T(), target.Submit(ctxs.Root()))
 }
 
 func (this *SuiteMixed) TestExec() {
 	target := newMixed(this.major, this.minor)
 	key := this.Key("mixed exec")
-	assert.Nil(this.T(), target.Submit(ctxs.Root(), this.name).Add(newBehaveTester(true, true)).Exec())
-	assert.Nil(this.T(), target.Submit(ctxs.Root(), this.name).Lock(key).Unlock(key).Exec())
-	assert.NotNil(this.T(), target.Submit(ctxs.Root(), this.name).Add(newBehaveTester(false, true)).Exec())
-	assert.NotNil(this.T(), target.Submit(ctxs.Root(), this.name).Add(newBehaveTester(true, false)).Exec())
+	assert.Nil(this.T(), target.Submit(ctxs.Root()).Add(newBehaveTester(true, true)).Exec())
+	assert.Nil(this.T(), target.Submit(ctxs.Root()).Lock(key).Unlock(key).Exec())
+	assert.NotNil(this.T(), target.Submit(ctxs.Root()).Add(newBehaveTester(false, true)).Exec())
+	assert.NotNil(this.T(), target.Submit(ctxs.Root()).Add(newBehaveTester(true, false)).Exec())
 }
 
 func (this *SuiteMixed) TestBehave() {
 	target := Behave{
 		ctx:   ctxs.Root(),
 		major: this.major.Submit(),
-		minor: this.minor.Submit(this.name),
+		minor: this.minor.Submit(),
 	}
 	assert.NotNil(this.T(), target.Ctx())
 	assert.NotNil(this.T(), target.Major())

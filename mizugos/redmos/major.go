@@ -26,9 +26,6 @@ type Major struct {
 	client redis.UniversalClient // 客戶端物件
 }
 
-// MajorSubmit 資料庫執行器, 實際上就是redis管線
-type MajorSubmit = redis.Pipeliner
-
 // Submit 取得執行物件
 func (this *Major) Submit() MajorSubmit {
 	if this.client != nil {
@@ -50,3 +47,6 @@ func (this *Major) stop() {
 		this.client = nil
 	} // if
 }
+
+// MajorSubmit 資料庫執行器, 實際上就是redis管線
+type MajorSubmit = redis.Pipeliner

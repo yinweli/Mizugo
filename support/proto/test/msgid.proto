@@ -21,8 +21,7 @@ enum ErrID {
   JsonUnmarshal = 1; // json反序列化失敗
   ProtoUnmarshal = 2; // proto反序列化失敗
   DatabaseNil = 5; // 資料庫為空
-  SubmitNil = 6; // 資料庫執行器為空
-  SubmitFailed = 7; // 資料庫執行失敗
-  AccountNotExist = 8; // 帳號不存在
-  TokenNotMatch = 9; // token不匹配
+  SubmitFailed = 6; // 資料庫執行失敗
+  AccountNotExist = 7; // 帳號不存在
+  TokenNotMatch = 8; // token不匹配
 }
