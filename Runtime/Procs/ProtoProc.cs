@@ -1,4 +1,4 @@
-using Google.Protobuf;
+﻿using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using System;
 using System.Security.Cryptography;
@@ -132,8 +132,7 @@ namespace Mizugo
         /// <param name="input">輸入物件</param>
         /// <param name="messageID">訊息編號</param>
         /// <param name="message">訊息物件</param>
-        public static void Unmarshal<T>(object input, out MessageID messageID, out T message)
-            where T : IMessage, new()
+        public static void Unmarshal<T>(object input, out MessageID messageID, out T message) where T : IMessage, new()
         {
             if (input == null)
                 throw new ArgumentNullException("input");
