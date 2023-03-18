@@ -7,7 +7,6 @@ namespace Mizugo
     /// </summary>
     public class AlreadyStartException : Exception
     {
-        public AlreadyStartException(string name)
-            : base(name + " already start") { }
+        public AlreadyStartException(string name) : base(name + " already start") { }
     }
 }
