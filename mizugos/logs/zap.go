@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"time"
 
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
@@ -50,7 +51,6 @@ func (this *ZapLogger) Initialize() error {
 		)
 		this.logger = zap.New(core, zap.AddCallerSkip(1))
 	})
-
 	return nil
 }
 
@@ -300,6 +300,7 @@ func (this *ZapStream) EndError(err error) {
 // End 結束記錄
 func (this *ZapStream) End() {
 	if l := this.logger.Check(this.level, this.message); l != nil {
+		l.Time = time.Now().UTC() // 讓日誌輸出的時間使用UTC+0
 		l.Write(this.field...)
 	} // if
 }

@@ -35,12 +35,13 @@ func (this *SuiteZap) TearDownTest() {
 
 func (this *SuiteZap) TestZapLogger() {
 	target := &ZapLogger{
-		Name:    "zapLogger",
-		Path:    "zapLogger",
-		Json:    true,
-		Console: true,
-		File:    true,
-		Level:   LevelDebug,
+		Name:       "zapLogger",
+		Path:       "zapLogger",
+		Json:       true,
+		Console:    true,
+		File:       true,
+		Level:      LevelDebug,
+		TimeLayout: "2006-01-02 15:04:05.000",
 	}
 	target.Finalize() // 初始化前執行, 這次應該不執行
 	assert.Nil(this.T(), target.Initialize())
@@ -53,12 +54,13 @@ func (this *SuiteZap) TestZapLogger() {
 	target.Finalize() // 故意結束兩次, 這次應該不執行
 
 	target = &ZapLogger{
-		Name:    "zapLogger",
-		Path:    "zapLogger",
-		Json:    false,
-		Console: false,
-		File:    false,
-		Level:   LevelDebug,
+		Name:       "zapLogger",
+		Path:       "zapLogger",
+		Json:       false,
+		Console:    false,
+		File:       false,
+		Level:      LevelDebug,
+		TimeLayout: "2006-01-02 15:04:05.000",
 	}
 	assert.Nil(this.T(), target.Initialize())
 	target.Finalize()
@@ -66,11 +68,12 @@ func (this *SuiteZap) TestZapLogger() {
 
 func (this *SuiteZap) TestZapStream() {
 	logger := &ZapLogger{
-		Name:    "zapStream",
-		Path:    "zapStream",
-		Json:    true,
-		Console: true,
-		Level:   LevelDebug,
+		Name:       "zapStream",
+		Path:       "zapStream",
+		Json:       true,
+		Console:    true,
+		Level:      LevelDebug,
+		TimeLayout: "2006-01-02 15:04:05.000",
 	}
 	assert.Nil(this.T(), logger.Initialize())
 
@@ -89,11 +92,12 @@ func (this *SuiteZap) TestZapStream() {
 
 func (this *SuiteZap) TestZapStreamKV() {
 	logger := &ZapLogger{
-		Name:    "zapStreamKV",
-		Path:    "zapStreamKV",
-		Json:    true,
-		Console: true,
-		Level:   LevelDebug,
+		Name:       "zapStreamKV",
+		Path:       "zapStreamKV",
+		Json:       true,
+		Console:    true,
+		Level:      LevelDebug,
+		TimeLayout: "2006-01-02 15:04:05.000",
 	}
 	assert.Nil(this.T(), logger.Initialize())
 
