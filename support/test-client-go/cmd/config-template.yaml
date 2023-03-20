@@ -5,6 +5,7 @@ log-system:
   console: true
   file: true
   level: debug
+  timeLayout: 2006-01-02 15:04:05
   maxSize: 100
   maxTime: 0
   maxBackups: 0
@@ -17,6 +18,7 @@ log-crash:
   console: true
   file: true
   level: debug
+  timeLayout: 2006-01-02 15:04:05
   maxSize: 100
   maxTime: 0
   maxBackups: 0

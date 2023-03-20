@@ -129,7 +129,7 @@ func (this *SuiteZap) TestZapStreamKV() {
 	s := "value"
 	ss := []string{s}
 	b := false
-	bs := []bool{b}
+	bs := []bool{false}
 	obj := struct {
 		Name  string
 		Value int

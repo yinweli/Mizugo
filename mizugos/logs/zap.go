@@ -16,12 +16,17 @@ import (
 // ZapLogger zap日誌, uber實現的高效能日誌功能;
 // 使用前必須填寫好 ZapLogger 中的公開成員, 可以選擇從yaml格式的配置檔案來填寫 ZapLogger 結構
 type ZapLogger struct {
-	Name       string `yaml:"name"`       // 日誌名稱, 會被用到日誌檔案名稱上
-	Path       string `yaml:"path"`       // 日誌路徑, 指定日誌檔案的位置
-	Json       bool   `yaml:"json"`       // 是否使用json格式日誌, 建議正式環境使用json格式日誌
-	Console    bool   `yaml:"console"`    // 是否輸出到控制台
-	File       bool   `yaml:"file"`       // 是否輸出到日誌檔案
-	Level      string `yaml:"level"`      // 輸出日誌等級, 當記錄的日誌等級超過此值時才會儲存到檔案中; 有以下選擇: LevelDebug, LevelInfo, LevelWarn, LevelError
+	Name    string `yaml:"name"`    // 日誌名稱, 會被用到日誌檔案名稱上
+	Path    string `yaml:"path"`    // 日誌路徑, 指定日誌檔案的位置
+	Json    bool   `yaml:"json"`    // 是否使用json格式日誌, 建議正式環境使用json格式日誌
+	Console bool   `yaml:"console"` // 是否輸出到控制台
+	File    bool   `yaml:"file"`    // 是否輸出到日誌檔案
+	Level   string `yaml:"level"`   // 輸出日誌等級, 當記錄的日誌等級超過此值時才會儲存到檔案中; 有以下選擇: LevelDebug, LevelInfo, LevelWarn, LevelError
+	// 時間布局字串
+	//   - 如果不需要時區資訊, 可以寫成"2006-01-02 15:04:05"
+	//   - 遵循ISO8601標準, 可以寫成"2006-01-02T15:04:05.000Z0700"
+	//   - 遵循RFC3339標準, 可以寫成"2006-01-02T15:04:05.000000Z07:00"
+	TimeLayout string `yaml:"timeLayout"`
 	MaxSize    int    `yaml:"maxSize"`    // 日誌大小(MB), 當日誌檔案超過此大小時就會建立新檔案, 預設是100MB
 	MaxTime    int    `yaml:"maxTime"`    // 日誌保留時間(日), 當日誌檔案儲存超過此時間時會被刪除, 預設不會刪除檔案
 	MaxBackups int    `yaml:"maxBackups"` // 日誌保留數量, 當日誌檔案數量超過此數量時會刪除舊檔案, 預設不會刪除檔案
@@ -100,7 +105,7 @@ func (this *ZapLogger) encoder() zapcore.Encoder {
 		StacktraceKey:  "stacktrace",
 		LineEnding:     zapcore.DefaultLineEnding,
 		EncodeLevel:    zapcore.CapitalLevelEncoder,
-		EncodeTime:     zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05"),
+		EncodeTime:     zapcore.TimeEncoderOfLayout(this.TimeLayout),
 		EncodeDuration: zapcore.SecondsDurationEncoder,
 		EncodeCaller:   zapcore.FullCallerEncoder,
 		EncodeName:     zapcore.FullNameEncoder,
