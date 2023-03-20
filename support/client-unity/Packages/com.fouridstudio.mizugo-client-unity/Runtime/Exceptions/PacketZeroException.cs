@@ -7,6 +7,7 @@ namespace Mizugo
     /// </summary>
     public class PacketZeroException : Exception
     {
-        public PacketZeroException(string name) : base(name + " packet size zero") { }
+        public PacketZeroException(string name)
+            : base(name + " packet size zero") { }
     }
 }
