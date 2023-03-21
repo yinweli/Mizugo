@@ -10,13 +10,13 @@ import (
 const prefixLock = "lock" // 鎖定/解鎖索引前綴詞
 
 // Lock 鎖定行為, 以索引字串到redis中執行分布式鎖定, 主要用於避免同時執行客戶端動作, 使用上有以下幾點須注意
-//   - 使用前必須設定好 Key 並且不能為空字串
+//   - 執行前必須設定好 Key 並且不能為空字串
 //   - 鎖定完成後, 需要執行 Unlock 行為來解除鎖定
-//   - 鎖定後預設會在 Timeout 之後自動解鎖, 避免死鎖
+//   - 鎖定後會在 Timeout 之後自動解鎖, 避免死鎖
 //   - 在內部執行過程中, 索引字串會被轉為小寫
 type Lock struct {
 	Behave
-	Key    string         // 索引字串
+	Key    string         // 索引值
 	time   time.Duration  // 超時時間, redis的超時時間不能低於1秒; 這個欄位是為了讓單元測試可以設定較短的超時時間
 	incr   *redis.IntCmd  // 遞增命令結果
 	expire *redis.BoolCmd // 超時命令結果
@@ -58,7 +58,7 @@ func (this *Lock) Complete() error {
 //   - 在內部執行過程中, 索引字串會被轉為小寫
 type Unlock struct {
 	Behave
-	Key string        // 索引字串
+	Key string        // 索引值
 	del *redis.IntCmd // 刪除命令結果
 }
 

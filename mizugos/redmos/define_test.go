@@ -50,9 +50,3 @@ func (this *behaveTester) Complete() error {
 	this.validResult = true
 	return nil
 }
-
-// dataTester 測試資料
-type dataTester struct {
-	Key  string `bson:"key"`
-	Data string `bson:"data"`
-}

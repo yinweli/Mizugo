@@ -80,17 +80,22 @@ func (this *SuiteMinor) TestMinorSubmit() {
 }
 
 func BenchmarkMinorSet(b *testing.B) {
+	type myData struct {
+		Key  string `bson:"key"`
+		Data string `bson:"data"`
+	}
+
 	name := "benchmark minor"
+	data := &myData{
+		Key:  utils.RandString(testdata.RandStringLength),
+		Data: utils.RandString(testdata.RandStringLength),
+	}
 	target, _ := newMinor(ctxs.Root(), testdata.MongoURI, name)
 	submit := target.Submit()
 
 	for i := 0; i < b.N; i++ {
-		value := utils.RandString(testdata.RandStringLength)
-		_, _ = submit.Table(name).ReplaceOne(
-			ctxs.RootCtx(),
-			bson.D{{Key: "key", Value: value}},
-			&dataTester{Key: value, Data: value},
-			options.Replace().SetUpsert(true))
+		data.Data = utils.RandString(testdata.RandStringLength)
+		_, _ = submit.Table(name).ReplaceOne(ctxs.RootCtx(), bson.D{{Key: "key", Value: data.Key}}, data, options.Replace().SetUpsert(true))
 	} // for
 
 	_ = submit.Drop(ctxs.RootCtx())
