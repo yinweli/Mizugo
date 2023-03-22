@@ -108,4 +108,6 @@ func (this *Logmgr) Finalize() {
 	for _, itor := range this.logger {
 		itor.Finalize()
 	} // for
+
+	this.logger = map[string]Logger{}
 }
