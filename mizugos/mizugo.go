@@ -15,8 +15,6 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/redmos"
 )
 
-// TODO: 遊戲伺服器應用程式在發生問題或故障時有自動修復的功能嗎？
-
 // Start 啟動伺服器, 用於啟動mizugo伺服器, 需要指定 Initialize 執行初始化處理, Finalize 執行結束處理, Crashlize 執行崩潰處理
 //
 // 啟動伺服器執行的順序為

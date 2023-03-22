@@ -10,12 +10,13 @@ import (
 
 // Index 建立索引行為, 到次要資料庫中建立索引, 使用上有以下幾點須注意
 //   - 只有次要資料庫的操作會被索引影響, 當查詢的欄位符合索引時會自動生效
-//   - 使用前必須設定好 Table, Field 並且不能為空字串; (可選)設定好 Order, Unique 並且要符合規範
+//   - 執行前必須設定好 Table, Field 並且不能為空字串
+//   - 執行前設定好 Order, Unique 並且要符合規範
 //   - 在內部執行過程中, 索引名稱, 索引欄位會被轉為小寫
 type Index struct {
 	Behave
 	Table  string // 表格名稱
-	Field  string // 索引欄位
+	Field  string // 索引名稱
 	Order  int    // 排序方向, 1表示順序, -1表示逆序
 	Unique bool   // 是否唯一索引, 唯一索引的情況下, 索引值不允許重複
 }
