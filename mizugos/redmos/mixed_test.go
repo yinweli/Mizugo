@@ -17,7 +17,6 @@ func TestMixed(t *testing.T) {
 type SuiteMixed struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 	testdata.TestDB
 	name  string
 	major *Major
@@ -25,14 +24,14 @@ type SuiteMixed struct {
 }
 
 func (this *SuiteMixed) SetupSuite() {
-	this.Change("test-redmos-mixed")
+	this.TBegin("test-redmos-mixed", "")
 	this.name = "mixed"
 	this.major, _ = newMajor(ctxs.Root(), testdata.RedisURI)
 	this.minor, _ = newMinor(ctxs.Root(), testdata.MongoURI, this.name)
 }
 
 func (this *SuiteMixed) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 	this.RedisClear(ctxs.RootCtx(), this.major.Client())
 	this.MongoClear(ctxs.RootCtx(), this.minor.Database().Collection(this.name))
 	this.major.stop()
@@ -40,7 +39,7 @@ func (this *SuiteMixed) TearDownSuite() {
 }
 
 func (this *SuiteMixed) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteMixed) TestNewMixed() {

@@ -18,19 +18,18 @@ func TestMD5(t *testing.T) {
 type SuiteMD5 struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 }
 
 func (this *SuiteMD5) SetupSuite() {
-	this.Change("test-cryptos-md5")
+	this.TBegin("test-cryptos-md5", "")
 }
 
 func (this *SuiteMD5) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 }
 
 func (this *SuiteMD5) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteMD5) TestMD5String() {

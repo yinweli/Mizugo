@@ -16,19 +16,18 @@ func TestProcmgr(t *testing.T) {
 type SuiteProcmgr struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 }
 
 func (this *SuiteProcmgr) SetupSuite() {
-	this.Change("test-procs-procmgr")
+	this.TBegin("test-procs-procmgr", "")
 }
 
 func (this *SuiteProcmgr) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 }
 
 func (this *SuiteProcmgr) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteProcmgr) TestNewProcmgr() {

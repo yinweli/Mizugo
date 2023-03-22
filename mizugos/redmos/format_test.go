@@ -16,19 +16,18 @@ func TestFormat(t *testing.T) {
 type SuiteFormat struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 }
 
 func (this *SuiteFormat) SetupSuite() {
-	this.Change("test-redmos-format")
+	this.TBegin("test-redmos-format", "")
 }
 
 func (this *SuiteFormat) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 }
 
 func (this *SuiteFormat) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteFormat) TestFormatField() {

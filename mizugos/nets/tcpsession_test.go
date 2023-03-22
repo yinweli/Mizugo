@@ -17,23 +17,22 @@ func TestTCPSession(t *testing.T) {
 type SuiteTCPSession struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 	host    host
 	message string
 }
 
 func (this *SuiteTCPSession) SetupSuite() {
-	this.Change("test-nets-tcpSession")
+	this.TBegin("test-nets-tcpSession", "")
 	this.host = host{port: "11001"}
 	this.message = "message"
 }
 
 func (this *SuiteTCPSession) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 }
 
 func (this *SuiteTCPSession) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteTCPSession) TestNewTCPSession() {

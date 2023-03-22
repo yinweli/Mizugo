@@ -17,23 +17,22 @@ func TestNetmgr(t *testing.T) {
 type SuiteNetmgr struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 	hostGoogle host
 	hostLocal  host
 }
 
 func (this *SuiteNetmgr) SetupSuite() {
-	this.Change("test-nets-netmgr")
+	this.TBegin("test-nets-netmgr", "")
 	this.hostGoogle = host{ip: "google.com", port: "80"}
 	this.hostLocal = host{port: "12001"}
 }
 
 func (this *SuiteNetmgr) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 }
 
 func (this *SuiteNetmgr) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteNetmgr) TestNewNetmgr() {

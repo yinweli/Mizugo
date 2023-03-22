@@ -18,7 +18,6 @@ func TestMxGet(t *testing.T) {
 type SuiteMxGet struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 	testdata.TestDB
 	dbtable string
 	field   string
@@ -33,7 +32,7 @@ type dataMxGet struct {
 }
 
 func (this *SuiteMxGet) SetupSuite() {
-	this.Change("test-redmos-mxget")
+	this.TBegin("test-redmos-mxget", "")
 	this.dbtable = "mxget"
 	this.field = "key"
 	this.key = this.Key("mxget")
@@ -42,7 +41,7 @@ func (this *SuiteMxGet) SetupSuite() {
 }
 
 func (this *SuiteMxGet) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 	this.RedisClear(ctxs.RootCtx(), this.major.Client())
 	this.MongoClear(ctxs.RootCtx(), this.minor.Database().Collection(this.dbtable))
 	this.major.stop()
@@ -50,7 +49,7 @@ func (this *SuiteMxGet) TearDownSuite() {
 }
 
 func (this *SuiteMxGet) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteMxGet) TestGet() {

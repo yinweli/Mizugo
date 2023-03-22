@@ -16,19 +16,18 @@ func TestModulemgr(t *testing.T) {
 type SuiteModulemgr struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 }
 
 func (this *SuiteModulemgr) SetupSuite() {
-	this.Change("test-entitys-modulemgr")
+	this.TBegin("test-entitys-modulemgr", "")
 }
 
 func (this *SuiteModulemgr) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 }
 
 func (this *SuiteModulemgr) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteModulemgr) TestNewModulemgr() {

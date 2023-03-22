@@ -19,14 +19,13 @@ func TestProto(t *testing.T) {
 type SuiteProto struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 	key       string
 	messageID MessageID
 	message   *msgs.ProtoTest
 }
 
 func (this *SuiteProto) SetupSuite() {
-	this.Change("test-procs-proto")
+	this.TBegin("test-procs-proto", "")
 	this.key = cryptos.RandDesKeyString()
 	this.messageID = MessageID(1)
 	this.message = &msgs.ProtoTest{
@@ -35,11 +34,11 @@ func (this *SuiteProto) SetupSuite() {
 }
 
 func (this *SuiteProto) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 }
 
 func (this *SuiteProto) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteProto) TestNewProto() {

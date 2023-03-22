@@ -18,21 +18,20 @@ func TestTCPListen(t *testing.T) {
 type SuiteTCPListen struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 	host host
 }
 
 func (this *SuiteTCPListen) SetupSuite() {
-	this.Change("test-nets-tcpListen")
+	this.TBegin("test-nets-tcpListen", "")
 	this.host = host{port: "10001"}
 }
 
 func (this *SuiteTCPListen) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 }
 
 func (this *SuiteTCPListen) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteTCPListen) TestNewTCPListen() {

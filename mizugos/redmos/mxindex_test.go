@@ -17,7 +17,6 @@ func TestMxIndex(t *testing.T) {
 type SuiteMxIndex struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 	testdata.TestDB
 	dbtable string
 	field   string
@@ -26,7 +25,7 @@ type SuiteMxIndex struct {
 }
 
 func (this *SuiteMxIndex) SetupSuite() {
-	this.Change("test-redmos-mxindex")
+	this.TBegin("test-redmos-mxindex", "")
 	this.dbtable = "mxindex"
 	this.field = "index"
 	this.major, _ = newMajor(ctxs.Root(), testdata.RedisURI)
@@ -34,7 +33,7 @@ func (this *SuiteMxIndex) SetupSuite() {
 }
 
 func (this *SuiteMxIndex) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 	this.RedisClear(ctxs.RootCtx(), this.major.Client())
 	this.MongoClear(ctxs.RootCtx(), this.minor.Database().Collection(this.dbtable))
 	this.major.stop()
@@ -42,7 +41,7 @@ func (this *SuiteMxIndex) TearDownSuite() {
 }
 
 func (this *SuiteMxIndex) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteMxIndex) TestIndex() {
