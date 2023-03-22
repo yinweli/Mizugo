@@ -16,19 +16,18 @@ func TestRedmomgr(t *testing.T) {
 type SuiteRedmomgr struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 }
 
 func (this *SuiteRedmomgr) SetupSuite() {
-	this.Change("test-redmos-redmomgr")
+	this.TBegin("test-redmos-redmomgr", "")
 }
 
 func (this *SuiteRedmomgr) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 }
 
 func (this *SuiteRedmomgr) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteRedmomgr) TestNewRedmomgr() {

@@ -18,19 +18,18 @@ func TestContext(t *testing.T) {
 type SuiteContext struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 }
 
 func (this *SuiteContext) SetupSuite() {
-	this.Change("test-contexts-context")
+	this.TBegin("test-contexts-context", "")
 }
 
 func (this *SuiteContext) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 }
 
 func (this *SuiteContext) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteContext) TestRoot() {

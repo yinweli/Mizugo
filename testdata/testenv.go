@@ -4,31 +4,48 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"testing"
 
-	copyfolder "github.com/otiai10/copy"
+	"github.com/otiai10/copy"
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/goleak"
 )
 
 // TestEnv 測試環境
 type TestEnv struct {
+	// 通用測試
+
+	Unknown string // 未知字串
+
+	// 測試環境
+
 	original string // 原始路徑
 	workpath string // 工作路徑
 }
 
-// Change 變更工作目錄
-func (this *TestEnv) Change(dir string) {
+// TBegin 開始測試
+func (this *TestEnv) TBegin(work, data string) {
+	// 初始化通用測試
+
+	this.Unknown = "?????"
+
+	// 初始化測試環境
+
 	original, err := os.Getwd()
 
 	if err != nil {
 		panic(err)
 	} // if
 
-	workpath := filepath.Join(rootpath, dir)
+	workpath := filepath.Join(rootpath, work)
 
 	if err = os.MkdirAll(workpath, os.ModePerm); err != nil {
 		panic(err)
 	} // if
 
-	if err = copyfolder.Copy(envpath, workpath); err != nil {
+	datapath := filepath.Join(envpath, data)
+
+	if err = copy.Copy(datapath, workpath); err != nil {
 		panic(err)
 	} // if
 
@@ -40,8 +57,8 @@ func (this *TestEnv) Change(dir string) {
 	this.workpath = workpath
 }
 
-// Restore 復原工作目錄
-func (this *TestEnv) Restore() {
+// TFinal 結束測試
+func (this *TestEnv) TFinal() {
 	if err := os.Chdir(this.original); err != nil {
 		panic(err)
 	} // if
@@ -49,6 +66,25 @@ func (this *TestEnv) Restore() {
 	if err := os.RemoveAll(this.workpath); err != nil {
 		panic(err)
 	} // if
+}
+
+// ===== 洩漏測試 =====
+
+// TLeak 執行洩漏測試, 測試是否有執行緒未被關閉, 但是會有誤判的狀況, 預設關閉;
+// 可以通過在 init 函式中把 leakTest 設為 true 來開啟
+func (this *TestEnv) TLeak(t goleak.TestingT, run bool) {
+	if leakTest && run {
+		goleak.VerifyNone(t)
+	} // if
+}
+
+// ===== 測試工具 =====
+
+// TCompareFile 比對檔案內容, 預期資料來自位元陣列
+func (this *TestEnv) TCompareFile(t *testing.T, path string, expected []byte) {
+	actual, err := os.ReadFile(path)
+	assert.Nil(t, err)
+	assert.Equal(t, string(expected), string(actual))
 }
 
 func init() {
@@ -61,13 +97,16 @@ func init() {
 	rootpath = filepath.Dir(file)
 	envpath = filepath.Join(rootpath, "env")
 
-	// 如果env資料夾不存在, 就建立一個, 免得後測試測試時拋出錯誤
+	// 如果env資料夾不存在, 就建立一個, 免得測試時拋出錯誤
 	if _, err := os.Stat(envpath); os.IsNotExist(err) {
 		if err = os.MkdirAll(envpath, os.ModePerm); err != nil {
 			panic(err)
 		} // if
 	} // if
+
+	leakTest = false // 這裡用來開啟/關閉洩漏測試旗標
 }
 
-var rootpath string // 測試資料路徑
-var envpath string  // 環境資料路徑
+var rootpath string // 根路徑
+var envpath string  // 環境路徑
+var leakTest bool   // 洩漏測試旗標

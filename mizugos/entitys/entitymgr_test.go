@@ -16,19 +16,18 @@ func TestEntitymgr(t *testing.T) {
 type SuiteEntitymgr struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 }
 
 func (this *SuiteEntitymgr) SetupSuite() {
-	this.Change("test-entitys-entitymgr")
+	this.TBegin("test-entitys-entitymgr", "")
 }
 
 func (this *SuiteEntitymgr) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 }
 
 func (this *SuiteEntitymgr) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteEntitymgr) TestNewEntitymgr() {

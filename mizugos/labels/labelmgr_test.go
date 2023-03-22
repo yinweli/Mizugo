@@ -16,19 +16,18 @@ func TestLabelmgr(t *testing.T) {
 type SuiteLabelmgr struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 }
 
 func (this *SuiteLabelmgr) SetupSuite() {
-	this.Change("test-labels-labelmgr")
+	this.TBegin("test-labels-labelmgr", "")
 }
 
 func (this *SuiteLabelmgr) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 }
 
 func (this *SuiteLabelmgr) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteLabelmgr) TestNewLabelmgr() {

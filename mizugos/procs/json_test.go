@@ -18,14 +18,13 @@ func TestJson(t *testing.T) {
 type SuiteJson struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 	key       string
 	messageID MessageID
 	message   *msgs.JsonTest
 }
 
 func (this *SuiteJson) SetupSuite() {
-	this.Change("test-procs-json")
+	this.TBegin("test-procs-json", "")
 	this.key = cryptos.RandDesKeyString()
 	this.messageID = MessageID(1)
 	this.message = &msgs.JsonTest{
@@ -34,11 +33,11 @@ func (this *SuiteJson) SetupSuite() {
 }
 
 func (this *SuiteJson) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 }
 
 func (this *SuiteJson) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteJson) TestNewJson() {

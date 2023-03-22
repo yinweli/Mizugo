@@ -18,20 +18,19 @@ func TestMajor(t *testing.T) {
 type SuiteMajor struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 	testdata.TestDB
 }
 
 func (this *SuiteMajor) SetupSuite() {
-	this.Change("test-redmos-major")
+	this.TBegin("test-redmos-major", "")
 }
 
 func (this *SuiteMajor) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 }
 
 func (this *SuiteMajor) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteMajor) TestNewMajor() {

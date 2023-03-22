@@ -19,21 +19,20 @@ func TestRuntime(t *testing.T) {
 type SuiteRuntime struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 	port int
 }
 
 func (this *SuiteRuntime) SetupSuite() {
-	this.Change("test-metrics-runtime")
+	this.TBegin("test-metrics-runtime", "")
 	this.port = 8080
 }
 
 func (this *SuiteRuntime) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 }
 
 func (this *SuiteRuntime) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteRuntime) TestRuntime() {

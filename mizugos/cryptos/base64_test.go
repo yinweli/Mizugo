@@ -17,19 +17,18 @@ func TestBase64(t *testing.T) {
 type SuiteBase64 struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 }
 
 func (this *SuiteBase64) SetupSuite() {
-	this.Change("test-cryptos-base64")
+	this.TBegin("test-cryptos-base64", "")
 }
 
 func (this *SuiteBase64) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 }
 
 func (this *SuiteBase64) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteBase64) TestBase64() {

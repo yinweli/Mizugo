@@ -18,19 +18,18 @@ func TestURI(t *testing.T) {
 type SuiteURI struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 }
 
 func (this *SuiteURI) SetupSuite() {
-	this.Change("test-redmos-uri")
+	this.TBegin("test-redmos-uri", "")
 }
 
 func (this *SuiteURI) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 }
 
 func (this *SuiteURI) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteURI) TestRedisURIConnect() {

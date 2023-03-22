@@ -17,19 +17,18 @@ func TestString(t *testing.T) {
 type SuiteString struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 }
 
 func (this *SuiteString) SetupSuite() {
-	this.Change("test-utils-string")
+	this.TBegin("test-utils-string", "")
 }
 
 func (this *SuiteString) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 }
 
 func (this *SuiteString) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteString) TestExpvarStr() {

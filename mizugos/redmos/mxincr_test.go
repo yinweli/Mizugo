@@ -17,7 +17,6 @@ func TestMxIncr(t *testing.T) {
 type SuiteMxIncr struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 	testdata.TestDB
 	dbtable string
 	field   string
@@ -32,7 +31,7 @@ type dataMxIncr struct {
 }
 
 func (this *SuiteMxIncr) SetupSuite() {
-	this.Change("test-redmos-mxincr")
+	this.TBegin("test-redmos-mxincr", "")
 	this.dbtable = "mxincr"
 	this.field = "name"
 	this.key = this.Key("mxincr")
@@ -41,7 +40,7 @@ func (this *SuiteMxIncr) SetupSuite() {
 }
 
 func (this *SuiteMxIncr) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 	this.RedisClear(ctxs.RootCtx(), this.major.Client())
 	this.MongoClear(ctxs.RootCtx(), this.minor.Database().Collection(this.dbtable))
 	this.major.stop()
@@ -49,7 +48,7 @@ func (this *SuiteMxIncr) TearDownSuite() {
 }
 
 func (this *SuiteMxIncr) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteMxIncr) TestIncr() {

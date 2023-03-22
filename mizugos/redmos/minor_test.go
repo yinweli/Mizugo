@@ -20,22 +20,21 @@ func TestMinor(t *testing.T) {
 type SuiteMinor struct {
 	suite.Suite
 	testdata.TestEnv
-	testdata.TestLeak
 	testdata.TestDB
 	name string
 }
 
 func (this *SuiteMinor) SetupSuite() {
-	this.Change("test-redmos-minor")
+	this.TBegin("test-redmos-minor", "")
 	this.name = "minor"
 }
 
 func (this *SuiteMinor) TearDownSuite() {
-	this.Restore()
+	this.TFinal()
 }
 
 func (this *SuiteMinor) TearDownTest() {
-	this.GoLeak(this.T(), true)
+	this.TLeak(this.T(), true)
 }
 
 func (this *SuiteMinor) TestNewMinor() {
