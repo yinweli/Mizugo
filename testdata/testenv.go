@@ -4,10 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"testing"
 
 	"github.com/otiai10/copy"
-	"github.com/stretchr/testify/assert"
 	"go.uber.org/goleak"
 )
 
@@ -68,8 +66,6 @@ func (this *TestEnv) TFinal() {
 	} // if
 }
 
-// ===== 洩漏測試 =====
-
 // TLeak 執行洩漏測試, 測試是否有執行緒未被關閉, 但是會有誤判的狀況, 預設關閉;
 // 可以通過在 init 函式中把 leakTest 設為 true 來開啟
 func (this *TestEnv) TLeak(t goleak.TestingT, run bool) {
@@ -78,13 +74,13 @@ func (this *TestEnv) TLeak(t goleak.TestingT, run bool) {
 	} // if
 }
 
-// ===== 測試工具 =====
-
 // TCompareFile 比對檔案內容, 預期資料來自位元陣列
-func (this *TestEnv) TCompareFile(t *testing.T, path string, expected []byte) {
-	actual, err := os.ReadFile(path)
-	assert.Nil(t, err)
-	assert.Equal(t, string(expected), string(actual))
+func (this *TestEnv) TCompareFile(path string, expected []byte) bool {
+	if actual, err := os.ReadFile(path); err == nil {
+		return string(expected) == string(actual)
+	} // if
+
+	return false
 }
 
 func init() {
