@@ -1,7 +1,6 @@
 package mizugos
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/yinweli/Mizugo/mizugos/configs"
@@ -15,29 +14,37 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/redmos"
 )
 
-// Start 啟動伺服器, 用於啟動mizugo伺服器, 需要指定 Initialize 執行初始化處理, Finalize 執行結束處理, Crashlize 執行崩潰處理
+// Start 啟動伺服器
 //
-// 啟動伺服器執行的順序為
-//   - 設置內部成員
-//   - 建立各管理器, 注意! 這裡只建立而沒有對各管理器進行初始化
-//   - 執行 Initialize
-//   - 進入無限迴圈, 直到關閉伺服器(呼叫 Stop 後)
-//   - 執行 Finalize
-//   - 釋放內部成員
-//   - 釋放各管理器
-//   - 最後呼叫 ctxs.Root().Cancel() 讓由contexts.Ctx()衍生出來的執行緒最後都能被終止, 避免goroutine洩漏
+// 啟動伺服器後按使用者的需要, 可以參考以下的寫法
 //
-// 為了讓程式持續執行, 此函式不能用執行緒執行, 也請不要執行此函式兩次
-func Start(name string, initialize Initialize, finalize Finalize, crashlize Crashlize) {
-	defer func() {
-		if cause := recover(); cause != nil {
-			crashlize(cause)
-		} // if
-	}()
-
+//	defer func() {
+//	    if cause := recover(); cause != nil {
+//	        // 處理崩潰錯誤
+//	    } // if
+//	}()
+//
+//	ctx := ctxs.Root().WithCancel()
+//	name := "伺服器名稱"
+//	mizugos.Start() // 啟動伺服器
+//
+//	// 使用者自訂的初始化程序
+//	// 如果有任何失敗, 執行 mizugos.Stop() 後退出
+//
+//	fmt.Printf("%v start\n", name)
+//
+//	for range ctx.Done() { // 進入無限迴圈直到執行 ctx.Cancel()
+//	} // for
+//
+//	// 使用者自訂的結束程序
+//	// 如果有任何失敗, 執行 mizugos.Stop() 後退出
+//
+//	mizugos.Stop() // 關閉伺服器
+//	fmt.Printf("%v shutdown\n", name)
+func Start() {
 	server.lock.Lock()
-	server.name = name
-	server.ctx = ctxs.Root().WithCancel()
+	defer server.lock.Unlock()
+
 	server.configmgr = configs.NewConfigmgr()
 	server.metricsmgr = metrics.NewMetricsmgr()
 	server.logmgr = logs.NewLogmgr()
@@ -46,29 +53,13 @@ func Start(name string, initialize Initialize, finalize Finalize, crashlize Cras
 	server.entitymgr = entitys.NewEntitymgr()
 	server.labelmgr = labels.NewLabelmgr()
 	server.poolmgr = pools.DefaultPool // 執行緒池管理器直接用預設的
-	server.lock.Unlock()
+}
 
-	fmt.Printf("%v initialize\n", name)
+// Stop 關閉伺服器
+func Stop() {
+	server.lock.RLock()
+	defer server.lock.RUnlock()
 
-	if err := initialize.Do(); err != nil {
-		fmt.Println(fmt.Errorf("%v initialize: %w", name, err))
-		goto Finalize
-	} // if
-
-	fmt.Printf("%v start\n", name)
-
-	// 進行等待, 直到關閉伺服器
-	for range server.ctx.Done() {
-	} // for
-
-	fmt.Printf("%v shutdown\n", name)
-	finalize.Do()
-
-Finalize: // 結束處理
-	fmt.Printf("%v finalize\n", name)
-	server.lock.Lock()
-	server.name = ""
-	server.ctx.Cancel()
 	server.configmgr = nil
 	server.metricsmgr = nil
 	server.logmgr = nil
@@ -77,24 +68,7 @@ Finalize: // 結束處理
 	server.entitymgr = nil
 	server.labelmgr = nil
 	server.poolmgr = nil
-	server.lock.Unlock()
-	ctxs.Root().Cancel() // 關閉伺服器, 並且保證由contexts.Ctx()衍生出來的執行緒最後都能被終止, 避免goroutine洩漏
-}
-
-// Stop 關閉伺服器
-func Stop() {
-	server.lock.RLock()
-	defer server.lock.RUnlock()
-
-	server.ctx.Cancel()
-}
-
-// Name 取得伺服器名稱
-func Name() string {
-	server.lock.RLock()
-	defer server.lock.RUnlock()
-
-	return server.name
+	ctxs.Root().Cancel() // 關閉由contexts.Ctx()衍生出來的執行緒, 避免goroutine洩漏
 }
 
 // ===== 管理器功能 =====
@@ -197,44 +171,8 @@ func Error(name, label string) logs.Stream {
 	return server.logmgr.Error(name, label)
 }
 
-// ===== 其他定義 =====
-
-// Initialize 初始化處理函式類型
-type Initialize func() error
-
-// Do 執行處理
-func (this Initialize) Do() error {
-	if this != nil {
-		return this()
-	} // if
-
-	return nil
-}
-
-// Finalize 結束處理函式類型
-type Finalize func()
-
-// Do 執行處理
-func (this Finalize) Do() {
-	if this != nil {
-		this()
-	} // if
-}
-
-// Crashlize 崩潰處理函式類型
-type Crashlize func(cause any)
-
-// Do 執行處理
-func (this Crashlize) Do(cause any) {
-	if this != nil {
-		this(cause)
-	} // if
-}
-
 // server 伺服器資料
 var server struct {
-	name       string              // 伺服器名稱
-	ctx        ctxs.Ctx            // ctx物件
 	configmgr  *configs.Configmgr  // 配置管理器
 	metricsmgr *metrics.Metricsmgr // 統計管理器
 	logmgr     *logs.Logmgr        // 日誌管理器

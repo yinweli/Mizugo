@@ -4,13 +4,38 @@ import (
 	"fmt"
 
 	"github.com/yinweli/Mizugo/mizugos"
+	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/entrys"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/features"
 )
 
 func main() {
-	mizugos.Start(defines.CmdClient, initialize, finalize, defines.Crashlize)
+	defer func() {
+		if cause := recover(); cause != nil {
+			defines.Crashlize(cause)
+		} // if
+	}()
+
+	ctx := ctxs.Root().WithCancel()
+	name := defines.CmdClient
+	mizugos.Start()
+
+	if err := initialize(); err != nil {
+		fmt.Println(fmt.Errorf("%v start: %w", name, err))
+		mizugos.Stop()
+		return
+	} // if
+
+	fmt.Printf("%v start\n", name)
+
+	for range ctx.Done() {
+		// do nothing...
+	} // for
+
+	finalize()
+	mizugos.Stop()
+	fmt.Printf("%v shutdown\n", name)
 }
 
 // initialize 初始化處理

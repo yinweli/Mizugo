@@ -1,8 +1,6 @@
 package mizugos
 
 import (
-	"fmt"
-	"sync/atomic"
 	"testing"
 	"time"
 
@@ -34,12 +32,8 @@ func (this *SuiteMizugo) TearDownTest() {
 }
 
 func (this *SuiteMizugo) TestMizugo() {
-	name := "mizugo"
-	tester := &mizugoTester{}
-
-	go Start(name, tester.initialize, tester.finalize, tester.crashlize)
+	Start()
 	time.Sleep(testdata.Timeout)
-	assert.Equal(this.T(), name, Name())
 	assert.NotNil(this.T(), Configmgr())
 	assert.NotNil(this.T(), Metricsmgr())
 	assert.NotNil(this.T(), Logmgr())
@@ -54,42 +48,4 @@ func (this *SuiteMizugo) TestMizugo() {
 	assert.NotNil(this.T(), Error("", ""))
 	time.Sleep(testdata.Timeout)
 	Stop()
-	time.Sleep(testdata.Timeout)
-	assert.True(this.T(), tester.validInit())
-	assert.True(this.T(), tester.validFinal())
-
-	go Start(name, func() error {
-		return fmt.Errorf("failed")
-	}, nil, nil)
-	time.Sleep(testdata.Timeout)
-	Stop()
-
-	go Start(name, nil, nil, nil)
-	time.Sleep(testdata.Timeout)
-	Stop()
-}
-
-type mizugoTester struct {
-	countInit atomic.Int64
-	countFin  atomic.Int64
-}
-
-func (this *mizugoTester) initialize() error {
-	this.countInit.Add(1)
-	return nil
-}
-
-func (this *mizugoTester) finalize() {
-	this.countFin.Add(1)
-}
-
-func (this *mizugoTester) crashlize(_ any) {
-}
-
-func (this *mizugoTester) validInit() bool {
-	return this.countInit.Load() == 1
-}
-
-func (this *mizugoTester) validFinal() bool {
-	return this.countFin.Load() == 1
 }
