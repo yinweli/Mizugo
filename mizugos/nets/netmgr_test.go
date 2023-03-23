@@ -51,7 +51,7 @@ func (this *SuiteNetmgr) TestAddConnectTCP() {
 	assert.Nil(this.T(), target.GetConnect(connectID))
 
 	time.Sleep(testdata.Timeout)
-	target.Stop()
+	target.Finalize()
 }
 
 func (this *SuiteNetmgr) TestAddListenTCP() {
@@ -66,7 +66,7 @@ func (this *SuiteNetmgr) TestAddListenTCP() {
 	assert.Nil(this.T(), target.GetListen(listenID))
 
 	time.Sleep(testdata.Timeout)
-	target.Stop()
+	target.Finalize()
 }
 
 func (this *SuiteNetmgr) TestStop() {
@@ -78,7 +78,7 @@ func (this *SuiteNetmgr) TestStop() {
 	assert.True(this.T(), test.validSession())
 
 	time.Sleep(testdata.Timeout)
-	target.Stop()
+	target.Finalize()
 
 	time.Sleep(testdata.Timeout)
 	assert.False(this.T(), test.validSession())
@@ -102,7 +102,7 @@ func (this *SuiteNetmgr) TestStatus() {
 	assert.Equal(this.T(), 2, status.Session)
 
 	time.Sleep(testdata.Timeout)
-	target.Stop()
+	target.Finalize()
 }
 
 func (this *SuiteNetmgr) TestConnectmgr() {

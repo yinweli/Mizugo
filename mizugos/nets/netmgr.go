@@ -93,8 +93,8 @@ func (this *Netmgr) GetListen(listenID ListenID) Listener {
 	return this.listenmgr.get(listenID)
 }
 
-// Stop 停止網路
-func (this *Netmgr) Stop() {
+// Finalize 結束處理
+func (this *Netmgr) Finalize() {
 	this.connectmgr.clear()
 	this.listenmgr.clear()
 	this.sessionmgr.clear()

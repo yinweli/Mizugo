@@ -58,5 +58,5 @@ func (this *SuiteRedmomgr) TestRedmomgr() {
 	assert.NotNil(this.T(), target.AddMixed(unknownName, unknownName, minorName))
 	assert.NotNil(this.T(), target.GetMixed(mixedName))
 	assert.Nil(this.T(), target.GetMixed(unknownName))
-	target.Stop()
+	target.Finalize()
 }
