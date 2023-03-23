@@ -16,9 +16,8 @@ func NewPoolmgr() *Poolmgr {
 
 // Poolmgr 執行緒池管理器
 type Poolmgr struct {
-	pool   *ants.Pool     // 執行緒池
-	logger ants.Logger    // 日誌物件
-	once   utils.SyncOnce // 單次執行物件
+	pool   *ants.Pool  // 執行緒池
+	logger ants.Logger // 日誌物件
 }
 
 // Initialize 初始化處理
@@ -27,57 +26,54 @@ func (this *Poolmgr) Initialize(config *Config) (err error) {
 		return fmt.Errorf("poolmgr initialize: config nil")
 	} // if
 
-	if this.once.Done() {
+	if this.pool != nil {
 		return fmt.Errorf("poolmgr initialize: already initialize")
 	} // if
 
-	this.once.Do(func() {
-		this.pool, err = ants.NewPool(
-			config.Capacity,
-			ants.WithExpiryDuration(config.Expire),
-			ants.WithPreAlloc(config.PreAlloc),
-			ants.WithNonblocking(config.Nonblocking),
-			ants.WithMaxBlockingTasks(config.MaxBlocking),
-			ants.WithPanicHandler(config.PanicHandler),
-			ants.WithLogger(config.Logger),
-		)
-		this.logger = config.Logger
+	this.pool, err = ants.NewPool(
+		config.Capacity,
+		ants.WithExpiryDuration(config.Expire),
+		ants.WithPreAlloc(config.PreAlloc),
+		ants.WithNonblocking(config.Nonblocking),
+		ants.WithMaxBlockingTasks(config.MaxBlocking),
+		ants.WithPanicHandler(config.PanicHandler),
+		ants.WithLogger(config.Logger),
+	)
+	this.logger = config.Logger
 
-		if err != nil {
-			err = fmt.Errorf("poolmgr initialize: %w", err)
-		} // if
-	})
+	if err != nil {
+		err = fmt.Errorf("poolmgr initialize: %w", err)
+	} // if
 
 	return err
 }
 
 // Finalize 結束處理
 func (this *Poolmgr) Finalize() {
-	if this.once.Done() == false {
-		return
-	} // if
-
 	if this.pool != nil {
 		this.pool.Release()
+		this.pool = nil
+		this.logger = nil
 	} // if
 }
 
 // Submit 啟動執行緒
 func (this *Poolmgr) Submit(task func()) {
-	if this.once.Done() {
-		if err := this.pool.Submit(task); err != nil {
-			if this.logger != nil {
-				this.logger.Printf("poolmgr submit: %w", err)
-			} // if
-		} // if
-	} else {
+	if this.pool == nil {
 		go task()
+		return
+	} // if
+
+	if err := this.pool.Submit(task); err != nil {
+		if this.logger != nil {
+			this.logger.Printf("poolmgr submit: %w", err)
+		} // if
 	} // if
 }
 
 // Status 獲得狀態資料
 func (this *Poolmgr) Status() Stat {
-	if this.once.Done() == false || this.pool == nil {
+	if this.pool == nil {
 		return Stat{}
 	} // if
 
