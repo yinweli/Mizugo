@@ -38,6 +38,7 @@ func (this *SuiteRuntime) TearDownTest() {
 func (this *SuiteRuntime) TestRuntime() {
 	metricsmgr := NewMetricsmgr()
 	assert.Nil(this.T(), metricsmgr.Initialize(this.port))
+	time.Sleep(testdata.Timeout) // 等待一下, 讓初始化有機會完成
 
 	target := metricsmgr.NewRuntime("test")
 	assert.NotNil(this.T(), target)

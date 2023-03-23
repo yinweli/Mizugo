@@ -152,6 +152,7 @@ func (this *Redmomgr) Stop() {
 	} // if
 
 	this.ctx.Cancel()
+	this.ctx = ctxs.Root().WithCancel()
 	this.major = map[string]*Major{}
 	this.minor = map[string]*Minor{}
 	this.mixed = map[string]*Mixed{}
