@@ -8,7 +8,6 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/pools"
-	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
 // NewMetricsmgr 建立度量管理器
@@ -40,49 +39,42 @@ func NewMetricsmgr() *Metricsmgr {
 //   - expvarmon -ports="http://localhost:8080" -i 1s
 //   - expvarmon -ports="http://localhost:8080" -vars="count:count,total:total,money:value" -i 1s
 type Metricsmgr struct {
-	once   utils.SyncOnce // 單次執行物件
-	ctx    ctxs.Ctx       // ctx物件
-	server *http.Server   // http伺服器物件
+	ctx    ctxs.Ctx     // ctx物件
+	server *http.Server // http伺服器物件
 }
 
 // Initialize 初始化處理
 func (this *Metricsmgr) Initialize(port int) error {
-	if this.once.Done() {
+	if this.server != nil {
 		return fmt.Errorf("metricsmgr initialize: already initialize")
 	} // if
 
-	this.once.Do(func() {
-		handler := http.NewServeMux()
-		handler.HandleFunc("/debug/pprof/", pprof.Index)
-		handler.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-		handler.HandleFunc("/debug/pprof/profile", pprof.Profile)
-		handler.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-		handler.HandleFunc("/debug/pprof/trace", pprof.Trace)
-		handler.Handle("/debug/vars", expvar.Handler())
+	handler := http.NewServeMux()
+	handler.HandleFunc("/debug/pprof/", pprof.Index)
+	handler.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	handler.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	handler.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	handler.HandleFunc("/debug/pprof/trace", pprof.Trace)
+	handler.Handle("/debug/vars", expvar.Handler())
 
-		this.ctx = ctxs.Root().WithCancel()
-		this.server = &http.Server{
-			Addr:              fmt.Sprintf(":%v", port),
-			ReadHeaderTimeout: timeout,
-			Handler:           handler,
-		}
+	this.ctx = ctxs.Root().WithCancel()
+	this.server = &http.Server{
+		Addr:              fmt.Sprintf(":%v", port),
+		ReadHeaderTimeout: timeout,
+		Handler:           handler,
+	}
 
-		pools.DefaultPool.Submit(func() {
-			_ = this.server.ListenAndServe()
-		})
+	pools.DefaultPool.Submit(func() {
+		_ = this.server.ListenAndServe()
 	})
-
 	return nil
 }
 
 // Finalize 結束處理
 func (this *Metricsmgr) Finalize() {
-	if this.once.Done() == false {
-		return
-	} // if
-
 	if this.server != nil {
 		_ = this.server.Close()
+		this.server = nil
 	} // if
 
 	this.ctx.Cancel()

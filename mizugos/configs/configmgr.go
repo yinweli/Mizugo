@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
-
-	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
 // NewConfigmgr 建立配置管理器
@@ -30,11 +28,12 @@ func NewConfigmgr() *Configmgr {
 // 當配置讀取完畢後, 需要從管理器中取得配置值時, 可以用索引字串來呼叫 Get.. 系列函式來取得配置值;
 // 或是用索引字串來呼叫 Unmarshal 來取得反序列化到結構的配置資料
 type Configmgr struct {
-	once utils.SyncOnce // 單次執行物件
+	read bool // 讀取旗標
 }
 
 // Reset 重置配置管理器
 func (this *Configmgr) Reset() {
+	this.read = false
 	viper.Reset()
 }
 
@@ -50,9 +49,10 @@ func (this *Configmgr) ReadFile(name, ext string) (err error) {
 	viper.SetConfigName(name)
 	viper.SetConfigType(ext)
 
-	if this.once.Do(func() {
+	if this.read == false {
+		this.read = true
 		err = viper.ReadInConfig()
-	}) == false {
+	} else {
 		err = viper.MergeInConfig()
 	} // if
 
@@ -68,9 +68,10 @@ func (this *Configmgr) ReadString(value, ext string) (err error) {
 	reader := bytes.NewBuffer([]byte(value))
 	viper.SetConfigType(ext)
 
-	if this.once.Do(func() {
+	if this.read == false {
+		this.read = true
 		err = viper.ReadConfig(reader)
-	}) == false {
+	} else {
 		err = viper.MergeConfig(reader)
 	} // if
 
@@ -85,9 +86,10 @@ func (this *Configmgr) ReadString(value, ext string) (err error) {
 func (this *Configmgr) ReadBuffer(reader io.Reader, ext string) (err error) {
 	viper.SetConfigType(ext)
 
-	if this.once.Do(func() {
+	if this.read == false {
+		this.read = true
 		err = viper.ReadConfig(reader)
-	}) == false {
+	} else {
 		err = viper.MergeConfig(reader)
 	} // if
 
