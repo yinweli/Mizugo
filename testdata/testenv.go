@@ -83,6 +83,16 @@ func (this *TestEnv) TCompareFile(path string, expected []byte) bool {
 	return false
 }
 
+// RootPath 取得根路徑
+func RootPath() string {
+	return rootpath
+}
+
+// EnvPath 取得環境路徑
+func EnvPath() string {
+	return envpath
+}
+
 func init() {
 	_, file, _, ok := runtime.Caller(0)
 
