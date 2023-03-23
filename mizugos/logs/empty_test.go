@@ -16,19 +16,19 @@ func TestEmpty(t *testing.T) {
 
 type SuiteEmpty struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 }
 
 func (this *SuiteEmpty) SetupSuite() {
-	this.TBegin("test-logs-empty", "")
+	testdata.EnvSetup(&this.Env, "test-logs-empty")
 }
 
 func (this *SuiteEmpty) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteEmpty) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteEmpty) TestEmptyLogger() {

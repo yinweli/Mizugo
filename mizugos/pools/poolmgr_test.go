@@ -18,19 +18,19 @@ func TestPoolmgr(t *testing.T) {
 
 type SuitePoolmgr struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 }
 
 func (this *SuitePoolmgr) SetupSuite() {
-	this.TBegin("test-pools-poolmgr", "")
+	testdata.EnvSetup(&this.Env, "test-pools-poolmgr")
 }
 
 func (this *SuitePoolmgr) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuitePoolmgr) TearDownTest() {
-	this.TLeak(this.T(), false) // 由於ants中有許多內部執行緒, 所以把這裡的執行緒洩漏檢查關閉
+	testdata.Leak(this.T(), false) // 由於ants中有許多內部執行緒, 所以把這裡的執行緒洩漏檢查關閉
 }
 
 func (this *SuitePoolmgr) TestNewPoolmgr() {

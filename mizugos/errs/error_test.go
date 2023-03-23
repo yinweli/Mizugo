@@ -16,19 +16,19 @@ func TestErr(t *testing.T) {
 
 type SuiteErr struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 }
 
 func (this *SuiteErr) SetupSuite() {
-	this.TBegin("test-errs-error", "")
+	testdata.EnvSetup(&this.Env, "test-errs-error")
 }
 
 func (this *SuiteErr) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteErr) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteErr) TestError() {

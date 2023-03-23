@@ -17,14 +17,14 @@ func TestJson(t *testing.T) {
 
 type SuiteJson struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 	key       string
 	messageID MessageID
 	message   *msgs.JsonTest
 }
 
 func (this *SuiteJson) SetupSuite() {
-	this.TBegin("test-procs-json", "")
+	testdata.EnvSetup(&this.Env, "test-procs-json")
 	this.key = cryptos.RandDesKeyString()
 	this.messageID = MessageID(1)
 	this.message = &msgs.JsonTest{
@@ -33,11 +33,11 @@ func (this *SuiteJson) SetupSuite() {
 }
 
 func (this *SuiteJson) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteJson) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteJson) TestNewJson() {

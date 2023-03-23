@@ -15,19 +15,19 @@ func TestCast(t *testing.T) {
 
 type SuiteCast struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 }
 
 func (this *SuiteCast) SetupSuite() {
-	this.TBegin("test-utils-cast", "")
+	testdata.EnvSetup(&this.Env, "test-utils-cast")
 }
 
 func (this *SuiteCast) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteCast) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteCast) TestCastPointer() {

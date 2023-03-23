@@ -18,19 +18,19 @@ func TestDes(t *testing.T) {
 
 type SuiteDes struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 }
 
 func (this *SuiteDes) SetupSuite() {
-	this.TBegin("test-cryptos-des", "")
+	testdata.EnvSetup(&this.Env, "test-cryptos-des")
 }
 
 func (this *SuiteDes) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteDes) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteDes) TestDesECB() {

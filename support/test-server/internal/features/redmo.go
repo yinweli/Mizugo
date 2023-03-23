@@ -32,7 +32,7 @@ func (this *Redmo) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", nameRedmo, err)
 	} // if
 
-	if err := mizugos.Redmomgr().AddMajor(defines.RedmoMajor, this.config.MajorURI); err != nil {
+	if err := mizugos.Redmomgr().AddMajor(defines.RedmoMajor, this.config.MajorURI, false); err != nil {
 		return fmt.Errorf("%v initialize: %w", nameRedmo, err)
 	} // if
 

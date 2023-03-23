@@ -17,21 +17,21 @@ func TestTCPConnect(t *testing.T) {
 
 type SuiteTCPConnect struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 	host host
 }
 
 func (this *SuiteTCPConnect) SetupSuite() {
-	this.TBegin("test-nets-tcpConnect", "")
+	testdata.EnvSetup(&this.Env, "test-nets-tcpConnect")
 	this.host = host{ip: "google.com", port: "80"}
 }
 
 func (this *SuiteTCPConnect) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteTCPConnect) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteTCPConnect) TestNewTCPConnect() {

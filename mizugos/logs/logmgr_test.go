@@ -15,19 +15,19 @@ func TestLogmgr(t *testing.T) {
 
 type SuiteLogmgr struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 }
 
 func (this *SuiteLogmgr) SetupSuite() {
-	this.TBegin("test-logs-logmgr", "")
+	testdata.EnvSetup(&this.Env, "test-logs-logmgr")
 }
 
 func (this *SuiteLogmgr) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteLogmgr) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteLogmgr) TestNewLogmgr() {

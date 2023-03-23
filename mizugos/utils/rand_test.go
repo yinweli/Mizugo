@@ -16,19 +16,19 @@ func TestRand(t *testing.T) {
 
 type SuiteRand struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 }
 
 func (this *SuiteRand) SetupSuite() {
-	this.TBegin("test-utils-rand", "")
+	testdata.EnvSetup(&this.Env, "test-utils-rand")
 }
 
 func (this *SuiteRand) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteRand) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteRand) TestRandString() {
