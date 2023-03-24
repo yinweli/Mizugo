@@ -16,19 +16,19 @@ func TestMizugo(t *testing.T) {
 
 type SuiteMizugo struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 }
 
 func (this *SuiteMizugo) SetupSuite() {
-	this.TBegin("test-mizugos-mizugo", "")
+	testdata.EnvSetup(&this.Env, "test-mizugos-mizugo")
 }
 
 func (this *SuiteMizugo) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteMizugo) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteMizugo) TestMizugo() {

@@ -17,21 +17,21 @@ func TestEventmgr(t *testing.T) {
 
 type SuiteEventmgr struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 	capacity int
 }
 
 func (this *SuiteEventmgr) SetupSuite() {
-	this.TBegin("test-events-eventmgr", "")
+	testdata.EnvSetup(&this.Env, "test-events-eventmgr")
 	this.capacity = 100
 }
 
 func (this *SuiteEventmgr) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteEventmgr) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteEventmgr) TestNewEventmgr() {

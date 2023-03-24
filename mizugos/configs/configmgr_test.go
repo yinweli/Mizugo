@@ -18,7 +18,7 @@ func TestConfigmgr(t *testing.T) {
 
 type SuiteConfigmgr struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 	name1   string
 	name2   string
 	value1  string
@@ -31,7 +31,7 @@ type SuiteConfigmgr struct {
 }
 
 func (this *SuiteConfigmgr) SetupSuite() {
-	this.TBegin("test-configs-configmgr", "configmgr")
+	testdata.EnvSetup(&this.Env, "test-configs-configmgr", "configmgr")
 	this.name1 = "configmgr"
 	this.name2 = "!?"
 	this.value1 = "valid: valid"
@@ -48,11 +48,11 @@ func (this *SuiteConfigmgr) SetupSuite() {
 }
 
 func (this *SuiteConfigmgr) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteConfigmgr) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteConfigmgr) TestNewConfigmgr() {

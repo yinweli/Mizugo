@@ -15,19 +15,19 @@ func TestModule(t *testing.T) {
 
 type SuiteModule struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 }
 
 func (this *SuiteModule) SetupSuite() {
-	this.TBegin("test-entitys-module", "")
+	testdata.EnvSetup(&this.Env, "test-entitys-module")
 }
 
 func (this *SuiteModule) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteModule) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteModule) TestNewModule() {

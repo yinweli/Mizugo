@@ -21,7 +21,10 @@ func newMinor(ctx ctxs.Ctx, uri MongoURI, dbName string) (major *Minor, err erro
 		return nil, fmt.Errorf("newMinor: dbName empty")
 	} // if
 
-	return &Minor{client: client, database: client.Database(dbName)}, nil
+	minor := &Minor{}
+	minor.client = client
+	minor.database = client.Database(dbName)
+	return minor, nil
 }
 
 // Minor 次要資料庫, 內部用mongo實現的資料庫組件, 包含以下功能

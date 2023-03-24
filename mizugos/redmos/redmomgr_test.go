@@ -15,19 +15,19 @@ func TestRedmomgr(t *testing.T) {
 
 type SuiteRedmomgr struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 }
 
 func (this *SuiteRedmomgr) SetupSuite() {
-	this.TBegin("test-redmos-redmomgr", "")
+	testdata.EnvSetup(&this.Env, "test-redmos-redmomgr")
 }
 
 func (this *SuiteRedmomgr) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteRedmomgr) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteRedmomgr) TestNewRedmomgr() {
@@ -41,9 +41,9 @@ func (this *SuiteRedmomgr) TestRedmomgr() {
 	minorName := "minorName"
 	mixedName := "mixedName"
 	unknownName := "unknown"
-	assert.Nil(this.T(), target.AddMajor(majorName, testdata.RedisURI))
-	assert.NotNil(this.T(), target.AddMajor(majorName, ""))
-	assert.NotNil(this.T(), target.AddMajor(unknownName, testdata.RedisURIInvalid))
+	assert.Nil(this.T(), target.AddMajor(majorName, testdata.RedisURI, false))
+	assert.NotNil(this.T(), target.AddMajor(majorName, "", false))
+	assert.NotNil(this.T(), target.AddMajor(unknownName, testdata.RedisURIInvalid, false))
 	assert.NotNil(this.T(), target.GetMajor(majorName))
 	assert.Nil(this.T(), target.GetMajor(unknownName))
 	assert.Nil(this.T(), target.AddMinor(minorName, testdata.MongoURI, dbName))

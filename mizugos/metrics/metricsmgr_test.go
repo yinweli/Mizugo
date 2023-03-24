@@ -16,21 +16,21 @@ func TestMetricsmgr(t *testing.T) {
 
 type SuiteMetricsmgr struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 	port int
 }
 
 func (this *SuiteMetricsmgr) SetupSuite() {
-	this.TBegin("test-metrics-metricsmgr", "")
+	testdata.EnvSetup(&this.Env, "test-metrics-metricsmgr")
 	this.port = 8080
 }
 
 func (this *SuiteMetricsmgr) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteMetricsmgr) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteMetricsmgr) TestInitialize() {

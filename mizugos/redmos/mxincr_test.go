@@ -16,8 +16,7 @@ func TestMxIncr(t *testing.T) {
 
 type SuiteMxIncr struct {
 	suite.Suite
-	testdata.TestEnv
-	testdata.TestDB
+	testdata.Env
 	dbtable string
 	field   string
 	key     string
@@ -31,24 +30,24 @@ type dataMxIncr struct {
 }
 
 func (this *SuiteMxIncr) SetupSuite() {
-	this.TBegin("test-redmos-mxincr", "")
+	testdata.EnvSetup(&this.Env, "test-redmos-mxincr")
 	this.dbtable = "mxincr"
 	this.field = "name"
-	this.key = this.Key("mxincr")
-	this.major, _ = newMajor(ctxs.Root(), testdata.RedisURI)
+	this.key = "mxincr-0001"
+	this.major, _ = newMajor(ctxs.Root(), testdata.RedisURI, true)
 	this.minor, _ = newMinor(ctxs.Root(), testdata.MongoURI, this.dbtable)
 }
 
 func (this *SuiteMxIncr) TearDownSuite() {
-	this.TFinal()
-	this.RedisClear(ctxs.RootCtx(), this.major.Client())
-	this.MongoClear(ctxs.RootCtx(), this.minor.Database().Collection(this.dbtable))
+	testdata.EnvRestore(&this.Env)
+	testdata.RedisClear(ctxs.RootCtx(), this.major.Client(), this.major.UsedKey())
+	testdata.MongoClear(ctxs.RootCtx(), this.minor.Database())
 	this.major.stop()
 	this.minor.stop(ctxs.Root())
 }
 
 func (this *SuiteMxIncr) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteMxIncr) TestIncr() {
@@ -79,7 +78,7 @@ func (this *SuiteMxIncr) TestIncr() {
 	assert.NotNil(this.T(), get.Data)
 	assert.Equal(this.T(), int64(2), *get.Data)
 
-	assert.True(this.T(), this.MongoFindOne(ctxs.RootCtx(), this.minor.Database().Collection(this.dbtable), this.field, this.key, actual))
+	assert.True(this.T(), testdata.MongoFindOne(ctxs.RootCtx(), this.minor.Database(), this.dbtable, this.field, this.key, actual))
 	assert.Equal(this.T(), expected, actual)
 
 	incr.Table = ""

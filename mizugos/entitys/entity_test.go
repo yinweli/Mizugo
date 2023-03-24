@@ -21,23 +21,23 @@ func TestEntity(t *testing.T) {
 
 type SuiteEntity struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 	entityID EntityID
 	capacity int
 }
 
 func (this *SuiteEntity) SetupSuite() {
-	this.TBegin("test-entitys-entity", "")
+	testdata.EnvSetup(&this.Env, "test-entitys-entity")
 	this.entityID = EntityID(1)
 	this.capacity = 1
 }
 
 func (this *SuiteEntity) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteEntity) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteEntity) TestNewEntity() {

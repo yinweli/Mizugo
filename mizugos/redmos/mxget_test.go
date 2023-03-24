@@ -17,8 +17,7 @@ func TestMxGet(t *testing.T) {
 
 type SuiteMxGet struct {
 	suite.Suite
-	testdata.TestEnv
-	testdata.TestDB
+	testdata.Env
 	dbtable string
 	field   string
 	key     string
@@ -32,24 +31,24 @@ type dataMxGet struct {
 }
 
 func (this *SuiteMxGet) SetupSuite() {
-	this.TBegin("test-redmos-mxget", "")
+	testdata.EnvSetup(&this.Env, "test-redmos-mxget")
 	this.dbtable = "mxget"
 	this.field = "key"
-	this.key = this.Key("mxget")
-	this.major, _ = newMajor(ctxs.Root(), testdata.RedisURI)
+	this.key = "mxget-0001"
+	this.major, _ = newMajor(ctxs.Root(), testdata.RedisURI, true)
 	this.minor, _ = newMinor(ctxs.Root(), testdata.MongoURI, this.dbtable)
 }
 
 func (this *SuiteMxGet) TearDownSuite() {
-	this.TFinal()
-	this.RedisClear(ctxs.RootCtx(), this.major.Client())
-	this.MongoClear(ctxs.RootCtx(), this.minor.Database().Collection(this.dbtable))
+	testdata.EnvRestore(&this.Env)
+	testdata.RedisClear(ctxs.RootCtx(), this.major.Client(), this.major.UsedKey())
+	testdata.MongoClear(ctxs.RootCtx(), this.minor.Database())
 	this.major.stop()
 	this.minor.stop(ctxs.Root())
 }
 
 func (this *SuiteMxGet) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteMxGet) TestGet() {
@@ -75,7 +74,7 @@ func (this *SuiteMxGet) TestGet() {
 	assert.True(this.T(), get.Result)
 	assert.Equal(this.T(), set.Data, get.Data)
 
-	assert.True(this.T(), this.MongoFindOne(ctxs.RootCtx(), this.minor.Database().Collection(this.dbtable), this.field, this.key, actual))
+	assert.True(this.T(), testdata.MongoFindOne(ctxs.RootCtx(), this.minor.Database(), this.dbtable, this.field, this.key, actual))
 	assert.Equal(this.T(), expected, actual)
 
 	get.Key = ""

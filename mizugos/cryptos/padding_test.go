@@ -17,25 +17,25 @@ func TestPadding(t *testing.T) {
 
 type SuitePadding struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 	blockSize int
 	length1   int
 	length2   int
 }
 
 func (this *SuitePadding) SetupSuite() {
-	this.TBegin("test-cryptos-padding", "")
+	testdata.EnvSetup(&this.Env, "test-cryptos-padding")
 	this.blockSize = 64
 	this.length1 = 99
 	this.length2 = 199
 }
 
 func (this *SuitePadding) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuitePadding) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuitePadding) TestPadding() {

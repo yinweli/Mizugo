@@ -12,9 +12,9 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/errs"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/mizugos/redmos"
-	"github.com/yinweli/Mizugo/support/test-server/internal/access"
 	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-server/internal/features"
+	"github.com/yinweli/Mizugo/support/test-server/internal/querys"
 	"github.com/yinweli/Mizugo/support/test-server/msgs"
 )
 
@@ -70,7 +70,7 @@ func (this *Auth) procMLoginQ(message any) {
 		return
 	} // if
 
-	authGet := access.NewAuthGet(msg.Account, nil)
+	authGet := querys.NewAuthGet(msg.Account, nil)
 
 	if err = database.Submit(ctxs.Root()).Lock(msg.Account).Add(authGet).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
@@ -78,7 +78,7 @@ func (this *Auth) procMLoginQ(message any) {
 		return
 	} // if
 
-	authSet := access.NewAuthSet(msg.Account, &access.Auth{
+	authSet := querys.NewAuthSet(msg.Account, &querys.Auth{
 		Account: msg.Account,
 		Token:   uuid.NewString(),
 		Time:    time.Now(),
@@ -131,7 +131,7 @@ func (this *Auth) procMUpdateQ(message any) {
 		return
 	} // if
 
-	authGet := access.NewAuthGet(msg.Account, nil)
+	authGet := querys.NewAuthGet(msg.Account, nil)
 
 	if err = database.Submit(ctxs.Root()).Lock(msg.Account).Add(authGet).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
@@ -151,7 +151,7 @@ func (this *Auth) procMUpdateQ(message any) {
 		return
 	} // if
 
-	authSet := access.NewAuthSet(msg.Account, &access.Auth{
+	authSet := querys.NewAuthSet(msg.Account, &querys.Auth{
 		Account: msg.Account,
 		Token:   uuid.NewString(),
 		Time:    time.Now(),

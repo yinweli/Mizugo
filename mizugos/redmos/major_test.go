@@ -17,66 +17,63 @@ func TestMajor(t *testing.T) {
 
 type SuiteMajor struct {
 	suite.Suite
-	testdata.TestEnv
-	testdata.TestDB
+	testdata.Env
 }
 
 func (this *SuiteMajor) SetupSuite() {
-	this.TBegin("test-redmos-major", "")
+	testdata.EnvSetup(&this.Env, "test-redmos-major")
 }
 
 func (this *SuiteMajor) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteMajor) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteMajor) TestNewMajor() {
-	target, err := newMajor(ctxs.Root(), testdata.RedisURI)
+	target, err := newMajor(ctxs.Root(), testdata.RedisURI, true)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), target)
 
-	_, err = newMajor(ctxs.Root(), "")
+	_, err = newMajor(ctxs.Root(), "", true)
 	assert.NotNil(this.T(), err)
 }
 
 func (this *SuiteMajor) TestMajor() {
-	target, err := newMajor(ctxs.Root(), testdata.RedisURI)
+	target, err := newMajor(ctxs.Root(), testdata.RedisURI, true)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), target.Submit())
 	assert.NotNil(this.T(), target.Client())
+	ping, err := target.Client().Ping(ctxs.RootCtx()).Result()
+	assert.Nil(this.T(), err)
+	assert.Equal(this.T(), "PONG", ping)
+
 	target.stop()
 	assert.Nil(this.T(), target.Submit())
 	assert.Nil(this.T(), target.Client())
 
-	_, err = newMajor(ctxs.Root(), testdata.RedisURIInvalid)
+	_, err = newMajor(ctxs.Root(), testdata.RedisURIInvalid, true)
 	assert.NotNil(this.T(), err)
 }
 
-func (this *SuiteMajor) TestClient() {
-	target, err := newMajor(ctxs.Root(), testdata.RedisURI)
+func (this *SuiteMajor) TestUsedKey() {
+	target, err := newMajor(ctxs.Root(), testdata.RedisURI, true)
 	assert.Nil(this.T(), err)
 	client := target.Client()
 	assert.NotNil(this.T(), client)
 
-	key := this.Key("major client")
 	data := utils.RandString(testdata.RandStringLength)
-	set, err := client.Set(ctxs.RootCtx(), key, data, testdata.RedisTimeout).Result()
-	assert.Nil(this.T(), err)
-	assert.Equal(this.T(), RedisOk, set)
-
-	del, err := client.Del(ctxs.RootCtx(), key).Result()
-	assert.Nil(this.T(), err)
-	assert.Equal(this.T(), int64(1), del)
-
-	this.RedisClear(ctxs.RootCtx(), client)
+	_, _ = client.Set(ctxs.RootCtx(), "index1", data, testdata.RedisTimeout).Result()
+	_, _ = client.Set(ctxs.RootCtx(), "index2", data, testdata.RedisTimeout).Result()
+	_, _ = client.Set(ctxs.RootCtx(), "index3", data, testdata.RedisTimeout).Result()
+	assert.Equal(this.T(), []string{"index1", "index2", "index3"}, target.UsedKey())
 	target.stop()
 }
 
 func BenchmarkMajorSet(b *testing.B) {
-	target, _ := newMajor(ctxs.Root(), testdata.RedisURI)
+	target, _ := newMajor(ctxs.Root(), testdata.RedisURI, false)
 	submit := target.Submit()
 
 	for i := 0; i < b.N; i++ {
@@ -88,7 +85,7 @@ func BenchmarkMajorSet(b *testing.B) {
 }
 
 func BenchmarkMajorGet(b *testing.B) {
-	target, _ := newMajor(ctxs.Root(), testdata.RedisURI)
+	target, _ := newMajor(ctxs.Root(), testdata.RedisURI, false)
 	submit := target.Submit()
 	value := utils.RandString(testdata.RandStringLength)
 	_, _ = submit.Set(ctxs.RootCtx(), value, value, 0).Result()

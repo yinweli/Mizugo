@@ -15,19 +15,19 @@ func TestLabelobj(t *testing.T) {
 
 type SuiteLabelobj struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 }
 
 func (this *SuiteLabelobj) SetupSuite() {
-	this.TBegin("test-labels-labelobj", "")
+	testdata.EnvSetup(&this.Env, "test-labels-labelobj")
 }
 
 func (this *SuiteLabelobj) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteLabelobj) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteLabelobj) TestNewLabelobj() {

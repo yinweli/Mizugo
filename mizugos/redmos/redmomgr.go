@@ -36,7 +36,7 @@ type Redmomgr struct {
 }
 
 // AddMajor 新增主要資料庫, 需要提供 RedisURI 來指定要連接的資料庫以及連接選項
-func (this *Redmomgr) AddMajor(majorName string, uri RedisURI) error {
+func (this *Redmomgr) AddMajor(majorName string, uri RedisURI, record bool) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -44,7 +44,7 @@ func (this *Redmomgr) AddMajor(majorName string, uri RedisURI) error {
 		return fmt.Errorf("redmomgr addMajor: duplicate database")
 	} // if
 
-	major, err := newMajor(this.ctx, uri)
+	major, err := newMajor(this.ctx, uri, record)
 
 	if err != nil {
 		return fmt.Errorf("redmomgr addMajor: %w", err)

@@ -16,8 +16,7 @@ func TestMxLock(t *testing.T) {
 
 type SuiteMxLock struct {
 	suite.Suite
-	testdata.TestEnv
-	testdata.TestDB
+	testdata.Env
 	dbtable string
 	key     string
 	major   *Major
@@ -25,23 +24,23 @@ type SuiteMxLock struct {
 }
 
 func (this *SuiteMxLock) SetupSuite() {
-	this.TBegin("test-redmos-mxlock", "")
+	testdata.EnvSetup(&this.Env, "test-redmos-mxlock")
 	this.dbtable = "mxlock"
-	this.key = this.Key("mxlock")
-	this.major, _ = newMajor(ctxs.Root(), testdata.RedisURI)
+	this.key = "mxlock-0001"
+	this.major, _ = newMajor(ctxs.Root(), testdata.RedisURI, true)
 	this.minor, _ = newMinor(ctxs.Root(), testdata.MongoURI, this.dbtable)
 }
 
 func (this *SuiteMxLock) TearDownSuite() {
-	this.TFinal()
-	this.RedisClear(ctxs.RootCtx(), this.major.Client())
-	this.MongoClear(ctxs.RootCtx(), this.minor.Database().Collection(this.dbtable))
+	testdata.EnvRestore(&this.Env)
+	testdata.RedisClear(ctxs.RootCtx(), this.major.Client(), this.major.UsedKey())
+	testdata.MongoClear(ctxs.RootCtx(), this.minor.Database())
 	this.major.stop()
 	this.minor.stop(ctxs.Root())
 }
 
 func (this *SuiteMxLock) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteMxLock) TestLock() {

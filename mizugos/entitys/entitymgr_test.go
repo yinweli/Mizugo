@@ -15,19 +15,19 @@ func TestEntitymgr(t *testing.T) {
 
 type SuiteEntitymgr struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 }
 
 func (this *SuiteEntitymgr) SetupSuite() {
-	this.TBegin("test-entitys-entitymgr", "")
+	testdata.EnvSetup(&this.Env, "test-entitys-entitymgr")
 }
 
 func (this *SuiteEntitymgr) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteEntitymgr) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteEntitymgr) TestNewEntitymgr() {

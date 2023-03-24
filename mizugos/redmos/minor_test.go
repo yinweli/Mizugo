@@ -19,22 +19,21 @@ func TestMinor(t *testing.T) {
 
 type SuiteMinor struct {
 	suite.Suite
-	testdata.TestEnv
-	testdata.TestDB
+	testdata.Env
 	name string
 }
 
 func (this *SuiteMinor) SetupSuite() {
-	this.TBegin("test-redmos-minor", "")
+	testdata.EnvSetup(&this.Env, "test-redmos-minor")
 	this.name = "minor"
 }
 
 func (this *SuiteMinor) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteMinor) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteMinor) TestNewMinor() {
@@ -53,12 +52,10 @@ func (this *SuiteMinor) TestMinor() {
 	target, err := newMinor(ctxs.Root(), testdata.MongoURI, this.name)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), target.Submit())
-	client := target.Client()
-	assert.NotNil(this.T(), client)
-	assert.Nil(this.T(), client.Ping(ctxs.RootCtx(), nil))
-	database := target.Database()
-	assert.NotNil(this.T(), database)
-	assert.NotNil(this.T(), database.Client())
+	assert.NotNil(this.T(), target.Client())
+	assert.NotNil(this.T(), target.Database())
+	assert.Nil(this.T(), target.Client().Ping(ctxs.RootCtx(), nil))
+	assert.NotNil(this.T(), target.Database().Client())
 	target.stop(ctxs.Root())
 	assert.Nil(this.T(), target.Submit())
 	assert.Nil(this.T(), target.Client())

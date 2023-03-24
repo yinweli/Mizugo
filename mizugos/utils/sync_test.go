@@ -17,19 +17,19 @@ func TestSync(t *testing.T) {
 
 type SuiteSync struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 }
 
 func (this *SuiteSync) SetupSuite() {
-	this.TBegin("test-utils-sync", "")
+	testdata.EnvSetup(&this.Env, "test-utils-sync")
 }
 
 func (this *SuiteSync) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteSync) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteSync) TestSyncOnce() {

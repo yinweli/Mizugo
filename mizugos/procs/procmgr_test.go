@@ -15,19 +15,19 @@ func TestProcmgr(t *testing.T) {
 
 type SuiteProcmgr struct {
 	suite.Suite
-	testdata.TestEnv
+	testdata.Env
 }
 
 func (this *SuiteProcmgr) SetupSuite() {
-	this.TBegin("test-procs-procmgr", "")
+	testdata.EnvSetup(&this.Env, "test-procs-procmgr")
 }
 
 func (this *SuiteProcmgr) TearDownSuite() {
-	this.TFinal()
+	testdata.EnvRestore(&this.Env)
 }
 
 func (this *SuiteProcmgr) TearDownTest() {
-	this.TLeak(this.T(), true)
+	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteProcmgr) TestNewProcmgr() {
