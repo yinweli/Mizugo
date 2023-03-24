@@ -55,7 +55,6 @@ func (this *SuiteMxIncr) TestIncr() {
 		Name:  this.key,
 		Value: 2,
 	}
-	actual := &dataMxIncr{}
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
 	get := &Get[int64]{Key: this.key}
@@ -78,8 +77,7 @@ func (this *SuiteMxIncr) TestIncr() {
 	assert.NotNil(this.T(), get.Data)
 	assert.Equal(this.T(), int64(2), *get.Data)
 
-	assert.True(this.T(), testdata.MongoFindOne(ctxs.RootCtx(), this.minor.Database(), this.dbtable, this.field, this.key, actual))
-	assert.Equal(this.T(), expected, actual)
+	assert.True(this.T(), testdata.MongoCompare[dataMxIncr](ctxs.RootCtx(), this.minor.Database(), this.dbtable, this.field, this.key, expected))
 
 	incr.Table = ""
 	incr.Field = this.field

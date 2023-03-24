@@ -2,6 +2,7 @@ package testdata
 
 import (
 	"context"
+	"reflect"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -13,13 +14,19 @@ func MongoClear(ctx context.Context, table *mongo.Database) {
 	_ = table.Drop(ctx)
 }
 
-// MongoFindOne 在mongo中搜尋單一結果
-func MongoFindOne(ctx context.Context, database *mongo.Database, tableName, fieldName, key string, result any) bool {
-	if table := database.Collection(tableName); table != nil {
-		if table.FindOne(ctx, bson.D{{Key: fieldName, Value: key}}, options.FindOne()).Decode(result) == nil {
-			return true
-		} // if
+// MongoCompare 在mongo中比對資料是否相同
+func MongoCompare[T any](ctx context.Context, database *mongo.Database, tableName, fieldName, key string, expected *T) bool {
+	table := database.Collection(tableName)
+
+	if table == nil {
+		return false
 	} // if
 
-	return false
+	actual := new(T)
+
+	if table.FindOne(ctx, bson.D{{Key: fieldName, Value: key}}, options.FindOne()).Decode(actual) != nil {
+		return false
+	} // if
+
+	return reflect.DeepEqual(expected, actual)
 }

@@ -56,7 +56,6 @@ func (this *SuiteMxGet) TestGet() {
 		Key:  this.key,
 		Data: utils.RandString(testdata.RandStringLength),
 	}
-	actual := &dataMxGet{}
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
 	get := &Get[dataMxGet]{Key: this.key}
@@ -74,8 +73,7 @@ func (this *SuiteMxGet) TestGet() {
 	assert.True(this.T(), get.Result)
 	assert.Equal(this.T(), set.Data, get.Data)
 
-	assert.True(this.T(), testdata.MongoFindOne(ctxs.RootCtx(), this.minor.Database(), this.dbtable, this.field, this.key, actual))
-	assert.Equal(this.T(), expected, actual)
+	assert.True(this.T(), testdata.MongoCompare[dataMxGet](ctxs.RootCtx(), this.minor.Database(), this.dbtable, this.field, this.key, expected))
 
 	get.Key = ""
 	assert.NotNil(this.T(), get.Prepare())
