@@ -23,7 +23,7 @@ type SuiteTCPListen struct {
 
 func (this *SuiteTCPListen) SetupSuite() {
 	testdata.EnvSetup(&this.Env, "test-nets-tcpListen")
-	this.host = host{port: "10001"}
+	this.host = host{port: "9001"}
 }
 
 func (this *SuiteTCPListen) TearDownSuite() {

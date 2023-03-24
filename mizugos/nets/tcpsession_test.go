@@ -23,7 +23,7 @@ type SuiteTCPSession struct {
 
 func (this *SuiteTCPSession) SetupSuite() {
 	testdata.EnvSetup(&this.Env, "test-nets-tcpSession")
-	this.host = host{port: "11001"}
+	this.host = host{port: "9002"}
 	this.message = "message"
 }
 

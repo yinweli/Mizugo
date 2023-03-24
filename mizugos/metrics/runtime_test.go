@@ -24,7 +24,7 @@ type SuiteRuntime struct {
 
 func (this *SuiteRuntime) SetupSuite() {
 	testdata.EnvSetup(&this.Env, "test-metrics-runtime")
-	this.port = 8080
+	this.port = 9101
 }
 
 func (this *SuiteRuntime) TearDownSuite() {

@@ -22,7 +22,7 @@ type SuiteMetricsmgr struct {
 
 func (this *SuiteMetricsmgr) SetupSuite() {
 	testdata.EnvSetup(&this.Env, "test-metrics-metricsmgr")
-	this.port = 8080
+	this.port = 9100
 }
 
 func (this *SuiteMetricsmgr) TearDownSuite() {
