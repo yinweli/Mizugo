@@ -79,7 +79,6 @@ func init() {
 			panic(err)
 		} // if
 	} // if
-
 }
 
 var rootpath string // 根路徑

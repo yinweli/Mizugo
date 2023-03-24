@@ -28,7 +28,6 @@ const ( // 資料庫名稱
 	RedmoMinor = "minor" // 次要資料庫名稱
 	RedmoMixed = "mixed" // 混合資料庫名稱
 	MongoDB    = "auth"  // mongo資料庫名稱
-	MongoTable = "auth"  // mongo資料表名稱
 )
 
 const ( // 模組編號

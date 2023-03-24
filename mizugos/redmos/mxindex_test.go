@@ -1,6 +1,7 @@
 package redmos
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,18 +18,15 @@ func TestMxIndex(t *testing.T) {
 type SuiteMxIndex struct {
 	suite.Suite
 	testdata.Env
-	dbtable string
-	field   string
-	major   *Major
-	minor   *Minor
+	meta  metaMxIndex
+	major *Major
+	minor *Minor
 }
 
 func (this *SuiteMxIndex) SetupSuite() {
 	testdata.EnvSetup(&this.Env, "test-redmos-mxindex")
-	this.dbtable = "mxindex"
-	this.field = "index"
 	this.major, _ = newMajor(ctxs.Root(), testdata.RedisURI, true)
-	this.minor, _ = newMinor(ctxs.Root(), testdata.MongoURI, this.dbtable)
+	this.minor, _ = newMinor(ctxs.Root(), testdata.MongoURI, this.meta.MinorTable()) // 這裡偷懶把表格名稱當資料庫名稱來用
 }
 
 func (this *SuiteMxIndex) TearDownSuite() {
@@ -46,24 +44,58 @@ func (this *SuiteMxIndex) TearDownTest() {
 func (this *SuiteMxIndex) TestIndex() {
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
-	index := &Index{Table: this.dbtable, Field: this.field, Order: 1}
+	index := &Index{Meta: &this.meta, Order: 1}
 	index.Initialize(ctxs.Root(), majorSubmit, minorSubmit)
 
 	assert.Nil(this.T(), index.Prepare())
 	assert.Nil(this.T(), index.Complete())
 
-	index.Table = ""
-	index.Field = this.field
+	index.Meta = nil
 	index.Order = 1
 	assert.NotNil(this.T(), index.Prepare())
 
-	index.Table = this.dbtable
-	index.Field = ""
-	index.Order = 1
-	assert.NotNil(this.T(), index.Prepare())
-
-	index.Table = this.dbtable
-	index.Field = this.field
+	index.Meta = &this.meta
 	index.Order = 0
 	assert.NotNil(this.T(), index.Prepare())
+
+	index.Meta = &this.meta
+	index.Order = 1
+	this.meta.tableEmpty = false
+	this.meta.fieldEmpty = true
+	assert.NotNil(this.T(), index.Prepare())
+
+	index.Meta = &this.meta
+	index.Order = 1
+	this.meta.tableEmpty = true
+	this.meta.fieldEmpty = false
+	assert.NotNil(this.T(), index.Prepare())
+}
+
+type metaMxIndex struct {
+	tableEmpty bool
+	fieldEmpty bool
+}
+
+func (this *metaMxIndex) MajorKey(key any) string {
+	return fmt.Sprintf("mxindex:%v", key)
+}
+
+func (this *metaMxIndex) MinorKey(key any) string {
+	return fmt.Sprintf("%v", key)
+}
+
+func (this *metaMxIndex) MinorTable() string {
+	if this.tableEmpty == false {
+		return "mxindex_table"
+	} // if
+
+	return ""
+}
+
+func (this *metaMxIndex) MinorField() string {
+	if this.fieldEmpty == false {
+		return "mxindex_key"
+	} // if
+
+	return ""
 }
