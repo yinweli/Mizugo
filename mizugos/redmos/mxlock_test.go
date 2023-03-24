@@ -44,27 +44,23 @@ func (this *SuiteMxLock) TearDownTest() {
 }
 
 func (this *SuiteMxLock) TestLock() {
-	submit := this.major.Submit()
+	majorSubmit := this.major.Submit()
 	lock := &Lock{Key: this.key, time: testdata.RedisTimeout}
-	lock.Initialize(ctxs.Root(), submit, nil)
+	lock.Initialize(ctxs.Root(), majorSubmit, nil)
 	unlock := &Unlock{Key: this.key}
-	unlock.Initialize(ctxs.Root(), submit, nil)
+	unlock.Initialize(ctxs.Root(), majorSubmit, nil)
 
 	assert.Nil(this.T(), lock.Prepare())
-	_, _ = submit.Exec(ctxs.RootCtx())
+	_, _ = majorSubmit.Exec(ctxs.RootCtx())
 	assert.Nil(this.T(), lock.Complete())
+
+	assert.Nil(this.T(), lock.Prepare())
+	_, _ = majorSubmit.Exec(ctxs.RootCtx())
+	assert.NotNil(this.T(), lock.Complete())
 
 	assert.Nil(this.T(), unlock.Prepare())
-	_, _ = submit.Exec(ctxs.RootCtx())
+	_, _ = majorSubmit.Exec(ctxs.RootCtx())
 	assert.Nil(this.T(), unlock.Complete())
-
-	assert.Nil(this.T(), lock.Prepare())
-	_, _ = submit.Exec(ctxs.RootCtx())
-	assert.Nil(this.T(), lock.Complete())
-
-	assert.Nil(this.T(), lock.Prepare())
-	_, _ = submit.Exec(ctxs.RootCtx())
-	assert.NotNil(this.T(), lock.Complete())
 
 	lock.Key = ""
 	assert.NotNil(this.T(), lock.Prepare())

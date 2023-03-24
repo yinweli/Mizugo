@@ -1,6 +1,7 @@
 package redmos
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,25 +18,17 @@ func TestMxIncr(t *testing.T) {
 type SuiteMxIncr struct {
 	suite.Suite
 	testdata.Env
-	dbtable string
-	field   string
-	key     string
-	major   *Major
-	minor   *Minor
-}
-
-type dataMxIncr struct {
-	Name  string `bson:"name"`
-	Value int64  `bson:"value"`
+	meta  metaMxIncr
+	key   string
+	major *Major
+	minor *Minor
 }
 
 func (this *SuiteMxIncr) SetupSuite() {
 	testdata.EnvSetup(&this.Env, "test-redmos-mxincr")
-	this.dbtable = "mxincr"
-	this.field = "name"
 	this.key = "mxincr-0001"
 	this.major, _ = newMajor(ctxs.Root(), testdata.RedisURI, true)
-	this.minor, _ = newMinor(ctxs.Root(), testdata.MongoURI, this.dbtable)
+	this.minor, _ = newMinor(ctxs.Root(), testdata.MongoURI, this.meta.MinorTable()) // 這裡偷懶把表格名稱當資料庫名稱來用
 }
 
 func (this *SuiteMxIncr) TearDownSuite() {
@@ -52,14 +45,14 @@ func (this *SuiteMxIncr) TearDownTest() {
 
 func (this *SuiteMxIncr) TestIncr() {
 	expected := &dataMxIncr{
-		Name:  this.key,
+		Key:   this.key,
 		Value: 2,
 	}
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
-	get := &Get[int64]{Key: this.key}
+	get := &Get[int64]{Meta: &this.meta, Key: this.key}
 	get.Initialize(ctxs.Root(), majorSubmit, minorSubmit)
-	incr := &Incr[int64]{Table: this.dbtable, Field: this.field, Key: this.key, Incr: 1}
+	incr := &Incr[int64]{Meta: &this.meta, Key: this.key, Incr: 1}
 	incr.Initialize(ctxs.Root(), majorSubmit, minorSubmit)
 
 	assert.Nil(this.T(), incr.Prepare())
@@ -75,22 +68,61 @@ func (this *SuiteMxIncr) TestIncr() {
 	assert.Nil(this.T(), get.Complete())
 	assert.True(this.T(), get.Result)
 	assert.NotNil(this.T(), get.Data)
-	assert.Equal(this.T(), int64(2), *get.Data)
+	assert.Equal(this.T(), expected.Value, *get.Data)
 
-	assert.True(this.T(), testdata.MongoCompare[dataMxIncr](ctxs.RootCtx(), this.minor.Database(), this.dbtable, this.field, this.key, expected))
+	assert.True(this.T(), testdata.MongoCompare[dataMxIncr](ctxs.RootCtx(), this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(this.key), expected))
 
-	incr.Table = ""
-	incr.Field = this.field
+	incr.Meta = nil
 	incr.Key = this.key
 	assert.NotNil(this.T(), incr.Prepare())
 
-	incr.Table = this.dbtable
-	incr.Field = ""
-	incr.Key = this.key
-	assert.NotNil(this.T(), incr.Prepare())
-
-	incr.Table = this.dbtable
-	incr.Field = this.field
+	incr.Meta = &this.meta
 	incr.Key = ""
 	assert.NotNil(this.T(), incr.Prepare())
+
+	incr.Meta = &this.meta
+	incr.Key = this.key
+	this.meta.tableEmpty = false
+	this.meta.fieldEmpty = true
+	assert.NotNil(this.T(), incr.Prepare())
+
+	incr.Meta = &this.meta
+	incr.Key = this.key
+	this.meta.tableEmpty = true
+	this.meta.fieldEmpty = false
+	assert.NotNil(this.T(), incr.Prepare())
+}
+
+type metaMxIncr struct {
+	tableEmpty bool
+	fieldEmpty bool
+}
+
+func (this *metaMxIncr) MajorKey(key any) string {
+	return fmt.Sprintf("mxincr:%v", key)
+}
+
+func (this *metaMxIncr) MinorKey(key any) string {
+	return fmt.Sprintf("%v", key)
+}
+
+func (this *metaMxIncr) MinorTable() string {
+	if this.tableEmpty == false {
+		return "mxincr_table"
+	} // if
+
+	return ""
+}
+
+func (this *metaMxIncr) MinorField() string {
+	if this.fieldEmpty == false {
+		return "mxincr_key"
+	} // if
+
+	return ""
+}
+
+type dataMxIncr struct {
+	Key   string `bson:"mxincr_key"`
+	Value int64  `bson:"value"`
 }

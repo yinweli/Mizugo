@@ -1,6 +1,7 @@
 package redmos
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -18,25 +19,17 @@ func TestMxGet(t *testing.T) {
 type SuiteMxGet struct {
 	suite.Suite
 	testdata.Env
-	dbtable string
-	field   string
-	key     string
-	major   *Major
-	minor   *Minor
-}
-
-type dataMxGet struct {
-	Key  string `bson:"key"`
-	Data string `bson:"data"`
+	meta  metaMxGet
+	key   string
+	major *Major
+	minor *Minor
 }
 
 func (this *SuiteMxGet) SetupSuite() {
 	testdata.EnvSetup(&this.Env, "test-redmos-mxget")
-	this.dbtable = "mxget"
-	this.field = "key"
 	this.key = "mxget-0001"
 	this.major, _ = newMajor(ctxs.Root(), testdata.RedisURI, true)
-	this.minor, _ = newMinor(ctxs.Root(), testdata.MongoURI, this.dbtable)
+	this.minor, _ = newMinor(ctxs.Root(), testdata.MongoURI, this.meta.MinorTable()) // 這裡偷懶把表格名稱當資料庫名稱來用
 }
 
 func (this *SuiteMxGet) TearDownSuite() {
@@ -58,9 +51,9 @@ func (this *SuiteMxGet) TestGet() {
 	}
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
-	get := &Get[dataMxGet]{Key: this.key}
+	get := &Get[dataMxGet]{Meta: &this.meta, Key: this.key}
 	get.Initialize(ctxs.Root(), majorSubmit, minorSubmit)
-	set := &Set[dataMxGet]{Table: this.dbtable, Field: this.field, Key: this.key, Data: expected}
+	set := &Set[dataMxGet]{Meta: &this.meta, Key: this.key, Data: expected}
 	set.Initialize(ctxs.Root(), majorSubmit, minorSubmit)
 
 	assert.Nil(this.T(), set.Prepare())
@@ -73,32 +66,91 @@ func (this *SuiteMxGet) TestGet() {
 	assert.True(this.T(), get.Result)
 	assert.Equal(this.T(), set.Data, get.Data)
 
-	assert.True(this.T(), testdata.MongoCompare[dataMxGet](ctxs.RootCtx(), this.minor.Database(), this.dbtable, this.field, this.key, expected))
+	assert.True(this.T(), testdata.RedisCompare[dataMxGet](ctxs.RootCtx(), this.major.Client(), this.meta.MajorKey(this.key), expected))
+	assert.True(this.T(), testdata.MongoCompare[dataMxGet](ctxs.RootCtx(), this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(this.key), expected))
 
+	get.Meta = nil
+	get.Key = this.key
+	assert.NotNil(this.T(), get.Prepare())
+
+	get.Meta = &this.meta
 	get.Key = ""
 	assert.NotNil(this.T(), get.Prepare())
 
-	set.Table = ""
-	set.Field = this.field
+	get.Meta = &this.meta
+	get.Key = this.key
+	this.meta.tableEmpty = false
+	this.meta.fieldEmpty = true
+	assert.NotNil(this.T(), get.Prepare())
+
+	get.Meta = &this.meta
+	get.Key = this.key
+	this.meta.tableEmpty = true
+	this.meta.fieldEmpty = false
+	assert.NotNil(this.T(), get.Prepare())
+
+	set.Meta = nil
 	set.Key = this.key
 	set.Data = expected
+	this.meta.tableEmpty = false
+	this.meta.fieldEmpty = false
 	assert.NotNil(this.T(), set.Prepare())
 
-	set.Table = this.dbtable
-	set.Field = ""
-	set.Key = this.key
-	set.Data = expected
-	assert.NotNil(this.T(), set.Prepare())
-
-	set.Table = this.dbtable
-	set.Field = this.field
+	set.Meta = &this.meta
 	set.Key = ""
 	set.Data = expected
 	assert.NotNil(this.T(), set.Prepare())
 
-	set.Table = this.dbtable
-	set.Field = this.field
+	set.Meta = &this.meta
 	set.Key = this.key
 	set.Data = nil
 	assert.NotNil(this.T(), set.Prepare())
+
+	set.Meta = &this.meta
+	set.Key = this.key
+	set.Data = expected
+	this.meta.tableEmpty = false
+	this.meta.fieldEmpty = true
+	assert.NotNil(this.T(), set.Prepare())
+
+	set.Meta = &this.meta
+	set.Key = this.key
+	set.Data = expected
+	this.meta.tableEmpty = true
+	this.meta.fieldEmpty = false
+	assert.NotNil(this.T(), set.Prepare())
+}
+
+type metaMxGet struct {
+	tableEmpty bool
+	fieldEmpty bool
+}
+
+func (this *metaMxGet) MajorKey(key any) string {
+	return fmt.Sprintf("mxget:%v", key)
+}
+
+func (this *metaMxGet) MinorKey(key any) string {
+	return fmt.Sprintf("%v", key)
+}
+
+func (this *metaMxGet) MinorTable() string {
+	if this.tableEmpty == false {
+		return "mxget_table"
+	} // if
+
+	return ""
+}
+
+func (this *metaMxGet) MinorField() string {
+	if this.fieldEmpty == false {
+		return "mxget_key"
+	} // if
+
+	return ""
+}
+
+type dataMxGet struct {
+	Key  string `bson:"mxget_key"`
+	Data string `bson:"data"`
 }
