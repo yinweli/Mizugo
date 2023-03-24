@@ -30,9 +30,8 @@ func (this *Get[T]) Prepare() error {
 		return fmt.Errorf("get prepare: key empty")
 	} // if
 
-	key := FormatKey(this.Key)
 	this.Result = false
-	this.get = this.Major().Get(this.Ctx(), key)
+	this.get = this.Major().Get(this.Ctx(), this.Key)
 	return nil
 }
 
@@ -98,8 +97,7 @@ func (this *Set[T]) Prepare() error {
 		return fmt.Errorf("set prepare: %w", err)
 	} //
 
-	key := FormatKey(this.Key)
-	this.set = this.Major().Set(this.Ctx(), key, value, 0)
+	this.set = this.Major().Set(this.Ctx(), this.Key, value, 0)
 	return nil
 }
 
@@ -115,9 +113,7 @@ func (this *Set[T]) Complete() error {
 		return fmt.Errorf("set complete: save to redis failed")
 	} // if
 
-	field := FormatField(this.Field)
-	key := FormatKey(this.Key)
-	filter := bson.D{{Key: field, Value: key}}
+	filter := bson.D{{Key: this.Field, Value: this.Key}}
 	opt := options.Replace().SetUpsert(true)
 
 	if _, err = this.Minor().Table(this.Table).ReplaceOne(this.Ctx(), filter, this.Data, opt); err != nil {

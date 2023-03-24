@@ -40,9 +40,8 @@ func (this *Index) Prepare() error {
 
 // Complete 完成處理
 func (this *Index) Complete() error {
-	field := FormatField(this.Field)
 	model := mongo.IndexModel{
-		Keys:    bson.M{field: this.Order},
+		Keys:    bson.M{this.Field: this.Order},
 		Options: options.Index().SetUnique(this.Unique),
 	}
 
