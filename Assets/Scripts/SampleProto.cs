@@ -140,7 +140,7 @@ public class SampleProto : MonoBehaviour
     /// 伺服器埠號
     /// </summary>
     [SerializeField]
-    private int port = 10002;
+    private int port = 9002;
 
     /// <summary>
     /// 密鑰
