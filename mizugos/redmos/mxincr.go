@@ -39,8 +39,7 @@ func (this *Incr[T]) Prepare() error {
 		return fmt.Errorf("incr prepare: key empty")
 	} // if
 
-	key := FormatKey(this.Key)
-	this.incr = this.Major().IncrBy(this.Ctx(), key, int64(this.Incr))
+	this.incr = this.Major().IncrBy(this.Ctx(), this.Key, int64(this.Incr))
 	return nil
 }
 
@@ -52,10 +51,8 @@ func (this *Incr[T]) Complete() error {
 		return fmt.Errorf("incr complete: %w", err)
 	} // if
 
-	field := FormatField(this.Field)
-	key := FormatKey(this.Key)
-	filter := bson.D{{Key: field, Value: key}}
-	data := bson.M{field: key, "value": value} // 在mongo中, 遞增值固定儲存在value欄位
+	filter := bson.D{{Key: this.Field, Value: this.Key}}
+	data := bson.M{this.Field: this.Key, "value": value} // 在mongo中, 遞增值固定儲存在value欄位
 	opt := options.Replace().SetUpsert(true)
 
 	if _, err = this.Minor().Table(this.Table).ReplaceOne(this.Ctx(), filter, data, opt); err != nil {

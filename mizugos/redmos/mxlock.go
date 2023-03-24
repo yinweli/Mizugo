@@ -28,7 +28,7 @@ func (this *Lock) Prepare() error {
 		return fmt.Errorf("lock set key: key empty")
 	} // if
 
-	key := FormatKey(prefixLock, this.Key)
+	key := MajorKey(prefixLock, this.Key)
 	this.incr = this.Major().Incr(this.Ctx(), key)
 	this.expire = this.Major().Expire(this.Ctx(), key, this.time)
 	return nil
@@ -68,7 +68,7 @@ func (this *Unlock) Prepare() error {
 		return fmt.Errorf("unlock prepare: key empty")
 	} // if
 
-	key := FormatKey(prefixLock, this.Key)
+	key := MajorKey(prefixLock, this.Key)
 	this.del = this.Major().Del(this.Ctx(), key)
 	return nil
 }

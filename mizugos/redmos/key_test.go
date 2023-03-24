@@ -30,10 +30,6 @@ func (this *SuiteFormat) TearDownTest() {
 	testdata.Leak(this.T(), true)
 }
 
-func (this *SuiteFormat) TestFormatField() {
-	assert.Equal(this.T(), "abc", FormatField("ABC"))
-}
-
-func (this *SuiteFormat) TestFormatKey() {
-	assert.Equal(this.T(), "a:b:c", FormatKey("A", "B", "C"))
+func (this *SuiteFormat) TestMajorKey() {
+	assert.Equal(this.T(), "A:B:C", MajorKey("A", "B", "C"))
 }
