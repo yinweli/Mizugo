@@ -44,7 +44,7 @@ func (this *Redmo) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", nameRedmo, err)
 	} // if
 
-	mizugos.Info(defines.LogSystem, nameRedmo).Caller(0).Message("initialize").KV("config", this.config).End()
+	System.Info(nameRedmo).Caller(0).Message("initialize").KV("config", this.config).End()
 	return nil
 }
 

@@ -1,7 +1,6 @@
 package modules
 
 import (
-	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/errs"
 	"github.com/yinweli/Mizugo/mizugos/procs"
@@ -41,13 +40,13 @@ func (this *Proto) procMProtoQ(message any) {
 
 	if err != nil {
 		this.sendMProtoA(nil, msgs.ErrID_ProtoUnmarshal, 0)
-		mizugos.Warn(defines.LogSystem, nameProto).Caller(0).EndError(errs.Errore(msgs.ErrID_ProtoUnmarshal, err))
+		features.System.Warn(nameProto).Caller(0).EndError(errs.Errore(msgs.ErrID_ProtoUnmarshal, err))
 		return
 	} // if
 
 	count := this.incr()
 	this.sendMProtoA(msg, msgs.ErrID_Success, count)
-	mizugos.Info(defines.LogSystem, nameProto).Caller(0).KV("count", count).End()
+	features.System.Info(nameProto).Caller(0).KV("count", count).End()
 }
 
 // sendMProtoA 傳送回應Proto
@@ -59,7 +58,7 @@ func (this *Proto) sendMProtoA(from *msgs.MProtoQ, errID msgs.ErrID, count int64
 	})
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, nameProto).Caller(0).EndError(err)
+		features.System.Warn(nameProto).Caller(0).EndError(err)
 		return
 	} // if
 

@@ -38,10 +38,8 @@ func (this *SuiteLogmgr) TestLogmgr() {
 	target := NewLogmgr()
 	name := "log"
 	assert.Nil(this.T(), target.Add(name, newLoggerTester(true)))
-	assert.NotNil(this.T(), target.Debug(name, name))
-	assert.NotNil(this.T(), target.Info(name, name))
-	assert.NotNil(this.T(), target.Warn(name, name))
-	assert.NotNil(this.T(), target.Error(name, name))
+	assert.NotNil(this.T(), target.Get(name))
+	assert.Nil(this.T(), target.Get(testdata.Unknown))
 	target.Finalize()
 
 	assert.NotNil(this.T(), target.Add("", newLoggerTester(true)))

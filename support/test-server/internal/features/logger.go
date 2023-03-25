@@ -2,6 +2,7 @@ package features
 
 import (
 	"fmt"
+	"runtime/debug"
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/logs"
@@ -27,12 +28,20 @@ func (this *Logger) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", nameLogger, err)
 	} // if
 
+	if System = mizugos.Logmgr().Get(defines.LogSystem); System == nil {
+		return fmt.Errorf("%v initialize: system logger nil", nameLogger)
+	} // if
+
 	if err := this.add(defines.LogCrash, &this.configCrash); err != nil {
 		return fmt.Errorf("%v initialize: %w", nameLogger, err)
 	} // if
 
-	mizugos.Info(defines.LogSystem, nameLogger).Caller(0).Message("initialize system log").KV("config", &this.configSystem).End()
-	mizugos.Info(defines.LogSystem, nameLogger).Caller(0).Message("initialize crash log").KV("config", &this.configCrash).End()
+	if Crash = mizugos.Logmgr().Get(defines.LogCrash); Crash == nil {
+		return fmt.Errorf("%v initialize: crash logger nil", nameLogger)
+	} // if
+
+	System.Info(nameLogger).Caller(0).Message("initialize system log").KV("config", &this.configSystem).End()
+	System.Info(nameLogger).Caller(0).Message("initialize crash log").KV("config", &this.configCrash).End()
 	return nil
 }
 
@@ -53,3 +62,11 @@ func (this *Logger) add(name string, logger logs.Logger) error {
 
 	return nil
 }
+
+// Crashlize 崩潰處理
+func Crashlize(cause any) {
+	Crash.Error("crash").KV("stack", string(debug.Stack())).EndError(fmt.Errorf("%s", cause))
+}
+
+var System logs.Logger // 系統日誌
+var Crash logs.Logger  // 崩潰日誌

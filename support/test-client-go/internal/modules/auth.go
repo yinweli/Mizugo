@@ -3,7 +3,6 @@ package modules
 import (
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/errs"
 	"github.com/yinweli/Mizugo/mizugos/procs"
@@ -57,18 +56,18 @@ func (this *Auth) procMLoginA(message any) {
 	_, msg, err := procs.JsonUnmarshal[msgs.MLoginA](message)
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		features.System.Warn(nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
 		return
 	} // if
 
 	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success {
-		mizugos.Warn(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errort(msg.ErrID))
+		features.System.Warn(nameAuth).Caller(0).EndError(errs.Errort(msg.ErrID))
 		return
 	} // if
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
 	features.Auth.Add(duration)
-	mizugos.Info(defines.LogSystem, nameAuth).Caller(0).KV("duration", duration).KV("token", msg.Token).End()
+	features.System.Info(nameAuth).Caller(0).KV("duration", duration).KV("token", msg.Token).End()
 
 	this.token = msg.Token
 	this.sendMUpdateQ()
@@ -82,7 +81,7 @@ func (this *Auth) sendMLoginQ() {
 	})
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, nameAuth).Caller(0).EndError(err)
+		features.System.Warn(nameAuth).Caller(0).EndError(err)
 		return
 	} // if
 
@@ -94,18 +93,18 @@ func (this *Auth) procMUpdateA(message any) {
 	_, msg, err := procs.JsonUnmarshal[msgs.MUpdateA](message)
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		features.System.Warn(nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
 		return
 	} // if
 
 	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success {
-		mizugos.Warn(defines.LogSystem, nameAuth).Caller(0).EndError(errs.Errort(msg.ErrID))
+		features.System.Warn(nameAuth).Caller(0).EndError(errs.Errort(msg.ErrID))
 		return
 	} // if
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
 	features.Auth.Add(duration)
-	mizugos.Info(defines.LogSystem, nameAuth).Caller(0).KV("duration", duration).KV("token", msg.Token).End()
+	features.System.Info(nameAuth).Caller(0).KV("duration", duration).KV("token", msg.Token).End()
 
 	this.token = msg.Token
 	this.sendMUpdateQ()
@@ -125,7 +124,7 @@ func (this *Auth) sendMUpdateQ() {
 	})
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, nameAuth).Caller(0).EndError(err)
+		features.System.Warn(nameAuth).Caller(0).EndError(err)
 		return
 	} // if
 

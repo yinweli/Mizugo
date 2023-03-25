@@ -43,7 +43,7 @@ type ProtoConfig struct {
 
 // Initialize 初始化處理
 func (this *Proto) Initialize() error {
-	mizugos.Info(defines.LogSystem, nameProto).Caller(0).Message("entry initialize").End()
+	features.System.Info(nameProto).Caller(0).Message("entry initialize").End()
 
 	if err := mizugos.Configmgr().Unmarshal(nameProto, &this.config); err != nil {
 		return fmt.Errorf("%v initialize: %w", nameProto, err)
@@ -55,18 +55,18 @@ func (this *Proto) Initialize() error {
 		})
 	} // if
 
-	mizugos.Info(defines.LogSystem, nameProto).Caller(0).Message("entry start").KV("config", this.config).End()
+	features.System.Info(nameProto).Caller(0).Message("entry start").KV("config", this.config).End()
 	return nil
 }
 
 // Finalize 結束處理
 func (this *Proto) Finalize() {
-	mizugos.Info(defines.LogSystem, nameProto).Caller(0).Message("entry finalize").End()
+	features.System.Info(nameProto).Caller(0).Message("entry finalize").End()
 }
 
 // bind 綁定處理
 func (this *Proto) bind(session nets.Sessioner) *nets.Bundle {
-	mizugos.Info(defines.LogSystem, nameProto).Caller(0).Message("bind").End()
+	features.System.Info(nameProto).Caller(0).Message("bind").End()
 	entity := mizugos.Entitymgr().Add()
 
 	var wrong error
@@ -119,7 +119,7 @@ Error:
 	} // if
 
 	session.Stop()
-	mizugos.Error(defines.LogSystem, nameProto).Caller(0).EndError(wrong)
+	features.System.Error(nameProto).Caller(0).EndError(wrong)
 	return nil
 }
 
@@ -135,10 +135,10 @@ func (this *Proto) unbind(session nets.Sessioner) {
 
 // connectWrong 連接錯誤處理
 func (this *Proto) connectWrong(err error) {
-	mizugos.Error(defines.LogSystem, nameProto).Caller(1).EndError(err)
+	features.System.Error(nameProto).Caller(1).EndError(err)
 }
 
 // bindWrong 綁定錯誤處理
 func (this *Proto) bindWrong(err error) {
-	mizugos.Warn(defines.LogSystem, nameProto).Caller(1).EndError(err)
+	features.System.Warn(nameProto).Caller(1).EndError(err)
 }

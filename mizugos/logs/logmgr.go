@@ -52,52 +52,16 @@ func (this *Logmgr) Add(name string, logger Logger) error {
 	return nil
 }
 
-// Debug 記錄除錯訊息, 用於記錄除錯訊息; 如果 name 不存在則取得空記錄物件
-func (this *Logmgr) Debug(name, label string) Stream {
+// Get 取得日誌物件
+func (this *Logmgr) Get(name string) Logger {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 
 	if logger, ok := this.logger[name]; ok {
-		return logger.Debug(label)
+		return logger
 	} // if
 
-	return &EmptyStream{}
-}
-
-// Info 記錄一般訊息, 用於記錄一般訊息; 如果 name 不存在則取得空記錄物件
-func (this *Logmgr) Info(name, label string) Stream {
-	this.lock.RLock()
-	defer this.lock.RUnlock()
-
-	if logger, ok := this.logger[name]; ok {
-		return logger.Info(label)
-	} // if
-
-	return &EmptyStream{}
-}
-
-// Warn 記錄警告訊息, 用於記錄遊戲邏輯錯誤; 如果 name 不存在則取得空記錄物件
-func (this *Logmgr) Warn(name, label string) Stream {
-	this.lock.RLock()
-	defer this.lock.RUnlock()
-
-	if logger, ok := this.logger[name]; ok {
-		return logger.Warn(label)
-	} // if
-
-	return &EmptyStream{}
-}
-
-// Error 記錄錯誤訊息, 用於記錄伺服器錯誤; 如果 name 不存在則取得空記錄物件
-func (this *Logmgr) Error(name, label string) Stream {
-	this.lock.RLock()
-	defer this.lock.RUnlock()
-
-	if logger, ok := this.logger[name]; ok {
-		return logger.Error(label)
-	} // if
-
-	return &EmptyStream{}
+	return nil
 }
 
 // Finalize 結束處理

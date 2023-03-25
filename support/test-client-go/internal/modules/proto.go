@@ -3,7 +3,6 @@ package modules
 import (
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/errs"
 	"github.com/yinweli/Mizugo/mizugos/procs"
@@ -53,12 +52,12 @@ func (this *Proto) procMProtoA(message any) {
 	_, msg, err := procs.ProtoUnmarshal[msgs.MProtoA](message)
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, nameProto).Caller(0).EndError(errs.Errore(msgs.ErrID_ProtoUnmarshal, err))
+		features.System.Warn(nameProto).Caller(0).EndError(errs.Errore(msgs.ErrID_ProtoUnmarshal, err))
 		return
 	} // if
 
 	if msg.ErrID != msgs.ErrID_Success {
-		mizugos.Warn(defines.LogSystem, nameProto).Caller(0).EndError(errs.Errort(msg.ErrID))
+		features.System.Warn(nameProto).Caller(0).EndError(errs.Errort(msg.ErrID))
 		return
 	} // if
 
@@ -71,7 +70,7 @@ func (this *Proto) procMProtoA(message any) {
 		this.sendMProtoQ()
 	} // if
 
-	mizugos.Info(defines.LogSystem, nameProto).Caller(0).KV("duration", duration).KV("count", msg.Count).End()
+	features.System.Info(nameProto).Caller(0).KV("duration", duration).KV("count", msg.Count).End()
 }
 
 // sendMProtoQ 傳送要求Proto
@@ -81,7 +80,7 @@ func (this *Proto) sendMProtoQ() {
 	})
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, nameProto).Caller(0).EndError(err)
+		features.System.Warn(nameProto).Caller(0).EndError(err)
 		return
 	} // if
 

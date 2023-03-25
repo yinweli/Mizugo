@@ -43,7 +43,7 @@ type JsonConfig struct {
 
 // Initialize 初始化處理
 func (this *Json) Initialize() error {
-	mizugos.Info(defines.LogSystem, nameJson).Caller(0).Message("entry initialize").End()
+	features.System.Info(nameJson).Caller(0).Message("entry initialize").End()
 
 	if err := mizugos.Configmgr().Unmarshal(nameJson, &this.config); err != nil {
 		return fmt.Errorf("%v initialize: %w", nameJson, err)
@@ -55,18 +55,18 @@ func (this *Json) Initialize() error {
 		})
 	} // if
 
-	mizugos.Info(defines.LogSystem, nameJson).Caller(0).Message("entry start").KV("config", this.config).End()
+	features.System.Info(nameJson).Caller(0).Message("entry start").KV("config", this.config).End()
 	return nil
 }
 
 // Finalize 結束處理
 func (this *Json) Finalize() {
-	mizugos.Info(defines.LogSystem, nameJson).Caller(0).Message("entry finalize").End()
+	features.System.Info(nameJson).Caller(0).Message("entry finalize").End()
 }
 
 // bind 綁定處理
 func (this *Json) bind(session nets.Sessioner) *nets.Bundle {
-	mizugos.Info(defines.LogSystem, nameJson).Caller(0).Message("bind").End()
+	features.System.Info(nameJson).Caller(0).Message("bind").End()
 	entity := mizugos.Entitymgr().Add()
 
 	var wrong error
@@ -119,7 +119,7 @@ Error:
 	} // if
 
 	session.Stop()
-	mizugos.Error(defines.LogSystem, nameJson).Caller(0).EndError(wrong)
+	features.System.Error(nameJson).Caller(0).EndError(wrong)
 	return nil
 }
 
@@ -135,10 +135,10 @@ func (this *Json) unbind(session nets.Sessioner) {
 
 // connectWrong 連接錯誤處理
 func (this *Json) connectWrong(err error) {
-	mizugos.Error(defines.LogSystem, nameJson).Caller(1).EndError(err)
+	features.System.Error(nameJson).Caller(1).EndError(err)
 }
 
 // bindWrong 綁定錯誤處理
 func (this *Json) bindWrong(err error) {
-	mizugos.Warn(defines.LogSystem, nameJson).Caller(1).EndError(err)
+	features.System.Warn(nameJson).Caller(1).EndError(err)
 }

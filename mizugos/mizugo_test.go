@@ -42,10 +42,6 @@ func (this *SuiteMizugo) TestMizugo() {
 	assert.NotNil(this.T(), Entitymgr())
 	assert.NotNil(this.T(), Labelmgr())
 	assert.NotNil(this.T(), Poolmgr())
-	assert.NotNil(this.T(), Debug("", ""))
-	assert.NotNil(this.T(), Info("", ""))
-	assert.NotNil(this.T(), Warn("", ""))
-	assert.NotNil(this.T(), Error("", ""))
 	time.Sleep(testdata.Timeout)
 	Stop()
 }

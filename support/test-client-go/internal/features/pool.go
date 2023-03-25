@@ -5,7 +5,6 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/pools"
-	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
 )
 
 const namePool = "pool" // 特性名稱
@@ -32,7 +31,7 @@ func (this *Pool) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", namePool, err)
 	} // if
 
-	mizugos.Info(defines.LogSystem, namePool).Caller(0).Message("initialize").KV("config", &this.config).End()
+	System.Info(namePool).Caller(0).Message("initialize").KV("config", &this.config).End()
 	return nil
 }
 
@@ -47,5 +46,5 @@ type poolLogger struct {
 
 // Printf 輸出日誌
 func (this *poolLogger) Printf(format string, args ...any) {
-	mizugos.Logmgr().Error(defines.LogSystem, namePool).Caller(1).Message(format, args...).End()
+	System.Error(namePool).Caller(1).Message(format, args...).End()
 }
