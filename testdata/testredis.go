@@ -3,8 +3,8 @@ package testdata
 import (
 	"context"
 	"encoding/json"
-	"reflect"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -16,7 +16,7 @@ func RedisClear(ctx context.Context, client redis.Cmdable, key []string) {
 }
 
 // RedisCompare 在redis中比對資料是否相同
-func RedisCompare[T any](ctx context.Context, client redis.Cmdable, key string, expected *T) bool {
+func RedisCompare[T any](ctx context.Context, client redis.Cmdable, key string, expected *T, cmpOpt ...cmp.Option) bool {
 	result, err := client.Get(ctx, key).Result()
 
 	if err != nil {
@@ -29,5 +29,5 @@ func RedisCompare[T any](ctx context.Context, client redis.Cmdable, key string, 
 		return false
 	} // if
 
-	return reflect.DeepEqual(expected, actual)
+	return cmp.Equal(expected, actual, cmpOpt...)
 }

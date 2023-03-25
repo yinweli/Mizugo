@@ -2,8 +2,8 @@ package testdata
 
 import (
 	"context"
-	"reflect"
 
+	"github.com/google/go-cmp/cmp"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -15,7 +15,7 @@ func MongoClear(ctx context.Context, table *mongo.Database) {
 }
 
 // MongoCompare 在mongo中比對資料是否相同
-func MongoCompare[T any](ctx context.Context, database *mongo.Database, tableName, fieldName, key string, expected *T) bool {
+func MongoCompare[T any](ctx context.Context, database *mongo.Database, tableName, fieldName, key string, expected *T, cmpOpt ...cmp.Option) bool {
 	table := database.Collection(tableName)
 
 	if table == nil {
@@ -28,5 +28,5 @@ func MongoCompare[T any](ctx context.Context, database *mongo.Database, tableNam
 		return false
 	} // if
 
-	return reflect.DeepEqual(expected, actual)
+	return cmp.Equal(expected, actual, cmpOpt...)
 }
