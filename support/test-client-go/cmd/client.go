@@ -13,7 +13,7 @@ import (
 func main() {
 	defer func() {
 		if cause := recover(); cause != nil {
-			defines.Crashlize(cause)
+			features.Crashlize(cause)
 		} // if
 	}()
 

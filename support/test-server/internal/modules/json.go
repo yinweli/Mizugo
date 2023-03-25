@@ -1,7 +1,6 @@
 package modules
 
 import (
-	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/errs"
 	"github.com/yinweli/Mizugo/mizugos/procs"
@@ -41,13 +40,13 @@ func (this *Json) procMJsonQ(message any) {
 
 	if err != nil {
 		this.sendMJsonA(nil, msgs.ErrID_JsonUnmarshal, 0)
-		mizugos.Warn(defines.LogSystem, nameJson).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		features.System.Warn(nameJson).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
 		return
 	} // if
 
 	count := this.incr()
 	this.sendMJsonA(msg, msgs.ErrID_Success, count)
-	mizugos.Info(defines.LogSystem, nameJson).Caller(0).KV("count", count).End()
+	features.System.Info(nameJson).Caller(0).KV("count", count).End()
 }
 
 // sendMJsonA 傳送回應Json
@@ -59,7 +58,7 @@ func (this *Json) sendMJsonA(from *msgs.MJsonQ, errID msgs.ErrID, count int64) {
 	})
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, nameJson).Caller(0).EndError(err)
+		features.System.Warn(nameJson).Caller(0).EndError(err)
 		return
 	} // if
 

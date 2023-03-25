@@ -3,7 +3,6 @@ package modules
 import (
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/errs"
 	"github.com/yinweli/Mizugo/mizugos/procs"
@@ -53,12 +52,12 @@ func (this *Json) procMJsonA(message any) {
 	_, msg, err := procs.JsonUnmarshal[msgs.MJsonA](message)
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, nameJson).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		features.System.Warn(nameJson).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
 		return
 	} // if
 
 	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success {
-		mizugos.Warn(defines.LogSystem, nameJson).Caller(0).EndError(errs.Errort(msg.ErrID))
+		features.System.Warn(nameJson).Caller(0).EndError(errs.Errort(msg.ErrID))
 		return
 	} // if
 
@@ -71,7 +70,7 @@ func (this *Json) procMJsonA(message any) {
 		this.sendMJsonQ()
 	} // if
 
-	mizugos.Info(defines.LogSystem, nameJson).Caller(0).KV("duration", duration).KV("count", msg.Count).End()
+	features.System.Info(nameJson).Caller(0).KV("duration", duration).KV("count", msg.Count).End()
 }
 
 // sendMJsonQ 傳送要求Json
@@ -81,7 +80,7 @@ func (this *Json) sendMJsonQ() {
 	})
 
 	if err != nil {
-		mizugos.Warn(defines.LogSystem, nameJson).Caller(0).EndError(err)
+		features.System.Warn(nameJson).Caller(0).EndError(err)
 		return
 	} // if
 

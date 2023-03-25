@@ -5,7 +5,6 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/metrics"
-	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
 )
 
 const nameMetrics = "metrics" // 特性名稱
@@ -39,7 +38,7 @@ func (this *Metrics) Initialize() error {
 	Json = mizugos.Metricsmgr().NewRuntime("json")
 	Proto = mizugos.Metricsmgr().NewRuntime("proto")
 	Connect = mizugos.Metricsmgr().NewInt("connect")
-	mizugos.Info(defines.LogSystem, nameMetrics).Caller(0).Message("initialize").KV("config", this.config).End()
+	System.Info(nameMetrics).Caller(0).Message("initialize").KV("config", this.config).End()
 	return nil
 }
 

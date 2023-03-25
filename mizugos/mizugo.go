@@ -137,40 +137,6 @@ func Poolmgr() *pools.Poolmgr {
 	return server.poolmgr
 }
 
-// ===== 日誌功能 =====
-
-// Debug 記錄除錯訊息
-func Debug(name, label string) logs.Stream {
-	server.lock.RLock()
-	defer server.lock.RUnlock()
-
-	return server.logmgr.Debug(name, label)
-}
-
-// Info 記錄一般訊息
-func Info(name, label string) logs.Stream {
-	server.lock.RLock()
-	defer server.lock.RUnlock()
-
-	return server.logmgr.Info(name, label)
-}
-
-// Warn 記錄警告訊息
-func Warn(name, label string) logs.Stream {
-	server.lock.RLock()
-	defer server.lock.RUnlock()
-
-	return server.logmgr.Warn(name, label)
-}
-
-// Error 記錄錯誤訊息
-func Error(name, label string) logs.Stream {
-	server.lock.RLock()
-	defer server.lock.RUnlock()
-
-	return server.logmgr.Error(name, label)
-}
-
 // server 伺服器資料
 var server struct {
 	configmgr  *configs.Configmgr  // 配置管理器
