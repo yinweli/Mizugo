@@ -25,8 +25,8 @@ type SuiteMxIndex struct {
 
 func (this *SuiteMxIndex) SetupSuite() {
 	testdata.EnvSetup(&this.Env, "test-redmos-mxindex")
-	this.major, _ = newMajor(ctxs.Root(), testdata.RedisURI, true)
-	this.minor, _ = newMinor(ctxs.Root(), testdata.MongoURI, this.meta.MinorTable()) // 這裡偷懶把表格名稱當資料庫名稱來用
+	this.major, _ = newMajor(ctxs.RootCtx(), testdata.RedisURI, true)
+	this.minor, _ = newMinor(ctxs.RootCtx(), testdata.MongoURI, this.meta.MinorTable()) // 這裡偷懶把表格名稱當資料庫名稱來用
 }
 
 func (this *SuiteMxIndex) TearDownSuite() {
@@ -34,7 +34,7 @@ func (this *SuiteMxIndex) TearDownSuite() {
 	testdata.RedisClear(ctxs.RootCtx(), this.major.Client(), this.major.UsedKey())
 	testdata.MongoClear(ctxs.RootCtx(), this.minor.Database())
 	this.major.stop()
-	this.minor.stop(ctxs.Root())
+	this.minor.stop(ctxs.RootCtx())
 }
 
 func (this *SuiteMxIndex) TearDownTest() {
@@ -45,7 +45,7 @@ func (this *SuiteMxIndex) TestIndex() {
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
 	index := &Index{Meta: &this.meta, Order: 1}
-	index.Initialize(ctxs.Root(), majorSubmit, minorSubmit)
+	index.Initialize(ctxs.RootCtx(), majorSubmit, minorSubmit)
 
 	assert.Nil(this.T(), index.Prepare())
 	assert.Nil(this.T(), index.Complete())

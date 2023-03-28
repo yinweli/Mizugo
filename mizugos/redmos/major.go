@@ -6,13 +6,11 @@ import (
 	"net"
 
 	"github.com/redis/go-redis/v9"
-
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 )
 
 // newMajor 建立主要資料庫, 並且連線到 RedisURI 指定的資料庫
-func newMajor(ctx ctxs.Ctx, uri RedisURI, record bool) (major *Major, err error) {
-	client, err := uri.Connect(ctx)
+func newMajor(context context.Context, uri RedisURI, record bool) (major *Major, err error) {
+	client, err := uri.Connect(context)
 
 	if err != nil {
 		return nil, fmt.Errorf("newMajor: %w", err)

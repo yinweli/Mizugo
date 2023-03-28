@@ -27,8 +27,8 @@ func (this *SuiteMxLock) SetupSuite() {
 	testdata.EnvSetup(&this.Env, "test-redmos-mxlock")
 	this.dbtable = "mxlock"
 	this.key = "mxlock-0001"
-	this.major, _ = newMajor(ctxs.Root(), testdata.RedisURI, true)
-	this.minor, _ = newMinor(ctxs.Root(), testdata.MongoURI, this.dbtable)
+	this.major, _ = newMajor(ctxs.RootCtx(), testdata.RedisURI, true)
+	this.minor, _ = newMinor(ctxs.RootCtx(), testdata.MongoURI, this.dbtable)
 }
 
 func (this *SuiteMxLock) TearDownSuite() {
@@ -36,7 +36,7 @@ func (this *SuiteMxLock) TearDownSuite() {
 	testdata.RedisClear(ctxs.RootCtx(), this.major.Client(), this.major.UsedKey())
 	testdata.MongoClear(ctxs.RootCtx(), this.minor.Database())
 	this.major.stop()
-	this.minor.stop(ctxs.Root())
+	this.minor.stop(ctxs.RootCtx())
 }
 
 func (this *SuiteMxLock) TearDownTest() {
@@ -46,9 +46,9 @@ func (this *SuiteMxLock) TearDownTest() {
 func (this *SuiteMxLock) TestLock() {
 	majorSubmit := this.major.Submit()
 	lock := &Lock{Key: this.key, time: testdata.RedisTimeout}
-	lock.Initialize(ctxs.Root(), majorSubmit, nil)
+	lock.Initialize(ctxs.RootCtx(), majorSubmit, nil)
 	unlock := &Unlock{Key: this.key}
-	unlock.Initialize(ctxs.Root(), majorSubmit, nil)
+	unlock.Initialize(ctxs.RootCtx(), majorSubmit, nil)
 
 	assert.Nil(this.T(), lock.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.RootCtx())

@@ -3,8 +3,6 @@ package redmos
 import (
 	"context"
 	"fmt"
-
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 )
 
 // newMixed 建立混合資料庫
@@ -23,11 +21,11 @@ type Mixed struct {
 }
 
 // Submit 取得執行物件
-func (this *Mixed) Submit(ctx ctxs.Ctx) *Submit {
+func (this *Mixed) Submit(context context.Context) *Submit {
 	return &Submit{
-		ctx:   ctx,
-		major: this.major.Submit(),
-		minor: this.minor.Submit(),
+		context: context,
+		major:   this.major.Submit(),
+		minor:   this.minor.Submit(),
 	}
 }
 
@@ -42,15 +40,15 @@ func (this *Mixed) Submit(ctx ctxs.Ctx) *Submit {
 // 目前已經實作了幾個預設行為 Lock, Unlock, Get, Set, Index 可以幫助使用者作行為設計;
 // 其中 Lock, Unlock 已經直接整合到 Submit 提供的函式
 type Submit struct {
-	ctx      ctxs.Ctx     // ctx物件
-	major    MajorSubmit  // 主要執行物件
-	minor    *MinorSubmit // 次要執行物件
-	behavior []Behavior   // 行為列表
+	context  context.Context // ctx物件
+	major    MajorSubmit     // 主要執行物件
+	minor    *MinorSubmit    // 次要執行物件
+	behavior []Behavior      // 行為列表
 }
 
 // Add 新增行為
 func (this *Submit) Add(behavior Behavior) *Submit {
-	behavior.Initialize(this.ctx, this.major, this.minor)
+	behavior.Initialize(this.context, this.major, this.minor)
 	this.behavior = append(this.behavior, behavior)
 	return this
 }
@@ -77,7 +75,7 @@ func (this *Submit) Exec() error {
 		} // if
 	} // for
 
-	_, _ = this.major.Exec(this.ctx.Ctx())
+	_, _ = this.major.Exec(this.context)
 
 	for _, itor := range this.behavior {
 		if err := itor.Complete(); err != nil {
@@ -96,7 +94,7 @@ func (this *Submit) Exec() error {
 //   - 錯誤處理: 當資料庫失敗時才會回傳錯誤, 若是邏輯錯誤(例如資料不存在), 就不應該回傳錯誤, 而是把結果記錄下來提供外部使用
 type Behavior interface {
 	// Initialize 初始處理
-	Initialize(ctx ctxs.Ctx, major MajorSubmit, minor *MinorSubmit)
+	Initialize(context context.Context, major MajorSubmit, minor *MinorSubmit)
 
 	// Prepare 準備處理
 	Prepare() error
@@ -107,21 +105,21 @@ type Behavior interface {
 
 // Behave 行為資料
 type Behave struct {
-	ctx   ctxs.Ctx     // ctx物件
-	major MajorSubmit  // 主要執行物件
-	minor *MinorSubmit // 次要執行物件
+	context context.Context // ctx物件
+	major   MajorSubmit     // 主要執行物件
+	minor   *MinorSubmit    // 次要執行物件
 }
 
 // Initialize 初始處理
-func (this *Behave) Initialize(ctx ctxs.Ctx, major MajorSubmit, minor *MinorSubmit) {
-	this.ctx = ctx
+func (this *Behave) Initialize(context context.Context, major MajorSubmit, minor *MinorSubmit) {
+	this.context = context
 	this.major = major
 	this.minor = minor
 }
 
 // Ctx 取得ctx物件
 func (this *Behave) Ctx() context.Context {
-	return this.ctx.Ctx()
+	return this.context
 }
 
 // Major 取得主要執行物件
