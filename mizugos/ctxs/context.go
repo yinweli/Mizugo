@@ -5,14 +5,14 @@ import (
 	"time"
 )
 
-// Root 取得 Ctx 根物件, 當使用mizugo框架並且需要使用context時, 應該要由此函式的 Ctx 物件衍生
-func Root() Ctx {
+// Get 取得 Ctx 根物件, 當使用mizugo框架並且需要使用context時, 應該要由此函式的 Ctx 物件衍生
+func Get() Ctx {
 	return root
 }
 
-// RootCtx 方便取得 Ctx 根物件中的context.Context
-func RootCtx() context.Context {
-	return Root().Ctx()
+// Set 設定 Ctx 根物件, 當需要使用外部的context來做根物件時, 可用此函式來替換
+func Set(ctx context.Context) {
+	root.ctx, root.cancel = context.WithCancel(ctx)
 }
 
 // Ctx context資料
@@ -60,8 +60,7 @@ func (this Ctx) WithDeadline(deadline time.Time) Ctx {
 }
 
 func init() { //nolint:gochecknoinits
-	root = Ctx{}
-	root.ctx, root.cancel = context.WithCancel(context.Background())
+	Set(context.Background())
 }
 
 var root Ctx // Ctx 根物件

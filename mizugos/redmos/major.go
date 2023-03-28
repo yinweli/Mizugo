@@ -9,8 +9,8 @@ import (
 )
 
 // newMajor 建立主要資料庫, 並且連線到 RedisURI 指定的資料庫
-func newMajor(context context.Context, uri RedisURI, record bool) (major *Major, err error) {
-	client, err := uri.Connect(context)
+func newMajor(ctx context.Context, uri RedisURI, record bool) (major *Major, err error) {
+	client, err := uri.Connect(ctx)
 
 	if err != nil {
 		return nil, fmt.Errorf("newMajor: %w", err)

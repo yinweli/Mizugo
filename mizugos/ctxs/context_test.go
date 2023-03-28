@@ -33,8 +33,8 @@ func (this *SuiteContext) TearDownTest() {
 }
 
 func (this *SuiteContext) TestRoot() {
-	assert.NotNil(this.T(), Root())
-	assert.NotNil(this.T(), RootCtx())
+	Set(context.Background())
+	assert.NotNil(this.T(), Get())
 }
 
 func (this *SuiteContext) TestCtx() {

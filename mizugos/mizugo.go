@@ -24,7 +24,7 @@ import (
 //	    } // if
 //	}()
 //
-//	ctx := ctxs.Root().WithCancel()
+//	ctx := ctxs.Get().WithCancel()
 //	name := "伺服器名稱"
 //	mizugos.Start() // 啟動伺服器
 //
@@ -68,7 +68,7 @@ func Stop() {
 	server.entitymgr = nil
 	server.labelmgr = nil
 	server.poolmgr = nil
-	ctxs.Root().Cancel() // 關閉由contexts.Ctx()衍生出來的執行緒, 避免goroutine洩漏
+	ctxs.Get().Cancel() // 關閉由contexts.Ctx()衍生出來的執行緒, 避免goroutine洩漏
 }
 
 // ===== 管理器功能 =====

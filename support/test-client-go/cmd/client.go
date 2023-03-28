@@ -17,7 +17,7 @@ func main() {
 		} // if
 	}()
 
-	ctx := ctxs.Root().WithCancel()
+	ctx := ctxs.Get().WithCancel()
 	name := defines.CmdClient
 	mizugos.Start()
 

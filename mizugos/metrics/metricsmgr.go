@@ -57,7 +57,7 @@ func (this *Metricsmgr) Initialize(port int) error {
 	handler.HandleFunc("/debug/pprof/trace", pprof.Trace)
 	handler.Handle("/debug/vars", expvar.Handler())
 
-	this.ctx = ctxs.Root().WithCancel()
+	this.ctx = ctxs.Get().WithCancel()
 	this.server = &http.Server{
 		Addr:              fmt.Sprintf(":%v", port),
 		ReadHeaderTimeout: timeout,
@@ -103,7 +103,7 @@ func (this *Metricsmgr) NewMap(name string) *Map {
 // NewRuntime 建立執行統計
 func (this *Metricsmgr) NewRuntime(name string) *Runtime {
 	v := &Runtime{}
-	v.start(this.ctx)
+	v.start(this.ctx.Ctx())
 	expvar.Publish(name, v)
 	return v
 }

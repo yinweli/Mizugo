@@ -10,7 +10,7 @@ import (
 // NewRedmomgr 建立資料庫管理器
 func NewRedmomgr() *Redmomgr {
 	return &Redmomgr{
-		ctx:   ctxs.Root().WithCancel(),
+		ctx:   ctxs.Get().WithCancel(),
 		major: map[string]*Major{},
 		minor: map[string]*Minor{},
 		mixed: map[string]*Mixed{},
@@ -152,7 +152,7 @@ func (this *Redmomgr) Stop() {
 	} // if
 
 	this.ctx.Cancel()
-	this.ctx = ctxs.Root().WithCancel()
+	this.ctx = ctxs.Get().WithCancel()
 	this.major = map[string]*Major{}
 	this.minor = map[string]*Minor{}
 	this.mixed = map[string]*Mixed{}
