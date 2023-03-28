@@ -72,7 +72,7 @@ func (this *Auth) procMLoginQ(message any) {
 
 	authGet := querys.NewAuthGet(msg.Account, nil)
 
-	if err = database.Submit(ctxs.Root()).Lock(msg.Account).Add(authGet).Exec(); err != nil {
+	if err = database.Submit(ctxs.RootCtx()).Lock(msg.Account).Add(authGet).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
 		features.System.Error(nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
 		return
@@ -84,7 +84,7 @@ func (this *Auth) procMLoginQ(message any) {
 		Time:    time.Now(),
 	})
 
-	if err = database.Submit(ctxs.Root()).Add(authSet).Unlock(msg.Account).Exec(); err != nil {
+	if err = database.Submit(ctxs.RootCtx()).Add(authSet).Unlock(msg.Account).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
 		features.System.Error(nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
 		return
@@ -133,7 +133,7 @@ func (this *Auth) procMUpdateQ(message any) {
 
 	authGet := querys.NewAuthGet(msg.Account, nil)
 
-	if err = database.Submit(ctxs.Root()).Lock(msg.Account).Add(authGet).Exec(); err != nil {
+	if err = database.Submit(ctxs.RootCtx()).Lock(msg.Account).Add(authGet).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
 		features.System.Error(nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
 		return
@@ -157,7 +157,7 @@ func (this *Auth) procMUpdateQ(message any) {
 		Time:    time.Now(),
 	})
 
-	if err = database.Submit(ctxs.Root()).Add(authSet).Unlock(msg.Account).Exec(); err != nil {
+	if err = database.Submit(ctxs.RootCtx()).Add(authSet).Unlock(msg.Account).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
 		features.System.Error(nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
 		return

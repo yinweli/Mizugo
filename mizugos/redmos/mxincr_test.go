@@ -27,8 +27,8 @@ type SuiteMxIncr struct {
 func (this *SuiteMxIncr) SetupSuite() {
 	testdata.EnvSetup(&this.Env, "test-redmos-mxincr")
 	this.key = "mxincr-0001"
-	this.major, _ = newMajor(ctxs.Root(), testdata.RedisURI, true)
-	this.minor, _ = newMinor(ctxs.Root(), testdata.MongoURI, this.meta.MinorTable()) // 這裡偷懶把表格名稱當資料庫名稱來用
+	this.major, _ = newMajor(ctxs.RootCtx(), testdata.RedisURI, true)
+	this.minor, _ = newMinor(ctxs.RootCtx(), testdata.MongoURI, this.meta.MinorTable()) // 這裡偷懶把表格名稱當資料庫名稱來用
 }
 
 func (this *SuiteMxIncr) TearDownSuite() {
@@ -36,7 +36,7 @@ func (this *SuiteMxIncr) TearDownSuite() {
 	testdata.RedisClear(ctxs.RootCtx(), this.major.Client(), this.major.UsedKey())
 	testdata.MongoClear(ctxs.RootCtx(), this.minor.Database())
 	this.major.stop()
-	this.minor.stop(ctxs.Root())
+	this.minor.stop(ctxs.RootCtx())
 }
 
 func (this *SuiteMxIncr) TearDownTest() {
@@ -51,9 +51,9 @@ func (this *SuiteMxIncr) TestIncr() {
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
 	get := &Get[int64]{Meta: &this.meta, Key: this.key}
-	get.Initialize(ctxs.Root(), majorSubmit, minorSubmit)
+	get.Initialize(ctxs.RootCtx(), majorSubmit, minorSubmit)
 	incr := &Incr[int64]{Meta: &this.meta, Key: this.key, Incr: 1}
-	incr.Initialize(ctxs.Root(), majorSubmit, minorSubmit)
+	incr.Initialize(ctxs.RootCtx(), majorSubmit, minorSubmit)
 
 	assert.Nil(this.T(), incr.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.RootCtx())

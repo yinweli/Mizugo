@@ -33,16 +33,16 @@ func (this *SuiteMajor) TearDownTest() {
 }
 
 func (this *SuiteMajor) TestNewMajor() {
-	target, err := newMajor(ctxs.Root(), testdata.RedisURI, true)
+	target, err := newMajor(ctxs.RootCtx(), testdata.RedisURI, true)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), target)
 
-	_, err = newMajor(ctxs.Root(), "", true)
+	_, err = newMajor(ctxs.RootCtx(), "", true)
 	assert.NotNil(this.T(), err)
 }
 
 func (this *SuiteMajor) TestMajor() {
-	target, err := newMajor(ctxs.Root(), testdata.RedisURI, true)
+	target, err := newMajor(ctxs.RootCtx(), testdata.RedisURI, true)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), target.Submit())
 	assert.NotNil(this.T(), target.Client())
@@ -54,12 +54,12 @@ func (this *SuiteMajor) TestMajor() {
 	assert.Nil(this.T(), target.Submit())
 	assert.Nil(this.T(), target.Client())
 
-	_, err = newMajor(ctxs.Root(), testdata.RedisURIInvalid, true)
+	_, err = newMajor(ctxs.RootCtx(), testdata.RedisURIInvalid, true)
 	assert.NotNil(this.T(), err)
 }
 
 func (this *SuiteMajor) TestUsedKey() {
-	target, err := newMajor(ctxs.Root(), testdata.RedisURI, true)
+	target, err := newMajor(ctxs.RootCtx(), testdata.RedisURI, true)
 	assert.Nil(this.T(), err)
 	client := target.Client()
 	assert.NotNil(this.T(), client)
@@ -73,7 +73,7 @@ func (this *SuiteMajor) TestUsedKey() {
 }
 
 func BenchmarkMajorSet(b *testing.B) {
-	target, _ := newMajor(ctxs.Root(), testdata.RedisURI, false)
+	target, _ := newMajor(ctxs.RootCtx(), testdata.RedisURI, false)
 	submit := target.Submit()
 
 	for i := 0; i < b.N; i++ {
@@ -85,7 +85,7 @@ func BenchmarkMajorSet(b *testing.B) {
 }
 
 func BenchmarkMajorGet(b *testing.B) {
-	target, _ := newMajor(ctxs.Root(), testdata.RedisURI, false)
+	target, _ := newMajor(ctxs.RootCtx(), testdata.RedisURI, false)
 	submit := target.Submit()
 	value := utils.RandString(testdata.RandStringLength)
 	_, _ = submit.Set(ctxs.RootCtx(), value, value, 0).Result()

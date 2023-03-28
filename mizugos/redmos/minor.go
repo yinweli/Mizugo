@@ -1,17 +1,16 @@
 package redmos
 
 import (
+	"context"
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/mongo"
-
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 )
 
 // newMinor 建立次要資料庫, 並且連線到 MongoURI 指定的資料庫;
 // 另外需要指定mongo資料庫名稱, 簡化後面取得執行器的流程, 但也因此限制次要資料庫不能在多個mongo資料庫間切換
-func newMinor(ctx ctxs.Ctx, uri MongoURI, dbName string) (major *Minor, err error) {
-	client, err := uri.Connect(ctx)
+func newMinor(context context.Context, uri MongoURI, dbName string) (major *Minor, err error) {
+	client, err := uri.Connect(context)
 
 	if err != nil {
 		return nil, fmt.Errorf("newMinor: %w", err)
@@ -58,9 +57,9 @@ func (this *Minor) Database() *mongo.Database {
 }
 
 // stop 停止資料庫
-func (this *Minor) stop(ctx ctxs.Ctx) {
+func (this *Minor) stop(context context.Context) {
 	if this.client != nil {
-		_ = this.client.Disconnect(ctx.Ctx())
+		_ = this.client.Disconnect(context)
 		this.client = nil
 		this.database = nil
 	} // if

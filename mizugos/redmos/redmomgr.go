@@ -44,7 +44,7 @@ func (this *Redmomgr) AddMajor(majorName string, uri RedisURI, record bool) erro
 		return fmt.Errorf("redmomgr addMajor: duplicate database")
 	} // if
 
-	major, err := newMajor(this.ctx, uri, record)
+	major, err := newMajor(this.ctx.Ctx(), uri, record)
 
 	if err != nil {
 		return fmt.Errorf("redmomgr addMajor: %w", err)
@@ -76,7 +76,7 @@ func (this *Redmomgr) AddMinor(minorName string, uri MongoURI, dbName string) er
 		return fmt.Errorf("redmomgr addMinor: duplicate database")
 	} // if
 
-	minor, err := newMinor(this.ctx, uri, dbName)
+	minor, err := newMinor(this.ctx.Ctx(), uri, dbName)
 
 	if err != nil {
 		return fmt.Errorf("redmomgr addMinor: %w", err)
@@ -148,7 +148,7 @@ func (this *Redmomgr) Stop() {
 	} // if
 
 	for _, itor := range this.minor {
-		itor.stop(this.ctx)
+		itor.stop(this.ctx.Ctx())
 	} // if
 
 	this.ctx.Cancel()

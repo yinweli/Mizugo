@@ -1,6 +1,7 @@
 package redmos
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -9,8 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 )
 
 // RedisURI redis連接字串, 選項字串是仿造mongo配置字串做出來的, 選項字串語法如下
@@ -72,7 +71,7 @@ import (
 type RedisURI string
 
 // Connect 連接到資料庫
-func (this RedisURI) Connect(ctx ctxs.Ctx) (client redis.UniversalClient, err error) {
+func (this RedisURI) Connect(context context.Context) (client redis.UniversalClient, err error) {
 	option, err := this.option()
 
 	if err != nil {
@@ -81,7 +80,7 @@ func (this RedisURI) Connect(ctx ctxs.Ctx) (client redis.UniversalClient, err er
 
 	client = redis.NewUniversalClient(option)
 
-	if _, err = client.Ping(ctx.Ctx()).Result(); err != nil {
+	if _, err = client.Ping(context).Result(); err != nil {
 		return nil, fmt.Errorf("redisURI start: %w", err)
 	} // if
 
@@ -251,20 +250,20 @@ func (this RedisURI) option() (option *redis.UniversalOptions, err error) {
 type MongoURI string
 
 // Connect 連接到資料庫
-func (this MongoURI) Connect(ctx ctxs.Ctx) (client *mongo.Client, err error) {
+func (this MongoURI) Connect(context context.Context) (client *mongo.Client, err error) {
 	option, err := this.option()
 
 	if err != nil {
 		return nil, fmt.Errorf("mongoURI start: %w", err)
 	} // if
 
-	client, err = mongo.Connect(ctx.Ctx(), option)
+	client, err = mongo.Connect(context, option)
 
 	if err != nil {
 		return nil, fmt.Errorf("mongoURI start: %w", err)
 	} // if
 
-	if err = client.Ping(ctx.Ctx(), readpref.Primary()); err != nil {
+	if err = client.Ping(context, readpref.Primary()); err != nil {
 		return nil, fmt.Errorf("mongoURI start: %w", err)
 	} // if
 

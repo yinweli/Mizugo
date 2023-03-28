@@ -33,13 +33,13 @@ func (this *SuiteURI) TearDownTest() {
 }
 
 func (this *SuiteURI) TestRedisURIConnect() {
-	_, err := RedisURI(testdata.RedisURI).Connect(ctxs.Root())
+	_, err := RedisURI(testdata.RedisURI).Connect(ctxs.RootCtx())
 	assert.Nil(this.T(), err)
 
-	_, err = RedisURI("unknown://").Connect(ctxs.Root())
+	_, err = RedisURI("unknown://").Connect(ctxs.RootCtx())
 	assert.NotNil(this.T(), err)
 
-	_, err = RedisURI(testdata.RedisURIInvalid).Connect(ctxs.Root())
+	_, err = RedisURI(testdata.RedisURIInvalid).Connect(ctxs.RootCtx())
 	assert.NotNil(this.T(), err)
 }
 
@@ -135,13 +135,13 @@ func (this *SuiteURI) TestRedisURIOption() {
 }
 
 func (this *SuiteURI) TestMongoURIConnect() {
-	_, err := MongoURI(testdata.MongoURI).Connect(ctxs.Root())
+	_, err := MongoURI(testdata.MongoURI).Connect(ctxs.RootCtx())
 	assert.Nil(this.T(), err)
 
-	_, err = MongoURI("unknown://").Connect(ctxs.Root())
+	_, err = MongoURI("unknown://").Connect(ctxs.RootCtx())
 	assert.NotNil(this.T(), err)
 
-	_, err = MongoURI(testdata.MongoURIInvalid).Connect(ctxs.Root())
+	_, err = MongoURI(testdata.MongoURIInvalid).Connect(ctxs.RootCtx())
 	assert.NotNil(this.T(), err)
 }
 
