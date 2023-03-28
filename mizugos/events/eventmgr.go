@@ -18,7 +18,7 @@ const separateSubID = "@" // 訂閱索引分隔字串
 // NewEventmgr 建立事件管理器
 func NewEventmgr(capacity int) *Eventmgr {
 	return &Eventmgr{
-		ctx:    ctxs.Root().WithCancel(),
+		ctx:    ctxs.Get().WithCancel(),
 		notify: make(chan notify, capacity),
 		pubsub: newPubsub(),
 	}

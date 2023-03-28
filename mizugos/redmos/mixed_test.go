@@ -25,16 +25,16 @@ type SuiteMixed struct {
 func (this *SuiteMixed) SetupSuite() {
 	testdata.EnvSetup(&this.Env, "test-redmos-mixed")
 	this.name = "mixed"
-	this.major, _ = newMajor(ctxs.RootCtx(), testdata.RedisURI, true)
-	this.minor, _ = newMinor(ctxs.RootCtx(), testdata.MongoURI, this.name)
+	this.major, _ = newMajor(ctxs.Get().Ctx(), testdata.RedisURI, true)
+	this.minor, _ = newMinor(ctxs.Get().Ctx(), testdata.MongoURI, this.name)
 }
 
 func (this *SuiteMixed) TearDownSuite() {
 	testdata.EnvRestore(&this.Env)
-	testdata.RedisClear(ctxs.RootCtx(), this.major.Client(), this.major.UsedKey())
-	testdata.MongoClear(ctxs.RootCtx(), this.minor.Database())
+	testdata.RedisClear(ctxs.Get().Ctx(), this.major.Client(), this.major.UsedKey())
+	testdata.MongoClear(ctxs.Get().Ctx(), this.minor.Database())
 	this.major.stop()
-	this.minor.stop(ctxs.RootCtx())
+	this.minor.stop(ctxs.Get().Ctx())
 }
 
 func (this *SuiteMixed) TearDownTest() {
@@ -47,21 +47,21 @@ func (this *SuiteMixed) TestNewMixed() {
 
 func (this *SuiteMixed) TestSubmit() {
 	target := newMixed(this.major, this.minor)
-	assert.NotNil(this.T(), target.Submit(ctxs.RootCtx()))
+	assert.NotNil(this.T(), target.Submit(ctxs.Get().Ctx()))
 }
 
 func (this *SuiteMixed) TestExec() {
 	target := newMixed(this.major, this.minor)
 	key := "mixed exec"
-	assert.Nil(this.T(), target.Submit(ctxs.RootCtx()).Add(newBehaveTester(true, true)).Exec())
-	assert.Nil(this.T(), target.Submit(ctxs.RootCtx()).Lock(key).Unlock(key).Exec())
-	assert.NotNil(this.T(), target.Submit(ctxs.RootCtx()).Add(newBehaveTester(false, true)).Exec())
-	assert.NotNil(this.T(), target.Submit(ctxs.RootCtx()).Add(newBehaveTester(true, false)).Exec())
+	assert.Nil(this.T(), target.Submit(ctxs.Get().Ctx()).Add(newBehaveTester(true, true)).Exec())
+	assert.Nil(this.T(), target.Submit(ctxs.Get().Ctx()).Lock(key).Unlock(key).Exec())
+	assert.NotNil(this.T(), target.Submit(ctxs.Get().Ctx()).Add(newBehaveTester(false, true)).Exec())
+	assert.NotNil(this.T(), target.Submit(ctxs.Get().Ctx()).Add(newBehaveTester(true, false)).Exec())
 }
 
 func (this *SuiteMixed) TestBehave() {
 	target := Behave{
-		context: ctxs.RootCtx(),
+		context: ctxs.Get().Ctx(),
 		major:   this.major.Submit(),
 		minor:   this.minor.Submit(),
 	}

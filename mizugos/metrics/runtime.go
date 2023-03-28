@@ -1,10 +1,10 @@
 package metrics
 
 import (
+	"context"
 	"sync"
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/pools"
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
@@ -85,7 +85,7 @@ func (this *Runtime) String() string {
 }
 
 // start 開始統計
-func (this *Runtime) start(ctx ctxs.Ctx) {
+func (this *Runtime) start(ctx context.Context) {
 	pools.DefaultPool.Submit(func() {
 		ticker := time.NewTicker(time.Second)
 		ticker1 := time.NewTicker(time.Second * interval1)

@@ -28,16 +28,16 @@ type SuiteMxGet struct {
 func (this *SuiteMxGet) SetupSuite() {
 	testdata.EnvSetup(&this.Env, "test-redmos-mxget")
 	this.key = "mxget-0001"
-	this.major, _ = newMajor(ctxs.RootCtx(), testdata.RedisURI, true)
-	this.minor, _ = newMinor(ctxs.RootCtx(), testdata.MongoURI, this.meta.MinorTable()) // 這裡偷懶把表格名稱當資料庫名稱來用
+	this.major, _ = newMajor(ctxs.Get().Ctx(), testdata.RedisURI, true)
+	this.minor, _ = newMinor(ctxs.Get().Ctx(), testdata.MongoURI, this.meta.MinorTable()) // 這裡偷懶把表格名稱當資料庫名稱來用
 }
 
 func (this *SuiteMxGet) TearDownSuite() {
 	testdata.EnvRestore(&this.Env)
-	testdata.RedisClear(ctxs.RootCtx(), this.major.Client(), this.major.UsedKey())
-	testdata.MongoClear(ctxs.RootCtx(), this.minor.Database())
+	testdata.RedisClear(ctxs.Get().Ctx(), this.major.Client(), this.major.UsedKey())
+	testdata.MongoClear(ctxs.Get().Ctx(), this.minor.Database())
 	this.major.stop()
-	this.minor.stop(ctxs.RootCtx())
+	this.minor.stop(ctxs.Get().Ctx())
 }
 
 func (this *SuiteMxGet) TearDownTest() {
@@ -52,22 +52,22 @@ func (this *SuiteMxGet) TestGet() {
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
 	get := &Get[dataMxGet]{Meta: &this.meta, Key: this.key}
-	get.Initialize(ctxs.RootCtx(), majorSubmit, minorSubmit)
+	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	set := &Set[dataMxGet]{Meta: &this.meta, Key: this.key, Data: expected}
-	set.Initialize(ctxs.RootCtx(), majorSubmit, minorSubmit)
+	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 
 	assert.Nil(this.T(), set.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.RootCtx())
+	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), set.Complete())
 
 	assert.Nil(this.T(), get.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.RootCtx())
+	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), get.Complete())
 	assert.True(this.T(), get.Result)
 	assert.Equal(this.T(), set.Data, get.Data)
 
-	assert.True(this.T(), testdata.RedisCompare[dataMxGet](ctxs.RootCtx(), this.major.Client(), this.meta.MajorKey(this.key), expected))
-	assert.True(this.T(), testdata.MongoCompare[dataMxGet](ctxs.RootCtx(), this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(this.key), expected))
+	assert.True(this.T(), testdata.RedisCompare[dataMxGet](ctxs.Get().Ctx(), this.major.Client(), this.meta.MajorKey(this.key), expected))
+	assert.True(this.T(), testdata.MongoCompare[dataMxGet](ctxs.Get().Ctx(), this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(this.key), expected))
 
 	get.Meta = nil
 	get.Key = this.key

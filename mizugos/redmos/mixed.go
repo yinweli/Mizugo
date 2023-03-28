@@ -21,9 +21,9 @@ type Mixed struct {
 }
 
 // Submit 取得執行物件
-func (this *Mixed) Submit(context context.Context) *Submit {
+func (this *Mixed) Submit(ctx context.Context) *Submit {
 	return &Submit{
-		context: context,
+		context: ctx,
 		major:   this.major.Submit(),
 		minor:   this.minor.Submit(),
 	}
@@ -94,7 +94,7 @@ func (this *Submit) Exec() error {
 //   - 錯誤處理: 當資料庫失敗時才會回傳錯誤, 若是邏輯錯誤(例如資料不存在), 就不應該回傳錯誤, 而是把結果記錄下來提供外部使用
 type Behavior interface {
 	// Initialize 初始處理
-	Initialize(context context.Context, major MajorSubmit, minor *MinorSubmit)
+	Initialize(ctx context.Context, major MajorSubmit, minor *MinorSubmit)
 
 	// Prepare 準備處理
 	Prepare() error
@@ -111,8 +111,8 @@ type Behave struct {
 }
 
 // Initialize 初始處理
-func (this *Behave) Initialize(context context.Context, major MajorSubmit, minor *MinorSubmit) {
-	this.context = context
+func (this *Behave) Initialize(ctx context.Context, major MajorSubmit, minor *MinorSubmit) {
+	this.context = ctx
 	this.major = major
 	this.minor = minor
 }
