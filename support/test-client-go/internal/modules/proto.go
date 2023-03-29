@@ -1,10 +1,10 @@
 package modules
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/errs"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/features"
@@ -52,12 +52,12 @@ func (this *Proto) procMProtoA(message any) {
 	_, msg, err := procs.ProtoUnmarshal[msgs.MProtoA](message)
 
 	if err != nil {
-		features.System.Warn(nameProto).Caller(0).EndError(errs.Errore(msgs.ErrID_ProtoUnmarshal, err))
+		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("proto procMProtoA: %w", err))
 		return
 	} // if
 
 	if msg.ErrID != msgs.ErrID_Success {
-		features.System.Warn(nameProto).Caller(0).EndError(errs.Errort(msg.ErrID))
+		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("proto procMProtoA: %v", msg.ErrID))
 		return
 	} // if
 

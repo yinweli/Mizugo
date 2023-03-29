@@ -1,8 +1,9 @@
 package modules
 
 import (
+	"fmt"
+
 	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/errs"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-server/internal/features"
@@ -40,7 +41,7 @@ func (this *Proto) procMProtoQ(message any) {
 
 	if err != nil {
 		this.sendMProtoA(nil, msgs.ErrID_ProtoUnmarshal, 0)
-		features.System.Warn(nameProto).Caller(0).EndError(errs.Errore(msgs.ErrID_ProtoUnmarshal, err))
+		features.System.Warn(nameProto).Caller(0).EndError(fmt.Errorf("proto procMProtoQ: %w", err))
 		return
 	} // if
 

@@ -1,8 +1,9 @@
 package modules
 
 import (
+	"fmt"
+
 	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/errs"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-server/internal/features"
@@ -40,7 +41,7 @@ func (this *Json) procMJsonQ(message any) {
 
 	if err != nil {
 		this.sendMJsonA(nil, msgs.ErrID_JsonUnmarshal, 0)
-		features.System.Warn(nameJson).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		features.System.Warn(nameJson).Caller(0).EndError(fmt.Errorf("json procMJsonQ: %w", err))
 		return
 	} // if
 
