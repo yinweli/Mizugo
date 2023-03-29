@@ -9,7 +9,6 @@ import (
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/errs"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/mizugos/redmos"
 	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
@@ -60,7 +59,7 @@ func (this *Auth) procMLoginQ(message any) {
 
 	if err != nil {
 		this.sendMLoginA(nil, msgs.ErrID_JsonUnmarshal, "")
-		features.System.Warn(nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMLoginQ: %w", err))
 		return
 	} // if
 
@@ -68,7 +67,7 @@ func (this *Auth) procMLoginQ(message any) {
 
 	if err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_DatabaseNil, "")
-		features.System.Error(nameAuth).Caller(0).EndError(errs.Errort(msgs.ErrID_DatabaseNil))
+		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMLoginQ: %w", err))
 		return
 	} // if
 
@@ -76,7 +75,7 @@ func (this *Auth) procMLoginQ(message any) {
 
 	if err = database.Submit(ctxs.Get().Ctx()).Lock(msg.Account).Add(authGet).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
-		features.System.Error(nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
+		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMLoginQ: %w", err))
 		return
 	} // if
 
@@ -88,7 +87,7 @@ func (this *Auth) procMLoginQ(message any) {
 
 	if err = database.Submit(ctxs.Get().Ctx()).Add(authSet).Unlock(msg.Account).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
-		features.System.Error(nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
+		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMLoginQ: %w", err))
 		return
 	} // if
 
@@ -121,7 +120,7 @@ func (this *Auth) procMUpdateQ(message any) {
 
 	if err != nil {
 		this.sendMUpdateA(nil, msgs.ErrID_JsonUnmarshal, "")
-		features.System.Warn(nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err))
 		return
 	} // if
 
@@ -129,7 +128,7 @@ func (this *Auth) procMUpdateQ(message any) {
 
 	if err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_DatabaseNil, "")
-		features.System.Error(nameAuth).Caller(0).EndError(errs.Errort(msgs.ErrID_DatabaseNil))
+		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err))
 		return
 	} // if
 
@@ -137,19 +136,19 @@ func (this *Auth) procMUpdateQ(message any) {
 
 	if err = database.Submit(ctxs.Get().Ctx()).Lock(msg.Account).Add(authGet).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
-		features.System.Error(nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
+		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err))
 		return
 	} // if
 
 	if authGet.Result == false {
 		this.sendMUpdateA(msg, msgs.ErrID_AccountNotExist, "")
-		features.System.Warn(nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_AccountNotExist, err))
+		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err))
 		return
 	} // if
 
 	if authGet.Data.Token != msg.Token {
 		this.sendMUpdateA(msg, msgs.ErrID_TokenNotMatch, "")
-		features.System.Warn(nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_TokenNotMatch, err))
+		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err))
 		return
 	} // if
 
@@ -161,7 +160,7 @@ func (this *Auth) procMUpdateQ(message any) {
 
 	if err = database.Submit(ctxs.Get().Ctx()).Add(authSet).Unlock(msg.Account).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
-		features.System.Error(nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_SubmitFailed, err))
+		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err))
 		return
 	} // if
 

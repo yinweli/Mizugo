@@ -1,10 +1,10 @@
 package modules
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/errs"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/features"
@@ -52,12 +52,12 @@ func (this *Json) procMJsonA(message any) {
 	_, msg, err := procs.JsonUnmarshal[msgs.MJsonA](message)
 
 	if err != nil {
-		features.System.Warn(nameJson).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("json procMJsonA: %w", err))
 		return
 	} // if
 
 	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success {
-		features.System.Warn(nameJson).Caller(0).EndError(errs.Errort(msg.ErrID))
+		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("json procMJsonA: %v", msg.ErrID))
 		return
 	} // if
 

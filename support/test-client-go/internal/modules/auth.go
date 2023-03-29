@@ -1,10 +1,10 @@
 package modules
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/errs"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/features"
@@ -56,12 +56,12 @@ func (this *Auth) procMLoginA(message any) {
 	_, msg, err := procs.JsonUnmarshal[msgs.MLoginA](message)
 
 	if err != nil {
-		features.System.Warn(nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMLoginA: %w", err))
 		return
 	} // if
 
 	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success {
-		features.System.Warn(nameAuth).Caller(0).EndError(errs.Errort(msg.ErrID))
+		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMLoginA: %v", msg.ErrID))
 		return
 	} // if
 
@@ -93,12 +93,12 @@ func (this *Auth) procMUpdateA(message any) {
 	_, msg, err := procs.JsonUnmarshal[msgs.MUpdateA](message)
 
 	if err != nil {
-		features.System.Warn(nameAuth).Caller(0).EndError(errs.Errore(msgs.ErrID_JsonUnmarshal, err))
+		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMUpdateA: %w", err))
 		return
 	} // if
 
 	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success {
-		features.System.Warn(nameAuth).Caller(0).EndError(errs.Errort(msg.ErrID))
+		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMUpdateA: %v", msg.ErrID))
 		return
 	} // if
 
