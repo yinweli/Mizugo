@@ -32,15 +32,15 @@ func (this *Redmo) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", nameRedmo, err)
 	} // if
 
-	if err := mizugos.Redmomgr().AddMajor(defines.RedmoMajor, this.config.MajorURI, false); err != nil {
+	if _, err := mizugos.Redmomgr().AddMajor(defines.RedmoMajor, this.config.MajorURI, false); err != nil {
 		return fmt.Errorf("%v initialize: %w", nameRedmo, err)
 	} // if
 
-	if err := mizugos.Redmomgr().AddMinor(defines.RedmoMinor, this.config.MinorURI, defines.MongoDB); err != nil {
+	if _, err := mizugos.Redmomgr().AddMinor(defines.RedmoMinor, this.config.MinorURI, defines.MongoDB); err != nil {
 		return fmt.Errorf("%v initialize: %w", nameRedmo, err)
 	} // if
 
-	if err := mizugos.Redmomgr().AddMixed(defines.RedmoMixed, defines.RedmoMajor, defines.RedmoMinor); err != nil {
+	if _, err := mizugos.Redmomgr().AddMixed(defines.RedmoMixed, defines.RedmoMajor, defines.RedmoMinor); err != nil {
 		return fmt.Errorf("%v initialize: %w", nameRedmo, err)
 	} // if
 

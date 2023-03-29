@@ -36,22 +36,22 @@ type Redmomgr struct {
 }
 
 // AddMajor 新增主要資料庫, 需要提供 RedisURI 來指定要連接的資料庫以及連接選項
-func (this *Redmomgr) AddMajor(majorName string, uri RedisURI, record bool) error {
+func (this *Redmomgr) AddMajor(majorName string, uri RedisURI, record bool) (major *Major, err error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	if _, ok := this.major[majorName]; ok {
-		return fmt.Errorf("redmomgr addMajor: duplicate database")
+		return nil, fmt.Errorf("redmomgr addMajor: duplicate database")
 	} // if
 
-	major, err := newMajor(this.ctx.Ctx(), uri, record)
+	major, err = newMajor(this.ctx.Ctx(), uri, record)
 
 	if err != nil {
-		return fmt.Errorf("redmomgr addMajor: %w", err)
+		return nil, fmt.Errorf("redmomgr addMajor: %w", err)
 	} // if
 
 	this.major[majorName] = major
-	return nil
+	return major, nil
 }
 
 // GetMajor 取得主要資料庫
@@ -68,22 +68,22 @@ func (this *Redmomgr) GetMajor(majorName string) *Major {
 
 // AddMinor 新增次要資料庫, 需要提供 MongoURI 來指定要連接的資料庫以及連接選項;
 // 另外需要指定mongo資料庫名稱, 簡化後面取得執行器的流程, 但也因此限制次要資料庫不能在多個mongo資料庫間切換
-func (this *Redmomgr) AddMinor(minorName string, uri MongoURI, dbName string) error {
+func (this *Redmomgr) AddMinor(minorName string, uri MongoURI, dbName string) (minor *Minor, err error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	if _, ok := this.minor[minorName]; ok {
-		return fmt.Errorf("redmomgr addMinor: duplicate database")
+		return nil, fmt.Errorf("redmomgr addMinor: duplicate database")
 	} // if
 
-	minor, err := newMinor(this.ctx.Ctx(), uri, dbName)
+	minor, err = newMinor(this.ctx.Ctx(), uri, dbName)
 
 	if err != nil {
-		return fmt.Errorf("redmomgr addMinor: %w", err)
+		return nil, fmt.Errorf("redmomgr addMinor: %w", err)
 	} // if
 
 	this.minor[minorName] = minor
-	return nil
+	return minor, nil
 }
 
 // GetMinor 取得次要資料庫
@@ -99,31 +99,32 @@ func (this *Redmomgr) GetMinor(minorName string) *Minor {
 }
 
 // AddMixed 新增混合資料庫, 必須確保 majorName 與 minorName 必須是先前建立好的資料庫, 否則會失敗
-func (this *Redmomgr) AddMixed(mixedName, majorName, minorName string) error {
+func (this *Redmomgr) AddMixed(mixedName, majorName, minorName string) (mixed *Mixed, err error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	if _, ok := this.mixed[mixedName]; ok {
-		return fmt.Errorf("redmomgr addMixed: duplicate database")
+		return nil, fmt.Errorf("redmomgr addMixed: duplicate database")
 	} // if
 
 	major, ok := this.major[majorName]
 
 	if ok == false {
-		return fmt.Errorf("redmomgr addMixed: major not exist")
+		return nil, fmt.Errorf("redmomgr addMixed: major not exist")
 	} // if
 
 	minor, ok := this.minor[minorName]
 
 	if ok == false {
-		return fmt.Errorf("redmomgr addMixed: minor not exist")
+		return nil, fmt.Errorf("redmomgr addMixed: minor not exist")
 	} // if
 
-	this.mixed[mixedName] = &Mixed{
+	mixed = &Mixed{
 		major: major,
 		minor: minor,
 	}
-	return nil
+	this.mixed[mixedName] = mixed
+	return mixed, nil
 }
 
 // GetMixed 取得混合資料庫

@@ -42,6 +42,8 @@ func (this *Auth) Awake() error {
 
 // Start 啟動處理
 func (this *Auth) Start() error {
+	// 把取得資料庫放在這裡, 其實只是為了展示 Start 函式也可以負擔初始模組初始化的任務
+	// 實際狀況下, 應該還是會把取得資料庫放在 Awake 函式中
 	if this.database = mizugos.Redmomgr().GetMixed(defines.RedmoMixed); this.database == nil {
 		return fmt.Errorf("auth start: database nil")
 	} // if
