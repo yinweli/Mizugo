@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
@@ -46,8 +48,9 @@ func (this *SuiteMxGet) TearDownTest() {
 
 func (this *SuiteMxGet) TestGet() {
 	expected := &dataMxGet{
-		Key:  this.key,
-		Data: utils.RandString(testdata.RandStringLength),
+		dirty: true,
+		Key:   this.key,
+		Data:  utils.RandString(testdata.RandStringLength),
 	}
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
@@ -55,6 +58,7 @@ func (this *SuiteMxGet) TestGet() {
 	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	set := &Set[dataMxGet]{Meta: &this.meta, Key: this.key, Data: expected}
 	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	ignore := cmpopts.IgnoreFields(dataMxGet{}, "dirty") // 比對時忽略dirty欄位
 
 	assert.Nil(this.T(), set.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
@@ -64,10 +68,14 @@ func (this *SuiteMxGet) TestGet() {
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), get.Complete())
 	assert.True(this.T(), get.Result)
-	assert.Equal(this.T(), set.Data, get.Data)
+	assert.True(this.T(), cmp.Equal(set.Data, get.Data, ignore))
 
-	assert.True(this.T(), testdata.RedisCompare[dataMxGet](ctxs.Get().Ctx(), this.major.Client(), this.meta.MajorKey(this.key), expected))
-	assert.True(this.T(), testdata.MongoCompare[dataMxGet](ctxs.Get().Ctx(), this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(this.key), expected))
+	assert.True(this.T(), testdata.RedisCompare[dataMxGet](ctxs.Get().Ctx(), this.major.Client(), this.meta.MajorKey(this.key), expected, ignore))
+	assert.True(this.T(), testdata.MongoCompare[dataMxGet](ctxs.Get().Ctx(), this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(this.key), expected, ignore))
+
+	set.Data.dirty = false
+	assert.Nil(this.T(), set.Prepare())
+	assert.Nil(this.T(), set.Complete())
 
 	get.Meta = nil
 	get.Key = this.key
@@ -151,6 +159,11 @@ func (this *metaMxGet) MinorField() string {
 }
 
 type dataMxGet struct {
-	Key  string `bson:"mxget_key"`
-	Data string `bson:"data"`
+	dirty bool
+	Key   string `bson:"mxget_key"`
+	Data  string `bson:"data"`
+}
+
+func (this *dataMxGet) Save() bool {
+	return this.dirty
 }
