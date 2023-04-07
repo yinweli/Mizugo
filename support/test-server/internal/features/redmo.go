@@ -50,5 +50,5 @@ func (this *Redmo) Initialize() error {
 
 // Finalize 結束處理
 func (this *Redmo) Finalize() {
-	mizugos.Redmomgr().Stop()
+	mizugos.Redmomgr().Finalize()
 }

@@ -139,8 +139,8 @@ func (this *Redmomgr) GetMixed(mixedName string) *Mixed {
 	return nil
 }
 
-// Stop 停止資料庫
-func (this *Redmomgr) Stop() {
+// Finalize 結束處理
+func (this *Redmomgr) Finalize() {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
