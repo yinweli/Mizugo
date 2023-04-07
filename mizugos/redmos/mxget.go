@@ -74,6 +74,7 @@ func (this *Get[T]) Complete() error {
 
 // Set 設值行為, 以索引字串與資料到主要/次要資料庫中儲存資料, 使用上有以下幾點須注意
 //   - 需要事先建立好資料結構, 並填寫到泛型類型T中, 請不要填入指標類型
+//   - 如果該資料結構符合 Saver 介面, 會套用儲存判斷機制, 減少不必要的儲存操作
 //   - 資料結構的成員都需要設定好`bson:xxxxx`屬性
 //   - 需要事先建立好與 Metaer 介面符合的元資料結構, 並填寫到 Meta
 //   - 執行前設定好 Key 並且不能為空字串
@@ -108,6 +109,10 @@ func (this *Set[T]) Prepare() error {
 		return fmt.Errorf("set prepare: data nil")
 	} // if
 
+	if save, ok := any(this.Data).(Saver); ok && save.Save() == false {
+		return nil
+	} // if
+
 	key := this.Meta.MajorKey(this.Key)
 	data, err := json.Marshal(this.Data)
 
@@ -121,6 +126,10 @@ func (this *Set[T]) Prepare() error {
 
 // Complete 完成處理
 func (this *Set[T]) Complete() error {
+	if save, ok := any(this.Data).(Saver); ok && save.Save() == false {
+		return nil
+	} // if
+
 	data, err := this.set.Result()
 
 	if err != nil {

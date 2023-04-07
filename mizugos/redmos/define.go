@@ -24,3 +24,9 @@ type Metaer interface {
 	// MinorField 取得次要資料庫索引名稱
 	MinorField() string
 }
+
+// Saver 儲存判斷介面, 用來判斷是否要把資料儲存到主要資料庫
+type Saver interface {
+	// Save 取得是否要把資料儲存到主要資料庫
+	Save() bool
+}
