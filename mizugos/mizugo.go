@@ -12,6 +12,7 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/pools"
 	"github.com/yinweli/Mizugo/mizugos/redmos"
+	"github.com/yinweli/Mizugo/mizugos/vars"
 )
 
 // Start 啟動伺服器
@@ -46,6 +47,7 @@ func Start() {
 	defer server.lock.Unlock()
 
 	server.configmgr = configs.NewConfigmgr()
+	server.varmgr = vars.NewVarmgr()
 	server.metricsmgr = metrics.NewMetricsmgr()
 	server.logmgr = logs.NewLogmgr()
 	server.netmgr = nets.NewNetmgr()
@@ -61,6 +63,7 @@ func Stop() {
 	defer server.lock.RUnlock()
 
 	server.configmgr = nil
+	server.varmgr = nil
 	server.metricsmgr = nil
 	server.logmgr = nil
 	server.netmgr = nil
@@ -79,6 +82,14 @@ func Configmgr() *configs.Configmgr {
 	defer server.lock.RUnlock()
 
 	return server.configmgr
+}
+
+// Varmgr 取得變數管理器
+func Varmgr() *vars.Varmgr {
+	server.lock.RLock()
+	defer server.lock.RUnlock()
+
+	return server.varmgr
 }
 
 // Metricsmgr 統計管理器
@@ -140,6 +151,7 @@ func Poolmgr() *pools.Poolmgr {
 // server 伺服器資料
 var server struct {
 	configmgr  *configs.Configmgr  // 配置管理器
+	varmgr     *vars.Varmgr        // 變數管理器
 	metricsmgr *metrics.Metricsmgr // 統計管理器
 	logmgr     *logs.Logmgr        // 日誌管理器
 	netmgr     *nets.Netmgr        // 網路管理器
