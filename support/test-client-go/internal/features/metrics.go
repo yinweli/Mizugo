@@ -7,38 +7,39 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/metrics"
 )
 
-const nameMetrics = "metrics" // 特性名稱
-
 // NewMetrics 建立統計資料
 func NewMetrics() *Metrics {
-	return &Metrics{}
+	return &Metrics{
+		name: "feature metrics",
+	}
 }
 
 // Metrics 統計資料
 type Metrics struct {
+	name   string        // 系統名稱
 	config MetricsConfig // 配置資料
 }
 
 // MetricsConfig 配置資料
 type MetricsConfig struct {
-	Port int // 埠號
+	Port int `yaml:"port"` // 埠號
 }
 
 // Initialize 初始化處理
 func (this *Metrics) Initialize() error {
-	if err := mizugos.Configmgr().Unmarshal(nameMetrics, &this.config); err != nil {
-		return fmt.Errorf("%v initialize: %w", nameMetrics, err)
+	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
+		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
 	if err := mizugos.Metricsmgr().Initialize(this.config.Port); err != nil {
-		return fmt.Errorf("%v initialize: %w", nameMetrics, err)
+		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	Auth = mizugos.Metricsmgr().NewRuntime("auth")
-	Json = mizugos.Metricsmgr().NewRuntime("json")
-	Proto = mizugos.Metricsmgr().NewRuntime("proto")
-	Connect = mizugos.Metricsmgr().NewInt("connect")
-	System.Info(nameMetrics).Caller(0).Message("initialize").KV("config", this.config).End()
+	MeterAuth = mizugos.Metricsmgr().NewRuntime("auth")
+	MeterJson = mizugos.Metricsmgr().NewRuntime("json")
+	MeterProto = mizugos.Metricsmgr().NewRuntime("proto")
+	MeterConnect = mizugos.Metricsmgr().NewInt("connect")
+	LogSystem.Info(this.name).Caller(0).Message("initialize").KV("config", this.config).End()
 	return nil
 }
 
@@ -47,7 +48,7 @@ func (this *Metrics) Finalize() {
 	mizugos.Metricsmgr().Finalize()
 }
 
-var Auth *metrics.Runtime  // auth訊息統計物件
-var Json *metrics.Runtime  // json訊息統計物件
-var Proto *metrics.Runtime // proto訊息統計物件
-var Connect *metrics.Int   // 連線統計物件
+var MeterAuth *metrics.Runtime  // auth訊息統計物件
+var MeterJson *metrics.Runtime  // json訊息統計物件
+var MeterProto *metrics.Runtime // proto訊息統計物件
+var MeterConnect *metrics.Int   // 連線統計物件

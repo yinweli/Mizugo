@@ -10,12 +10,11 @@ import (
 	"github.com/yinweli/Mizugo/support/test-server/msgs"
 )
 
-const nameProto = "module-proto" // 模組名稱
-
 // NewProto 建立Proto模組
-func NewProto(incr func() int64) *Proto {
+func NewProto(incr func(int64) int64) *Proto {
 	return &Proto{
 		Module: entitys.NewModule(defines.ModuleIDProto),
+		name:   "module proto",
 		incr:   incr,
 	}
 }
@@ -23,7 +22,8 @@ func NewProto(incr func() int64) *Proto {
 // Proto Proto模組
 type Proto struct {
 	*entitys.Module
-	incr func() int64 // 計數函式
+	name string            // 系統名稱
+	incr func(int64) int64 // 計數函式
 }
 
 // Awake 喚醒處理
@@ -34,20 +34,20 @@ func (this *Proto) Awake() error {
 
 // procMProtoQ 處理要求Proto
 func (this *Proto) procMProtoQ(message any) {
-	rec := features.Proto.Rec()
+	rec := features.MeterProto.Rec()
 	defer rec()
 
 	_, msg, err := procs.ProtoUnmarshal[msgs.MProtoQ](message)
 
 	if err != nil {
 		this.sendMProtoA(nil, msgs.ErrID_ProtoUnmarshal, 0)
-		features.System.Warn(nameProto).Caller(0).EndError(fmt.Errorf("proto procMProtoQ: %w", err))
+		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("proto procMProtoQ: %w", err))
 		return
 	} // if
 
-	count := this.incr()
+	count := this.incr(1)
 	this.sendMProtoA(msg, msgs.ErrID_Success, count)
-	features.System.Info(nameProto).Caller(0).KV("count", count).End()
+	features.LogSystem.Info(this.name).Caller(0).KV("count", count).End()
 }
 
 // sendMProtoA 傳送回應Proto
@@ -59,7 +59,7 @@ func (this *Proto) sendMProtoA(from *msgs.MProtoQ, errID msgs.ErrID, count int64
 	})
 
 	if err != nil {
-		features.System.Warn(nameProto).Caller(0).EndError(err)
+		features.LogSystem.Warn(this.name).Caller(0).EndError(err)
 		return
 	} // if
 

@@ -10,12 +10,11 @@ import (
 	"github.com/yinweli/Mizugo/support/test-server/msgs"
 )
 
-const nameJson = "module-json" // 模組名稱
-
 // NewJson 建立Json模組
-func NewJson(incr func() int64) *Json {
+func NewJson(incr func(int64) int64) *Json {
 	return &Json{
 		Module: entitys.NewModule(defines.ModuleIDJson),
+		name:   "module json",
 		incr:   incr,
 	}
 }
@@ -23,7 +22,8 @@ func NewJson(incr func() int64) *Json {
 // Json Json模組
 type Json struct {
 	*entitys.Module
-	incr func() int64 // 計數函式
+	name string            // 系統名稱
+	incr func(int64) int64 // 計數函式
 }
 
 // Awake 喚醒處理
@@ -34,20 +34,20 @@ func (this *Json) Awake() error {
 
 // procMJsonQ 處理要求Json
 func (this *Json) procMJsonQ(message any) {
-	rec := features.Json.Rec()
+	rec := features.MeterJson.Rec()
 	defer rec()
 
 	_, msg, err := procs.JsonUnmarshal[msgs.MJsonQ](message)
 
 	if err != nil {
 		this.sendMJsonA(nil, msgs.ErrID_JsonUnmarshal, 0)
-		features.System.Warn(nameJson).Caller(0).EndError(fmt.Errorf("json procMJsonQ: %w", err))
+		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("json procMJsonQ: %w", err))
 		return
 	} // if
 
-	count := this.incr()
+	count := this.incr(1)
 	this.sendMJsonA(msg, msgs.ErrID_Success, count)
-	features.System.Info(nameJson).Caller(0).KV("count", count).End()
+	features.LogSystem.Info(this.name).Caller(0).KV("count", count).End()
 }
 
 // sendMJsonA 傳送回應Json
@@ -59,7 +59,7 @@ func (this *Json) sendMJsonA(from *msgs.MJsonQ, errID msgs.ErrID, count int64) {
 	})
 
 	if err != nil {
-		features.System.Warn(nameJson).Caller(0).EndError(err)
+		features.LogSystem.Warn(this.name).Caller(0).EndError(err)
 		return
 	} // if
 
