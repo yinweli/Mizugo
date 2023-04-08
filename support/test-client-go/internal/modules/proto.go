@@ -11,12 +11,11 @@ import (
 	"github.com/yinweli/Mizugo/support/test-client-go/msgs"
 )
 
-const nameProto = "module-proto" // 模組名稱
-
 // NewProto 建立Proto模組
 func NewProto(delay time.Duration, disconnect bool) *Proto {
 	return &Proto{
 		Module:     entitys.NewModule(defines.ModuleIDProto),
+		name:       "module proto",
 		delay:      delay,
 		disconnect: disconnect,
 	}
@@ -25,6 +24,7 @@ func NewProto(delay time.Duration, disconnect bool) *Proto {
 // Proto Proto模組
 type Proto struct {
 	*entitys.Module               // 模組資料
+	name            string        // 系統名稱
 	delay           time.Duration // 延遲時間
 	disconnect      bool          // 斷線旗標
 }
@@ -52,17 +52,17 @@ func (this *Proto) procMProtoA(message any) {
 	_, msg, err := procs.ProtoUnmarshal[msgs.MProtoA](message)
 
 	if err != nil {
-		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("proto procMProtoA: %w", err))
+		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("proto procMProtoA: %w", err))
 		return
 	} // if
 
 	if msg.ErrID != msgs.ErrID_Success {
-		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("proto procMProtoA: %v", msg.ErrID))
+		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("proto procMProtoA: %v", msg.ErrID))
 		return
 	} // if
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
-	features.Proto.Add(duration)
+	features.MeterProto.Add(duration)
 
 	if this.disconnect {
 		this.Entity().GetSession().Stop()
@@ -70,7 +70,7 @@ func (this *Proto) procMProtoA(message any) {
 		this.sendMProtoQ()
 	} // if
 
-	features.System.Info(nameProto).Caller(0).KV("duration", duration).KV("count", msg.Count).End()
+	features.LogSystem.Info(this.name).Caller(0).KV("duration", duration).KV("count", msg.Count).End()
 }
 
 // sendMProtoQ 傳送要求Proto
@@ -80,7 +80,7 @@ func (this *Proto) sendMProtoQ() {
 	})
 
 	if err != nil {
-		features.System.Warn(nameProto).Caller(0).EndError(err)
+		features.LogSystem.Warn(this.name).Caller(0).EndError(err)
 		return
 	} // if
 

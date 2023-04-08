@@ -11,12 +11,11 @@ import (
 	"github.com/yinweli/Mizugo/support/test-client-go/msgs"
 )
 
-const nameAuth = "module-auth" // 模組名稱
-
 // NewAuth 建立Auth模組
 func NewAuth(delay time.Duration, account string, update int) *Auth {
 	return &Auth{
 		Module:  entitys.NewModule(defines.ModuleIDAuth),
+		name:    "module auth",
 		delay:   delay,
 		account: account,
 		update:  update,
@@ -26,6 +25,7 @@ func NewAuth(delay time.Duration, account string, update int) *Auth {
 // Auth Auth模組
 type Auth struct {
 	*entitys.Module               // 模組資料
+	name            string        // 系統名稱
 	delay           time.Duration // 延遲時間
 	account         string        // 帳號
 	update          int           // 更新次數
@@ -56,18 +56,18 @@ func (this *Auth) procMLoginA(message any) {
 	_, msg, err := procs.JsonUnmarshal[msgs.MLoginA](message)
 
 	if err != nil {
-		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMLoginA: %w", err))
+		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMLoginA: %w", err))
 		return
 	} // if
 
 	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success {
-		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMLoginA: %v", msg.ErrID))
+		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMLoginA: %v", msg.ErrID))
 		return
 	} // if
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
-	features.Auth.Add(duration)
-	features.System.Info(nameAuth).Caller(0).KV("duration", duration).KV("token", msg.Token).End()
+	features.MeterAuth.Add(duration)
+	features.LogSystem.Info(this.name).Caller(0).KV("duration", duration).KV("token", msg.Token).End()
 
 	this.token = msg.Token
 	this.sendMUpdateQ()
@@ -81,7 +81,7 @@ func (this *Auth) sendMLoginQ() {
 	})
 
 	if err != nil {
-		features.System.Warn(nameAuth).Caller(0).EndError(err)
+		features.LogSystem.Warn(this.name).Caller(0).EndError(err)
 		return
 	} // if
 
@@ -93,18 +93,18 @@ func (this *Auth) procMUpdateA(message any) {
 	_, msg, err := procs.JsonUnmarshal[msgs.MUpdateA](message)
 
 	if err != nil {
-		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMUpdateA: %w", err))
+		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMUpdateA: %w", err))
 		return
 	} // if
 
 	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success {
-		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMUpdateA: %v", msg.ErrID))
+		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMUpdateA: %v", msg.ErrID))
 		return
 	} // if
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
-	features.Auth.Add(duration)
-	features.System.Info(nameAuth).Caller(0).KV("duration", duration).KV("token", msg.Token).End()
+	features.MeterAuth.Add(duration)
+	features.LogSystem.Info(this.name).Caller(0).KV("duration", duration).KV("token", msg.Token).End()
 
 	this.token = msg.Token
 	this.sendMUpdateQ()
@@ -124,7 +124,7 @@ func (this *Auth) sendMUpdateQ() {
 	})
 
 	if err != nil {
-		features.System.Warn(nameAuth).Caller(0).EndError(err)
+		features.LogSystem.Warn(this.name).Caller(0).EndError(err)
 		return
 	} // if
 

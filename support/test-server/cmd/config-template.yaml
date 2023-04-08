@@ -36,7 +36,9 @@ metrics:
 
 redmo:
   majorURI: redisdb://127.0.0.1:6379/
+  majorDebug: false
   minorURI: mongodb://127.0.0.1:27017/
+  minorDBName: test
 
 auth:
   ip:

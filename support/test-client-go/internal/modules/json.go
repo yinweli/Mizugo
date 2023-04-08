@@ -11,12 +11,11 @@ import (
 	"github.com/yinweli/Mizugo/support/test-client-go/msgs"
 )
 
-const nameJson = "module-json" // 模組名稱
-
 // NewJson 建立Json模組
 func NewJson(delay time.Duration, disconnect bool) *Json {
 	return &Json{
 		Module:     entitys.NewModule(defines.ModuleIDJson),
+		name:       "module json",
 		delay:      delay,
 		disconnect: disconnect,
 	}
@@ -25,6 +24,7 @@ func NewJson(delay time.Duration, disconnect bool) *Json {
 // Json Json模組
 type Json struct {
 	*entitys.Module               // 模組資料
+	name            string        // 系統名稱
 	delay           time.Duration // 延遲時間
 	disconnect      bool          // 斷線旗標
 }
@@ -52,17 +52,17 @@ func (this *Json) procMJsonA(message any) {
 	_, msg, err := procs.JsonUnmarshal[msgs.MJsonA](message)
 
 	if err != nil {
-		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("json procMJsonA: %w", err))
+		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("json procMJsonA: %w", err))
 		return
 	} // if
 
 	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success {
-		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("json procMJsonA: %v", msg.ErrID))
+		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("json procMJsonA: %v", msg.ErrID))
 		return
 	} // if
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
-	features.Json.Add(duration)
+	features.MeterJson.Add(duration)
 
 	if this.disconnect {
 		this.Entity().GetSession().Stop()
@@ -70,7 +70,7 @@ func (this *Json) procMJsonA(message any) {
 		this.sendMJsonQ()
 	} // if
 
-	features.System.Info(nameJson).Caller(0).KV("duration", duration).KV("count", msg.Count).End()
+	features.LogSystem.Info(this.name).Caller(0).KV("duration", duration).KV("count", msg.Count).End()
 }
 
 // sendMJsonQ 傳送要求Json
@@ -80,7 +80,7 @@ func (this *Json) sendMJsonQ() {
 	})
 
 	if err != nil {
-		features.System.Warn(nameJson).Caller(0).EndError(err)
+		features.LogSystem.Warn(this.name).Caller(0).EndError(err)
 		return
 	} // if
 

@@ -7,15 +7,16 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/metrics"
 )
 
-const nameMetrics = "metrics" // 特性名稱
-
 // NewMetrics 建立統計資料
 func NewMetrics() *Metrics {
-	return &Metrics{}
+	return &Metrics{
+		name: "feature metrics",
+	}
 }
 
 // Metrics 統計資料
 type Metrics struct {
+	name   string        // 系統名稱
 	config MetricsConfig // 配置資料
 }
 
@@ -26,19 +27,19 @@ type MetricsConfig struct {
 
 // Initialize 初始化處理
 func (this *Metrics) Initialize() error {
-	if err := mizugos.Configmgr().Unmarshal(nameMetrics, &this.config); err != nil {
-		return fmt.Errorf("%v initialize: %w", nameMetrics, err)
+	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
+		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
 	if err := mizugos.Metricsmgr().Initialize(this.config.Port); err != nil {
-		return fmt.Errorf("%v initialize: %w", nameMetrics, err)
+		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	Login = mizugos.Metricsmgr().NewRuntime("login")
-	Update = mizugos.Metricsmgr().NewRuntime("update")
-	Json = mizugos.Metricsmgr().NewRuntime("json")
-	Proto = mizugos.Metricsmgr().NewRuntime("proto")
-	System.Info(nameMetrics).Caller(0).Message("initialize").KV("config", this.config).End()
+	MeterLogin = mizugos.Metricsmgr().NewRuntime("login")
+	MeterUpdate = mizugos.Metricsmgr().NewRuntime("update")
+	MeterJson = mizugos.Metricsmgr().NewRuntime("json")
+	MeterProto = mizugos.Metricsmgr().NewRuntime("proto")
+	LogSystem.Info(this.name).Caller(0).Message("initialize").KV("config", this.config).End()
 	return nil
 }
 
@@ -47,7 +48,7 @@ func (this *Metrics) Finalize() {
 	mizugos.Metricsmgr().Finalize()
 }
 
-var Login *metrics.Runtime  // Login訊息統計物件
-var Update *metrics.Runtime // Update訊息統計物件
-var Json *metrics.Runtime   // Json訊息統計物件
-var Proto *metrics.Runtime  // Proto訊息統計物件
+var MeterLogin *metrics.Runtime  // Login訊息統計物件
+var MeterUpdate *metrics.Runtime // Update訊息統計物件
+var MeterJson *metrics.Runtime   // Json訊息統計物件
+var MeterProto *metrics.Runtime  // Proto訊息統計物件

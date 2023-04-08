@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"runtime/debug"
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
@@ -13,7 +14,7 @@ import (
 func main() {
 	defer func() {
 		if cause := recover(); cause != nil {
-			features.Crashlize(cause)
+			features.LogCrash.Error("crash").KV("stack", string(debug.Stack())).EndError(fmt.Errorf("%s", cause))
 		} // if
 	}()
 

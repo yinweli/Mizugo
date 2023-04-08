@@ -6,30 +6,27 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/mizugos/redmos"
 	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-server/internal/features"
 	"github.com/yinweli/Mizugo/support/test-server/internal/querys"
 	"github.com/yinweli/Mizugo/support/test-server/msgs"
 )
 
-const nameAuth = "module-auth" // 模組名稱
-
 // NewAuth 建立Auth模組
 func NewAuth() *Auth {
 	return &Auth{
 		Module: entitys.NewModule(defines.ModuleIDAuth),
+		name:   "module auth",
 	}
 }
 
 // Auth Auth模組
 type Auth struct {
 	*entitys.Module
-	database *redmos.Mixed // 資料庫物件
+	name string // 系統名稱
 }
 
 // Awake 喚醒處理
@@ -39,43 +36,24 @@ func (this *Auth) Awake() error {
 	return nil
 }
 
-// Start 啟動處理
-func (this *Auth) Start() error {
-	// 把取得資料庫放在這裡, 其實只是為了展示 Start 函式也可以負擔初始模組初始化的任務
-	// 實際狀況下, 應該還是會把取得資料庫放在 Awake 函式中
-	if this.database = mizugos.Redmomgr().GetMixed(defines.RedmoMixed); this.database == nil {
-		return fmt.Errorf("auth start: database nil")
-	} // if
-
-	return nil
-}
-
 // procMLoginQ 處理要求登入
 func (this *Auth) procMLoginQ(message any) {
-	rec := features.Login.Rec()
+	rec := features.MeterLogin.Rec()
 	defer rec()
 
 	_, msg, err := procs.JsonUnmarshal[msgs.MLoginQ](message)
 
 	if err != nil {
 		this.sendMLoginA(nil, msgs.ErrID_JsonUnmarshal, "")
-		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMLoginQ: %w", err))
-		return
-	} // if
-
-	database := mizugos.Redmomgr().GetMixed(defines.RedmoMixed)
-
-	if err != nil {
-		this.sendMLoginA(msg, msgs.ErrID_DatabaseNil, "")
-		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMLoginQ: %w", err))
+		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMLoginQ: %w", err))
 		return
 	} // if
 
 	authGet := querys.NewAuthGet(msg.Account, nil)
 
-	if err = database.Submit(ctxs.Get().Ctx()).Lock(msg.Account).Add(authGet).Exec(); err != nil {
+	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Lock(msg.Account).Add(authGet).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
-		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMLoginQ: %w", err))
+		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMLoginQ: %w", err))
 		return
 	} // if
 
@@ -85,14 +63,14 @@ func (this *Auth) procMLoginQ(message any) {
 		Time:    time.Now(),
 	})
 
-	if err = database.Submit(ctxs.Get().Ctx()).Add(authSet).Unlock(msg.Account).Exec(); err != nil {
+	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Add(authSet).Unlock(msg.Account).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
-		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMLoginQ: %w", err))
+		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMLoginQ: %w", err))
 		return
 	} // if
 
 	this.sendMLoginA(msg, msgs.ErrID_Success, authSet.Data.Token)
-	features.System.Info(nameAuth).Caller(0).KV("account", authSet.Data.Account).KV("token", authSet.Data.Token).End()
+	features.LogSystem.Info(this.name).Caller(0).KV("account", authSet.Data.Account).KV("token", authSet.Data.Token).End()
 }
 
 // sendMLoginA 傳送回應登入
@@ -104,7 +82,7 @@ func (this *Auth) sendMLoginA(from *msgs.MLoginQ, errID msgs.ErrID, token string
 	})
 
 	if err != nil {
-		features.System.Warn(nameAuth).Caller(0).EndError(err)
+		features.LogSystem.Warn(this.name).Caller(0).EndError(err)
 		return
 	} // if
 
@@ -113,42 +91,34 @@ func (this *Auth) sendMLoginA(from *msgs.MLoginQ, errID msgs.ErrID, token string
 
 // procMUpdateQ 處理要求更新
 func (this *Auth) procMUpdateQ(message any) {
-	rec := features.Update.Rec()
+	rec := features.MeterUpdate.Rec()
 	defer rec()
 
 	_, msg, err := procs.JsonUnmarshal[msgs.MUpdateQ](message)
 
 	if err != nil {
 		this.sendMUpdateA(nil, msgs.ErrID_JsonUnmarshal, "")
-		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err))
-		return
-	} // if
-
-	database := mizugos.Redmomgr().GetMixed(defines.RedmoMixed)
-
-	if err != nil {
-		this.sendMUpdateA(msg, msgs.ErrID_DatabaseNil, "")
-		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err))
+		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err))
 		return
 	} // if
 
 	authGet := querys.NewAuthGet(msg.Account, nil)
 
-	if err = database.Submit(ctxs.Get().Ctx()).Lock(msg.Account).Add(authGet).Exec(); err != nil {
+	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Lock(msg.Account).Add(authGet).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
-		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err))
+		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err))
 		return
 	} // if
 
 	if authGet.Result == false {
 		this.sendMUpdateA(msg, msgs.ErrID_AccountNotExist, "")
-		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err))
+		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err))
 		return
 	} // if
 
 	if authGet.Data.Token != msg.Token {
 		this.sendMUpdateA(msg, msgs.ErrID_TokenNotMatch, "")
-		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err))
+		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err))
 		return
 	} // if
 
@@ -158,14 +128,14 @@ func (this *Auth) procMUpdateQ(message any) {
 		Time:    time.Now(),
 	})
 
-	if err = database.Submit(ctxs.Get().Ctx()).Add(authSet).Unlock(msg.Account).Exec(); err != nil {
+	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Add(authSet).Unlock(msg.Account).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
-		features.System.Warn(nameAuth).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err))
+		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err))
 		return
 	} // if
 
 	this.sendMUpdateA(msg, msgs.ErrID_Success, authSet.Data.Token)
-	features.System.Info(nameAuth).Caller(0).KV("account", authSet.Data.Account).KV("token", authSet.Data.Token).End()
+	features.LogSystem.Info(this.name).Caller(0).KV("account", authSet.Data.Account).KV("token", authSet.Data.Token).End()
 }
 
 // sendMUpdateA 傳送回應登入
@@ -177,7 +147,7 @@ func (this *Auth) sendMUpdateA(from *msgs.MUpdateQ, errID msgs.ErrID, token stri
 	})
 
 	if err != nil {
-		features.System.Warn(nameAuth).Caller(0).EndError(err)
+		features.LogSystem.Warn(this.name).Caller(0).EndError(err)
 		return
 	} // if
 
