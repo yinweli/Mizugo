@@ -19,7 +19,7 @@ import (
 func NewAuth() *Auth {
 	return &Auth{
 		Module: entitys.NewModule(defines.ModuleIDAuth),
-		name:   "module auth",
+		name:   "auth",
 	}
 }
 

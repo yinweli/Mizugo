@@ -15,7 +15,7 @@ import (
 func NewJson(delay time.Duration, disconnect bool) *Json {
 	return &Json{
 		Module:     entitys.NewModule(defines.ModuleIDJson),
-		name:       "module json",
+		name:       "json",
 		delay:      delay,
 		disconnect: disconnect,
 	}

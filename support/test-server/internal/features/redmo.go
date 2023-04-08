@@ -10,7 +10,7 @@ import (
 // NewRedmo 建立資料庫資料
 func NewRedmo() *Redmo {
 	return &Redmo{
-		name: "feature redmo",
+		name: "redmo",
 	}
 }
 

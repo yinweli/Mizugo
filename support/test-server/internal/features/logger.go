@@ -10,7 +10,7 @@ import (
 // NewLogger 建立日誌資料
 func NewLogger() *Logger {
 	return &Logger{
-		name: "feature logger",
+		name: "logger",
 	}
 }
 

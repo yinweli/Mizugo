@@ -16,7 +16,7 @@ import (
 // NewAuth 建立Auth入口
 func NewAuth() *Auth {
 	return &Auth{
-		name: "entry auth",
+		name: "auth",
 	}
 }
 

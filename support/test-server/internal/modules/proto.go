@@ -14,7 +14,7 @@ import (
 func NewProto(incr func(int64) int64) *Proto {
 	return &Proto{
 		Module: entitys.NewModule(defines.ModuleIDProto),
-		name:   "module proto",
+		name:   "proto",
 		incr:   incr,
 	}
 }

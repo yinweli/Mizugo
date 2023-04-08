@@ -10,7 +10,7 @@ import (
 // NewMetrics 建立統計資料
 func NewMetrics() *Metrics {
 	return &Metrics{
-		name: "feature metrics",
+		name: "metrics",
 	}
 }
 

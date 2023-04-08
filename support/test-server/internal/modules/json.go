@@ -14,7 +14,7 @@ import (
 func NewJson(incr func(int64) int64) *Json {
 	return &Json{
 		Module: entitys.NewModule(defines.ModuleIDJson),
-		name:   "module json",
+		name:   "json",
 		incr:   incr,
 	}
 }

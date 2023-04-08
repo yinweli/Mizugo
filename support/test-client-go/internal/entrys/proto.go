@@ -18,7 +18,7 @@ import (
 // NewProto 建立Proto入口
 func NewProto() *Proto {
 	return &Proto{
-		name: "entry proto",
+		name: "proto",
 	}
 }
 

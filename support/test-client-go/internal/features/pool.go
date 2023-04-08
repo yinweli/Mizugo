@@ -10,7 +10,7 @@ import (
 // NewPool 建立執行緒池資料
 func NewPool() *Pool {
 	return &Pool{
-		name: "feature pool",
+		name: "pool",
 	}
 }
 

@@ -18,7 +18,7 @@ import (
 // NewJson 建立Json入口
 func NewJson() *Json {
 	return &Json{
-		name: "entry json",
+		name: "json",
 	}
 }
 

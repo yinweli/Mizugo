@@ -15,7 +15,7 @@ import (
 func NewProto(delay time.Duration, disconnect bool) *Proto {
 	return &Proto{
 		Module:     entitys.NewModule(defines.ModuleIDProto),
-		name:       "module proto",
+		name:       "proto",
 		delay:      delay,
 		disconnect: disconnect,
 	}
