@@ -123,7 +123,7 @@ func DesCBCDecrypt(padding Padding, key, iv, src []byte) (out []byte, err error)
 
 // RandDesKey 產生隨機des密鑰
 func RandDesKey() []byte {
-	return []byte(utils.RandString(DesKeySize))
+	return []byte(utils.RandString(DesKeySize, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"))
 }
 
 // RandDesKeyString 產生隨機des密鑰字串

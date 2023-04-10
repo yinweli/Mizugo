@@ -7,9 +7,7 @@ import (
 )
 
 // RandString 取得指定位數的隨機字串
-func RandString(length int) string {
-	const letter = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
+func RandString(length int, letter string) string {
 	builder := bytes.Buffer{}
 	max := big.NewInt(int64(len(letter)))
 

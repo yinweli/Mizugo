@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/utils"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -60,7 +59,7 @@ func BenchmarkRuntimeRec(b *testing.B) {
 	metricsmgr := NewMetricsmgr()
 	_ = metricsmgr.Initialize(8080)
 
-	target := metricsmgr.NewRuntime(utils.RandString(10))
+	target := metricsmgr.NewRuntime(testdata.RandString(10))
 
 	for i := 0; i < b.N; i++ {
 		target.Rec()()
@@ -73,7 +72,7 @@ func BenchmarkRuntimeString(b *testing.B) {
 	metricsmgr := NewMetricsmgr()
 	_ = metricsmgr.Initialize(8080)
 
-	target := metricsmgr.NewRuntime(utils.RandString(10))
+	target := metricsmgr.NewRuntime(testdata.RandString(10))
 	target.Rec()()
 	target.Rec()()
 	target.Rec()()

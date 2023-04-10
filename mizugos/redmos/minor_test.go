@@ -9,7 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
-	"github.com/yinweli/Mizugo/mizugos/utils"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -83,14 +82,14 @@ func BenchmarkMinorSet(b *testing.B) {
 
 	name := "benchmark minor"
 	data := &myData{
-		Key:  utils.RandString(testdata.RandStringLength),
-		Data: utils.RandString(testdata.RandStringLength),
+		Key:  testdata.RandString(testdata.RandStringLength),
+		Data: testdata.RandString(testdata.RandStringLength),
 	}
 	target, _ := newMinor(ctxs.Get().Ctx(), testdata.MongoURI, name)
 	submit := target.Submit()
 
 	for i := 0; i < b.N; i++ {
-		data.Data = utils.RandString(testdata.RandStringLength)
+		data.Data = testdata.RandString(testdata.RandStringLength)
 		_, _ = submit.Table(name).ReplaceOne(ctxs.Get().Ctx(), bson.D{{Key: "key", Value: data.Key}}, data, options.Replace().SetUpsert(true))
 	} // for
 

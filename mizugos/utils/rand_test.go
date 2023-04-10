@@ -32,14 +32,16 @@ func (this *SuiteRand) TearDownTest() {
 }
 
 func (this *SuiteRand) TestRandString() {
+	letter := "0123456789"
+
 	length := 32
-	value := RandString(length)
+	value := RandString(length, letter)
 	assert.NotNil(this.T(), value)
 	assert.Len(this.T(), value, length)
 	fmt.Println(value)
 
 	length = 64
-	value = RandString(length)
+	value = RandString(length, letter)
 	assert.NotNil(this.T(), value)
 	assert.Len(this.T(), value, length)
 	fmt.Println(value)
