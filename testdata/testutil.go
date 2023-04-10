@@ -1,9 +1,6 @@
 package testdata
 
 import (
-	"bytes"
-	"crypto/rand"
-	"math/big"
 	"os"
 	"time"
 )
@@ -26,19 +23,4 @@ func CompareFile(path string, expected []byte) bool {
 	} // if
 
 	return false
-}
-
-// RandString 取得隨機字串
-func RandString(length int) string {
-	// 為了避免循環引用問題, 所以這裡實現了隨機字串相關機制, 而非使用 utils.RandString
-
-	builder := bytes.Buffer{}
-	max := big.NewInt(int64(len(RandStringLetter)))
-
-	for i := 0; i < length; i++ {
-		index, _ := rand.Int(rand.Reader, max)
-		builder.WriteByte(RandStringLetter[int(index.Int64())])
-	} // for
-
-	return builder.String()
 }

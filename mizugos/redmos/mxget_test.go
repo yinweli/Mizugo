@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
+	"github.com/yinweli/Mizugo/mizugos/utils"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -49,7 +50,7 @@ func (this *SuiteMxGet) TestGet() {
 	expected := &dataMxGet{
 		dirty: true,
 		Key:   this.key,
-		Data:  testdata.RandString(testdata.RandStringLength),
+		Data:  utils.RandString(testdata.RandStringLength, testdata.RandStringLetter),
 	}
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()

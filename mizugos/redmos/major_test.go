@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
+	"github.com/yinweli/Mizugo/mizugos/utils"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -63,7 +64,7 @@ func (this *SuiteMajor) TestUsedKey() {
 	client := target.Client()
 	assert.NotNil(this.T(), client)
 
-	data := testdata.RandString(testdata.RandStringLength)
+	data := utils.RandString(testdata.RandStringLength, testdata.RandStringLetter)
 	_, _ = client.Set(ctxs.Get().Ctx(), "index1", data, testdata.RedisTimeout).Result()
 	_, _ = client.Set(ctxs.Get().Ctx(), "index2", data, testdata.RedisTimeout).Result()
 	_, _ = client.Set(ctxs.Get().Ctx(), "index3", data, testdata.RedisTimeout).Result()
@@ -76,7 +77,7 @@ func BenchmarkMajorSet(b *testing.B) {
 	submit := target.Submit()
 
 	for i := 0; i < b.N; i++ {
-		value := testdata.RandString(testdata.RandStringLength)
+		value := utils.RandString(testdata.RandStringLength, testdata.RandStringLetter)
 		_, _ = submit.Set(ctxs.Get().Ctx(), value, value, testdata.RedisTimeout).Result()
 	} // for
 
@@ -86,7 +87,7 @@ func BenchmarkMajorSet(b *testing.B) {
 func BenchmarkMajorGet(b *testing.B) {
 	target, _ := newMajor(ctxs.Get().Ctx(), testdata.RedisURI, false)
 	submit := target.Submit()
-	value := testdata.RandString(testdata.RandStringLength)
+	value := utils.RandString(testdata.RandStringLength, testdata.RandStringLetter)
 	_, _ = submit.Set(ctxs.Get().Ctx(), value, value, 0).Result()
 
 	for i := 0; i < b.N; i++ {
