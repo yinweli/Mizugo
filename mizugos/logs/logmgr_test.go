@@ -19,11 +19,11 @@ type SuiteLogmgr struct {
 }
 
 func (this *SuiteLogmgr) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-logs-logmgr")
+	this.Env = testdata.EnvSetup("test-logs-logmgr")
 }
 
 func (this *SuiteLogmgr) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteLogmgr) TearDownTest() {

@@ -22,12 +22,12 @@ type SuiteTCPConnect struct {
 }
 
 func (this *SuiteTCPConnect) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-nets-tcpConnect")
+	this.Env = testdata.EnvSetup("test-nets-tcpConnect")
 	this.host = host{ip: "google.com", port: "80"}
 }
 
 func (this *SuiteTCPConnect) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteTCPConnect) TearDownTest() {

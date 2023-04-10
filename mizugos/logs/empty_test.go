@@ -20,11 +20,11 @@ type SuiteEmpty struct {
 }
 
 func (this *SuiteEmpty) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-logs-empty")
+	this.Env = testdata.EnvSetup("test-logs-empty")
 }
 
 func (this *SuiteEmpty) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteEmpty) TearDownTest() {

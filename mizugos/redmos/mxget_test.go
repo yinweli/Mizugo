@@ -28,14 +28,14 @@ type SuiteMxGet struct {
 }
 
 func (this *SuiteMxGet) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-redmos-mxget")
+	this.Env = testdata.EnvSetup("test-redmos-mxget")
 	this.key = "mxget-0001"
 	this.major, _ = newMajor(ctxs.Get().Ctx(), testdata.RedisURI, true)
 	this.minor, _ = newMinor(ctxs.Get().Ctx(), testdata.MongoURI, this.meta.MinorTable()) // 這裡偷懶把表格名稱當資料庫名稱來用
 }
 
 func (this *SuiteMxGet) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 	testdata.RedisClear(ctxs.Get().Ctx(), this.major.Client(), this.major.UsedKey())
 	testdata.MongoClear(ctxs.Get().Ctx(), this.minor.Database())
 	this.major.stop()

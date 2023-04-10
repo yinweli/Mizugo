@@ -24,7 +24,7 @@ type SuiteMxLock struct {
 }
 
 func (this *SuiteMxLock) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-redmos-mxlock")
+	this.Env = testdata.EnvSetup("test-redmos-mxlock")
 	this.dbtable = "mxlock"
 	this.key = "mxlock-0001"
 	this.major, _ = newMajor(ctxs.Get().Ctx(), testdata.RedisURI, true)
@@ -32,7 +32,7 @@ func (this *SuiteMxLock) SetupSuite() {
 }
 
 func (this *SuiteMxLock) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 	testdata.RedisClear(ctxs.Get().Ctx(), this.major.Client(), this.major.UsedKey())
 	testdata.MongoClear(ctxs.Get().Ctx(), this.minor.Database())
 	this.major.stop()

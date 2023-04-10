@@ -20,11 +20,11 @@ type SuiteBase64 struct {
 }
 
 func (this *SuiteBase64) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-cryptos-base64")
+	this.Env = testdata.EnvSetup("test-cryptos-base64")
 }
 
 func (this *SuiteBase64) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteBase64) TearDownTest() {

@@ -24,14 +24,14 @@ type SuitePadding struct {
 }
 
 func (this *SuitePadding) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-cryptos-padding")
+	this.Env = testdata.EnvSetup("test-cryptos-padding")
 	this.blockSize = 64
 	this.length1 = 99
 	this.length2 = 199
 }
 
 func (this *SuitePadding) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuitePadding) TearDownTest() {

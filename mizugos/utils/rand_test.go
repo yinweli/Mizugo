@@ -20,11 +20,11 @@ type SuiteRand struct {
 }
 
 func (this *SuiteRand) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-utils-rand")
+	this.Env = testdata.EnvSetup("test-utils-rand")
 }
 
 func (this *SuiteRand) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteRand) TearDownTest() {

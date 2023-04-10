@@ -24,12 +24,12 @@ type SuiteMinor struct {
 }
 
 func (this *SuiteMinor) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-redmos-minor")
+	this.Env = testdata.EnvSetup("test-redmos-minor")
 	this.name = "minor"
 }
 
 func (this *SuiteMinor) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteMinor) TearDownTest() {

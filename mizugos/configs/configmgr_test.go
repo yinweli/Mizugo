@@ -31,7 +31,7 @@ type SuiteConfigmgr struct {
 }
 
 func (this *SuiteConfigmgr) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-configs-configmgr", "configmgr")
+	this.Env = testdata.EnvSetup("test-configs-configmgr", "configmgr")
 	this.name1 = "configmgr"
 	this.name2 = "!?"
 	this.value1 = "valid: valid"
@@ -48,7 +48,7 @@ func (this *SuiteConfigmgr) SetupSuite() {
 }
 
 func (this *SuiteConfigmgr) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteConfigmgr) TearDownTest() {

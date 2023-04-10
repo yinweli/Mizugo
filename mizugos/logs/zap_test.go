@@ -21,11 +21,11 @@ type SuiteZap struct {
 }
 
 func (this *SuiteZap) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-logs-zap")
+	this.Env = testdata.EnvSetup("test-logs-zap")
 }
 
 func (this *SuiteZap) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteZap) TearDownTest() {

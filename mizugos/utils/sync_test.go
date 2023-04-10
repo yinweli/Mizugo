@@ -21,11 +21,11 @@ type SuiteSync struct {
 }
 
 func (this *SuiteSync) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-utils-sync")
+	this.Env = testdata.EnvSetup("test-utils-sync")
 }
 
 func (this *SuiteSync) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteSync) TearDownTest() {

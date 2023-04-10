@@ -22,12 +22,12 @@ type SuiteEventmgr struct {
 }
 
 func (this *SuiteEventmgr) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-events-eventmgr")
+	this.Env = testdata.EnvSetup("test-events-eventmgr")
 	this.capacity = 100
 }
 
 func (this *SuiteEventmgr) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteEventmgr) TearDownTest() {

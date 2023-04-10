@@ -19,11 +19,11 @@ type SuiteLabelobj struct {
 }
 
 func (this *SuiteLabelobj) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-labels-labelobj")
+	this.Env = testdata.EnvSetup("test-labels-labelobj")
 }
 
 func (this *SuiteLabelobj) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteLabelobj) TearDownTest() {

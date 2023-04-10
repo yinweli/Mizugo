@@ -23,14 +23,14 @@ type SuiteMixed struct {
 }
 
 func (this *SuiteMixed) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-redmos-mixed")
+	this.Env = testdata.EnvSetup("test-redmos-mixed")
 	this.name = "mixed"
 	this.major, _ = newMajor(ctxs.Get().Ctx(), testdata.RedisURI, true)
 	this.minor, _ = newMinor(ctxs.Get().Ctx(), testdata.MongoURI, this.name)
 }
 
 func (this *SuiteMixed) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 	testdata.RedisClear(ctxs.Get().Ctx(), this.major.Client(), this.major.UsedKey())
 	testdata.MongoClear(ctxs.Get().Ctx(), this.minor.Database())
 	this.major.stop()

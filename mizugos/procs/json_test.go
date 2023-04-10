@@ -24,7 +24,7 @@ type SuiteJson struct {
 }
 
 func (this *SuiteJson) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-procs-json")
+	this.Env = testdata.EnvSetup("test-procs-json")
 	this.key = cryptos.RandDesKeyString()
 	this.messageID = MessageID(1)
 	this.message = &msgs.JsonTest{
@@ -33,7 +33,7 @@ func (this *SuiteJson) SetupSuite() {
 }
 
 func (this *SuiteJson) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteJson) TearDownTest() {

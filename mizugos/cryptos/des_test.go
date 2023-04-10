@@ -22,11 +22,11 @@ type SuiteDes struct {
 }
 
 func (this *SuiteDes) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-cryptos-des")
+	this.Env = testdata.EnvSetup("test-cryptos-des")
 }
 
 func (this *SuiteDes) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteDes) TearDownTest() {

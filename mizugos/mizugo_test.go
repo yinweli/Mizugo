@@ -20,11 +20,11 @@ type SuiteMizugo struct {
 }
 
 func (this *SuiteMizugo) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-mizugos-mizugo")
+	this.Env = testdata.EnvSetup("test-mizugos-mizugo")
 }
 
 func (this *SuiteMizugo) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteMizugo) TearDownTest() {

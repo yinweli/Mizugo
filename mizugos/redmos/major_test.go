@@ -21,11 +21,11 @@ type SuiteMajor struct {
 }
 
 func (this *SuiteMajor) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-redmos-major")
+	this.Env = testdata.EnvSetup("test-redmos-major")
 }
 
 func (this *SuiteMajor) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteMajor) TearDownTest() {

@@ -8,14 +8,10 @@ import (
 	"github.com/otiai10/copy"
 )
 
-// Env 環境資料
-type Env struct {
-	original string // 原始路徑
-	workpath string // 工作路徑
-}
-
-// EnvSetup 設定環境
-func EnvSetup(env *Env, work string, data ...string) {
+// EnvSetup 設定測試環境, 依照以下流程執行
+//   - 工作目錄改為使用者指定的目錄
+//   - 從使用者指定的目錄把測試資料複製過來
+func EnvSetup(work string, data ...string) Env {
 	original, err := os.Getwd()
 
 	if err != nil {
@@ -28,22 +24,24 @@ func EnvSetup(env *Env, work string, data ...string) {
 		panic(err)
 	} // if
 
-	for _, itor := range data {
-		if err = copy.Copy(filepath.Join(envpath, itor), workpath); err != nil {
-			panic(err)
-		} // if
-	} // for
-
 	if err = os.Chdir(workpath); err != nil {
 		panic(err)
 	} // if
 
-	env.original = original
-	env.workpath = workpath
+	for _, itor := range data {
+		if err = copy.Copy(filepath.Join(envpath, itor), "."); err != nil {
+			panic(err)
+		} // if
+	} // for
+
+	return Env{
+		original: original,
+		workpath: workpath,
+	}
 }
 
 // EnvRestore 還原環境
-func EnvRestore(env *Env) {
+func EnvRestore(env Env) {
 	if err := os.Chdir(env.original); err != nil {
 		panic(err)
 	} // if
@@ -53,14 +51,10 @@ func EnvRestore(env *Env) {
 	} // if
 }
 
-// PathRoot 取得根路徑
-func PathRoot() string {
-	return rootpath
-}
-
-// PathEnv 取得環境路徑
-func PathEnv() string {
-	return envpath
+// Env 環境資料
+type Env struct {
+	original string // 原始路徑
+	workpath string // 工作路徑
 }
 
 func init() {

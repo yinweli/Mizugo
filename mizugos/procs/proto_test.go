@@ -25,7 +25,7 @@ type SuiteProto struct {
 }
 
 func (this *SuiteProto) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-procs-proto")
+	this.Env = testdata.EnvSetup("test-procs-proto")
 	this.key = cryptos.RandDesKeyString()
 	this.messageID = MessageID(1)
 	this.message = &msgs.ProtoTest{
@@ -34,7 +34,7 @@ func (this *SuiteProto) SetupSuite() {
 }
 
 func (this *SuiteProto) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteProto) TearDownTest() {

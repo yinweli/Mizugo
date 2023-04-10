@@ -22,13 +22,13 @@ type SuiteNetmgr struct {
 }
 
 func (this *SuiteNetmgr) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-nets-netmgr")
+	this.Env = testdata.EnvSetup("test-nets-netmgr")
 	this.hostGoogle = host{ip: "google.com", port: "80"}
 	this.hostLocal = host{port: "9000"}
 }
 
 func (this *SuiteNetmgr) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteNetmgr) TearDownTest() {

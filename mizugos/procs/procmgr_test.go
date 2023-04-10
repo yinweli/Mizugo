@@ -19,11 +19,11 @@ type SuiteProcmgr struct {
 }
 
 func (this *SuiteProcmgr) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-procs-procmgr")
+	this.Env = testdata.EnvSetup("test-procs-procmgr")
 }
 
 func (this *SuiteProcmgr) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteProcmgr) TearDownTest() {
