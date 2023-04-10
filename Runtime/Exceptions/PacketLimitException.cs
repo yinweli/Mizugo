@@ -7,6 +7,7 @@ namespace Mizugo
     /// </summary>
     public class PacketLimitException : Exception
     {
-        public PacketLimitException(string name) : base(name + " packet size limit") { }
+        public PacketLimitException(string name)
+            : base(name + " packet size limit") { }
     }
 }
