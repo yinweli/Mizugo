@@ -22,11 +22,11 @@ type SuitePoolmgr struct {
 }
 
 func (this *SuitePoolmgr) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-pools-poolmgr")
+	this.Env = testdata.EnvSetup("test-pools-poolmgr")
 }
 
 func (this *SuitePoolmgr) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuitePoolmgr) TearDownTest() {

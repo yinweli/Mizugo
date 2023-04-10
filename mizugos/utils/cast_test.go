@@ -19,11 +19,11 @@ type SuiteCast struct {
 }
 
 func (this *SuiteCast) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-utils-cast")
+	this.Env = testdata.EnvSetup("test-utils-cast")
 }
 
 func (this *SuiteCast) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteCast) TearDownTest() {

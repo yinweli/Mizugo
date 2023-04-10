@@ -25,14 +25,14 @@ type SuiteMxIncr struct {
 }
 
 func (this *SuiteMxIncr) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-redmos-mxincr")
+	this.Env = testdata.EnvSetup("test-redmos-mxincr")
 	this.key = "mxincr-0001"
 	this.major, _ = newMajor(ctxs.Get().Ctx(), testdata.RedisURI, true)
 	this.minor, _ = newMinor(ctxs.Get().Ctx(), testdata.MongoURI, this.meta.MinorTable()) // 這裡偷懶把表格名稱當資料庫名稱來用
 }
 
 func (this *SuiteMxIncr) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 	testdata.RedisClear(ctxs.Get().Ctx(), this.major.Client(), this.major.UsedKey())
 	testdata.MongoClear(ctxs.Get().Ctx(), this.minor.Database())
 	this.major.stop()

@@ -21,12 +21,12 @@ type SuiteMetricsmgr struct {
 }
 
 func (this *SuiteMetricsmgr) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-metrics-metricsmgr")
+	this.Env = testdata.EnvSetup("test-metrics-metricsmgr")
 	this.port = 9100
 }
 
 func (this *SuiteMetricsmgr) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteMetricsmgr) TearDownTest() {

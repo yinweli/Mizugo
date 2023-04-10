@@ -21,11 +21,11 @@ type SuiteURI struct {
 }
 
 func (this *SuiteURI) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-redmos-uri")
+	this.Env = testdata.EnvSetup("test-redmos-uri")
 }
 
 func (this *SuiteURI) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteURI) TearDownTest() {

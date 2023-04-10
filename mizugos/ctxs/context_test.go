@@ -21,11 +21,11 @@ type SuiteContext struct {
 }
 
 func (this *SuiteContext) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-contexts-context")
+	this.Env = testdata.EnvSetup("test-contexts-context")
 }
 
 func (this *SuiteContext) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteContext) TearDownTest() {

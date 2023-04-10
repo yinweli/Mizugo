@@ -19,11 +19,11 @@ type SuiteRedmomgr struct {
 }
 
 func (this *SuiteRedmomgr) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-redmos-redmomgr")
+	this.Env = testdata.EnvSetup("test-redmos-redmomgr")
 }
 
 func (this *SuiteRedmomgr) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteRedmomgr) TearDownTest() {

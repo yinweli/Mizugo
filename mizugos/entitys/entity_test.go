@@ -27,13 +27,13 @@ type SuiteEntity struct {
 }
 
 func (this *SuiteEntity) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-entitys-entity")
+	this.Env = testdata.EnvSetup("test-entitys-entity")
 	this.entityID = EntityID(1)
 	this.capacity = 1
 }
 
 func (this *SuiteEntity) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteEntity) TearDownTest() {

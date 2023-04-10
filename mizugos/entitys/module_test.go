@@ -19,11 +19,11 @@ type SuiteModule struct {
 }
 
 func (this *SuiteModule) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-entitys-module")
+	this.Env = testdata.EnvSetup("test-entitys-module")
 }
 
 func (this *SuiteModule) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteModule) TearDownTest() {

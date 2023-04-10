@@ -21,11 +21,11 @@ type SuiteMD5 struct {
 }
 
 func (this *SuiteMD5) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-cryptos-md5")
+	this.Env = testdata.EnvSetup("test-cryptos-md5")
 }
 
 func (this *SuiteMD5) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteMD5) TearDownTest() {

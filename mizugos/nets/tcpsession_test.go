@@ -22,13 +22,13 @@ type SuiteTCPSession struct {
 }
 
 func (this *SuiteTCPSession) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-nets-tcpSession")
+	this.Env = testdata.EnvSetup("test-nets-tcpSession")
 	this.host = host{port: "9002"}
 	this.message = "message"
 }
 
 func (this *SuiteTCPSession) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteTCPSession) TearDownTest() {

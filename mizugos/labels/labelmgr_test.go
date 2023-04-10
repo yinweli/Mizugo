@@ -19,11 +19,11 @@ type SuiteLabelmgr struct {
 }
 
 func (this *SuiteLabelmgr) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-labels-labelmgr")
+	this.Env = testdata.EnvSetup("test-labels-labelmgr")
 }
 
 func (this *SuiteLabelmgr) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteLabelmgr) TearDownTest() {

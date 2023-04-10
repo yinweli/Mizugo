@@ -19,11 +19,11 @@ type SuiteEntitymgr struct {
 }
 
 func (this *SuiteEntitymgr) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-entitys-entitymgr")
+	this.Env = testdata.EnvSetup("test-entitys-entitymgr")
 }
 
 func (this *SuiteEntitymgr) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteEntitymgr) TearDownTest() {

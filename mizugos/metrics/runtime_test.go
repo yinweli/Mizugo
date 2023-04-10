@@ -23,12 +23,12 @@ type SuiteRuntime struct {
 }
 
 func (this *SuiteRuntime) SetupSuite() {
-	testdata.EnvSetup(&this.Env, "test-metrics-runtime")
+	this.Env = testdata.EnvSetup("test-metrics-runtime")
 	this.port = 9101
 }
 
 func (this *SuiteRuntime) TearDownSuite() {
-	testdata.EnvRestore(&this.Env)
+	testdata.EnvRestore(this.Env)
 }
 
 func (this *SuiteRuntime) TearDownTest() {
