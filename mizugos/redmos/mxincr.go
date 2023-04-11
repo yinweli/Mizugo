@@ -21,7 +21,7 @@ type Incr[T int | int32 | int64] struct {
 	Key    string        // 索引值
 	Incr   T             // 遞增數值
 	Data   T             // 資料物件
-	incr   *redis.IntCmd // 遞增命令結果
+	incr   *redis.IntCmd // 命令結果
 }
 
 // Prepare 前置處理
