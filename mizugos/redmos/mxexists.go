@@ -1,0 +1,52 @@
+package redmos
+
+import (
+	"fmt"
+
+	"github.com/redis/go-redis/v9"
+)
+
+// Exists 索引查詢行為, 以索引列表到主要資料庫中查詢索引是否存在, 使用上有以下幾點須注意
+//   - 需要事先建立好與 Metaer 介面符合的元資料結構, 並填寫到 Meta
+//   - 執行前設定好 Key 並且不能為空列表
+//   - 執行後可用 Count 來取得存在的索引數量
+type Exists struct {
+	Behave               // 行為物件
+	Meta   Metaer        // 元資料
+	Key    []string      // 索引列表
+	Count  int           // 存在的索引數量
+	exists *redis.IntCmd // 命令結果
+}
+
+// Prepare 前置處理
+func (this *Exists) Prepare() error {
+	if this.Meta == nil {
+		return fmt.Errorf("exists prepare: meta nil")
+	} // if
+
+	if len(this.Key) == 0 {
+		return fmt.Errorf("exists prepare: key empty")
+	} // if
+
+	key := []string{}
+
+	for _, itor := range this.Key {
+		key = append(key, this.Meta.MajorKey(itor))
+	} // for
+
+	this.Count = 0
+	this.exists = this.Major().Exists(this.Ctx(), key...)
+	return nil
+}
+
+// Complete 完成處理
+func (this *Exists) Complete() error {
+	count, err := this.exists.Result()
+
+	if err != nil {
+		return fmt.Errorf("exists complete: %w: %v", err, this.Key)
+	} // if
+
+	this.Count = int(count)
+	return nil
+}
