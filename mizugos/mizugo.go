@@ -57,8 +57,8 @@ func Start() {
 
 // Stop 關閉伺服器
 func Stop() {
-	server.lock.RLock()
-	defer server.lock.RUnlock()
+	server.lock.Lock()
+	defer server.lock.Unlock()
 
 	server.configmgr = nil
 	server.metricsmgr = nil
