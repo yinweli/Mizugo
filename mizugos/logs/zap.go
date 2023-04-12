@@ -156,7 +156,7 @@ func (this *ZapStream) Message(format string, a ...any) Stream {
 // Caller 記錄呼叫訊息
 func (this *ZapStream) Caller(skip int) Stream {
 	if pc, _, _, ok := runtime.Caller(skip + 1); ok { // 這裡把skip+1的原因是為了多跳過現在這層, 這樣外部使用時就可以指定0為呼叫起點, 比較直覺
-		return this.KV("caller", runtime.FuncForPC(pc).Name())
+		return this.KV("caller", filepath.Base(runtime.FuncForPC(pc).Name()))
 	} // if
 
 	return this
