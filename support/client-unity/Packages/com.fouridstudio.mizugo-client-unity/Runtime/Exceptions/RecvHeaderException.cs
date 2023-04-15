@@ -7,7 +7,6 @@ namespace Mizugo
     /// </summary>
     public class RecvHeaderException : Exception
     {
-        public RecvHeaderException()
-            : base("receive header failed") { }
+        public RecvHeaderException() : base("receive header failed") { }
     }
 }

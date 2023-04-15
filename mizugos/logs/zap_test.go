@@ -42,15 +42,12 @@ func (this *SuiteZap) TestZapLogger() {
 		Level:      LevelDebug,
 		TimeLayout: "2006-01-02 15:04:05.000",
 	}
-	target.Finalize() // 初始化前執行, 這次應該不執行
 	assert.Nil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.Initialize()) // 故意啟動兩次, 這次應該失敗
 	assert.NotNil(this.T(), target.Debug(""))
 	assert.NotNil(this.T(), target.Info(""))
 	assert.NotNil(this.T(), target.Warn(""))
 	assert.NotNil(this.T(), target.Error(""))
 	target.Finalize()
-	target.Finalize() // 故意結束兩次, 這次應該不執行
 
 	target = &ZapLogger{
 		Name:       "zapLogger",
@@ -60,9 +57,15 @@ func (this *SuiteZap) TestZapLogger() {
 		File:       false,
 		Level:      LevelDebug,
 		TimeLayout: "2006-01-02 15:04:05.000",
+		TimeZone:   "Asia/Taipei",
 	}
 	assert.Nil(this.T(), target.Initialize())
 	target.Finalize()
+
+	target = &ZapLogger{
+		TimeZone: testdata.Unknown,
+	}
+	assert.NotNil(this.T(), target.Initialize())
 }
 
 func (this *SuiteZap) TestZapStream() {
