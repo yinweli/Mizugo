@@ -10,8 +10,6 @@ import (
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-
-	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
 // ZapLogger zap日誌, uber實現的高效能日誌功能;
@@ -28,69 +26,88 @@ type ZapLogger struct {
 	//   - 遵循ISO8601標準, 可以寫成"2006-01-02T15:04:05.000Z0700"
 	//   - 遵循RFC3339標準, 可以寫成"2006-01-02T15:04:05.000000Z07:00"
 	TimeLayout string `yaml:"timeLayout"`
+	TimeZone   string `yaml:"timeZone"`   // 時區字串, 採用與 time.LoadLocation 一樣的方式, 預設是UTC+0
 	MaxSize    int    `yaml:"maxSize"`    // 日誌大小(MB), 當日誌檔案超過此大小時就會建立新檔案, 預設是100MB
 	MaxTime    int    `yaml:"maxTime"`    // 日誌保留時間(日), 當日誌檔案儲存超過此時間時會被刪除, 預設不會刪除檔案
 	MaxBackups int    `yaml:"maxBackups"` // 日誌保留數量, 當日誌檔案數量超過此數量時會刪除舊檔案, 預設不會刪除檔案
 	Compress   bool   `yaml:"compress"`   // 是否壓縮日誌檔案, 預設不會壓縮
 
-	once   utils.SyncOnce // 單次執行物件
-	logger *zap.Logger    // zap日誌物件
+	location *time.Location // 時區物件
+	logger   *zap.Logger    // zap日誌物件
 }
 
 // Initialize 初始化處理
 func (this *ZapLogger) Initialize() error {
-	if this.once.Done() {
-		return fmt.Errorf("zaplogger initialize: already initialize")
+	location, err := this.timeZone()
+
+	if err != nil {
+		return fmt.Errorf("zapLogger initialize: %w", err)
 	} // if
 
-	this.once.Do(func() {
-		core := zapcore.NewCore(
+	this.location = location
+	this.logger = zap.New(
+		zapcore.NewCore(
 			this.encoder(),
 			this.writeSyncer(),
 			zap.NewAtomicLevelAt(zapLevel(this.Level)),
-		)
-		this.logger = zap.New(core, zap.AddCallerSkip(1))
-	})
+		),
+		zap.AddCallerSkip(1))
 	return nil
 }
 
 // Finalize 結束處理
 func (this *ZapLogger) Finalize() {
-	if this.once.Done() == false {
-		return
-	} // if
-
 	if this.logger != nil {
 		_ = this.logger.Sync()
 	} // if
+
+	this.location = nil
+	this.logger = nil
 }
 
 func (this *ZapLogger) Debug(label string) Stream {
 	return &ZapStream{
-		logger: this.logger.Named(label),
-		level:  zapcore.DebugLevel,
+		location: this.location,
+		logger:   this.logger.Named(label),
+		level:    zapcore.DebugLevel,
 	}
 }
 
 func (this *ZapLogger) Info(label string) Stream {
 	return &ZapStream{
-		logger: this.logger.Named(label),
-		level:  zapcore.InfoLevel,
+		location: this.location,
+		logger:   this.logger.Named(label),
+		level:    zapcore.InfoLevel,
 	}
 }
 
 func (this *ZapLogger) Warn(label string) Stream {
 	return &ZapStream{
-		logger: this.logger.Named(label),
-		level:  zapcore.WarnLevel,
+		location: this.location,
+		logger:   this.logger.Named(label),
+		level:    zapcore.WarnLevel,
 	}
 }
 
 func (this *ZapLogger) Error(label string) Stream {
 	return &ZapStream{
-		logger: this.logger.Named(label),
-		level:  zapcore.ErrorLevel,
+		location: this.location,
+		logger:   this.logger.Named(label),
+		level:    zapcore.ErrorLevel,
 	}
+}
+
+// timeZone 取得時區物件
+func (this *ZapLogger) timeZone() (location *time.Location, err error) {
+	if this.TimeZone == "" {
+		return time.UTC, nil
+	} // if
+
+	if location, err = time.LoadLocation(this.TimeZone); err != nil {
+		return nil, fmt.Errorf("zapLogger timeZone: time zone error")
+	} // if
+
+	return location, nil
 }
 
 // encoder 取得日誌編碼器
@@ -141,10 +158,11 @@ func (this *ZapLogger) writeSyncer() zapcore.WriteSyncer {
 
 // ZapStream zap記錄
 type ZapStream struct {
-	logger  *zap.Logger   // 日誌物件
-	level   zapcore.Level // 日誌等級
-	message string        // 訊息字串
-	field   []zap.Field   // 記錄列表
+	location *time.Location // 時區物件
+	logger   *zap.Logger    // 日誌物件
+	level    zapcore.Level  // 日誌等級
+	message  string         // 訊息字串
+	field    []zap.Field    // 記錄列表
 }
 
 // Message 記錄訊息
@@ -300,7 +318,7 @@ func (this *ZapStream) EndError(err error) {
 // End 結束記錄
 func (this *ZapStream) End() {
 	if l := this.logger.Check(this.level, this.message); l != nil {
-		l.Time = time.Now().UTC() // 讓日誌輸出的時間使用UTC+0
+		l.Time = time.Now().In(this.location)
 		l.Write(this.field...)
 	} // if
 }
