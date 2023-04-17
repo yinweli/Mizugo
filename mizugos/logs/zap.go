@@ -104,7 +104,7 @@ func (this *ZapLogger) timeZone() (location *time.Location, err error) {
 	} // if
 
 	if location, err = time.LoadLocation(this.TimeZone); err != nil {
-		return nil, fmt.Errorf("zapLogger timeZone: time zone error")
+		return nil, fmt.Errorf("zapLogger timeZone: %w", err)
 	} // if
 
 	return location, nil
