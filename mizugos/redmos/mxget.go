@@ -31,14 +31,6 @@ func (this *Get[T]) Prepare() error {
 		return fmt.Errorf("get prepare: meta nil")
 	} // if
 
-	if this.Meta.MinorTable() == "" {
-		return fmt.Errorf("get prepare: table empty")
-	} // if
-
-	if this.Meta.MinorField() == "" {
-		return fmt.Errorf("get prepare: field empty")
-	} // if
-
 	if this.Key == "" {
 		return fmt.Errorf("get prepare: key empty")
 	} // if
@@ -77,11 +69,13 @@ func (this *Get[T]) Complete() error {
 //   - 如果該資料結構符合 Saver 介面, 會套用儲存判斷機制, 減少不必要的儲存操作
 //   - 資料結構的成員都需要設定好`bson:xxxxx`屬性
 //   - 需要事先建立好與 Metaer 介面符合的元資料結構, 並填寫到 Meta
+//   - 執行前設定好 Redis, true表示只儲存到redis中, false則是redis+mongo都儲存
 //   - 執行前設定好 Key 並且不能為空字串
 //   - 執行前設定好 Data 並且不能為nil
 type Set[T any] struct {
 	Behave                  // 行為物件
 	Meta   Metaer           // 元資料
+	Redis  bool             // 是否只儲存redis
 	Key    string           // 索引值
 	Data   *T               // 資料物件
 	set    *redis.StatusCmd // 命令結果
@@ -93,11 +87,11 @@ func (this *Set[T]) Prepare() error {
 		return fmt.Errorf("set prepare: meta nil")
 	} // if
 
-	if this.Meta.MinorTable() == "" {
+	if this.Redis == false && this.Meta.MinorTable() == "" {
 		return fmt.Errorf("set prepare: table empty")
 	} // if
 
-	if this.Meta.MinorField() == "" {
+	if this.Redis == false && this.Meta.MinorField() == "" {
 		return fmt.Errorf("set prepare: field empty")
 	} // if
 
@@ -138,6 +132,10 @@ func (this *Set[T]) Complete() error {
 
 	if data != RedisOk {
 		return fmt.Errorf("set complete: save to redis failed: %v", this.Key)
+	} // if
+
+	if this.Redis {
+		return nil
 	} // if
 
 	key := this.Meta.MinorKey(this.Key)

@@ -31,8 +31,8 @@ func (this *SuiteMxIndex) SetupSuite() {
 
 func (this *SuiteMxIndex) TearDownSuite() {
 	testdata.EnvRestore(this.Env)
-	testdata.RedisClear(ctxs.Get().Ctx(), this.major.Client(), this.major.UsedKey())
-	testdata.MongoClear(ctxs.Get().Ctx(), this.minor.Database())
+	testdata.RedisClear(this.major.Client(), this.major.UsedKey())
+	testdata.MongoClear(this.minor.Database())
 	this.major.stop()
 	this.minor.stop(ctxs.Get().Ctx())
 }

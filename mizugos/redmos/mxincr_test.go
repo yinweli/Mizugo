@@ -33,8 +33,8 @@ func (this *SuiteMxIncr) SetupSuite() {
 
 func (this *SuiteMxIncr) TearDownSuite() {
 	testdata.EnvRestore(this.Env)
-	testdata.RedisClear(ctxs.Get().Ctx(), this.major.Client(), this.major.UsedKey())
-	testdata.MongoClear(ctxs.Get().Ctx(), this.minor.Database())
+	testdata.RedisClear(this.major.Client(), this.major.UsedKey())
+	testdata.MongoClear(this.minor.Database())
 	this.major.stop()
 	this.minor.stop(ctxs.Get().Ctx())
 }
@@ -70,7 +70,7 @@ func (this *SuiteMxIncr) TestIncr() {
 	assert.NotNil(this.T(), get.Data)
 	assert.Equal(this.T(), expected.Value, *get.Data)
 
-	assert.True(this.T(), testdata.MongoCompare[dataMxIncr](ctxs.Get().Ctx(), this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(this.key), expected))
+	assert.True(this.T(), testdata.MongoCompare[dataMxIncr](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(this.key), expected))
 
 	incr.Meta = nil
 	incr.Key = this.key
