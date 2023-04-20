@@ -14,21 +14,21 @@ namespace Mizugo
         public void Connect(string host, int port)
         {
             var client = new TCPClient(new Eventmgr(), new JsonProc());
-            var vaildConnect = false;
-            var vaildDisconnect = false;
+            var validConnect = false;
+            var validDisconnect = false;
 
             client.AddEvent(
                 EventID.Connect,
                 (object _) =>
                 {
-                    vaildConnect = true;
+                    validConnect = true;
                 }
             );
             client.AddEvent(
                 EventID.Disconnect,
                 (object _) =>
                 {
-                    vaildDisconnect = true;
+                    validDisconnect = true;
                 }
             );
 
@@ -40,8 +40,8 @@ namespace Mizugo
             while (client.IsUpdate)
                 client.Update();
 
-            Assert.IsTrue(vaildConnect);
-            Assert.IsTrue(vaildDisconnect);
+            Assert.IsTrue(validConnect);
+            Assert.IsTrue(validDisconnect);
         }
 
         [Test]
@@ -198,31 +198,31 @@ namespace Mizugo
         {
             var client = new TCPClient(new Eventmgr(), new JsonProc().SetBase64(true).SetDesCBC(true, key, key));
             var stopwatch = new Stopwatch();
-            var vaildConnect = false;
-            var vaildDisconnect = false;
-            var vaildRecv = false;
-            var vaildSend = false;
+            var validConnect = false;
+            var validDisconnect = false;
+            var validRecv = false;
+            var validSend = false;
             var validMessage = false;
 
             client.AddEvent(
                 EventID.Connect,
                 (object _) =>
                 {
-                    vaildConnect = true;
+                    validConnect = true;
                 }
             );
             client.AddEvent(
                 EventID.Disconnect,
                 (object _) =>
                 {
-                    vaildDisconnect = true;
+                    validDisconnect = true;
                 }
             );
             client.AddEvent(
                 EventID.Recv,
                 (object _) =>
                 {
-                    vaildRecv = true;
+                    validRecv = true;
                     client.Disconnect();
                 }
             );
@@ -230,7 +230,7 @@ namespace Mizugo
                 EventID.Send,
                 (object _) =>
                 {
-                    vaildSend = true;
+                    validSend = true;
                 }
             );
             client.AddEvent(EventID.Error, TestUtil.Log);
@@ -254,10 +254,10 @@ namespace Mizugo
             while (client.IsUpdate)
                 client.Update();
 
-            Assert.IsTrue(vaildConnect);
-            Assert.IsTrue(vaildDisconnect);
-            Assert.IsTrue(vaildRecv);
-            Assert.IsTrue(vaildSend);
+            Assert.IsTrue(validConnect);
+            Assert.IsTrue(validDisconnect);
+            Assert.IsTrue(validRecv);
+            Assert.IsTrue(validSend);
             Assert.IsTrue(validMessage);
         }
     }
@@ -273,31 +273,31 @@ namespace Mizugo
         {
             var client = new TCPClient(new Eventmgr(), new ProtoProc().SetBase64(true).SetDesCBC(true, key, key));
             var stopwatch = new Stopwatch();
-            var vaildConnect = false;
-            var vaildDisconnect = false;
-            var vaildRecv = false;
-            var vaildSend = false;
+            var validConnect = false;
+            var validDisconnect = false;
+            var validRecv = false;
+            var validSend = false;
             var validMessage = false;
 
             client.AddEvent(
                 EventID.Connect,
                 (object _) =>
                 {
-                    vaildConnect = true;
+                    validConnect = true;
                 }
             );
             client.AddEvent(
                 EventID.Disconnect,
                 (object _) =>
                 {
-                    vaildDisconnect = true;
+                    validDisconnect = true;
                 }
             );
             client.AddEvent(
                 EventID.Recv,
                 (object _) =>
                 {
-                    vaildRecv = true;
+                    validRecv = true;
                     client.Disconnect();
                 }
             );
@@ -305,7 +305,7 @@ namespace Mizugo
                 EventID.Send,
                 (object _) =>
                 {
-                    vaildSend = true;
+                    validSend = true;
                 }
             );
             client.AddEvent(EventID.Error, TestUtil.Log);
@@ -329,10 +329,10 @@ namespace Mizugo
             while (client.IsUpdate)
                 client.Update();
 
-            Assert.IsTrue(vaildConnect);
-            Assert.IsTrue(vaildDisconnect);
-            Assert.IsTrue(vaildRecv);
-            Assert.IsTrue(vaildSend);
+            Assert.IsTrue(validConnect);
+            Assert.IsTrue(validDisconnect);
+            Assert.IsTrue(validRecv);
+            Assert.IsTrue(validSend);
             Assert.IsTrue(validMessage);
         }
     }
