@@ -1,0 +1,14 @@
+support/client-unity/[Ll]ibrary/
+support/client-unity/[Tt]emp/
+support/client-unity/[Oo]bj/
+support/client-unity/[Bb]uild/
+support/client-unity/[Bb]uilds/
+support/client-unity/[Ll]ogs/
+support/client-unity/[Uu]ser[Ss]ettings/
+support/test-client-cs/[Ll]ibrary/
+support/test-client-cs/[Tt]emp/
+support/test-client-cs/[Oo]bj/
+support/test-client-cs/[Bb]uild/
+support/test-client-cs/[Bb]uilds/
+support/test-client-cs/[Ll]ogs/
+support/test-client-cs/[Uu]ser[Ss]ettings/
