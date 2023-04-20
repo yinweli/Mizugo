@@ -47,9 +47,12 @@ type Submit struct {
 }
 
 // Add 新增行為
-func (this *Submit) Add(behavior Behavior) *Submit {
-	behavior.Initialize(this.context, this.major, this.minor)
-	this.behavior = append(this.behavior, behavior)
+func (this *Submit) Add(behavior ...Behavior) *Submit {
+	for _, itor := range behavior {
+		itor.Initialize(this.context, this.major, this.minor)
+	} // for
+
+	this.behavior = append(this.behavior, behavior...)
 	return this
 }
 
