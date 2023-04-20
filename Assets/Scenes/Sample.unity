@@ -1076,7 +1076,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   host: 127.0.0.1
-  port: 10001
+  port: 9001
   key: key-@@@@
 --- !u!114 &745669695
 MonoBehaviour:
@@ -1091,7 +1091,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   host: 127.0.0.1
-  port: 10002
+  port: 9002
   key: key-####
 --- !u!1 &865659814
 GameObject:
