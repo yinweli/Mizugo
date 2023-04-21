@@ -3,6 +3,7 @@ package redmos
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/bson"
@@ -70,12 +71,14 @@ func (this *Get[T]) Complete() error {
 //   - 資料結構的成員都需要設定好`bson:xxxxx`屬性
 //   - 需要事先建立好與 Metaer 介面符合的元資料結構, 並填寫到 Meta
 //   - 執行前設定好 Redis, true表示只儲存到redis中, false則是redis+mongo都儲存
+//   - 執行前設定好 Expire, 若不設置或是設置為0表示不過期
 //   - 執行前設定好 Key 並且不能為空字串
 //   - 執行前設定好 Data 並且不能為nil
 type Set[T any] struct {
 	Behave                  // 行為物件
 	Meta   Metaer           // 元資料
 	Redis  bool             // 是否只儲存redis
+	Expire time.Duration    // 過期時間, 若為0表示不過期
 	Key    string           // 索引值
 	Data   *T               // 資料物件
 	set    *redis.StatusCmd // 命令結果
@@ -114,7 +117,7 @@ func (this *Set[T]) Prepare() error {
 		return fmt.Errorf("set prepare: %w: %v", err, this.Key)
 	} //
 
-	this.set = this.Major().Set(this.Ctx(), key, data, 0)
+	this.set = this.Major().Set(this.Ctx(), key, data, this.Expire)
 	return nil
 }
 
