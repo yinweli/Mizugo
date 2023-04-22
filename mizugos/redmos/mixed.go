@@ -78,7 +78,9 @@ func (this *Submit) Exec() error {
 		} // if
 	} // for
 
-	_, _ = this.major.Exec(this.context)
+	if len(this.behavior) > 0 {
+		_, _ = this.major.Exec(this.context)
+	} // if
 
 	for _, itor := range this.behavior {
 		if err := itor.Complete(); err != nil {
