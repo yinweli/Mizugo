@@ -162,6 +162,8 @@ type ZapStream struct {
 	logger   *zap.Logger    // 日誌物件
 	level    zapcore.Level  // 日誌等級
 	message  string         // 訊息字串
+	caller   string         // 呼叫訊息
+	err      error          // 錯誤訊息
 	field    []zap.Field    // 記錄列表
 }
 
@@ -174,9 +176,15 @@ func (this *ZapStream) Message(format string, a ...any) Stream {
 // Caller 記錄呼叫訊息
 func (this *ZapStream) Caller(skip int) Stream {
 	if pc, _, _, ok := runtime.Caller(skip + 1); ok { // 這裡把skip+1的原因是為了多跳過現在這層, 這樣外部使用時就可以指定0為呼叫起點, 比較直覺
-		return this.KV("caller", filepath.Base(runtime.FuncForPC(pc).Name()))
+		this.caller = filepath.Base(runtime.FuncForPC(pc).Name())
 	} // if
 
+	return this
+}
+
+// Error 記錄錯誤
+func (this *ZapStream) Error(err error) Stream {
+	this.err = err
 	return this
 }
 
@@ -304,12 +312,6 @@ func (this *ZapStream) KV(key string, value any) Stream { //nolint:gocyclo
 	return this
 }
 
-// Error 記錄錯誤
-func (this *ZapStream) Error(err error) Stream {
-	this.field = append(this.field, zap.Error(err))
-	return this
-}
-
 // EndError 以錯誤結束記錄
 func (this *ZapStream) EndError(err error) {
 	this.Error(err).End()
@@ -318,6 +320,14 @@ func (this *ZapStream) EndError(err error) {
 // End 結束記錄
 func (this *ZapStream) End() {
 	if l := this.logger.Check(this.level, this.message); l != nil {
+		if this.caller != "" {
+			this.field = append(this.field, zap.String("caller", this.caller))
+		} // if
+
+		if this.err != nil {
+			this.field = append(this.field, zap.Error(this.err))
+		} // if
+
 		l.Time = time.Now().In(this.location)
 		l.Write(this.field...)
 	} // if
