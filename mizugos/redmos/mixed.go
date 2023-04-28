@@ -66,6 +66,24 @@ func (this *Submit) Unlock(key string) *Submit {
 	return this.Add(&Unlock{Key: key})
 }
 
+// LockIf 新增鎖定行為, 依靠旗標來判斷是否要鎖定
+func (this *Submit) LockIf(key string, lock bool) *Submit {
+	if lock {
+		return this.Add(&Lock{Key: key, time: Timeout})
+	} // if
+
+	return this
+}
+
+// UnlockIf 新增解鎖行為, 依靠旗標來判斷是否要解鎖
+func (this *Submit) UnlockIf(key string, unlock bool) *Submit {
+	if unlock {
+		return this.Add(&Unlock{Key: key})
+	} // if
+
+	return this
+}
+
 // Exec 執行命令, 執行命令時, 會以下列順序執行
 //   - 執行所有行為的 Prepare 函式, 如果有錯誤就中止執行
 //   - 執行主要資料庫的管線處理
