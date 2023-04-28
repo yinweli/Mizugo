@@ -56,6 +56,8 @@ func (this *SuiteMixed) TestExec() {
 	assert.Nil(this.T(), target.Submit(ctxs.Get().Ctx()).Add(newBehaveTester(true, true)).Exec())
 	assert.Nil(this.T(), target.Submit(ctxs.Get().Ctx()).Add(newBehaveTester(true, true), newBehaveTester(true, true)).Exec())
 	assert.Nil(this.T(), target.Submit(ctxs.Get().Ctx()).Lock(key).Unlock(key).Exec())
+	assert.Nil(this.T(), target.Submit(ctxs.Get().Ctx()).LockIf(key, true).UnlockIf(key, true).Exec())
+	assert.Nil(this.T(), target.Submit(ctxs.Get().Ctx()).LockIf(key, false).UnlockIf(key, false).Exec())
 	assert.NotNil(this.T(), target.Submit(ctxs.Get().Ctx()).Add(newBehaveTester(false, true)).Exec())
 	assert.NotNil(this.T(), target.Submit(ctxs.Get().Ctx()).Add(newBehaveTester(true, false)).Exec())
 }
