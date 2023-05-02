@@ -64,7 +64,6 @@ func (this *SuiteMxGet) TestGet() {
 	assert.Nil(this.T(), get.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), get.Complete())
-	assert.True(this.T(), get.Result)
 	assert.True(this.T(), cmp.Equal(data, get.Data, data.ignore()))
 
 	data = &testMxGet{

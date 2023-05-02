@@ -15,13 +15,11 @@ import (
 //   - 需要事先建立好與 Metaer 介面符合的元資料結構, 並填寫到 Meta
 //   - 執行前設定好 Key 並且不能為空字串
 //   - 執行前設定好 Data, 如果為nil, 則內部程序會自己建立
-//   - 執行後可用 Result 來判斷行為是否成功
 //   - 執行後可用 Data 來取得資料
 type Get[T any] struct {
 	Behave                  // 行為物件
 	Meta   Metaer           // 元資料
 	Key    string           // 索引值
-	Result bool             // 執行結果
 	Data   *T               // 資料物件
 	get    *redis.StringCmd // 命令結果
 }
@@ -37,7 +35,6 @@ func (this *Get[T]) Prepare() error {
 	} // if
 
 	key := this.Meta.MajorKey(this.Key)
-	this.Result = false
 	this.get = this.Major().Get(this.Ctx(), key)
 	return nil
 }
@@ -58,8 +55,6 @@ func (this *Get[T]) Complete() error {
 		if err = json.Unmarshal([]byte(data), this.Data); err != nil {
 			return fmt.Errorf("get complete: %w: %v", err, this.Key)
 		} // if
-
-		this.Result = true
 	} // if
 
 	return nil

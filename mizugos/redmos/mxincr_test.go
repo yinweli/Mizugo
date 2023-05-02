@@ -66,7 +66,6 @@ func (this *SuiteMxIncr) TestIncr() {
 	assert.Nil(this.T(), get.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), get.Complete())
-	assert.True(this.T(), get.Result)
 	assert.NotNil(this.T(), get.Data)
 	assert.Equal(this.T(), expected.Value, *get.Data)
 

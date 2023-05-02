@@ -24,11 +24,10 @@ public static partial class MsgidReflection {
         string.Concat(
           "Cgttc2dpZC5wcm90byp0CgVNc2dJRBILCgdVbmtub3duEAASCQoFSnNvblEQ",
           "ARIJCgVKc29uQRACEgoKBlByb3RvURADEgoKBlByb3RvQRAEEgoKBkxvZ2lu",
-          "URAHEgoKBkxvZ2luQRAIEgsKB1VwZGF0ZVEQCRILCgdVcGRhdGVBEAoqhgEK",
-          "BUVycklEEgsKB1N1Y2Nlc3MQABIRCg1Kc29uVW5tYXJzaGFsEAESEgoOUHJv",
-          "dG9Vbm1hcnNoYWwQAhIPCgtEYXRhYmFzZU5pbBAFEhAKDFN1Ym1pdEZhaWxl",
-          "ZBAGEhMKD0FjY291bnROb3RFeGlzdBAHEhEKDVRva2VuTm90TWF0Y2gQCEIM",
-          "WgovbXNnczttc2dzYgZwcm90bzM="));
+          "URAHEgoKBkxvZ2luQRAIEgsKB1VwZGF0ZVEQCRILCgdVcGRhdGVBEAoqYAoF",
+          "RXJySUQSCwoHU3VjY2VzcxAAEhEKDUpzb25Vbm1hcnNoYWwQARISCg5Qcm90",
+          "b1VubWFyc2hhbBACEhAKDFN1Ym1pdEZhaWxlZBADEhEKDVRva2VuTm90TWF0",
+          "Y2gQBEIMWgovbXNnczttc2dzYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(new[] {typeof(global::MsgID), typeof(global::ErrID), }, null, null));
@@ -96,21 +95,13 @@ public enum ErrID {
   /// </summary>
   [pbr::OriginalName("ProtoUnmarshal")] ProtoUnmarshal = 2,
   /// <summary>
-  /// 資料庫為空
-  /// </summary>
-  [pbr::OriginalName("DatabaseNil")] DatabaseNil = 5,
-  /// <summary>
   /// 資料庫執行失敗
   /// </summary>
-  [pbr::OriginalName("SubmitFailed")] SubmitFailed = 6,
-  /// <summary>
-  /// 帳號不存在
-  /// </summary>
-  [pbr::OriginalName("AccountNotExist")] AccountNotExist = 7,
+  [pbr::OriginalName("SubmitFailed")] SubmitFailed = 3,
   /// <summary>
   /// token不匹配
   /// </summary>
-  [pbr::OriginalName("TokenNotMatch")] TokenNotMatch = 8,
+  [pbr::OriginalName("TokenNotMatch")] TokenNotMatch = 4,
 }
 
 #endregion

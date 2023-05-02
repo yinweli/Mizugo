@@ -110,12 +110,6 @@ func (this *Auth) procMUpdateQ(message any) {
 		return
 	} // if
 
-	if authGet.Result == false {
-		this.sendMUpdateA(msg, msgs.ErrID_AccountNotExist, "")
-		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err))
-		return
-	} // if
-
 	if authGet.Data.Token != msg.Token {
 		this.sendMUpdateA(msg, msgs.ErrID_TokenNotMatch, "")
 		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err))
