@@ -1,16 +1,16 @@
 package redmos
 
 import (
-	"context"
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/mongo"
+
+	"github.com/yinweli/Mizugo/mizugos/ctxs"
 )
 
-// newMinor 建立次要資料庫, 並且連線到 MongoURI 指定的資料庫;
-// 另外需要指定mongo資料庫名稱, 簡化後面取得執行器的流程, 但也因此限制次要資料庫不能在多個mongo資料庫間切換
-func newMinor(ctx context.Context, uri MongoURI, dbName string) (major *Minor, err error) {
-	client, err := uri.Connect(ctx)
+// newMinor 建立次要資料庫, 並且連線到 MongoURI 指定的資料庫
+func newMinor(uri MongoURI, dbName string) (major *Minor, err error) {
+	client, err := uri.Connect(ctxs.Get().Ctx())
 
 	if err != nil {
 		return nil, fmt.Errorf("newMinor: %w", err)
@@ -56,10 +56,27 @@ func (this *Minor) Database() *mongo.Database {
 	return this.database
 }
 
-// stop 停止資料庫
-func (this *Minor) stop(ctx context.Context) {
+// SwitchDB 切換資料庫
+func (this *Minor) SwitchDB(dbName string) error {
+	if this.client == nil {
+		return fmt.Errorf("minor switch: client nil")
+	} // if
+
+	this.database = this.client.Database(dbName)
+	return nil
+}
+
+// DropDB 清除資料庫
+func (this *Minor) DropDB() {
 	if this.client != nil {
-		_ = this.client.Disconnect(ctx)
+		_ = this.database.Drop(ctxs.Get().Ctx())
+	} // if
+}
+
+// stop 停止資料庫
+func (this *Minor) stop() {
+	if this.client != nil {
+		_ = this.client.Disconnect(ctxs.Get().Ctx())
 		this.client = nil
 		this.database = nil
 	} // if

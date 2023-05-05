@@ -17,24 +17,22 @@ func TestMixed(t *testing.T) {
 type SuiteMixed struct {
 	suite.Suite
 	testdata.Env
-	name  string
 	major *Major
 	minor *Minor
 }
 
 func (this *SuiteMixed) SetupSuite() {
 	this.Env = testdata.EnvSetup("test-redmos-mixed")
-	this.name = "mixed"
-	this.major, _ = newMajor(ctxs.Get().Ctx(), testdata.RedisURI, true)
-	this.minor, _ = newMinor(ctxs.Get().Ctx(), testdata.MongoURI, this.name)
+	this.major, _ = newMajor(testdata.RedisURI)
+	this.minor, _ = newMinor(testdata.MongoURI, "mixed")
 }
 
 func (this *SuiteMixed) TearDownSuite() {
 	testdata.EnvRestore(this.Env)
-	testdata.RedisClear(this.major.Client(), this.major.UsedKey())
-	testdata.MongoClear(this.minor.Database())
+	this.major.DropDB()
 	this.major.stop()
-	this.minor.stop(ctxs.Get().Ctx())
+	this.minor.DropDB()
+	this.minor.stop()
 }
 
 func (this *SuiteMixed) TearDownTest() {
@@ -51,8 +49,8 @@ func (this *SuiteMixed) TestSubmit() {
 }
 
 func (this *SuiteMixed) TestExec() {
-	target := newMixed(this.major, this.minor)
 	key := "mixed exec"
+	target := newMixed(this.major, this.minor)
 	assert.Nil(this.T(), target.Submit(ctxs.Get().Ctx()).Add(newBehaveTester(true, true)).Exec())
 	assert.Nil(this.T(), target.Submit(ctxs.Get().Ctx()).Add(newBehaveTester(true, true), newBehaveTester(true, true)).Exec())
 	assert.Nil(this.T(), target.Submit(ctxs.Get().Ctx()).Lock(key).Unlock(key).Exec())

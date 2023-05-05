@@ -3,14 +3,11 @@ package redmos
 import (
 	"fmt"
 	"sync"
-
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 )
 
 // NewRedmomgr 建立資料庫管理器
 func NewRedmomgr() *Redmomgr {
 	return &Redmomgr{
-		ctx:   ctxs.Get().WithCancel(),
 		major: map[string]*Major{},
 		minor: map[string]*Minor{},
 		mixed: map[string]*Mixed{},
@@ -28,7 +25,6 @@ func NewRedmomgr() *Redmomgr {
 //
 // 若要執行資料庫操作時, 呼叫 Get... 系列函式來取得資料庫物件
 type Redmomgr struct {
-	ctx   ctxs.Ctx          // ctx物件
 	major map[string]*Major // 主要資料庫列表
 	minor map[string]*Minor // 次要資料庫列表
 	mixed map[string]*Mixed // 混合資料庫列表
@@ -36,7 +32,7 @@ type Redmomgr struct {
 }
 
 // AddMajor 新增主要資料庫, 需要提供 RedisURI 來指定要連接的資料庫以及連接選項
-func (this *Redmomgr) AddMajor(majorName string, uri RedisURI, record bool) (major *Major, err error) {
+func (this *Redmomgr) AddMajor(majorName string, uri RedisURI) (major *Major, err error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -44,7 +40,7 @@ func (this *Redmomgr) AddMajor(majorName string, uri RedisURI, record bool) (maj
 		return nil, fmt.Errorf("redmomgr addMajor: duplicate database")
 	} // if
 
-	major, err = newMajor(this.ctx.Ctx(), uri, record)
+	major, err = newMajor(uri)
 
 	if err != nil {
 		return nil, fmt.Errorf("redmomgr addMajor: %w", err)
@@ -76,7 +72,7 @@ func (this *Redmomgr) AddMinor(minorName string, uri MongoURI, dbName string) (m
 		return nil, fmt.Errorf("redmomgr addMinor: duplicate database")
 	} // if
 
-	minor, err = newMinor(this.ctx.Ctx(), uri, dbName)
+	minor, err = newMinor(uri, dbName)
 
 	if err != nil {
 		return nil, fmt.Errorf("redmomgr addMinor: %w", err)
@@ -149,11 +145,9 @@ func (this *Redmomgr) Finalize() {
 	} // if
 
 	for _, itor := range this.minor {
-		itor.stop(this.ctx.Ctx())
+		itor.stop()
 	} // if
 
-	this.ctx.Cancel()
-	this.ctx = ctxs.Get().WithCancel()
 	this.major = map[string]*Major{}
 	this.minor = map[string]*Minor{}
 	this.mixed = map[string]*Mixed{}

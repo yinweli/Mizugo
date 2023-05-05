@@ -21,22 +21,23 @@ func TestMxGet(t *testing.T) {
 type SuiteMxGet struct {
 	suite.Suite
 	testdata.Env
+	meta  metaMxGet
 	major *Major
 	minor *Minor
 }
 
 func (this *SuiteMxGet) SetupSuite() {
 	this.Env = testdata.EnvSetup("test-redmos-mxget")
-	this.major, _ = newMajor(ctxs.Get().Ctx(), testdata.RedisURI, true)
-	this.minor, _ = newMinor(ctxs.Get().Ctx(), testdata.MongoURI, "mxget")
+	this.major, _ = newMajor(testdata.RedisURI)
+	this.minor, _ = newMinor(testdata.MongoURI, this.meta.MinorTable()) // 這裡偷懶把表格名稱當資料庫名稱來用
 }
 
 func (this *SuiteMxGet) TearDownSuite() {
 	testdata.EnvRestore(this.Env)
-	testdata.RedisClear(this.major.Client(), this.major.UsedKey())
-	testdata.MongoClear(this.minor.Database())
+	this.major.DropDB()
 	this.major.stop()
-	this.minor.stop(ctxs.Get().Ctx())
+	this.minor.DropDB()
+	this.minor.stop()
 }
 
 func (this *SuiteMxGet) TearDownTest() {
@@ -47,35 +48,29 @@ func (this *SuiteMxGet) TestGet() {
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
 
-	data := &testMxGet{
+	data := &dataMxGet{
 		Field: "mxget",
 		Value: utils.RandString(testdata.RandStringLength, testdata.RandStringLetter),
 	}
-	set := &Set[testMxGet]{Meta: data, Redis: false, Key: data.Field, Data: data}
+	set := &Set[dataMxGet]{Meta: &this.meta, Key: data.Field, Data: data}
 	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), set.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), set.Complete())
-	assert.True(this.T(), testdata.RedisCompare[testMxGet](this.major.Client(), data.MajorKey(data.Field), data, data.ignore()))
-	assert.True(this.T(), testdata.MongoCompare[testMxGet](this.minor.Database(), data.MinorTable(), data.MinorField(), data.MinorKey(data.Field), data, data.ignore()))
+	assert.True(this.T(), testdata.RedisCompare[dataMxGet](this.major.Client(), this.meta.MajorKey(data.Field), data, data.ignore()))
+	assert.True(this.T(), testdata.MongoCompare[dataMxGet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data, data.ignore()))
 
-	get := &Get[testMxGet]{Meta: data, Key: data.Field}
+	get := &Get[dataMxGet]{Meta: &this.meta, Key: data.Field}
 	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), get.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), get.Complete())
 	assert.True(this.T(), cmp.Equal(data, get.Data, data.ignore()))
 
-	data = &testMxGet{
-		Field: "mxget-meta-nil",
-	}
-	get = &Get[testMxGet]{Meta: nil, Key: data.Field}
+	get = &Get[dataMxGet]{Meta: nil, Key: data.Field}
 	assert.NotNil(this.T(), get.Prepare())
 
-	data = &testMxGet{
-		Field: "mxget-key-empty",
-	}
-	get = &Get[testMxGet]{Meta: data, Key: ""}
+	get = &Get[dataMxGet]{Meta: &this.meta, Key: ""}
 	assert.NotNil(this.T(), get.Prepare())
 }
 
@@ -83,90 +78,71 @@ func (this *SuiteMxGet) TestSet() {
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
 
-	data := &testMxGet{
-		Field: "mxset-redis",
+	data := &dataMxGet{
+		Field: "mxget_redis",
 		Value: utils.RandString(testdata.RandStringLength, testdata.RandStringLetter),
 	}
-	set := &Set[testMxGet]{Meta: data, Redis: true, Key: data.Field, Data: data}
+	set := &Set[dataMxGet]{Meta: &this.meta, Redis: true, Key: data.Field, Data: data}
 	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), set.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), set.Complete())
-	assert.True(this.T(), testdata.RedisCompare[testMxGet](this.major.Client(), data.MajorKey(data.Field), data, data.ignore()))
-	assert.False(this.T(), testdata.MongoCompare[testMxGet](this.minor.Database(), data.MinorTable(), data.MinorField(), data.MinorKey(data.Field), data, data.ignore()))
+	assert.True(this.T(), testdata.RedisCompare[dataMxGet](this.major.Client(), this.meta.MajorKey(data.Field), data, data.ignore()))
+	assert.False(this.T(), testdata.MongoCompare[dataMxGet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data, data.ignore()))
 
-	data = &testMxGet{
-		Field: "mxset-all",
+	data = &dataMxGet{
+		Field: "mxget_redis+mongo",
 		Value: utils.RandString(testdata.RandStringLength, testdata.RandStringLetter),
 	}
-	set = &Set[testMxGet]{Meta: data, Redis: false, Key: data.Field, Data: data}
+	set = &Set[dataMxGet]{Meta: &this.meta, Redis: false, Key: data.Field, Data: data}
 	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), set.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), set.Complete())
-	assert.True(this.T(), testdata.RedisCompare[testMxGet](this.major.Client(), data.MajorKey(data.Field), data, data.ignore()))
-	assert.True(this.T(), testdata.MongoCompare[testMxGet](this.minor.Database(), data.MinorTable(), data.MinorField(), data.MinorKey(data.Field), data, data.ignore()))
+	assert.True(this.T(), testdata.RedisCompare[dataMxGet](this.major.Client(), this.meta.MajorKey(data.Field), data, data.ignore()))
+	assert.True(this.T(), testdata.MongoCompare[dataMxGet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data, data.ignore()))
 
-	data = &testMxGet{
-		Field:  "mxset-no-save",
-		noSave: true,
-	}
-	set = &Set[testMxGet]{Meta: data, Redis: false, Key: data.Field, Data: data}
+	data.noSave = true
+	set = &Set[dataMxGet]{Meta: &this.meta, Key: data.Field, Data: data}
 	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), set.Prepare())
 	assert.Nil(this.T(), set.Complete())
 
-	data = &testMxGet{
-		Field: "mxset-meta-nil",
-	}
-	set = &Set[testMxGet]{Meta: nil, Redis: false, Key: data.Field, Data: data}
+	data.noSave = false
+	set = &Set[dataMxGet]{Meta: nil, Key: data.Field, Data: data}
 	assert.NotNil(this.T(), set.Prepare())
 
-	data = &testMxGet{
-		Field:      "mxset-table-empty",
-		tableEmpty: true,
-	}
-	set = &Set[testMxGet]{Meta: data, Redis: false, Key: data.Field, Data: data}
+	this.meta.tableEmpty = true
+	set = &Set[dataMxGet]{Meta: &this.meta, Key: data.Field, Data: data}
 	assert.NotNil(this.T(), set.Prepare())
 
-	data = &testMxGet{
-		Field:      "mxset-field-empty",
-		fieldEmpty: true,
-	}
-	set = &Set[testMxGet]{Meta: data, Redis: false, Key: data.Field, Data: data}
+	this.meta.tableEmpty = false
+	this.meta.fieldEmpty = true
+	set = &Set[dataMxGet]{Meta: &this.meta, Key: data.Field, Data: data}
 	assert.NotNil(this.T(), set.Prepare())
 
-	data = &testMxGet{
-		Field: "mxset-key-empty",
-	}
-	set = &Set[testMxGet]{Meta: data, Redis: false, Key: "", Data: data}
+	this.meta.fieldEmpty = false
+	set = &Set[dataMxGet]{Meta: &this.meta, Key: "", Data: data}
 	assert.NotNil(this.T(), set.Prepare())
 
-	data = &testMxGet{
-		Field: "mxset-data-nil",
-	}
-	set = &Set[testMxGet]{Meta: data, Redis: false, Key: data.Field, Data: nil}
+	set = &Set[dataMxGet]{Meta: &this.meta, Key: data.Field, Data: nil}
 	assert.NotNil(this.T(), set.Prepare())
 }
 
-type testMxGet struct {
-	Field string `bson:"mxget_field"`
-	Value string `bson:"value"`
-
+type metaMxGet struct {
 	tableEmpty bool
 	fieldEmpty bool
-	noSave     bool
 }
 
-func (this *testMxGet) MajorKey(key any) string {
+func (this *metaMxGet) MajorKey(key any) string {
 	return fmt.Sprintf("mxget:%v", key)
 }
 
-func (this *testMxGet) MinorKey(key any) string {
+func (this *metaMxGet) MinorKey(key any) string {
 	return fmt.Sprintf("%v", key)
 }
 
-func (this *testMxGet) MinorTable() string {
+func (this *metaMxGet) MinorTable() string {
 	if this.tableEmpty == false {
 		return "mxget_table"
 	} // if
@@ -174,7 +150,7 @@ func (this *testMxGet) MinorTable() string {
 	return ""
 }
 
-func (this *testMxGet) MinorField() string {
+func (this *metaMxGet) MinorField() string {
 	if this.fieldEmpty == false {
 		return "mxget_field"
 	} // if
@@ -182,10 +158,17 @@ func (this *testMxGet) MinorField() string {
 	return ""
 }
 
-func (this *testMxGet) Save() bool {
+type dataMxGet struct {
+	Field string `bson:"mxget_field"`
+	Value string `bson:"value"`
+
+	noSave bool
+}
+
+func (this *dataMxGet) Save() bool {
 	return this.noSave == false
 }
 
-func (this *testMxGet) ignore() cmp.Option {
-	return cmpopts.IgnoreFields(testMxGet{}, "tableEmpty", "fieldEmpty", "noSave")
+func (this *dataMxGet) ignore() cmp.Option {
+	return cmpopts.IgnoreFields(dataMxGet{}, "noSave")
 }

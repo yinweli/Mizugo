@@ -25,16 +25,16 @@ type SuiteMxIndex struct {
 
 func (this *SuiteMxIndex) SetupSuite() {
 	this.Env = testdata.EnvSetup("test-redmos-mxindex")
-	this.major, _ = newMajor(ctxs.Get().Ctx(), testdata.RedisURI, true)
-	this.minor, _ = newMinor(ctxs.Get().Ctx(), testdata.MongoURI, this.meta.MinorTable()) // 這裡偷懶把表格名稱當資料庫名稱來用
+	this.major, _ = newMajor(testdata.RedisURI)
+	this.minor, _ = newMinor(testdata.MongoURI, this.meta.MinorTable()) // 這裡偷懶把表格名稱當資料庫名稱來用
 }
 
 func (this *SuiteMxIndex) TearDownSuite() {
 	testdata.EnvRestore(this.Env)
-	testdata.RedisClear(this.major.Client(), this.major.UsedKey())
-	testdata.MongoClear(this.minor.Database())
+	this.major.DropDB()
 	this.major.stop()
-	this.minor.stop(ctxs.Get().Ctx())
+	this.minor.DropDB()
+	this.minor.stop()
 }
 
 func (this *SuiteMxIndex) TearDownTest() {
@@ -44,30 +44,26 @@ func (this *SuiteMxIndex) TearDownTest() {
 func (this *SuiteMxIndex) TestIndex() {
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
+
 	index := &Index{Meta: &this.meta, Order: 1}
 	index.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
-
 	assert.Nil(this.T(), index.Prepare())
 	assert.Nil(this.T(), index.Complete())
 
-	index.Meta = nil
-	index.Order = 1
+	index = &Index{Meta: nil, Order: 1}
 	assert.NotNil(this.T(), index.Prepare())
 
-	index.Meta = &this.meta
-	index.Order = 0
+	index = &Index{Meta: &this.meta, Order: 0}
 	assert.NotNil(this.T(), index.Prepare())
 
-	index.Meta = &this.meta
-	index.Order = 1
 	this.meta.tableEmpty = false
 	this.meta.fieldEmpty = true
+	index = &Index{Meta: &this.meta, Order: 1}
 	assert.NotNil(this.T(), index.Prepare())
 
-	index.Meta = &this.meta
-	index.Order = 1
 	this.meta.tableEmpty = true
 	this.meta.fieldEmpty = false
+	index = &Index{Meta: &this.meta, Order: 1}
 	assert.NotNil(this.T(), index.Prepare())
 }
 

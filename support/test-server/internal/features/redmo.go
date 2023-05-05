@@ -23,7 +23,6 @@ type Redmo struct {
 // RedmoConfig 配置資料
 type RedmoConfig struct {
 	MajorURI    redmos.RedisURI `yaml:"majorURI"`    // 主要資料庫連接字串
-	MajorDebug  bool            `yaml:"majorDebug"`  // 主要資料庫除錯旗標
 	MinorURI    redmos.MongoURI `yaml:"minorURI"`    // 次要資料庫連接字串
 	MinorDBName string          `yaml:"minorDBName"` // 次要資料庫資料庫名稱
 }
@@ -34,7 +33,7 @@ func (this *Redmo) Initialize() (err error) {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	if DBMajor, err = mizugos.Redmomgr().AddMajor("dbmajor", this.config.MajorURI, this.config.MajorDebug); err != nil {
+	if DBMajor, err = mizugos.Redmomgr().AddMajor("dbmajor", this.config.MajorURI); err != nil {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
