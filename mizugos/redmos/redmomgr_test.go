@@ -42,12 +42,12 @@ func (this *SuiteRedmomgr) TestRedmomgr() {
 	mixedName := "mixedName"
 	unknownName := "unknown"
 
-	major, err := target.AddMajor(majorName, testdata.RedisURI, false)
+	major, err := target.AddMajor(majorName, testdata.RedisURI)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), major)
-	_, err = target.AddMajor(majorName, testdata.RedisURI, false)
+	_, err = target.AddMajor(majorName, testdata.RedisURI)
 	assert.NotNil(this.T(), err)
-	_, err = target.AddMajor(unknownName, testdata.RedisURIInvalid, false)
+	_, err = target.AddMajor(unknownName, testdata.RedisURIInvalid)
 	assert.NotNil(this.T(), err)
 	assert.NotNil(this.T(), target.GetMajor(majorName))
 	assert.Nil(this.T(), target.GetMajor(unknownName))

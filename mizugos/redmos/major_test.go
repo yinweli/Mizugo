@@ -33,19 +33,22 @@ func (this *SuiteMajor) TearDownTest() {
 }
 
 func (this *SuiteMajor) TestNewMajor() {
-	target, err := newMajor(ctxs.Get().Ctx(), testdata.RedisURI, true)
+	target, err := newMajor(testdata.RedisURI)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), target)
 
-	_, err = newMajor(ctxs.Get().Ctx(), "", true)
+	_, err = newMajor("")
 	assert.NotNil(this.T(), err)
 }
 
 func (this *SuiteMajor) TestMajor() {
-	target, err := newMajor(ctxs.Get().Ctx(), testdata.RedisURI, true)
-	assert.Nil(this.T(), err)
+	target, _ := newMajor(testdata.RedisURI)
 	assert.NotNil(this.T(), target.Submit())
 	assert.NotNil(this.T(), target.Client())
+	assert.Nil(this.T(), target.SwitchDB(1))
+	assert.NotNil(this.T(), target.SwitchDB(100))
+	target.DropDB()
+
 	ping, err := target.Client().Ping(ctxs.Get().Ctx()).Result()
 	assert.Nil(this.T(), err)
 	assert.Equal(this.T(), "PONG", ping)
@@ -53,27 +56,15 @@ func (this *SuiteMajor) TestMajor() {
 	target.stop()
 	assert.Nil(this.T(), target.Submit())
 	assert.Nil(this.T(), target.Client())
+	assert.NotNil(this.T(), target.SwitchDB(1))
+	target.DropDB()
 
-	_, err = newMajor(ctxs.Get().Ctx(), testdata.RedisURIInvalid, true)
+	_, err = newMajor(testdata.RedisURIInvalid)
 	assert.NotNil(this.T(), err)
 }
 
-func (this *SuiteMajor) TestUsedKey() {
-	target, err := newMajor(ctxs.Get().Ctx(), testdata.RedisURI, true)
-	assert.Nil(this.T(), err)
-	client := target.Client()
-	assert.NotNil(this.T(), client)
-
-	data := utils.RandString(testdata.RandStringLength, testdata.RandStringLetter)
-	_, _ = client.Set(ctxs.Get().Ctx(), "index1", data, testdata.RedisTimeout).Result()
-	_, _ = client.Set(ctxs.Get().Ctx(), "index2", data, testdata.RedisTimeout).Result()
-	_, _ = client.Set(ctxs.Get().Ctx(), "index3", data, testdata.RedisTimeout).Result()
-	assert.Equal(this.T(), []string{"index1", "index2", "index3"}, target.UsedKey())
-	target.stop()
-}
-
 func BenchmarkMajorSet(b *testing.B) {
-	target, _ := newMajor(ctxs.Get().Ctx(), testdata.RedisURI, false)
+	target, _ := newMajor(testdata.RedisURI)
 	submit := target.Submit()
 
 	for i := 0; i < b.N; i++ {
@@ -82,10 +73,12 @@ func BenchmarkMajorSet(b *testing.B) {
 	} // for
 
 	_, _ = submit.Exec(ctxs.Get().Ctx())
+	target.DropDB()
+	target.stop()
 }
 
 func BenchmarkMajorGet(b *testing.B) {
-	target, _ := newMajor(ctxs.Get().Ctx(), testdata.RedisURI, false)
+	target, _ := newMajor(testdata.RedisURI)
 	submit := target.Submit()
 	value := utils.RandString(testdata.RandStringLength, testdata.RandStringLetter)
 	_, _ = submit.Set(ctxs.Get().Ctx(), value, value, 0).Result()
@@ -96,4 +89,6 @@ func BenchmarkMajorGet(b *testing.B) {
 
 	_, _ = submit.Del(ctxs.Get().Ctx(), value).Result()
 	_, _ = submit.Exec(ctxs.Get().Ctx())
+	target.DropDB()
+	target.stop()
 }

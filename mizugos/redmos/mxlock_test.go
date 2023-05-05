@@ -17,26 +17,22 @@ func TestMxLock(t *testing.T) {
 type SuiteMxLock struct {
 	suite.Suite
 	testdata.Env
-	dbtable string
-	key     string
-	major   *Major
-	minor   *Minor
+	major *Major
+	minor *Minor
 }
 
 func (this *SuiteMxLock) SetupSuite() {
 	this.Env = testdata.EnvSetup("test-redmos-mxlock")
-	this.dbtable = "mxlock"
-	this.key = "mxlock-0001"
-	this.major, _ = newMajor(ctxs.Get().Ctx(), testdata.RedisURI, true)
-	this.minor, _ = newMinor(ctxs.Get().Ctx(), testdata.MongoURI, this.dbtable)
+	this.major, _ = newMajor(testdata.RedisURI)
+	this.minor, _ = newMinor(testdata.MongoURI, "mxlock")
 }
 
 func (this *SuiteMxLock) TearDownSuite() {
 	testdata.EnvRestore(this.Env)
-	testdata.RedisClear(this.major.Client(), this.major.UsedKey())
-	testdata.MongoClear(this.minor.Database())
+	this.major.DropDB()
 	this.major.stop()
-	this.minor.stop(ctxs.Get().Ctx())
+	this.minor.DropDB()
+	this.minor.stop()
 }
 
 func (this *SuiteMxLock) TearDownTest() {
@@ -45,9 +41,11 @@ func (this *SuiteMxLock) TearDownTest() {
 
 func (this *SuiteMxLock) TestLock() {
 	majorSubmit := this.major.Submit()
-	lock := &Lock{Key: this.key, time: testdata.RedisTimeout}
+
+	key := "mxlock"
+	lock := &Lock{Key: key, time: testdata.RedisTimeout}
 	lock.Initialize(ctxs.Get().Ctx(), majorSubmit, nil)
-	unlock := &Unlock{Key: this.key}
+	unlock := &Unlock{Key: key}
 	unlock.Initialize(ctxs.Get().Ctx(), majorSubmit, nil)
 
 	assert.Nil(this.T(), lock.Prepare())

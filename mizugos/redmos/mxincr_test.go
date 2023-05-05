@@ -19,24 +19,22 @@ type SuiteMxIncr struct {
 	suite.Suite
 	testdata.Env
 	meta  metaMxIncr
-	key   string
 	major *Major
 	minor *Minor
 }
 
 func (this *SuiteMxIncr) SetupSuite() {
 	this.Env = testdata.EnvSetup("test-redmos-mxincr")
-	this.key = "mxincr-0001"
-	this.major, _ = newMajor(ctxs.Get().Ctx(), testdata.RedisURI, true)
-	this.minor, _ = newMinor(ctxs.Get().Ctx(), testdata.MongoURI, this.meta.MinorTable()) // 這裡偷懶把表格名稱當資料庫名稱來用
+	this.major, _ = newMajor(testdata.RedisURI)
+	this.minor, _ = newMinor(testdata.MongoURI, this.meta.MinorTable()) // 這裡偷懶把表格名稱當資料庫名稱來用
 }
 
 func (this *SuiteMxIncr) TearDownSuite() {
 	testdata.EnvRestore(this.Env)
-	testdata.RedisClear(this.major.Client(), this.major.UsedKey())
-	testdata.MongoClear(this.minor.Database())
+	this.major.DropDB()
 	this.major.stop()
-	this.minor.stop(ctxs.Get().Ctx())
+	this.minor.DropDB()
+	this.minor.stop()
 }
 
 func (this *SuiteMxIncr) TearDownTest() {
@@ -44,51 +42,41 @@ func (this *SuiteMxIncr) TearDownTest() {
 }
 
 func (this *SuiteMxIncr) TestIncr() {
-	expected := &dataMxIncr{
-		Key:   this.key,
-		Value: 2,
-	}
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
-	get := &Get[int64]{Meta: &this.meta, Key: this.key}
-	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
-	incr := &Incr[int64]{Meta: &this.meta, Key: this.key, Incr: 1}
+
+	data := &dataMxIncr{
+		Key:   "mxincr",
+		Value: 2,
+	}
+	incr := &Incr[int64]{Meta: &this.meta, Key: data.Key, Incr: 2}
 	incr.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
-
 	assert.Nil(this.T(), incr.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), incr.Complete())
-
-	assert.Nil(this.T(), incr.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
-	assert.Nil(this.T(), incr.Complete())
-
+	get := &Get[int64]{Meta: &this.meta, Key: data.Key}
+	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), get.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), get.Complete())
 	assert.NotNil(this.T(), get.Data)
-	assert.Equal(this.T(), expected.Value, *get.Data)
+	assert.Equal(this.T(), data.Value, *get.Data)
+	assert.True(this.T(), testdata.MongoCompare[dataMxIncr](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Key), data))
 
-	assert.True(this.T(), testdata.MongoCompare[dataMxIncr](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(this.key), expected))
-
-	incr.Meta = nil
-	incr.Key = this.key
+	incr = &Incr[int64]{Meta: nil, Key: data.Key, Incr: 1}
 	assert.NotNil(this.T(), incr.Prepare())
 
-	incr.Meta = &this.meta
-	incr.Key = ""
+	incr = &Incr[int64]{Meta: &this.meta, Key: "", Incr: 1}
 	assert.NotNil(this.T(), incr.Prepare())
 
-	incr.Meta = &this.meta
-	incr.Key = this.key
 	this.meta.tableEmpty = false
 	this.meta.fieldEmpty = true
+	incr = &Incr[int64]{Meta: &this.meta, Key: data.Key, Incr: 1}
 	assert.NotNil(this.T(), incr.Prepare())
 
-	incr.Meta = &this.meta
-	incr.Key = this.key
 	this.meta.tableEmpty = true
 	this.meta.fieldEmpty = false
+	incr = &Incr[int64]{Meta: &this.meta, Key: data.Key, Incr: 1}
 	assert.NotNil(this.T(), incr.Prepare())
 }
 
