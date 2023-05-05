@@ -67,6 +67,13 @@ func (this *SuiteMxGet) TestGet() {
 	assert.Nil(this.T(), get.Complete())
 	assert.True(this.T(), cmp.Equal(data, get.Data, data.ignore()))
 
+	get = &Get[dataMxGet]{Meta: &this.meta, Key: testdata.Unknown}
+	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	assert.Nil(this.T(), get.Prepare())
+	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+	assert.Nil(this.T(), get.Complete())
+	assert.Nil(this.T(), get.Data)
+
 	get = &Get[dataMxGet]{Meta: nil, Key: data.Field}
 	assert.NotNil(this.T(), get.Prepare())
 

@@ -8,13 +8,6 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// RedisClear 清除redis
-func RedisClear(client redis.Cmdable, key []string) {
-	for _, itor := range key {
-		client.Del(context.Background(), itor)
-	} // for
-}
-
 // RedisCompare 在redis中比對資料是否相同
 func RedisCompare[T any](client redis.Cmdable, key string, expected *T, cmpOpt ...cmp.Option) bool {
 	result, err := client.Get(context.Background(), key).Result()

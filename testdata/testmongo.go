@@ -9,11 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// MongoClear 清除mongo, 直接刪除資料庫
-func MongoClear(table *mongo.Database) {
-	_ = table.Drop(context.Background())
-}
-
 // MongoCompare 在mongo中比對資料是否相同
 func MongoCompare[T any](database *mongo.Database, tableName, fieldName, key string, expected *T, cmpOpt ...cmp.Option) bool {
 	table := database.Collection(tableName)
