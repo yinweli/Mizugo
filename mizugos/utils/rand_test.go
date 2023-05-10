@@ -31,18 +31,27 @@ func (this *SuiteRand) TearDownTest() {
 	testdata.Leak(this.T(), true)
 }
 
-func (this *SuiteRand) TestRandString() {
-	letter := "0123456789"
-
-	length := 32
-	value := RandString(length, letter)
-	assert.NotNil(this.T(), value)
-	assert.Len(this.T(), value, length)
-	fmt.Println(value)
-
-	length = 64
-	value = RandString(length, letter)
-	assert.NotNil(this.T(), value)
-	assert.Len(this.T(), value, length)
-	fmt.Println(value)
+func (this *SuiteRand) TestRand() {
+	RandSeed(0)
+	RandSeedTime()
+	fmt.Println(RandInt())
+	value := RandIntn(-5, 5)
+	assert.True(this.T(), value >= -5 && value <= 5)
+	fmt.Println(RandInt32())
+	value32 := RandInt32n(-5, 5)
+	assert.True(this.T(), value32 >= -5 && value32 <= 5)
+	fmt.Println(RandInt64())
+	value64 := RandInt64n(-5, 5)
+	assert.True(this.T(), value64 >= -5 && value64 <= 5)
+	fmt.Println(RandReal64())
+	value64 = RandReal64n(-5, 5)
+	assert.True(this.T(), value64 >= -5 && value64 <= 5)
+	values := RandString(32, testdata.RandStringLetter)
+	assert.NotNil(this.T(), values)
+	assert.Len(this.T(), values, 32)
+	fmt.Println(values)
+	values = RandString(64, testdata.RandStringLetter)
+	assert.NotNil(this.T(), values)
+	assert.Len(this.T(), values, 64)
+	fmt.Println(values)
 }

@@ -46,7 +46,7 @@ func (this *SuiteMajor) TestMajor() {
 	assert.NotNil(this.T(), target.Submit())
 	assert.NotNil(this.T(), target.Client())
 	assert.Nil(this.T(), target.SwitchDB(1))
-	assert.NotNil(this.T(), target.SwitchDB(100))
+	assert.NotNil(this.T(), target.SwitchDB(9999))
 	target.DropDB()
 
 	ping, err := target.Client().Ping(ctxs.Get().Ctx()).Result()
