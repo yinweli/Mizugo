@@ -8,7 +8,8 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
-const DesKeySize = 8 // des密鑰長度
+const DesKeySize = 8                                                             // des密鑰長度
+const DesKeyLetter = utils.StrNumber + utils.StrAlphaLower + utils.StrAlphaUpper // des密鑰字串
 
 // DesECBEncrypt des-ecb加密, 注意key的長度必須是 DesKeySize
 func DesECBEncrypt(padding Padding, key, src []byte) (out []byte, err error) {
@@ -123,7 +124,7 @@ func DesCBCDecrypt(padding Padding, key, iv, src []byte) (out []byte, err error)
 
 // RandDesKey 產生隨機des密鑰
 func RandDesKey() []byte {
-	return []byte(utils.RandString(DesKeySize, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+	return []byte(utils.RandString(DesKeySize, DesKeyLetter))
 }
 
 // RandDesKeyString 產生隨機des密鑰字串
