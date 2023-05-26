@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [0.2.1] - 2023-05-26
+### Fixed
+- 修正收到被切分的封包造成收包錯誤
+
 ## [0.2.0] - 2023-03-08
 ### Changed
 - Json處理增加base64與des-cbc功能及開關
