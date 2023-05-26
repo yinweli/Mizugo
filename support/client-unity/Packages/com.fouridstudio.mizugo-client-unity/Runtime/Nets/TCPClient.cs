@@ -227,18 +227,19 @@ namespace Mizugo
                 {
                     // 如果想要改用ArrayPool, 需要改到IProcmgr.Encode, IProcmgr.Decode, Des加密/解密的函式以及相關的函式等, 影響很大, 所以現在先不動
 
-                    var bufferOfHeader = new byte[Define.headerSize];
-                    var bufferOfPacket = (byte[])null;
+                    var header = new byte[Define.headerSize];
+                    var packet = (byte[])null;
                     var size = (ushort)0;
+                    var read = (ushort)0;
 
                     while (true)
                     {
                         try
                         {
-                            if (stream.Read(bufferOfHeader, 0, Define.headerSize) != Define.headerSize)
+                            if (stream.Read(header, 0, Define.headerSize) != Define.headerSize)
                                 throw new RecvHeaderException();
 
-                            size = BitConverter.ToUInt16(bufferOfHeader, 0);
+                            size = BitConverter.ToUInt16(header, 0);
 
                             if (size <= 0)
                                 throw new PacketZeroException("recv");
@@ -246,15 +247,26 @@ namespace Mizugo
                             if (size > Define.packetSize)
                                 throw new PacketLimitException("recv");
 
-                            bufferOfPacket = new byte[size];
+                            packet = new byte[size];
 
-                            if (stream.Read(bufferOfPacket, 0, size) != size)
+                            while (size > read)
+                            {
+                                var readnow = stream.Read(packet, read, size - read);
+
+                                if (readnow == 0)
+                                    break;
+
+                                read += (ushort)readnow;
+                            } // while
+
+                            if (size != read)
                                 throw new RecvPacketException();
 
-                            var message = procmgr.Decode(bufferOfPacket);
+                            var message = procmgr.Decode(packet);
 
                             equeue.Enqueue(EventID.Message, message);
                             equeue.Enqueue(EventID.Recv, null);
+                            read = 0;
                         } // try
                         catch (Exception e)
                         {

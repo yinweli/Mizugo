@@ -140,7 +140,7 @@ namespace Mizugo
         /// 這項測試需要啟動測試伺服器才能執行
         /// </summary>
         [Test]
-        [TestCase("127.0.0.1", 10001, "key-@@@@", 1000)]
+        [TestCase("127.0.0.1", 9001, "key-@@@@", 1000)]
         public void Test(string host, int port, string key, int count)
         {
             var client = new TCPClient(new Eventmgr(), new JsonProc().SetBase64(true).SetDesCBC(true, key, key));
@@ -193,7 +193,7 @@ namespace Mizugo
         /// 這項測試需要啟動測試伺服器才能執行
         /// </summary>
         [Test]
-        [TestCase("127.0.0.1", 10001, "key-@@@@")]
+        [TestCase("127.0.0.1", 9001, "key-@@@@")]
         public void Test(string host, int port, string key)
         {
             var client = new TCPClient(new Eventmgr(), new JsonProc().SetBase64(true).SetDesCBC(true, key, key));
@@ -268,7 +268,7 @@ namespace Mizugo
         /// 這項測試需要啟動測試伺服器才能執行
         /// </summary>
         [Test]
-        [TestCase("127.0.0.1", 10002, "key-####")]
+        [TestCase("127.0.0.1", 9002, "key-####")]
         public void Test(string host, int port, string key)
         {
             var client = new TCPClient(new Eventmgr(), new ProtoProc().SetBase64(true).SetDesCBC(true, key, key));
