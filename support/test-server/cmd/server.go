@@ -22,7 +22,7 @@ func main() {
 	name := defines.CmdServer
 	mizugos.Start()
 
-	if err := initialize(); err != nil {
+	if err := initialize(); err != nil { // 初始化測試伺服器的各項組件
 		fmt.Println(fmt.Errorf("%v start: %w", name, err))
 		mizugos.Stop()
 		return
@@ -34,7 +34,7 @@ func main() {
 		// do nothing...
 	} // for
 
-	finalize()
+	finalize() // 結束測試伺服器的各項組件
 	mizugos.Stop()
 	fmt.Printf("%v shutdown\n", name)
 }
@@ -101,9 +101,9 @@ func finalize() {
 var server struct {
 	logger  *features.Logger  // 日誌資料
 	pool    *features.Pool    // 執行緒池資料
-	metrics *features.Metrics // 統計資料
+	metrics *features.Metrics // 度量資料
 	redmo   *features.Redmo   // 資料庫資料
-	auth    *entrys.Auth      // Auth入口
-	json    *entrys.Json      // Json入口
-	proto   *entrys.Proto     // Proto入口
+	auth    *entrys.Auth      // Auth入口, 當客戶端連接或是傳送訊息到Auth入口指定的埠號時, 由此組件負責處理
+	json    *entrys.Json      // Json入口, 當客戶端連接或是傳送訊息到Json入口指定的埠號時, 由此組件負責處理
+	proto   *entrys.Proto     // Proto入口, 當客戶端連接或是傳送訊息到Proto入口指定的埠號時, 由此組件負責處理
 }
