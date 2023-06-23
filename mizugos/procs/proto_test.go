@@ -19,18 +19,10 @@ func TestProto(t *testing.T) {
 type SuiteProto struct {
 	suite.Suite
 	testdata.Env
-	key       string
-	messageID MessageID
-	message   *msgs.ProtoTest
 }
 
 func (this *SuiteProto) SetupSuite() {
 	this.Env = testdata.EnvSetup("test-procs-proto")
-	this.key = cryptos.RandDesKeyString()
-	this.messageID = MessageID(1)
-	this.message = &msgs.ProtoTest{
-		Data: "proto test",
-	}
 }
 
 func (this *SuiteProto) TearDownSuite() {
@@ -41,13 +33,14 @@ func (this *SuiteProto) TearDownTest() {
 	testdata.Leak(this.T(), true)
 }
 
-func (this *SuiteProto) TestNewProto() {
-	assert.NotNil(this.T(), NewProto())
-}
-
 func (this *SuiteProto) TestEncode() {
+	messageID := MessageID(1)
+	message := &msgs.ProtoTest{
+		Data: "proto test",
+	}
 	target := NewProto()
-	input, _ := ProtoMarshal(this.messageID, this.message)
+	assert.NotNil(this.T(), target)
+	input, _ := ProtoMarshal(messageID, message)
 
 	encode, err := target.Encode(input)
 	assert.Nil(this.T(), err)
@@ -72,8 +65,12 @@ func (this *SuiteProto) TestEncode() {
 }
 
 func (this *SuiteProto) TestEncodeBase64() {
+	messageID := MessageID(1)
+	message := &msgs.ProtoTest{
+		Data: "proto test",
+	}
 	target := NewProto().Base64(true)
-	input, _ := ProtoMarshal(this.messageID, this.message)
+	input, _ := ProtoMarshal(messageID, message)
 
 	encode, err := target.Encode(input)
 	assert.Nil(this.T(), err)
@@ -98,8 +95,13 @@ func (this *SuiteProto) TestEncodeBase64() {
 }
 
 func (this *SuiteProto) TestEncodeDesCBC() {
-	target := NewProto().DesCBC(true, this.key, this.key) // 這裡偷懶把key跟iv都設為key
-	input, _ := ProtoMarshal(this.messageID, this.message)
+	key := cryptos.RandDesKeyString()
+	messageID := MessageID(1)
+	message := &msgs.ProtoTest{
+		Data: "proto test",
+	}
+	target := NewProto().DesCBC(true, key, key) // 這裡偷懶把key跟iv都設為key
+	input, _ := ProtoMarshal(messageID, message)
 
 	encode, err := target.Encode(input)
 	assert.Nil(this.T(), err)
@@ -124,8 +126,13 @@ func (this *SuiteProto) TestEncodeDesCBC() {
 }
 
 func (this *SuiteProto) TestEncodeAll() {
-	target := NewProto().Base64(true).DesCBC(true, this.key, this.key) // 這裡偷懶把key跟iv都設為key
-	input, _ := ProtoMarshal(this.messageID, this.message)
+	key := cryptos.RandDesKeyString()
+	messageID := MessageID(1)
+	message := &msgs.ProtoTest{
+		Data: "proto test",
+	}
+	target := NewProto().Base64(true).DesCBC(true, key, key) // 這裡偷懶把key跟iv都設為key
+	input, _ := ProtoMarshal(messageID, message)
 
 	encode, err := target.Encode(input)
 	assert.Nil(this.T(), err)
@@ -150,34 +157,42 @@ func (this *SuiteProto) TestEncodeAll() {
 }
 
 func (this *SuiteProto) TestProcess() {
+	messageID := MessageID(1)
+	message := &msgs.ProtoTest{
+		Data: "proto test",
+	}
 	target := NewProto()
-	input, _ := ProtoMarshal(this.messageID, this.message)
+	input, _ := ProtoMarshal(messageID, message)
 
 	valid := false
-	target.Add(this.messageID, func(message any) {
+	target.Add(messageID, func(message any) {
 		valid = proto.Equal(input, message.(*msgs.ProtoMsg))
 	})
 	assert.Nil(this.T(), target.Process(input))
 	assert.True(this.T(), valid)
 
-	input, _ = ProtoMarshal(0, this.message)
+	input, _ = ProtoMarshal(0, message)
 	assert.NotNil(this.T(), target.Process(input))
 
 	assert.NotNil(this.T(), target.Process(nil))
 }
 
 func (this *SuiteProto) TestMarshal() {
-	output1, err := ProtoMarshal(this.messageID, this.message)
+	messageID := MessageID(1)
+	message := &msgs.ProtoTest{
+		Data: "proto test",
+	}
+	output1, err := ProtoMarshal(messageID, message)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), output1)
 
-	_, err = ProtoMarshal(this.messageID, nil)
+	_, err = ProtoMarshal(messageID, nil)
 	assert.NotNil(this.T(), err)
 
 	messageID, output2, err := ProtoUnmarshal[msgs.ProtoTest](output1)
 	assert.Nil(this.T(), err)
-	assert.Equal(this.T(), this.messageID, messageID)
-	assert.True(this.T(), proto.Equal(this.message, output2))
+	assert.Equal(this.T(), messageID, messageID)
+	assert.True(this.T(), proto.Equal(message, output2))
 
 	_, _, err = ProtoUnmarshal[msgs.ProtoTest](nil)
 	assert.NotNil(this.T(), err)

@@ -39,7 +39,7 @@ func (this *SuiteMixed) TearDownTest() {
 	testdata.Leak(this.T(), true)
 }
 
-func (this *SuiteMixed) TestNewMixed() {
+func (this *SuiteMixed) TestMixed() {
 	assert.NotNil(this.T(), newMixed(this.major, this.minor))
 }
 

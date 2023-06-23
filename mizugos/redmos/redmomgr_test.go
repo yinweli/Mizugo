@@ -30,17 +30,14 @@ func (this *SuiteRedmomgr) TearDownTest() {
 	testdata.Leak(this.T(), true)
 }
 
-func (this *SuiteRedmomgr) TestNewRedmomgr() {
-	assert.NotNil(this.T(), NewRedmomgr())
-}
-
 func (this *SuiteRedmomgr) TestRedmomgr() {
-	target := NewRedmomgr()
 	dbName := "dbName"
 	majorName := "majorName"
 	minorName := "minorName"
 	mixedName := "mixedName"
 	unknownName := "unknown"
+	target := NewRedmomgr()
+	assert.NotNil(this.T(), target)
 
 	major, err := target.AddMajor(majorName, testdata.RedisURI)
 	assert.Nil(this.T(), err)

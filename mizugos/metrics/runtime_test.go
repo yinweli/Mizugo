@@ -19,12 +19,10 @@ func TestRuntime(t *testing.T) {
 type SuiteRuntime struct {
 	suite.Suite
 	testdata.Env
-	port int
 }
 
 func (this *SuiteRuntime) SetupSuite() {
 	this.Env = testdata.EnvSetup("test-metrics-runtime")
-	this.port = 9101
 }
 
 func (this *SuiteRuntime) TearDownSuite() {
@@ -36,8 +34,9 @@ func (this *SuiteRuntime) TearDownTest() {
 }
 
 func (this *SuiteRuntime) TestRuntime() {
+	port := 9101
 	metricsmgr := NewMetricsmgr()
-	assert.Nil(this.T(), metricsmgr.Initialize(this.port))
+	assert.Nil(this.T(), metricsmgr.Initialize(port))
 	time.Sleep(testdata.Timeout) // 等待一下, 讓初始化有機會完成
 
 	target := metricsmgr.NewRuntime("test")

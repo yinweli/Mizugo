@@ -18,12 +18,10 @@ func TestEventmgr(t *testing.T) {
 type SuiteEventmgr struct {
 	suite.Suite
 	testdata.Env
-	capacity int
 }
 
 func (this *SuiteEventmgr) SetupSuite() {
 	this.Env = testdata.EnvSetup("test-events-eventmgr")
-	this.capacity = 100
 }
 
 func (this *SuiteEventmgr) TearDownSuite() {
@@ -34,12 +32,9 @@ func (this *SuiteEventmgr) TearDownTest() {
 	testdata.Leak(this.T(), true)
 }
 
-func (this *SuiteEventmgr) TestNewEventmgr() {
-	assert.NotNil(this.T(), NewEventmgr(this.capacity))
-}
-
-func (this *SuiteEventmgr) TestInitialize() {
-	target := NewEventmgr(this.capacity)
+func (this *SuiteEventmgr) TestEventmgr() {
+	target := NewEventmgr(100)
+	assert.NotNil(this.T(), target)
 	target.Finalize() // 初始化前執行, 這次應該不執行
 	assert.Nil(this.T(), target.Initialize())
 	assert.NotNil(this.T(), target.Initialize()) // 故意啟動兩次, 這次應該失敗
@@ -48,7 +43,7 @@ func (this *SuiteEventmgr) TestInitialize() {
 }
 
 func (this *SuiteEventmgr) TestPubOnce() {
-	target := NewEventmgr(this.capacity)
+	target := NewEventmgr(100)
 	assert.Nil(this.T(), target.Initialize())
 
 	value := "value once"
@@ -69,7 +64,7 @@ func (this *SuiteEventmgr) TestPubOnce() {
 }
 
 func (this *SuiteEventmgr) TestPubDelay() {
-	target := NewEventmgr(this.capacity)
+	target := NewEventmgr(100)
 	assert.Nil(this.T(), target.Initialize())
 
 	value := "value delay"
@@ -90,7 +85,7 @@ func (this *SuiteEventmgr) TestPubDelay() {
 }
 
 func (this *SuiteEventmgr) TestPubFixed() {
-	target := NewEventmgr(this.capacity)
+	target := NewEventmgr(100)
 	assert.Nil(this.T(), target.Initialize())
 
 	value := "value fixed"

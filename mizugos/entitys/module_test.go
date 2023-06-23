@@ -30,12 +30,9 @@ func (this *SuiteModule) TearDownTest() {
 	testdata.Leak(this.T(), true)
 }
 
-func (this *SuiteModule) TestNewModule() {
-	assert.NotNil(this.T(), NewModule(ModuleID(0)))
-}
-
 func (this *SuiteModule) TestModule() {
 	target := NewModule(ModuleID(1))
+	assert.NotNil(this.T(), target)
 	entity := NewEntity(EntityID(1))
 	target.initialize(entity)
 

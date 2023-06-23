@@ -18,16 +18,10 @@ func TestPadding(t *testing.T) {
 type SuitePadding struct {
 	suite.Suite
 	testdata.Env
-	blockSize int
-	length1   int
-	length2   int
 }
 
 func (this *SuitePadding) SetupSuite() {
 	this.Env = testdata.EnvSetup("test-cryptos-padding")
-	this.blockSize = 64
-	this.length1 = 99
-	this.length2 = 199
 }
 
 func (this *SuitePadding) TearDownSuite() {
@@ -39,8 +33,11 @@ func (this *SuitePadding) TearDownTest() {
 }
 
 func (this *SuitePadding) TestPadding() {
-	source := []byte(utils.RandString(this.length1, testdata.RandStringLetter))
-	padstr := pad(PaddingZero, source, this.blockSize)
+	blockSize := 64
+	length1 := 99
+	length2 := 199
+	source := []byte(utils.RandString(length1, testdata.RandStringLetter))
+	padstr := pad(PaddingZero, source, blockSize)
 	result := unpad(PaddingZero, padstr)
 	assert.Equal(this.T(), source, result)
 	fmt.Println(">> PaddingZero")
@@ -48,8 +45,8 @@ func (this *SuitePadding) TestPadding() {
 	fmt.Printf("padstr=%v\n", padstr)
 	fmt.Printf("result=%v\n", result)
 
-	source = []byte(utils.RandString(this.length2, testdata.RandStringLetter))
-	padstr = pad(PaddingZero, source, this.blockSize)
+	source = []byte(utils.RandString(length2, testdata.RandStringLetter))
+	padstr = pad(PaddingZero, source, blockSize)
 	result = unpad(PaddingZero, padstr)
 	assert.Equal(this.T(), source, result)
 	fmt.Println(">> PaddingZero")
@@ -57,8 +54,8 @@ func (this *SuitePadding) TestPadding() {
 	fmt.Printf("padstr=%v\n", padstr)
 	fmt.Printf("result=%v\n", result)
 
-	source = []byte(utils.RandString(this.length1, testdata.RandStringLetter))
-	padstr = pad(PaddingPKCS7, source, this.blockSize)
+	source = []byte(utils.RandString(length1, testdata.RandStringLetter))
+	padstr = pad(PaddingPKCS7, source, blockSize)
 	result = unpad(PaddingPKCS7, padstr)
 	assert.Equal(this.T(), source, result)
 	fmt.Println(">> PaddingPKCS7")
@@ -66,8 +63,8 @@ func (this *SuitePadding) TestPadding() {
 	fmt.Printf("padstr=%v\n", padstr)
 	fmt.Printf("result=%v\n", result)
 
-	source = []byte(utils.RandString(this.length2, testdata.RandStringLetter))
-	padstr = pad(PaddingPKCS7, source, this.blockSize)
+	source = []byte(utils.RandString(length2, testdata.RandStringLetter))
+	padstr = pad(PaddingPKCS7, source, blockSize)
 	result = unpad(PaddingPKCS7, padstr)
 	assert.Equal(this.T(), source, result)
 	fmt.Println(">> PaddingPKCS7")
