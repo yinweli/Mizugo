@@ -76,6 +76,24 @@ tasks:
       - git subtree split --prefix support/client-unity/Packages/com.fouridstudio.mizugo-client-unity --branch client-unity
       - git subtree split --prefix support/test-client-cs --branch client-unity-sample
 
+  # 在docker上啟動資料庫
+  db:
+    cmds:
+      - task: dbredis
+      - task: dbmongo
+
+  dbredis:
+    cmds:
+      - docker pull redis:latest
+      - docker rm -f -v mizugo-test-redis
+      - docker run --name mizugo-test-redis -p 6379:6379 -v mizugo-redis-volume:/data -d redis redis-server
+
+  dbmongo:
+    cmds:
+      - docker pull mongo:latest
+      - docker rm -f -v mizugo-test-mongo
+      - docker run --name mizugo-test-mongo -p 27017:27017 -v mizugo-mongo-volume:/data/db -d mongo:latest
+
   # 安裝工具
   install:
     ignore_error: true

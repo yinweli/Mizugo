@@ -17,14 +17,10 @@ func TestNetmgr(t *testing.T) {
 type SuiteNetmgr struct {
 	suite.Suite
 	testdata.Env
-	hostGoogle host
-	hostLocal  host
 }
 
 func (this *SuiteNetmgr) SetupSuite() {
 	this.Env = testdata.EnvSetup("test-nets-netmgr")
-	this.hostGoogle = host{ip: "google.com", port: "80"}
-	this.hostLocal = host{port: "9000"}
 }
 
 func (this *SuiteNetmgr) TearDownSuite() {
@@ -35,14 +31,12 @@ func (this *SuiteNetmgr) TearDownTest() {
 	testdata.Leak(this.T(), true)
 }
 
-func (this *SuiteNetmgr) TestNewNetmgr() {
-	assert.NotNil(this.T(), NewNetmgr())
-}
-
 func (this *SuiteNetmgr) TestAddConnectTCP() {
+	addr := host{ip: "google.com", port: "80"}
 	test := newTester(true, true, true)
 	target := NewNetmgr()
-	connectID := target.AddConnectTCP(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout, test.bind, test.unbind, test.wrong)
+	assert.NotNil(this.T(), target)
+	connectID := target.AddConnectTCP(addr.ip, addr.port, testdata.Timeout, test.bind, test.unbind, test.wrong)
 
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), test.valid())
@@ -55,9 +49,11 @@ func (this *SuiteNetmgr) TestAddConnectTCP() {
 }
 
 func (this *SuiteNetmgr) TestAddListenTCP() {
+	addr := host{port: "9000"}
 	test := newTester(true, true, true)
 	target := NewNetmgr()
-	listenID := target.AddListenTCP(this.hostLocal.ip, this.hostLocal.port, test.bind, test.unbind, test.wrong)
+	assert.NotNil(this.T(), target)
+	listenID := target.AddListenTCP(addr.ip, addr.port, test.bind, test.unbind, test.wrong)
 
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), test.valid())
@@ -70,9 +66,11 @@ func (this *SuiteNetmgr) TestAddListenTCP() {
 }
 
 func (this *SuiteNetmgr) TestStop() {
+	addr := host{ip: "google.com", port: "80"}
 	test := newTester(true, true, true)
 	target := NewNetmgr()
-	target.AddConnectTCP(this.hostGoogle.ip, this.hostGoogle.port, testdata.Timeout, test.bind, test.unbind, test.wrong)
+	assert.NotNil(this.T(), target)
+	target.AddConnectTCP(addr.ip, addr.port, testdata.Timeout, test.bind, test.unbind, test.wrong)
 
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), test.validSession())
@@ -85,13 +83,13 @@ func (this *SuiteNetmgr) TestStop() {
 }
 
 func (this *SuiteNetmgr) TestStatus() {
-	target := NewNetmgr()
-
+	addr := host{port: "9000"}
 	testl := newTester(true, true, true)
-	target.AddListenTCP(this.hostLocal.ip, this.hostLocal.port, testl.bind, testl.unbind, testl.wrong)
-
 	testc := newTester(true, true, true)
-	target.AddConnectTCP(this.hostLocal.ip, this.hostLocal.port, testdata.Timeout, testc.bind, testc.unbind, testc.wrong)
+	target := NewNetmgr()
+	assert.NotNil(this.T(), target)
+	target.AddListenTCP(addr.ip, addr.port, testl.bind, testl.unbind, testl.wrong)
+	target.AddConnectTCP(addr.ip, addr.port, testdata.Timeout, testc.bind, testc.unbind, testc.wrong)
 
 	time.Sleep(testdata.Timeout)
 	assert.True(this.T(), testl.valid())

@@ -2,7 +2,6 @@ package configs
 
 import (
 	"bytes"
-	"io"
 	"testing"
 	"time"
 
@@ -19,32 +18,10 @@ func TestConfigmgr(t *testing.T) {
 type SuiteConfigmgr struct {
 	suite.Suite
 	testdata.Env
-	name1   string
-	name2   string
-	value1  string
-	value2  string
-	reader1 io.Reader
-	reader2 io.Reader
-	object  configTester
-	ext     string
-	valid   string
 }
 
 func (this *SuiteConfigmgr) SetupSuite() {
 	this.Env = testdata.EnvSetup("test-configs-configmgr", "configmgr")
-	this.name1 = "configmgr"
-	this.name2 = "!?"
-	this.value1 = "valid: valid"
-	this.value2 = "valid=valid"
-	this.reader1 = bytes.NewBuffer([]byte(this.value1))
-	this.reader2 = bytes.NewBuffer([]byte(this.value2))
-	this.object = configTester{
-		Value1: 1,
-		Value2: "2",
-		Value3: []string{"a", "b", "c"},
-	}
-	this.ext = "yaml"
-	this.valid = "valid"
 }
 
 func (this *SuiteConfigmgr) TearDownSuite() {
@@ -55,42 +32,46 @@ func (this *SuiteConfigmgr) TearDownTest() {
 	testdata.Leak(this.T(), true)
 }
 
-func (this *SuiteConfigmgr) TestNewConfigmgr() {
-	assert.NotNil(this.T(), NewConfigmgr())
-}
-
-func (this *SuiteConfigmgr) TestReadFile() {
+func (this *SuiteConfigmgr) TestConfigmgr() {
+	ext := "yaml"
+	name1 := "configmgr"
+	name2 := "!?"
+	value1 := "valid: valid"
+	value2 := "valid=valid"
+	reader1 := bytes.NewBuffer([]byte(value1))
+	reader2 := bytes.NewBuffer([]byte(value2))
+	expected := configTester{
+		Value1: 1,
+		Value2: "2",
+		Value3: []string{"a", "b", "c"},
+	}
+	valid := "valid"
 	target := NewConfigmgr()
+	assert.NotNil(this.T(), target)
 	target.AddPath(".")
-	assert.Nil(this.T(), target.ReadFile(this.name1, this.ext))
-	assert.Nil(this.T(), target.ReadFile(this.name1, this.ext))
-	assert.NotNil(this.T(), target.ReadFile(this.name2, this.ext))
-	assert.Equal(this.T(), this.valid, target.Get(this.valid))
+	assert.Nil(this.T(), target.ReadFile(name1, ext))
+	assert.Nil(this.T(), target.ReadFile(name1, ext))
+	assert.NotNil(this.T(), target.ReadFile(name2, ext))
+	assert.Equal(this.T(), valid, target.Get(valid))
 	target.Reset()
-}
 
-func (this *SuiteConfigmgr) TestReadString() {
-	target := NewConfigmgr()
-	assert.Nil(this.T(), target.ReadString(this.value1, this.ext))
-	assert.Nil(this.T(), target.ReadString(this.value1, this.ext))
-	assert.NotNil(this.T(), target.ReadString(this.value2, this.ext))
-	assert.Equal(this.T(), this.valid, target.Get(this.valid))
+	target = NewConfigmgr()
+	assert.Nil(this.T(), target.ReadString(value1, ext))
+	assert.Nil(this.T(), target.ReadString(value1, ext))
+	assert.NotNil(this.T(), target.ReadString(value2, ext))
+	assert.Equal(this.T(), valid, target.Get(valid))
 	target.Reset()
-}
 
-func (this *SuiteConfigmgr) TestReadBuffer() {
-	target := NewConfigmgr()
-	assert.Nil(this.T(), target.ReadBuffer(this.reader1, this.ext))
-	assert.Nil(this.T(), target.ReadBuffer(this.reader1, this.ext))
-	assert.NotNil(this.T(), target.ReadBuffer(this.reader2, this.ext))
-	assert.Equal(this.T(), this.valid, target.Get(this.valid))
+	target = NewConfigmgr()
+	assert.Nil(this.T(), target.ReadBuffer(reader1, ext))
+	assert.Nil(this.T(), target.ReadBuffer(reader1, ext))
+	assert.NotNil(this.T(), target.ReadBuffer(reader2, ext))
+	assert.Equal(this.T(), valid, target.Get(valid))
 	target.Reset()
-}
 
-func (this *SuiteConfigmgr) TestGet() {
-	target := NewConfigmgr()
+	target = NewConfigmgr()
 	target.AddPath(".")
-	assert.Nil(this.T(), target.ReadFile(this.name1, this.ext))
+	assert.Nil(this.T(), target.ReadFile(name1, ext))
 	assert.Equal(this.T(), true, target.GetBool("valueb"))
 	assert.Equal(this.T(), 1, target.GetInt("valuei"))
 	assert.Equal(this.T(), int32(100000000), target.GetInt32("valuei32"))
@@ -106,17 +87,15 @@ func (this *SuiteConfigmgr) TestGet() {
 	assert.Equal(this.T(), time.Second*360, target.GetDuration("valued"))
 	assert.Equal(this.T(), uint(1024), target.GetSizeInBytes("valuec"))
 	target.Reset()
-}
 
-func (this *SuiteConfigmgr) TestUnmarshal() {
-	target := NewConfigmgr()
-	object := configTester{}
+	target = NewConfigmgr()
+	actual := configTester{}
 	target.AddPath(".")
-	assert.Nil(this.T(), target.ReadFile(this.name1, this.ext))
-	assert.Nil(this.T(), target.Unmarshal("object", &object))
-	assert.NotNil(this.T(), target.Unmarshal("!?", &object))
+	assert.Nil(this.T(), target.ReadFile(name1, ext))
+	assert.Nil(this.T(), target.Unmarshal("object", &actual))
+	assert.NotNil(this.T(), target.Unmarshal("!?", &actual))
 	assert.NotNil(this.T(), target.Unmarshal("object", nil))
-	assert.Equal(this.T(), this.object, object)
+	assert.Equal(this.T(), expected, actual)
 	target.Reset()
 }
 

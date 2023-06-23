@@ -33,12 +33,9 @@ func (this *SuitePoolmgr) TearDownTest() {
 	testdata.Leak(this.T(), false) // 由於ants中有許多內部執行緒, 所以把這裡的執行緒洩漏檢查關閉
 }
 
-func (this *SuitePoolmgr) TestNewPoolmgr() {
-	assert.NotNil(this.T(), NewPoolmgr())
-}
-
-func (this *SuitePoolmgr) TestInitialize() {
+func (this *SuitePoolmgr) TestPoolmgr() {
 	target := NewPoolmgr()
+	assert.NotNil(this.T(), target)
 	config := &Config{
 		Logger: &loggerTester{},
 	}

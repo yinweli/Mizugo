@@ -18,18 +18,10 @@ func TestJson(t *testing.T) {
 type SuiteJson struct {
 	suite.Suite
 	testdata.Env
-	key       string
-	messageID MessageID
-	message   *msgs.JsonTest
 }
 
 func (this *SuiteJson) SetupSuite() {
 	this.Env = testdata.EnvSetup("test-procs-json")
-	this.key = cryptos.RandDesKeyString()
-	this.messageID = MessageID(1)
-	this.message = &msgs.JsonTest{
-		Data: "json test",
-	}
 }
 
 func (this *SuiteJson) TearDownSuite() {
@@ -40,13 +32,14 @@ func (this *SuiteJson) TearDownTest() {
 	testdata.Leak(this.T(), true)
 }
 
-func (this *SuiteJson) TestNewJson() {
-	assert.NotNil(this.T(), NewJson())
-}
-
 func (this *SuiteJson) TestEncode() {
+	messageID := MessageID(1)
+	message := &msgs.JsonTest{
+		Data: "json test",
+	}
 	target := NewJson()
-	input, _ := JsonMarshal(this.messageID, this.message)
+	assert.NotNil(this.T(), target)
+	input, _ := JsonMarshal(messageID, message)
 
 	encode, err := target.Encode(input)
 	assert.Nil(this.T(), err)
@@ -71,8 +64,12 @@ func (this *SuiteJson) TestEncode() {
 }
 
 func (this *SuiteJson) TestEncodeBase64() {
+	messageID := MessageID(1)
+	message := &msgs.JsonTest{
+		Data: "json test",
+	}
 	target := NewJson().Base64(true)
-	input, _ := JsonMarshal(this.messageID, this.message)
+	input, _ := JsonMarshal(messageID, message)
 
 	encode, err := target.Encode(input)
 	assert.Nil(this.T(), err)
@@ -97,8 +94,13 @@ func (this *SuiteJson) TestEncodeBase64() {
 }
 
 func (this *SuiteJson) TestEncodeDesCBC() {
-	target := NewJson().DesCBC(true, this.key, this.key) // 這裡偷懶把key跟iv都設為key
-	input, _ := JsonMarshal(this.messageID, this.message)
+	key := cryptos.RandDesKeyString()
+	messageID := MessageID(1)
+	message := &msgs.JsonTest{
+		Data: "json test",
+	}
+	target := NewJson().DesCBC(true, key, key) // 這裡偷懶把key跟iv都設為key
+	input, _ := JsonMarshal(messageID, message)
 
 	encode, err := target.Encode(input)
 	assert.Nil(this.T(), err)
@@ -123,8 +125,13 @@ func (this *SuiteJson) TestEncodeDesCBC() {
 }
 
 func (this *SuiteJson) TestEncodeAll() {
-	target := NewJson().Base64(true).DesCBC(true, this.key, this.key) // 這裡偷懶把key跟iv都設為key
-	input, _ := JsonMarshal(this.messageID, this.message)
+	key := cryptos.RandDesKeyString()
+	messageID := MessageID(1)
+	message := &msgs.JsonTest{
+		Data: "json test",
+	}
+	target := NewJson().Base64(true).DesCBC(true, key, key) // 這裡偷懶把key跟iv都設為key
+	input, _ := JsonMarshal(messageID, message)
 
 	encode, err := target.Encode(input)
 	assert.Nil(this.T(), err)
@@ -149,34 +156,42 @@ func (this *SuiteJson) TestEncodeAll() {
 }
 
 func (this *SuiteJson) TestProcess() {
+	messageID := MessageID(1)
+	message := &msgs.JsonTest{
+		Data: "json test",
+	}
 	target := NewJson()
-	input, _ := JsonMarshal(this.messageID, this.message)
+	input, _ := JsonMarshal(messageID, message)
 
 	valid := false
-	target.Add(this.messageID, func(message any) {
+	target.Add(messageID, func(message any) {
 		valid = assert.Equal(this.T(), input, message)
 	})
 	assert.Nil(this.T(), target.Process(input))
 	assert.True(this.T(), valid)
 
-	input, _ = JsonMarshal(0, this.message)
+	input, _ = JsonMarshal(0, message)
 	assert.NotNil(this.T(), target.Process(input))
 
 	assert.NotNil(this.T(), target.Process(nil))
 }
 
 func (this *SuiteJson) TestMarshal() {
-	output1, err := JsonMarshal(this.messageID, this.message)
+	messageID := MessageID(1)
+	message := &msgs.JsonTest{
+		Data: "json test",
+	}
+	output1, err := JsonMarshal(messageID, message)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), output1)
 
-	_, err = JsonMarshal(this.messageID, nil)
+	_, err = JsonMarshal(messageID, nil)
 	assert.NotNil(this.T(), err)
 
 	messageID, output2, err := JsonUnmarshal[msgs.JsonTest](output1)
 	assert.Nil(this.T(), err)
-	assert.Equal(this.T(), this.messageID, messageID)
-	assert.Equal(this.T(), this.message, output2)
+	assert.Equal(this.T(), messageID, messageID)
+	assert.Equal(this.T(), message, output2)
 
 	_, _, err = JsonUnmarshal[msgs.JsonTest](nil)
 	assert.NotNil(this.T(), err)

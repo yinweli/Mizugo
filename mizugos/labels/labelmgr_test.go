@@ -30,16 +30,13 @@ func (this *SuiteLabelmgr) TearDownTest() {
 	testdata.Leak(this.T(), true)
 }
 
-func (this *SuiteLabelmgr) TestNewLabelmgr() {
-	assert.NotNil(this.T(), NewLabelmgr())
-}
-
 func (this *SuiteLabelmgr) TestLabelmgr() {
-	target := NewLabelmgr()
-	label := []string{"label1", "label2", "label3"}
 	obj := &labelTester{
 		Labelobj: NewLabelobj(),
 	}
+	label := []string{"label1", "label2", "label3"}
+	target := NewLabelmgr()
+	assert.NotNil(this.T(), target)
 
 	target.Add(obj, label...)
 	assert.Equal(this.T(), []any{obj}, target.Get(label[0]))

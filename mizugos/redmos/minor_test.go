@@ -20,12 +20,10 @@ func TestMinor(t *testing.T) {
 type SuiteMinor struct {
 	suite.Suite
 	testdata.Env
-	name string
 }
 
 func (this *SuiteMinor) SetupSuite() {
 	this.Env = testdata.EnvSetup("test-redmos-minor")
-	this.name = "minor"
 }
 
 func (this *SuiteMinor) TearDownSuite() {
@@ -36,25 +34,21 @@ func (this *SuiteMinor) TearDownTest() {
 	testdata.Leak(this.T(), true)
 }
 
-func (this *SuiteMinor) TestNewMinor() {
-	target, err := newMinor(testdata.MongoURI, this.name)
+func (this *SuiteMinor) TestMinor() {
+	target, err := newMinor(testdata.MongoURI, "minor")
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), target)
+	assert.NotNil(this.T(), target.Submit())
+	assert.NotNil(this.T(), target.Client())
+	assert.NotNil(this.T(), target.Database())
+	assert.Nil(this.T(), target.SwitchDB("minor"))
+	target.DropDB()
 
-	_, err = newMinor("", this.name)
+	_, err = newMinor("", "minor")
 	assert.NotNil(this.T(), err)
 
 	_, err = newMinor(testdata.MongoURI, "")
 	assert.NotNil(this.T(), err)
-}
-
-func (this *SuiteMinor) TestMinor() {
-	target, _ := newMinor(testdata.MongoURI, this.name)
-	assert.NotNil(this.T(), target.Submit())
-	assert.NotNil(this.T(), target.Client())
-	assert.NotNil(this.T(), target.Database())
-	assert.Nil(this.T(), target.SwitchDB(this.name))
-	target.DropDB()
 
 	assert.Nil(this.T(), target.Client().Ping(ctxs.Get().Ctx(), nil))
 
@@ -62,18 +56,18 @@ func (this *SuiteMinor) TestMinor() {
 	assert.Nil(this.T(), target.Submit())
 	assert.Nil(this.T(), target.Client())
 	assert.Nil(this.T(), target.Database())
-	assert.NotNil(this.T(), target.SwitchDB(this.name))
+	assert.NotNil(this.T(), target.SwitchDB("minor"))
 	target.DropDB()
 
-	_, err := newMinor(testdata.MongoURIInvalid, this.name)
+	_, err = newMinor(testdata.MongoURIInvalid, "minor")
 	assert.NotNil(this.T(), err)
 }
 
 func (this *SuiteMinor) TestMinorSubmit() {
-	target, _ := newMinor(testdata.MongoURI, this.name)
+	target, _ := newMinor(testdata.MongoURI, "minor")
 	submit := target.Submit()
 	assert.NotNil(this.T(), submit)
-	assert.NotNil(this.T(), submit.Table(this.name))
+	assert.NotNil(this.T(), submit.Table("minor"))
 	assert.NotNil(this.T(), submit.Database())
 	target.stop()
 }

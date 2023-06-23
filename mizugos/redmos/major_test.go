@@ -32,22 +32,18 @@ func (this *SuiteMajor) TearDownTest() {
 	testdata.Leak(this.T(), true)
 }
 
-func (this *SuiteMajor) TestNewMajor() {
+func (this *SuiteMajor) TestMajor() {
 	target, err := newMajor(testdata.RedisURI)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), target)
-
-	_, err = newMajor("")
-	assert.NotNil(this.T(), err)
-}
-
-func (this *SuiteMajor) TestMajor() {
-	target, _ := newMajor(testdata.RedisURI)
 	assert.NotNil(this.T(), target.Submit())
 	assert.NotNil(this.T(), target.Client())
 	assert.Nil(this.T(), target.SwitchDB(1))
 	assert.NotNil(this.T(), target.SwitchDB(9999))
 	target.DropDB()
+
+	_, err = newMajor("")
+	assert.NotNil(this.T(), err)
 
 	ping, err := target.Client().Ping(ctxs.Get().Ctx()).Result()
 	assert.Nil(this.T(), err)

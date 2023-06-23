@@ -30,52 +30,39 @@ func (this *SuiteEntitymgr) TearDownTest() {
 	testdata.Leak(this.T(), true)
 }
 
-func (this *SuiteEntitymgr) TestNewEntitymgr() {
-	assert.NotNil(this.T(), NewEntitymgr())
-}
-
-func (this *SuiteEntitymgr) TestAdd() {
+func (this *SuiteEntitymgr) TestEntitymgr() {
 	target := NewEntitymgr()
+	assert.NotNil(this.T(), target)
 	assert.NotNil(this.T(), target.Add())
 	target.Clear()
-}
 
-func (this *SuiteEntitymgr) TestDel() {
-	target := NewEntitymgr()
+	target = NewEntitymgr()
 	entity := target.Add()
 	assert.NotNil(this.T(), entity)
 	assert.NotNil(this.T(), target.Del(entity.EntityID()))
 	assert.Nil(this.T(), target.Get(entity.EntityID()))
 	assert.Nil(this.T(), target.Del(entity.EntityID()))
 	target.Clear()
-}
 
-func (this *SuiteEntitymgr) TestClear() {
-	target := NewEntitymgr()
+	target = NewEntitymgr()
 	assert.NotNil(this.T(), target.Add())
 	assert.Equal(this.T(), 1, target.Count())
 	target.Clear()
 	assert.Equal(this.T(), 0, target.Count())
-}
 
-func (this *SuiteEntitymgr) TestGet() {
-	target := NewEntitymgr()
-	entity := target.Add()
+	target = NewEntitymgr()
+	entity = target.Add()
 	assert.Equal(this.T(), entity, target.Get(entity.EntityID()))
 	assert.Nil(this.T(), target.Get(EntityID(2)))
 	target.Clear()
-}
 
-func (this *SuiteEntitymgr) TestAll() {
-	target := NewEntitymgr()
+	target = NewEntitymgr()
 	entity1 := target.Add()
 	entity2 := target.Add()
 	assert.ElementsMatch(this.T(), []*Entity{entity1, entity2}, target.All())
 	target.Clear()
-}
 
-func (this *SuiteEntitymgr) TestCount() {
-	target := NewEntitymgr()
+	target = NewEntitymgr()
 	assert.NotNil(this.T(), target.Add())
 	assert.NotNil(this.T(), target.Add())
 	assert.Equal(this.T(), 2, target.Count())

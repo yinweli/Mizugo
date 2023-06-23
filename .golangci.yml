@@ -1,12 +1,4 @@
 linters-settings:
-  depguard:
-    list-type: denylist
-    packages:
-      # logging is allowed only by logutils.Log, logrus
-      # is allowed to use only in logutils package
-      - github.com/sirupsen/logrus
-    packages-with-error-message:
-      - github.com/sirupsen/logrus: "logging is allowed only by logutils.Log"
   dupl:
     threshold: 400
   funlen:
@@ -15,6 +7,7 @@ linters-settings:
   goconst:
     min-len: 2
     min-occurrences: 2
+    ignore-tests: true
   gocritic:
     enabled-tags:
       - diagnostic
@@ -75,8 +68,6 @@ linters-settings:
     # If this set, it will override the default set of ignored signatures.
     # See https://github.com/tomarrell/wrapcheck#configuration for more information.
     ignoreSigs:
-      - .Errore(
-      - .Errort(
       - .Errorf(
       - errors.New(
       - errors.Unwrap(
@@ -104,8 +95,6 @@ linters:
   disable-all: true
   enable:
     - bodyclose
-    - deadcode
-    - depguard
     - dogsled
     - dupl
     - errcheck
@@ -131,13 +120,11 @@ linters:
     - nolintlint
     - rowserrcheck
     - staticcheck
-    - structcheck
     - stylecheck
     - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
     - whitespace
     - wrapcheck
 

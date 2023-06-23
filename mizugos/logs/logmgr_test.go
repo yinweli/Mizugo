@@ -30,15 +30,11 @@ func (this *SuiteLogmgr) TearDownTest() {
 	testdata.Leak(this.T(), true)
 }
 
-func (this *SuiteLogmgr) TestNewLogmgr() {
-	assert.NotNil(this.T(), NewLogmgr())
-}
-
 func (this *SuiteLogmgr) TestLogmgr() {
 	target := NewLogmgr()
-	name := "log"
-	assert.Nil(this.T(), target.Add(name, newLoggerTester(true)))
-	assert.NotNil(this.T(), target.Get(name))
+	assert.NotNil(this.T(), target)
+	assert.Nil(this.T(), target.Add("log", newLoggerTester(true)))
+	assert.NotNil(this.T(), target.Get("log"))
 	assert.Nil(this.T(), target.Get(testdata.Unknown))
 	target.Finalize()
 
