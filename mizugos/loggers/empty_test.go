@@ -1,4 +1,4 @@
-package logs
+package loggers
 
 import (
 	"fmt"
@@ -20,7 +20,7 @@ type SuiteEmpty struct {
 }
 
 func (this *SuiteEmpty) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-logs-empty")
+	this.Env = testdata.EnvSetup("test-loggers-empty")
 }
 
 func (this *SuiteEmpty) TearDownSuite() {
@@ -34,24 +34,26 @@ func (this *SuiteEmpty) TearDownTest() {
 func (this *SuiteEmpty) TestEmptyLogger() {
 	target := &EmptyLogger{}
 	assert.Nil(this.T(), target.Initialize())
+	assert.NotNil(this.T(), target.Get())
+	target.Finalize()
+}
+
+func (this *SuiteEmpty) TestEmptyRetain() {
+	target := &EmptyRetain{}
+	assert.NotNil(this.T(), target.Clear())
+	assert.NotNil(this.T(), target.Flush())
 	assert.NotNil(this.T(), target.Debug(""))
 	assert.NotNil(this.T(), target.Info(""))
 	assert.NotNil(this.T(), target.Warn(""))
 	assert.NotNil(this.T(), target.Error(""))
-	target.Finalize()
 }
 
 func (this *SuiteEmpty) TestEmptyStream() {
-	logger := &EmptyLogger{}
-	assert.Nil(this.T(), logger.Initialize())
-
-	target := logger.Debug("")
+	target := &EmptyStream{retain: &EmptyRetain{}}
 	assert.Equal(this.T(), target, target.Message("message"))
-	assert.Equal(this.T(), target, target.Caller(0))
 	assert.Equal(this.T(), target, target.KV("key", "value"))
+	assert.Equal(this.T(), target, target.Caller(0))
 	assert.Equal(this.T(), target, target.Error(fmt.Errorf("error")))
-	target.EndError(fmt.Errorf("end error"))
-	target.End()
-
-	logger.Finalize()
+	assert.NotNil(this.T(), target.EndError(fmt.Errorf("error")))
+	assert.NotNil(this.T(), target.End())
 }
