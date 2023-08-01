@@ -12,31 +12,26 @@ tasks:
       - task: fmt-proto
       - task: lint-mizugo
 
-  # mizugo程式碼格式化
   fmt-mizugo:
     cmds:
       - gofmt -s -w -l .
 
-  # client-unity格式化
   fmt-client-unity:
     dir: support/client-unity/Packages/com.fouridstudio.mizugo-client-unity
     cmds:
       - dotnet csharpier .
 
-  # client-unity-sample格式化
   fmt-client-unity-sample:
     dir: support/test-client-cs/Assets/Scripts
     cmds:
       - dotnet csharpier .
 
-  # proto格式化
   fmt-proto:
     dir: support/proto
     cmds:
       - buf format -w .
       - dotnet csharpier .
 
-  # mizugo程式碼檢查
   lint-mizugo:
     cmds:
       - golangci-lint -v run
@@ -47,13 +42,11 @@ tasks:
       - task: proto-mizugo
       - task: proto-test
 
-  # mizugo的proto轉換
   proto-mizugo:
     dir: support\proto\mizugo
     cmds:
       - cmd /C build.bat
 
-  # 測試訊息的proto轉換
   proto-test:
     dir: support\proto\test
     cmds:

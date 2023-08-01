@@ -1,4 +1,4 @@
-package logs
+package loggers
 
 import (
 	"testing"
@@ -19,7 +19,7 @@ type SuiteLogmgr struct {
 }
 
 func (this *SuiteLogmgr) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-logs-logmgr")
+	this.Env = testdata.EnvSetup("test-loggers-logmgr")
 }
 
 func (this *SuiteLogmgr) TearDownSuite() {

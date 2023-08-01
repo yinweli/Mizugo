@@ -7,6 +7,7 @@ namespace Mizugo
     /// </summary>
     public class RecvPacketException : Exception
     {
-        public RecvPacketException() : base("receive packet failed") { }
+        public RecvPacketException()
+            : base("receive packet failed") { }
     }
 }

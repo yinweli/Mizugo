@@ -41,13 +41,13 @@ func (this *Json) procMJsonQ(message any) {
 
 	if err != nil {
 		this.sendMJsonA(nil, msgs.ErrID_JsonUnmarshal, 0)
-		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("json procMJsonQ: %w", err))
+		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(fmt.Errorf("json procMJsonQ: %w", err)).Flush()
 		return
 	} // if
 
 	count := this.incr(1)
 	this.sendMJsonA(msg, msgs.ErrID_Success, count)
-	features.LogSystem.Info(this.name).Caller(0).KV("count", count).End()
+	features.LogSystem.Get().Info(this.name).KV("count", count).Caller(0).End().Flush()
 }
 
 // sendMJsonA 傳送回應Json
@@ -59,7 +59,7 @@ func (this *Json) sendMJsonA(from *msgs.MJsonQ, errID msgs.ErrID, count int64) {
 	})
 
 	if err != nil {
-		features.LogSystem.Warn(this.name).Caller(0).EndError(err)
+		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(err).Flush()
 		return
 	} // if
 

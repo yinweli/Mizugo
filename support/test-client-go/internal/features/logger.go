@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/mizugos/logs"
+	"github.com/yinweli/Mizugo/mizugos/loggers"
 )
 
 // NewLogger 建立日誌資料
@@ -29,8 +29,10 @@ func (this *Logger) Initialize() (err error) {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	LogSystem.Info(this.name).Caller(0).Message("initialize crash log").KV("config", LogCrash).End()
-	LogSystem.Info(this.name).Caller(0).Message("initialize system log").KV("config", LogSystem).End()
+	LogSystem.Get().
+		Info(this.name).Message("initialize crash log").KV("config", LogCrash).Caller(0).End().
+		Info(this.name).Message("initialize system log").KV("config", LogSystem).Caller(0).End().
+		Flush()
 	return nil
 }
 
@@ -40,8 +42,8 @@ func (this *Logger) Finalize() {
 }
 
 // create 建立日誌物件
-func (this *Logger) create(name string) (logger logs.Logger, err error) {
-	logger = &logs.ZapLogger{}
+func (this *Logger) create(name string) (logger loggers.Logger, err error) {
+	logger = &loggers.ZapLogger{}
 
 	if err = mizugos.Configmgr().Unmarshal(name, logger); err != nil {
 		return nil, fmt.Errorf("create: %v: %w", name, err)
@@ -54,5 +56,5 @@ func (this *Logger) create(name string) (logger logs.Logger, err error) {
 	return logger, nil
 }
 
-var LogCrash logs.Logger  // 崩潰日誌物件
-var LogSystem logs.Logger // 系統日誌物件
+var LogCrash loggers.Logger  // 崩潰日誌物件
+var LogSystem loggers.Logger // 系統日誌物件

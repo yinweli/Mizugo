@@ -52,12 +52,12 @@ func (this *Proto) procMProtoA(message any) {
 	_, msg, err := procs.ProtoUnmarshal[msgs.MProtoA](message)
 
 	if err != nil {
-		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("proto procMProtoA: %w", err))
+		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(fmt.Errorf("proto procMProtoA: %w", err)).Flush()
 		return
 	} // if
 
 	if msg.ErrID != msgs.ErrID_Success {
-		features.LogSystem.Warn(this.name).Caller(0).EndError(fmt.Errorf("proto procMProtoA: %v", msg.ErrID))
+		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(fmt.Errorf("proto procMProtoA: %v", msg.ErrID)).Flush()
 		return
 	} // if
 
@@ -70,7 +70,7 @@ func (this *Proto) procMProtoA(message any) {
 		this.sendMProtoQ()
 	} // if
 
-	features.LogSystem.Info(this.name).Caller(0).KV("duration", duration).KV("count", msg.Count).End()
+	features.LogSystem.Get().Info(this.name).KV("duration", duration).KV("count", msg.Count).Caller(0).End().Flush()
 }
 
 // sendMProtoQ 傳送要求Proto
@@ -80,7 +80,7 @@ func (this *Proto) sendMProtoQ() {
 	})
 
 	if err != nil {
-		features.LogSystem.Warn(this.name).Caller(0).EndError(err)
+		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(err).Flush()
 		return
 	} // if
 

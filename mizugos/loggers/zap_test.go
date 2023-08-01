@@ -1,4 +1,4 @@
-package logs
+package loggers
 
 import (
 	"fmt"
@@ -21,7 +21,7 @@ type SuiteZap struct {
 }
 
 func (this *SuiteZap) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-logs-zap")
+	this.Env = testdata.EnvSetup("test-loggers-zap")
 }
 
 func (this *SuiteZap) TearDownSuite() {
@@ -43,10 +43,12 @@ func (this *SuiteZap) TestZapLogger() {
 		TimeLayout: "2006-01-02 15:04:05.000",
 	}
 	assert.Nil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.Debug(""))
-	assert.NotNil(this.T(), target.Info(""))
-	assert.NotNil(this.T(), target.Warn(""))
-	assert.NotNil(this.T(), target.Error(""))
+	assert.NotNil(this.T(), target.Get())
+	assert.Equal(this.T(), zapcore.DebugLevel, target.zapLevel(LevelDebug))
+	assert.Equal(this.T(), zapcore.InfoLevel, target.zapLevel(LevelInfo))
+	assert.Equal(this.T(), zapcore.WarnLevel, target.zapLevel(LevelWarn))
+	assert.Equal(this.T(), zapcore.ErrorLevel, target.zapLevel(LevelError))
+	assert.Equal(this.T(), zapcore.InvalidLevel, target.zapLevel("!?"))
 	target.Finalize()
 
 	target = &ZapLogger{
@@ -68,6 +70,26 @@ func (this *SuiteZap) TestZapLogger() {
 	assert.NotNil(this.T(), target.Initialize())
 }
 
+func (this *SuiteZap) TestZapRetain() {
+	logger := &ZapLogger{
+		Name:       "zapStream",
+		Path:       "zapStream",
+		Json:       true,
+		Console:    true,
+		Level:      LevelDebug,
+		TimeLayout: "2006-01-02 15:04:05.000",
+	}
+	_ = logger.Initialize()
+
+	target := logger.Get()
+	assert.Equal(this.T(), target, target.Clear())
+	assert.Equal(this.T(), target, target.Debug("").End().Flush())
+	assert.NotNil(this.T(), target.Debug(""))
+	assert.NotNil(this.T(), target.Info(""))
+	assert.NotNil(this.T(), target.Warn(""))
+	assert.NotNil(this.T(), target.Error(""))
+}
+
 func (this *SuiteZap) TestZapStream() {
 	logger := &ZapLogger{
 		Name:       "zapStream",
@@ -77,32 +99,31 @@ func (this *SuiteZap) TestZapStream() {
 		Level:      LevelDebug,
 		TimeLayout: "2006-01-02 15:04:05.000",
 	}
-	assert.Nil(this.T(), logger.Initialize())
+	_ = logger.Initialize()
+	retain := logger.Get()
 
-	target := logger.Debug("log")
+	target := retain.Debug("log")
 	assert.Equal(this.T(), target, target.Message("message"))
+	assert.Equal(this.T(), target, target.KV("key", "value"))
 	assert.Equal(this.T(), target, target.Caller(0))
 	assert.Equal(this.T(), target, target.Error(fmt.Errorf("error")))
-	target.End()
-
-	target = logger.Debug("log")
-	assert.Equal(this.T(), target, target.Message("message"))
-	assert.Equal(this.T(), target, target.Caller(0))
-	target.EndError(fmt.Errorf("end error"))
+	assert.Equal(this.T(), retain, target.EndError(fmt.Errorf("error")))
+	assert.Equal(this.T(), retain, target.End())
 
 	logger.Finalize()
 }
 
 func (this *SuiteZap) TestZapStreamKV() {
 	logger := &ZapLogger{
-		Name:       "zapStreamKV",
-		Path:       "zapStreamKV",
+		Name:       "zapStream",
+		Path:       "zapStream",
 		Json:       true,
 		Console:    true,
 		Level:      LevelDebug,
 		TimeLayout: "2006-01-02 15:04:05.000",
 	}
-	assert.Nil(this.T(), logger.Initialize())
+	_ = logger.Initialize()
+	retain := logger.Get()
 
 	key := "key"
 	i8 := int8(0)
@@ -142,7 +163,7 @@ func (this *SuiteZap) TestZapStreamKV() {
 		Value int
 	}{Name: "name", Value: 1}
 
-	target := logger.Debug("log")
+	target := retain.Debug("log")
 	assert.Equal(this.T(), target, target.KV(key, i8))
 	assert.Equal(this.T(), target, target.KV(key, ui8))
 	assert.Equal(this.T(), target, target.KV(key, &i8))
@@ -192,15 +213,7 @@ func (this *SuiteZap) TestZapStreamKV() {
 	assert.Equal(this.T(), target, target.KV(key, &b))
 	assert.Equal(this.T(), target, target.KV(key, bs))
 	assert.Equal(this.T(), target, target.KV(key, obj))
-	target.End()
+	target.End().Flush()
 
 	logger.Finalize()
-}
-
-func (this *SuiteZap) TestZapLevel() {
-	assert.Equal(this.T(), zapcore.DebugLevel, zapLevel(LevelDebug))
-	assert.Equal(this.T(), zapcore.InfoLevel, zapLevel(LevelInfo))
-	assert.Equal(this.T(), zapcore.WarnLevel, zapLevel(LevelWarn))
-	assert.Equal(this.T(), zapcore.ErrorLevel, zapLevel(LevelError))
-	assert.Equal(this.T(), zapcore.InvalidLevel, zapLevel("!?"))
 }

@@ -4,6 +4,7 @@
     <working_directory value="$PROJECT_DIR$" />
     <go_parameters value="-race" />
     <kind value="DIRECTORY" />
+    <package value="github.com/yinweli/Mizugo" />
     <directory value="$PROJECT_DIR$" />
     <filePath value="$PROJECT_DIR$" />
     <framework value="gotest" />
