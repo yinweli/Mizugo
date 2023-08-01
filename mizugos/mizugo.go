@@ -7,7 +7,7 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/labels"
-	"github.com/yinweli/Mizugo/mizugos/logs"
+	"github.com/yinweli/Mizugo/mizugos/loggers"
 	"github.com/yinweli/Mizugo/mizugos/metrics"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/pools"
@@ -47,7 +47,7 @@ func Start() {
 
 	server.configmgr = configs.NewConfigmgr()
 	server.metricsmgr = metrics.NewMetricsmgr()
-	server.logmgr = logs.NewLogmgr()
+	server.logmgr = loggers.NewLogmgr()
 	server.netmgr = nets.NewNetmgr()
 	server.redmomgr = redmos.NewRedmomgr()
 	server.entitymgr = entitys.NewEntitymgr()
@@ -90,7 +90,7 @@ func Metricsmgr() *metrics.Metricsmgr {
 }
 
 // Logmgr 日誌管理器
-func Logmgr() *logs.Logmgr {
+func Logmgr() *loggers.Logmgr {
 	server.lock.RLock()
 	defer server.lock.RUnlock()
 
@@ -141,7 +141,7 @@ func Poolmgr() *pools.Poolmgr {
 var server struct {
 	configmgr  *configs.Configmgr  // 配置管理器
 	metricsmgr *metrics.Metricsmgr // 統計管理器
-	logmgr     *logs.Logmgr        // 日誌管理器
+	logmgr     *loggers.Logmgr     // 日誌管理器
 	netmgr     *nets.Netmgr        // 網路管理器
 	redmomgr   *redmos.Redmomgr    // 資料庫管理器
 	entitymgr  *entitys.Entitymgr  // 實體管理器
