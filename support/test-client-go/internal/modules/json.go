@@ -52,12 +52,12 @@ func (this *Json) procMJsonA(message any) {
 	_, msg, err := procs.JsonUnmarshal[msgs.MJsonA](message)
 
 	if err != nil {
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(fmt.Errorf("json procMJsonA: %w", err)).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("json procMJsonA: %w", err)).EndFlush()
 		return
 	} // if
 
 	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success {
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(fmt.Errorf("json procMJsonA: %v", msg.ErrID)).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("json procMJsonA: %v", msg.ErrID)).EndFlush()
 		return
 	} // if
 
@@ -70,7 +70,7 @@ func (this *Json) procMJsonA(message any) {
 		this.sendMJsonQ()
 	} // if
 
-	features.LogSystem.Get().Info(this.name).KV("duration", duration).KV("count", msg.Count).Caller(0).End().Flush()
+	features.LogSystem.Get().Info(this.name).KV("duration", duration).KV("count", msg.Count).Caller(0).EndFlush()
 }
 
 // sendMJsonQ 傳送要求Json
@@ -80,7 +80,7 @@ func (this *Json) sendMJsonQ() {
 	})
 
 	if err != nil {
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(err).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(err).EndFlush()
 		return
 	} // if
 

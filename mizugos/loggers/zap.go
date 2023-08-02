@@ -380,13 +380,13 @@ func (this *ZapStream) Error(err error) Stream {
 	return this
 }
 
-// EndError 記錄錯誤並結束記錄, 並把記錄加回到 Retain 中
-func (this *ZapStream) EndError(err error) Retain {
-	return this.Error(err).End()
-}
-
 // End 結束記錄
 func (this *ZapStream) End() Retain {
 	this.retain.stream = append(this.retain.stream, this)
 	return this.retain
+}
+
+// EndFlush 結束記錄, 並把記錄加回到 Retain 中, 然後儲存記錄
+func (this *ZapStream) EndFlush() {
+	this.End().Flush()
 }

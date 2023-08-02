@@ -56,18 +56,18 @@ func (this *Auth) procMLoginA(message any) {
 	_, msg, err := procs.JsonUnmarshal[msgs.MLoginA](message)
 
 	if err != nil {
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMLoginA: %w", err)).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMLoginA: %w", err)).EndFlush()
 		return
 	} // if
 
 	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success {
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMLoginA: %v", msg.ErrID)).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMLoginA: %v", msg.ErrID)).EndFlush()
 		return
 	} // if
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
 	features.MeterAuth.Add(duration)
-	features.LogSystem.Get().Info(this.name).KV("duration", duration).KV("token", msg.Token).Caller(0).End().Flush()
+	features.LogSystem.Get().Info(this.name).KV("duration", duration).KV("token", msg.Token).Caller(0).EndFlush()
 
 	this.token = msg.Token
 	this.sendMUpdateQ()
@@ -81,7 +81,7 @@ func (this *Auth) sendMLoginQ() {
 	})
 
 	if err != nil {
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(err).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(err).EndFlush()
 		return
 	} // if
 
@@ -93,18 +93,18 @@ func (this *Auth) procMUpdateA(message any) {
 	_, msg, err := procs.JsonUnmarshal[msgs.MUpdateA](message)
 
 	if err != nil {
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMUpdateA: %w", err)).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMUpdateA: %w", err)).EndFlush()
 		return
 	} // if
 
 	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success {
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMUpdateA: %v", msg.ErrID)).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMUpdateA: %v", msg.ErrID)).EndFlush()
 		return
 	} // if
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
 	features.MeterAuth.Add(duration)
-	features.LogSystem.Get().Info(this.name).KV("duration", duration).KV("token", msg.Token).Caller(0).End().Flush()
+	features.LogSystem.Get().Info(this.name).KV("duration", duration).KV("token", msg.Token).Caller(0).EndFlush()
 
 	this.token = msg.Token
 	this.sendMUpdateQ()
@@ -124,7 +124,7 @@ func (this *Auth) sendMUpdateQ() {
 	})
 
 	if err != nil {
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(err).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(err).EndFlush()
 		return
 	} // if
 

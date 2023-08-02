@@ -39,7 +39,7 @@ func (this *Metrics) Initialize() error {
 	MeterJson = mizugos.Metricsmgr().NewRuntime("json")
 	MeterProto = mizugos.Metricsmgr().NewRuntime("proto")
 	MeterConnect = mizugos.Metricsmgr().NewInt("connect")
-	LogSystem.Get().Info(this.name).Message("initialize").KV("config", this.config).Caller(0).End().Flush()
+	LogSystem.Get().Info(this.name).Message("initialize").KV("config", this.config).Caller(0).EndFlush()
 	return nil
 }
 

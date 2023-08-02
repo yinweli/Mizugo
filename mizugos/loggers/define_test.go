@@ -80,10 +80,9 @@ func (this *streamTester) Error(_ error) Stream {
 	return this
 }
 
-func (this *streamTester) EndError(_ error) Retain {
+func (this *streamTester) End() Retain {
 	return this.retain
 }
 
-func (this *streamTester) End() Retain {
-	return this.retain
+func (this *streamTester) EndFlush() {
 }
