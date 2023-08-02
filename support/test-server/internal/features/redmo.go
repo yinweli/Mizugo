@@ -45,7 +45,7 @@ func (this *Redmo) Initialize() (err error) {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	LogSystem.Get().Info(this.name).Message("initialize").KV("config", this.config).Caller(0).End().Flush()
+	LogSystem.Get().Info(this.name).Message("initialize").KV("config", this.config).Caller(0).EndFlush()
 	return nil
 }
 

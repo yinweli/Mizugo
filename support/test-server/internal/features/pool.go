@@ -32,7 +32,7 @@ func (this *Pool) Initialize() error {
 		return fmt.Errorf("%v initialize: %w", this.name, err)
 	} // if
 
-	LogSystem.Get().Info(this.name).Message("initialize").KV("config", this.config).Caller(0).End().Flush()
+	LogSystem.Get().Info(this.name).Message("initialize").KV("config", this.config).Caller(0).EndFlush()
 	return nil
 }
 
@@ -43,5 +43,5 @@ func (this *Pool) Finalize() {
 
 // Printf 輸出日誌
 func (this *Pool) Printf(format string, args ...any) {
-	LogSystem.Get().Error(this.name).Message(format, args...).Caller(1).End().Flush()
+	LogSystem.Get().Error(this.name).Message(format, args...).Caller(1).EndFlush()
 }

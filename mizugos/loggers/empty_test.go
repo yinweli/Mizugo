@@ -54,6 +54,6 @@ func (this *SuiteEmpty) TestEmptyStream() {
 	assert.Equal(this.T(), target, target.KV("key", "value"))
 	assert.Equal(this.T(), target, target.Caller(0))
 	assert.Equal(this.T(), target, target.Error(fmt.Errorf("error")))
-	assert.NotNil(this.T(), target.EndError(fmt.Errorf("error")))
 	assert.NotNil(this.T(), target.End())
+	target.EndFlush()
 }

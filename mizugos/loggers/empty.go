@@ -77,12 +77,11 @@ func (this *EmptyStream) Error(_ error) Stream {
 	return this
 }
 
-// EndError 記錄錯誤並結束記錄, 並把記錄加回到 Retain 中
-func (this *EmptyStream) EndError(_ error) Retain {
-	return this.retain
-}
-
 // End 結束記錄, 並把記錄加回到 Retain 中
 func (this *EmptyStream) End() Retain {
 	return this.retain
+}
+
+// EndFlush 結束記錄, 並把記錄加回到 Retain 中, 然後儲存記錄
+func (this *EmptyStream) EndFlush() {
 }

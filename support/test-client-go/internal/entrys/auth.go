@@ -48,13 +48,13 @@ func (this *Auth) Initialize() error {
 		mizugos.Netmgr().AddConnectTCP(this.config.IP, this.config.Port, this.config.Timeout, this.bind, this.unbind, this.connectWrong)
 	} // if
 
-	features.LogSystem.Get().Info(this.name).Message("entry start").KV("config", this.config).Caller(0).End().Flush()
+	features.LogSystem.Get().Info(this.name).Message("entry start").KV("config", this.config).Caller(0).EndFlush()
 	return nil
 }
 
 // Finalize 結束處理
 func (this *Auth) Finalize() {
-	features.LogSystem.Get().Info(this.name).Message("entry finalize").Caller(0).End().Flush()
+	features.LogSystem.Get().Info(this.name).Message("entry finalize").Caller(0).EndFlush()
 }
 
 // bind 綁定處理
@@ -101,7 +101,7 @@ func (this *Auth) bind(session nets.Sessioner) *nets.Bundle {
 	mizugos.Labelmgr().Add(entity, this.name)
 	session.SetOwner(entity)
 	features.MeterConnect.Add(1)
-	features.LogSystem.Get().Info(this.name).Message("bind").Caller(0).End().Flush()
+	features.LogSystem.Get().Info(this.name).Message("bind").Caller(0).EndFlush()
 	return entity.Bundle()
 
 Error:
@@ -112,7 +112,7 @@ Error:
 	} // if
 
 	session.Stop()
-	features.LogSystem.Get().Error(this.name).Caller(0).EndError(wrong).Flush()
+	features.LogSystem.Get().Error(this.name).Caller(0).Error(wrong).EndFlush()
 	return nil
 }
 
@@ -128,10 +128,10 @@ func (this *Auth) unbind(session nets.Sessioner) {
 
 // connectWrong 連接錯誤處理
 func (this *Auth) connectWrong(err error) {
-	features.LogSystem.Get().Error(this.name).Caller(1).EndError(err).Flush()
+	features.LogSystem.Get().Error(this.name).Caller(1).Error(err).EndFlush()
 }
 
 // bindWrong 綁定錯誤處理
 func (this *Auth) bindWrong(err error) {
-	features.LogSystem.Get().Warn(this.name).Caller(1).EndError(err).Flush()
+	features.LogSystem.Get().Warn(this.name).Caller(1).Error(err).EndFlush()
 }

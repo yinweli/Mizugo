@@ -41,13 +41,13 @@ func (this *Proto) procMProtoQ(message any) {
 
 	if err != nil {
 		this.sendMProtoA(nil, msgs.ErrID_ProtoUnmarshal, 0)
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(fmt.Errorf("proto procMProtoQ: %w", err)).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("proto procMProtoQ: %w", err)).EndFlush()
 		return
 	} // if
 
 	count := this.incr(1)
 	this.sendMProtoA(msg, msgs.ErrID_Success, count)
-	features.LogSystem.Get().Info(this.name).KV("count", count).Caller(0).End().Flush()
+	features.LogSystem.Get().Info(this.name).KV("count", count).Caller(0).EndFlush()
 }
 
 // sendMProtoA 傳送回應Proto
@@ -59,7 +59,7 @@ func (this *Proto) sendMProtoA(from *msgs.MProtoQ, errID msgs.ErrID, count int64
 	})
 
 	if err != nil {
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(err).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(err).EndFlush()
 		return
 	} // if
 

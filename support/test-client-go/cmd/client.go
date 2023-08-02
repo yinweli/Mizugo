@@ -14,7 +14,7 @@ import (
 func main() {
 	defer func() {
 		if cause := recover(); cause != nil {
-			features.LogCrash.Get().Error("crash").KV("stack", string(debug.Stack())).EndError(fmt.Errorf("%s", cause)).Flush()
+			features.LogCrash.Get().Error("crash").KV("stack", string(debug.Stack())).Error(fmt.Errorf("%s", cause)).EndFlush()
 		} // if
 	}()
 

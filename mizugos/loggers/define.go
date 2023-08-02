@@ -54,9 +54,9 @@ type Stream interface {
 	// Error 記錄錯誤
 	Error(err error) Stream
 
-	// EndError 記錄錯誤並結束記錄, 並把記錄加回到 Retain 中
-	EndError(err error) Retain
-
 	// End 結束記錄, 並把記錄加回到 Retain 中
 	End() Retain
+
+	// EndFlush 結束記錄, 並把記錄加回到 Retain 中, 然後儲存記錄
+	EndFlush()
 }

@@ -45,7 +45,7 @@ func (this *Auth) procMLoginQ(message any) {
 
 	if err != nil {
 		this.sendMLoginA(nil, msgs.ErrID_JsonUnmarshal, "")
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMLoginQ: %w", err)).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMLoginQ: %w", err)).EndFlush()
 		return
 	} // if
 
@@ -53,7 +53,7 @@ func (this *Auth) procMLoginQ(message any) {
 
 	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Lock(msg.Account).Add(authGet).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMLoginQ: %w", err)).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMLoginQ: %w", err)).EndFlush()
 		return
 	} // if
 
@@ -65,12 +65,12 @@ func (this *Auth) procMLoginQ(message any) {
 
 	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Add(authSet).Unlock(msg.Account).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMLoginQ: %w", err)).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMLoginQ: %w", err)).EndFlush()
 		return
 	} // if
 
 	this.sendMLoginA(msg, msgs.ErrID_Success, authSet.Data.Token)
-	features.LogSystem.Get().Info(this.name).KV("account", authSet.Data.Account).KV("token", authSet.Data.Token).Caller(0).End().Flush()
+	features.LogSystem.Get().Info(this.name).KV("account", authSet.Data.Account).KV("token", authSet.Data.Token).Caller(0).EndFlush()
 }
 
 // sendMLoginA 傳送回應登入
@@ -82,7 +82,7 @@ func (this *Auth) sendMLoginA(from *msgs.MLoginQ, errID msgs.ErrID, token string
 	})
 
 	if err != nil {
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(err).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(err).EndFlush()
 		return
 	} // if
 
@@ -98,7 +98,7 @@ func (this *Auth) procMUpdateQ(message any) {
 
 	if err != nil {
 		this.sendMUpdateA(nil, msgs.ErrID_JsonUnmarshal, "")
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err)).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMUpdateQ: %w", err)).EndFlush()
 		return
 	} // if
 
@@ -106,13 +106,13 @@ func (this *Auth) procMUpdateQ(message any) {
 
 	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Lock(msg.Account).Add(authGet).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err)).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMUpdateQ: %w", err)).EndFlush()
 		return
 	} // if
 
 	if authGet.Data.Token != msg.Token {
 		this.sendMUpdateA(msg, msgs.ErrID_TokenNotMatch, "")
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err)).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMUpdateQ: %w", err)).EndFlush()
 		return
 	} // if
 
@@ -124,12 +124,12 @@ func (this *Auth) procMUpdateQ(message any) {
 
 	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Add(authSet).Unlock(msg.Account).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(fmt.Errorf("auth procMUpdateQ: %w", err)).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMUpdateQ: %w", err)).EndFlush()
 		return
 	} // if
 
 	this.sendMUpdateA(msg, msgs.ErrID_Success, authSet.Data.Token)
-	features.LogSystem.Get().Info(this.name).KV("account", authSet.Data.Account).KV("token", authSet.Data.Token).Caller(0).End().Flush()
+	features.LogSystem.Get().Info(this.name).KV("account", authSet.Data.Account).KV("token", authSet.Data.Token).Caller(0).EndFlush()
 }
 
 // sendMUpdateA 傳送回應登入
@@ -141,7 +141,7 @@ func (this *Auth) sendMUpdateA(from *msgs.MUpdateQ, errID msgs.ErrID, token stri
 	})
 
 	if err != nil {
-		features.LogSystem.Get().Warn(this.name).Caller(0).EndError(err).Flush()
+		features.LogSystem.Get().Warn(this.name).Caller(0).Error(err).EndFlush()
 		return
 	} // if
 
