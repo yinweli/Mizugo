@@ -1,6 +1,7 @@
 package loggers
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -33,6 +34,7 @@ type ZapLogger struct {
 	MaxTime    int    `yaml:"maxTime"`    // 日誌保留時間(日), 當日誌檔案儲存超過此時間時會被刪除, 預設不會刪除檔案
 	MaxBackups int    `yaml:"maxBackups"` // 日誌保留數量, 當日誌檔案數量超過此數量時會刪除舊檔案, 預設不會刪除檔案
 	Compress   bool   `yaml:"compress"`   // 是否壓縮日誌檔案, 預設不會壓縮
+	Jsonify    bool   `yaml:"jsonify"`    // 物件記錄時是否以json字串記錄, 預設為關閉
 
 	location *time.Location // 時區物件
 	logger   *zap.Logger    // zap日誌物件
@@ -72,6 +74,7 @@ func (this *ZapLogger) Get() Retain {
 	return &ZapRetain{
 		location: this.location,
 		logger:   this.logger,
+		jsonify:  this.Jsonify,
 	}
 }
 
@@ -158,6 +161,7 @@ func (this *ZapLogger) zapLevel(level string) zapcore.Level {
 type ZapRetain struct {
 	location *time.Location // 時區物件
 	logger   *zap.Logger    // 日誌物件
+	jsonify  bool           // 物件記錄時是否以json字串記錄
 	stream   []*ZapStream   // 記錄列表
 }
 
@@ -193,36 +197,40 @@ func (this *ZapRetain) Flush() Retain {
 // Debug 記錄除錯訊息, 用於記錄除錯訊息
 func (this *ZapRetain) Debug(label string) Stream {
 	return &ZapStream{
-		retain: this,
-		level:  zapcore.DebugLevel,
-		label:  label,
+		retain:  this,
+		level:   zapcore.DebugLevel,
+		label:   label,
+		jsonify: this.jsonify,
 	}
 }
 
 // Info 記錄一般訊息, 用於記錄一般訊息
 func (this *ZapRetain) Info(label string) Stream {
 	return &ZapStream{
-		retain: this,
-		level:  zapcore.InfoLevel,
-		label:  label,
+		retain:  this,
+		level:   zapcore.InfoLevel,
+		label:   label,
+		jsonify: this.jsonify,
 	}
 }
 
 // Warn 記錄警告訊息, 用於記錄邏輯錯誤
 func (this *ZapRetain) Warn(label string) Stream {
 	return &ZapStream{
-		retain: this,
-		level:  zapcore.WarnLevel,
-		label:  label,
+		retain:  this,
+		level:   zapcore.WarnLevel,
+		label:   label,
+		jsonify: this.jsonify,
 	}
 }
 
 // Error 記錄錯誤訊息, 用於記錄嚴重錯誤
 func (this *ZapRetain) Error(label string) Stream {
 	return &ZapStream{
-		retain: this,
-		level:  zapcore.ErrorLevel,
-		label:  label,
+		retain:  this,
+		level:   zapcore.ErrorLevel,
+		label:   label,
+		jsonify: this.jsonify,
 	}
 }
 
@@ -231,6 +239,7 @@ type ZapStream struct {
 	retain  *ZapRetain    // 儲存器
 	level   zapcore.Level // 日誌等級
 	label   string        // 日誌標籤
+	jsonify bool          // 物件記錄時是否以json字串記錄
 	message string        // 訊息字串
 	field   []zap.Field   // 索引與數值列表
 }
@@ -242,126 +251,15 @@ func (this *ZapStream) Message(format string, a ...any) Stream {
 }
 
 // KV 記錄索引與數值
-func (this *ZapStream) KV(key string, value any) Stream { //nolint:gocyclo
-	switch v := value.(type) {
-	case int8:
-		this.field = append(this.field, zap.Int8(key, v))
-	case uint8:
-		this.field = append(this.field, zap.Uint8(key, v))
-	case *int8:
-		this.field = append(this.field, zap.Int8p(key, v))
-	case *uint8:
-		this.field = append(this.field, zap.Uint8p(key, v))
-	case []int8:
-		this.field = append(this.field, zap.Int8s(key, v))
-	case []byte:
-		this.field = append(this.field, zap.Binary(key, v))
+func (this *ZapStream) KV(key string, value any) Stream {
+	field := zap.Any(key, value)
 
-	case int16:
-		this.field = append(this.field, zap.Int16(key, v))
-	case uint16:
-		this.field = append(this.field, zap.Uint16(key, v))
-	case *int16:
-		this.field = append(this.field, zap.Int16p(key, v))
-	case *uint16:
-		this.field = append(this.field, zap.Uint16p(key, v))
-	case []int16:
-		this.field = append(this.field, zap.Int16s(key, v))
-	case []uint16:
-		this.field = append(this.field, zap.Uint16s(key, v))
+	if this.jsonify && field.Type == zapcore.ReflectType {
+		bytes, _ := json.Marshal(value)
+		field = zap.String(key, string(bytes))
+	} // if
 
-	case int32:
-		this.field = append(this.field, zap.Int32(key, v))
-	case uint32:
-		this.field = append(this.field, zap.Uint32(key, v))
-	case *int32:
-		this.field = append(this.field, zap.Int32p(key, v))
-	case *uint32:
-		this.field = append(this.field, zap.Uint32p(key, v))
-	case []int32:
-		this.field = append(this.field, zap.Int32s(key, v))
-	case []uint32:
-		this.field = append(this.field, zap.Uint32s(key, v))
-
-	case int64:
-		this.field = append(this.field, zap.Int64(key, v))
-	case uint64:
-		this.field = append(this.field, zap.Uint64(key, v))
-	case *int64:
-		this.field = append(this.field, zap.Int64p(key, v))
-	case *uint64:
-		this.field = append(this.field, zap.Uint64p(key, v))
-	case []int64:
-		this.field = append(this.field, zap.Int64s(key, v))
-	case []uint64:
-		this.field = append(this.field, zap.Uint64s(key, v))
-
-	case int:
-		this.field = append(this.field, zap.Int(key, v))
-	case uint:
-		this.field = append(this.field, zap.Uint(key, v))
-	case *int:
-		this.field = append(this.field, zap.Intp(key, v))
-	case *uint:
-		this.field = append(this.field, zap.Uintp(key, v))
-	case []int:
-		this.field = append(this.field, zap.Ints(key, v))
-	case []uint:
-		this.field = append(this.field, zap.Uints(key, v))
-
-	case float32:
-		this.field = append(this.field, zap.Float32(key, v))
-	case *float32:
-		this.field = append(this.field, zap.Float32p(key, v))
-	case []float32:
-		this.field = append(this.field, zap.Float32s(key, v))
-
-	case float64:
-		this.field = append(this.field, zap.Float64(key, v))
-	case *float64:
-		this.field = append(this.field, zap.Float64p(key, v))
-	case []float64:
-		this.field = append(this.field, zap.Float64s(key, v))
-
-	case complex64:
-		this.field = append(this.field, zap.Complex64(key, v))
-	case *complex64:
-		this.field = append(this.field, zap.Complex64p(key, v))
-	case []complex64:
-		this.field = append(this.field, zap.Complex64s(key, v))
-
-	case complex128:
-		this.field = append(this.field, zap.Complex128(key, v))
-	case *complex128:
-		this.field = append(this.field, zap.Complex128p(key, v))
-	case []complex128:
-		this.field = append(this.field, zap.Complex128s(key, v))
-
-	case string:
-		this.field = append(this.field, zap.String(key, v))
-	case *string:
-		this.field = append(this.field, zap.Stringp(key, v))
-	case []string:
-		this.field = append(this.field, zap.Strings(key, v))
-
-	case bool:
-		this.field = append(this.field, zap.Bool(key, v))
-	case *bool:
-		this.field = append(this.field, zap.Boolp(key, v))
-	case []bool:
-		this.field = append(this.field, zap.Bools(key, v))
-
-	case uintptr:
-		this.field = append(this.field, zap.Uintptr(key, v))
-	case *uintptr:
-		this.field = append(this.field, zap.Uintptrp(key, v))
-	case []uintptr:
-		this.field = append(this.field, zap.Uintptrs(key, v))
-
-	default:
-		this.field = append(this.field, zap.Reflect(key, v))
-	} // switch
-
+	this.field = append(this.field, field)
 	return this
 }
 
