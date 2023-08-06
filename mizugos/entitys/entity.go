@@ -24,14 +24,13 @@ func NewEntity(entityID EntityID) *Entity {
 //
 // 建立實體時, 需要遵循以下流程
 //   - 到實體管理器新增實體
-//   - 取得實體物件
-//   - 如果實體需要使用模組相關功能, 則呼叫 SetModulemgr 設置 entitys.Modulemgr
-//   - 如果實體需要使用事件相關功能, 則呼叫 SetEventmgr 設置 events.Eventmgr
-//   - 如果實體將要代表某個連線, 則呼叫 則需要設置 procs.Processor 與 nets.Sessioner
+//   - 如果實體需要使用模組相關功能, 呼叫 SetModulemgr 設置 entitys.Modulemgr
+//   - 如果實體需要使用事件相關功能, 呼叫 SetEventmgr 設置 events.Eventmgr
+//   - 如果實體將要代表某個連線, 呼叫 SetProcess 設置 procs.Processor, 呼叫 SetSession 設置 nets.Sessioner
 //   - 新增模組到實體中
 //   - 執行實體的初始化處理
 //
-// 結束實體時, 會依序發布 EventDispose 與 EventShutdown 事件
+// 結束實體時, 需要執行 Finalize
 //
 // 實體可以新增模組, 用於分類與實作遊戲功能/訊息處理等; 如果想要新增模組, 需要在實體初始化之前完成;
 // 需要在實體初始化之前設置 entitys.Modulemgr

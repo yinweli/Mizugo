@@ -95,7 +95,7 @@ func finalize() {
 var server struct {
 	logger  *features.Logger  // 日誌資料
 	pool    *features.Pool    // 執行緒池資料
-	metrics *features.Metrics // 統計資料
+	metrics *features.Metrics // 度量資料
 	auth    *entrys.Auth      // Auth入口
 	json    *entrys.Json      // Json入口
 	proto   *entrys.Proto     // Proto入口

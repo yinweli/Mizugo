@@ -13,14 +13,14 @@ const ( // 時間定義
 	interval60 = 3600            // 間隔時間: 60分鐘
 )
 
-// Int 整數統計
+// Int 整數度量
 type Int = expvar.Int
 
-// Float 浮點數統計
+// Float 浮點數度量
 type Float = expvar.Float
 
-// String 字串統計
+// String 字串度量
 type String = expvar.String
 
-// Map 映射統計
+// Map 映射度量
 type Map = expvar.Map

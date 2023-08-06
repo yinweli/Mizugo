@@ -81,7 +81,7 @@ func Configmgr() *configs.Configmgr {
 	return server.configmgr
 }
 
-// Metricsmgr 統計管理器
+// Metricsmgr 取得度量管理器
 func Metricsmgr() *metrics.Metricsmgr {
 	server.lock.RLock()
 	defer server.lock.RUnlock()
@@ -89,7 +89,7 @@ func Metricsmgr() *metrics.Metricsmgr {
 	return server.metricsmgr
 }
 
-// Logmgr 日誌管理器
+// Logmgr 取得日誌管理器
 func Logmgr() *loggers.Logmgr {
 	server.lock.RLock()
 	defer server.lock.RUnlock()
@@ -113,7 +113,7 @@ func Redmomgr() *redmos.Redmomgr {
 	return server.redmomgr
 }
 
-// Entitymgr 實體管理器
+// Entitymgr 取得實體管理器
 func Entitymgr() *entitys.Entitymgr {
 	server.lock.RLock()
 	defer server.lock.RUnlock()
@@ -121,7 +121,7 @@ func Entitymgr() *entitys.Entitymgr {
 	return server.entitymgr
 }
 
-// Labelmgr 標籤管理器
+// Labelmgr 取得標籤管理器
 func Labelmgr() *labels.Labelmgr {
 	server.lock.RLock()
 	defer server.lock.RUnlock()
@@ -129,7 +129,7 @@ func Labelmgr() *labels.Labelmgr {
 	return server.labelmgr
 }
 
-// Poolmgr 執行緒池管理器
+// Poolmgr 取得執行緒池管理器
 func Poolmgr() *pools.Poolmgr {
 	server.lock.RLock()
 	defer server.lock.RUnlock()
@@ -140,7 +140,7 @@ func Poolmgr() *pools.Poolmgr {
 // server 伺服器資料
 var server struct {
 	configmgr  *configs.Configmgr  // 配置管理器
-	metricsmgr *metrics.Metricsmgr // 統計管理器
+	metricsmgr *metrics.Metricsmgr // 度量管理器
 	logmgr     *loggers.Logmgr     // 日誌管理器
 	netmgr     *nets.Netmgr        // 網路管理器
 	redmomgr   *redmos.Redmomgr    // 資料庫管理器

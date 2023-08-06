@@ -7,14 +7,14 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/metrics"
 )
 
-// NewMetrics 建立統計資料
+// NewMetrics 建立度量資料
 func NewMetrics() *Metrics {
 	return &Metrics{
 		name: "metrics",
 	}
 }
 
-// Metrics 統計資料
+// Metrics 度量資料
 type Metrics struct {
 	name   string        // 系統名稱
 	config MetricsConfig // 配置資料
@@ -48,7 +48,7 @@ func (this *Metrics) Finalize() {
 	mizugos.Metricsmgr().Finalize()
 }
 
-var MeterAuth *metrics.Runtime  // auth訊息統計物件
-var MeterJson *metrics.Runtime  // json訊息統計物件
-var MeterProto *metrics.Runtime // proto訊息統計物件
-var MeterConnect *metrics.Int   // 連線統計物件
+var MeterAuth *metrics.Runtime  // auth訊息度量物件
+var MeterJson *metrics.Runtime  // json訊息度量物件
+var MeterProto *metrics.Runtime // proto訊息度量物件
+var MeterConnect *metrics.Int   // 連線度量物件

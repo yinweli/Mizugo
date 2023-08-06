@@ -9,7 +9,7 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
-// Runtime 執行統計, 記錄了以下數據
+// Runtime 執行度量, 記錄了以下數據
 //   - 總執行時間
 //   - 最大執行時間
 //   - 總執行次數
@@ -84,7 +84,7 @@ func (this *Runtime) String() string {
 	})
 }
 
-// start 開始統計
+// start 開始度量
 func (this *Runtime) start(ctx context.Context) {
 	pools.DefaultPool.Submit(func() {
 		ticker := time.NewTicker(time.Second)
