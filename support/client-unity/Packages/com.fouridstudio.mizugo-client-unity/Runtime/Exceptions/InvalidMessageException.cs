@@ -7,6 +7,7 @@ namespace Mizugo
     /// </summary>
     public class InvalidMessageException : Exception
     {
-        public InvalidMessageException(string name) : base(name + " invalid message") { }
+        public InvalidMessageException(string name)
+            : base(name + " invalid message") { }
     }
 }

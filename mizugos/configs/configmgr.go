@@ -21,12 +21,17 @@ func NewConfigmgr() *Configmgr {
 //     所以必須提供來源使用的檔案格式的副檔名
 //   - 從讀取器讀取配置: 從外部提供讀取器作為配置來源, 由於內部仍然用讀取檔案的方式來處理字串,
 //     所以必須提供來源使用的檔案格式的副檔名
+//   - 從環境變數讀取配置: 從環境變數中讀取配置, 這需要事先決定好前綴字
 //
 // 以上讀取配置的模式內部都是用讀取檔案的方式來處理字串, 所以必須提供來源使用的檔案格式的副檔名,
 // 支援的副檔名可以參考 viper.SupportedExts
 //
 // 當配置讀取完畢後, 需要從管理器中取得配置值時, 可以用索引字串來呼叫 Get... 系列函式來取得配置值;
 // 或是用索引字串來呼叫 Unmarshal 來取得反序列化到結構的配置資料
+//
+// 當同時使用檔案/字串/讀取器以及環境變數時, viper有規定其使用順序, 上面的會覆蓋下面的配置:
+//   - 環境變數
+//   - 配置檔案
 type Configmgr struct {
 	read bool // 讀取旗標
 }
@@ -97,6 +102,21 @@ func (this *Configmgr) ReadBuffer(reader io.Reader, ext string) (err error) {
 		return fmt.Errorf("configmgr readbuffer: %v: %w", ext, err)
 	} // if
 
+	return nil
+}
+
+// ReadEnvironment 從環境變數讀取配置, 讀取時需要指定前綴字;
+// 請注意在整個程式中只使用一個前綴字, 不然就得要在每次取得配置前, 都要執行 ReadEnvironment 來重新指定前綴字;
+// 以下是個配置檔案與環境變數的映射範例, 假設我們將前綴字設定為 MYAPP
+//
+//	test:       // 環境變數名稱為 MYAPP_TEST
+//	  value1: a // 環境變數名稱為 MYAPP_TEST_VALUE1
+//	  value2: b // 環境變數名稱為 MYAPP_TEST_VALUE2
+//
+// 環境變數名稱不是大小寫敏感的
+func (this *Configmgr) ReadEnvironment(prefix string) (err error) {
+	viper.SetEnvPrefix(prefix)
+	viper.AutomaticEnv()
 	return nil
 }
 

@@ -2,6 +2,7 @@ package configs
 
 import (
 	"bytes"
+	"os"
 	"testing"
 	"time"
 
@@ -40,6 +41,7 @@ func (this *SuiteConfigmgr) TestConfigmgr() {
 	value2 := "valid=valid"
 	reader1 := bytes.NewBuffer([]byte(value1))
 	reader2 := bytes.NewBuffer([]byte(value2))
+	env := "env"
 	expected := configTester{
 		Value1: 1,
 		Value2: "2",
@@ -67,6 +69,13 @@ func (this *SuiteConfigmgr) TestConfigmgr() {
 	assert.Nil(this.T(), target.ReadBuffer(reader1, ext))
 	assert.NotNil(this.T(), target.ReadBuffer(reader2, ext))
 	assert.Equal(this.T(), valid, target.Get(valid))
+	target.Reset()
+
+	target = NewConfigmgr()
+	_ = os.Setenv("ENV_VALUE", "abc")
+	assert.Nil(this.T(), target.ReadEnvironment(env))
+	assert.Equal(this.T(), "abc", target.Get("value"))
+	_ = os.Unsetenv("ENV_VALUE")
 	target.Reset()
 
 	target = NewConfigmgr()
