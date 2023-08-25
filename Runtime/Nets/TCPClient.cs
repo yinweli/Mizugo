@@ -236,7 +236,12 @@ namespace Mizugo
                     {
                         try
                         {
-                            if (stream.Read(header, 0, Define.headerSize) != Define.headerSize)
+                            var headerSize = stream.Read(header, 0, Define.headerSize);
+
+                            if (headerSize == 0)
+                                throw new DisconnectException();
+
+                            if (headerSize != Define.headerSize)
                                 throw new RecvHeaderException();
 
                             size = BitConverter.ToUInt16(header, 0);
@@ -270,7 +275,9 @@ namespace Mizugo
                         } // try
                         catch (Exception e)
                         {
-                            equeue.Enqueue(EventID.Error, e);
+                            if (e is DisconnectException == false)
+                                equeue.Enqueue(EventID.Error, e);
+
                             equeue.Enqueue(EventID.Disconnect, null);
                             return;
                         } // catch

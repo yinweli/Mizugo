@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [0.2.2] - 2023-08-25
+### Fixed
+- 修正斷線時不再拋出異常, 只會剩下斷線事件
+
 ## [0.2.1] - 2023-05-26
 ### Fixed
 - 修正收到被切分的封包造成收包錯誤
