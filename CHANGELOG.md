@@ -5,7 +5,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Planning]
-- Configmgr新增從目錄讀取配置, 將會讀取目錄底下所有符合副檔名的檔案
 - Configmgr新增從遠端讀取配置(viper的ReadRemoteConfig)
 - IAP組件(Apple / Google)
     - https://github.com/awa/go-iap
@@ -21,5 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - FB
         - https://developers.facebook.com/docs/graph-api/reference/v17.0/debug_token
         - https://blog.csdn.net/huqiankunlol/article/details/102721611
+- redmo的mix操作要可以選擇 使用redis+mongo / 只用redis / 只用mongo
 
 ## [Unrelease]
