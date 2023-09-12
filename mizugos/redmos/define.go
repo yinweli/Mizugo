@@ -12,6 +12,9 @@ const ( // redis定義
 
 // Metaer 元資料介面, 提供主要/次要資料庫操作時所需的必要資訊
 type Metaer interface {
+	// Enable 取得主要/次要資料庫是否啟用
+	Enable() (major, minor bool)
+
 	// MajorKey 取得主要資料庫索引字串
 	MajorKey(key any) string
 
@@ -21,7 +24,7 @@ type Metaer interface {
 	// MinorTable 取得次要資料庫表格名稱
 	MinorTable() string
 
-	// MinorField 取得次要資料庫索引名稱
+	// MinorField 取得次要資料庫索引欄位名稱
 	MinorField() string
 }
 

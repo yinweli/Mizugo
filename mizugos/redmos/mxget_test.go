@@ -29,7 +29,7 @@ type SuiteMxGet struct {
 func (this *SuiteMxGet) SetupSuite() {
 	this.Env = testdata.EnvSetup("test-redmos-mxget")
 	this.major, _ = newMajor(testdata.RedisURI)
-	this.minor, _ = newMinor(testdata.MongoURI, this.meta.MinorTable()) // 這裡偷懶把表格名稱當資料庫名稱來用
+	this.minor, _ = newMinor(testdata.MongoURI, "mxget")
 }
 
 func (this *SuiteMxGet) TearDownSuite() {
@@ -45,9 +45,12 @@ func (this *SuiteMxGet) TearDownTest() {
 }
 
 func (this *SuiteMxGet) TestGet() {
+	this.meta.major = true
+	this.meta.minor = true
+	this.meta.table = true
+	this.meta.field = true
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
-
 	data := &dataMxGet{
 		Field: "mxget",
 		Value: utils.RandString(testdata.RandStringLength, testdata.RandStringLetter),
@@ -67,6 +70,26 @@ func (this *SuiteMxGet) TestGet() {
 	assert.Nil(this.T(), get.Complete())
 	assert.True(this.T(), cmp.Equal(data, get.Data, data.ignore()))
 
+	this.meta.major = true
+	this.meta.minor = false
+	get = &Get[dataMxGet]{Meta: &this.meta, Key: data.Field}
+	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	assert.Nil(this.T(), get.Prepare())
+	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+	assert.Nil(this.T(), get.Complete())
+	assert.True(this.T(), cmp.Equal(data, get.Data, data.ignore()))
+
+	this.meta.major = false
+	this.meta.minor = true
+	get = &Get[dataMxGet]{Meta: &this.meta, Key: data.Field}
+	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	assert.Nil(this.T(), get.Prepare())
+	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+	assert.Nil(this.T(), get.Complete())
+	assert.True(this.T(), cmp.Equal(data, get.Data, data.ignore()))
+
+	this.meta.major = true
+	this.meta.minor = true
 	get = &Get[dataMxGet]{Meta: &this.meta, Key: testdata.Unknown}
 	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), get.Prepare())
@@ -75,70 +98,35 @@ func (this *SuiteMxGet) TestGet() {
 	assert.Nil(this.T(), get.Data)
 
 	get = &Get[dataMxGet]{Meta: nil, Key: data.Field}
+	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), get.Prepare())
 
 	get = &Get[dataMxGet]{Meta: &this.meta, Key: ""}
+	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	assert.NotNil(this.T(), get.Prepare())
+
+	this.meta.table = false
+	this.meta.field = true
+	get = &Get[dataMxGet]{Meta: &this.meta, Key: data.Field}
+	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	assert.NotNil(this.T(), get.Prepare())
+
+	this.meta.table = true
+	this.meta.field = false
+	get = &Get[dataMxGet]{Meta: &this.meta, Key: data.Field}
+	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), get.Prepare())
 }
 
-func (this *SuiteMxGet) TestSet() {
-	majorSubmit := this.major.Submit()
-	minorSubmit := this.minor.Submit()
-
-	data := &dataMxGet{
-		Field: "mxget_redis",
-		Value: utils.RandString(testdata.RandStringLength, testdata.RandStringLetter),
-	}
-	set := &Set[dataMxGet]{Meta: &this.meta, Redis: true, Key: data.Field, Data: data}
-	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), set.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
-	assert.Nil(this.T(), set.Complete())
-	assert.True(this.T(), testdata.RedisCompare[dataMxGet](this.major.Client(), this.meta.MajorKey(data.Field), data, data.ignore()))
-	assert.False(this.T(), testdata.MongoCompare[dataMxGet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data, data.ignore()))
-
-	data = &dataMxGet{
-		Field: "mxget_redis+mongo",
-		Value: utils.RandString(testdata.RandStringLength, testdata.RandStringLetter),
-	}
-	set = &Set[dataMxGet]{Meta: &this.meta, Redis: false, Key: data.Field, Data: data}
-	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), set.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
-	assert.Nil(this.T(), set.Complete())
-	assert.True(this.T(), testdata.RedisCompare[dataMxGet](this.major.Client(), this.meta.MajorKey(data.Field), data, data.ignore()))
-	assert.True(this.T(), testdata.MongoCompare[dataMxGet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data, data.ignore()))
-
-	data.noSave = true
-	set = &Set[dataMxGet]{Meta: &this.meta, Key: data.Field, Data: data}
-	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), set.Prepare())
-	assert.Nil(this.T(), set.Complete())
-
-	data.noSave = false
-	set = &Set[dataMxGet]{Meta: nil, Key: data.Field, Data: data}
-	assert.NotNil(this.T(), set.Prepare())
-
-	this.meta.tableEmpty = true
-	set = &Set[dataMxGet]{Meta: &this.meta, Key: data.Field, Data: data}
-	assert.NotNil(this.T(), set.Prepare())
-
-	this.meta.tableEmpty = false
-	this.meta.fieldEmpty = true
-	set = &Set[dataMxGet]{Meta: &this.meta, Key: data.Field, Data: data}
-	assert.NotNil(this.T(), set.Prepare())
-
-	this.meta.fieldEmpty = false
-	set = &Set[dataMxGet]{Meta: &this.meta, Key: "", Data: data}
-	assert.NotNil(this.T(), set.Prepare())
-
-	set = &Set[dataMxGet]{Meta: &this.meta, Key: data.Field, Data: nil}
-	assert.NotNil(this.T(), set.Prepare())
+type metaMxGet struct {
+	major bool
+	minor bool
+	table bool
+	field bool
 }
 
-type metaMxGet struct {
-	tableEmpty bool
-	fieldEmpty bool
+func (this *metaMxGet) Enable() (major, minor bool) {
+	return this.major, this.minor
 }
 
 func (this *metaMxGet) MajorKey(key any) string {
@@ -150,7 +138,7 @@ func (this *metaMxGet) MinorKey(key any) string {
 }
 
 func (this *metaMxGet) MinorTable() string {
-	if this.tableEmpty == false {
+	if this.table {
 		return "mxget_table"
 	} // if
 
@@ -158,7 +146,7 @@ func (this *metaMxGet) MinorTable() string {
 }
 
 func (this *metaMxGet) MinorField() string {
-	if this.fieldEmpty == false {
+	if this.field {
 		return "mxget_field"
 	} // if
 

@@ -62,6 +62,10 @@ func (this *Minor) SwitchDB(dbName string) error {
 		return fmt.Errorf("minor switch: client nil")
 	} // if
 
+	if dbName == "" {
+		return fmt.Errorf("minor switch: dbName empty")
+	} // if
+
 	this.database = this.client.Database(dbName)
 	return nil
 }

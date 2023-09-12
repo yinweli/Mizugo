@@ -26,7 +26,7 @@ type SuiteMxExist struct {
 func (this *SuiteMxExist) SetupSuite() {
 	this.Env = testdata.EnvSetup("test-redmos-mxexist")
 	this.major, _ = newMajor(testdata.RedisURI)
-	this.minor, _ = newMinor(testdata.MongoURI, this.meta.MinorTable()) // 這裡偷懶把表格名稱當資料庫名稱來用
+	this.minor, _ = newMinor(testdata.MongoURI, "mxexist")
 }
 
 func (this *SuiteMxExist) TearDownSuite() {
@@ -44,32 +44,35 @@ func (this *SuiteMxExist) TearDownTest() {
 func (this *SuiteMxExist) TestExist() {
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
-
 	key := []string{"mxexist-0001", "mxexist-0002", "mxexist-0003"}
-	exist := &Exist{Meta: &this.meta, Key: key}
-	exist.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	this.major.Client().Set(ctxs.Get().Ctx(), this.meta.MajorKey(key[0]), "value0", 0)
 	this.major.Client().Set(ctxs.Get().Ctx(), this.meta.MajorKey(key[1]), "value1", 0)
 
+	exist := &Exist{Meta: &this.meta, Key: key}
+	exist.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), exist.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), exist.Complete())
 	assert.Equal(this.T(), 2, exist.Count)
 
-	exist.Meta = nil
-	exist.Key = key
+	exist = &Exist{Meta: nil, Key: key}
+	exist.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), exist.Prepare())
 
-	exist.Meta = &this.meta
-	exist.Key = nil
+	exist = &Exist{Meta: &this.meta, Key: nil}
+	exist.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), exist.Prepare())
 
-	exist.Meta = &this.meta
-	exist.Key = []string{}
+	exist = &Exist{Meta: &this.meta, Key: []string{}}
+	exist.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), exist.Prepare())
 }
 
 type metaMxExist struct {
+}
+
+func (this *metaMxExist) Enable() (major, minor bool) {
+	return true, false
 }
 
 func (this *metaMxExist) MajorKey(key any) string {
