@@ -11,6 +11,10 @@ import (
 type MetaAuth struct {
 }
 
+func (this *MetaAuth) Enable() (major, minor bool) {
+	return true, true
+}
+
 func (this *MetaAuth) MajorKey(key any) string {
 	return fmt.Sprintf("auth:%v", key)
 }
