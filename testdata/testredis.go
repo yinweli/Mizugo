@@ -8,6 +8,17 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+// RedisExist 在redis中資料是否存在
+func RedisExist(client redis.Cmdable, key string) bool {
+	result, err := client.Exists(context.Background(), key).Result()
+
+	if err != nil {
+		return false
+	} // if
+
+	return result > 0
+}
+
 // RedisCompare 在redis中比對資料是否相同
 func RedisCompare[T any](client redis.Cmdable, key string, expected *T, cmpOpt ...cmp.Option) bool {
 	result, err := client.Get(context.Background(), key).Result()
