@@ -15,7 +15,7 @@ jobs:
           proto: [3.x]
           redis: [6]
           mongo: ['6.0']
-    name: ${{ matrix.os }} @ go ${{ matrix.go }} @ proto ${{ matrix.proto }} @ redis ${{ matrix.redis }} @ mongo ${{ matrix.mongo }}
+    name: ${{ matrix.os }} | go ${{ matrix.go }} | proto ${{ matrix.proto }} | redis ${{ matrix.redis }} | mongo ${{ matrix.mongo }}
     runs-on: ${{ matrix.os }}
     steps:
     - name: checkout

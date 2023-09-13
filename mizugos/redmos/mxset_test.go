@@ -45,95 +45,82 @@ func (this *SuiteMxSet) TearDownTest() {
 }
 
 func (this *SuiteMxSet) TestSet() {
-	this.meta.major = true
-	this.meta.minor = true
 	this.meta.table = true
 	this.meta.field = true
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
-	data := &dataMxSet{
+	dataAll := &dataMxSet{
 		Field: "mxset_redis+mongo",
 		Value: utils.RandString(testdata.RandStringLength, testdata.RandStringLetter),
 	}
-	set := &Set[dataMxSet]{Meta: &this.meta, Key: data.Field, Data: data}
-	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), set.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
-	assert.Nil(this.T(), set.Complete())
-	assert.True(this.T(), testdata.RedisCompare[dataMxSet](this.major.Client(), this.meta.MajorKey(data.Field), data, data.ignore()))
-	assert.True(this.T(), testdata.MongoCompare[dataMxSet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data, data.ignore()))
-
-	this.meta.major = true
-	this.meta.minor = false
-	data = &dataMxSet{
+	dataRedis := &dataMxSet{
 		Field: "mxset_redis",
 		Value: utils.RandString(testdata.RandStringLength, testdata.RandStringLetter),
 	}
-	set = &Set[dataMxSet]{Meta: &this.meta, Key: data.Field, Data: data}
-	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), set.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
-	assert.Nil(this.T(), set.Complete())
-	assert.True(this.T(), testdata.RedisCompare[dataMxSet](this.major.Client(), this.meta.MajorKey(data.Field), data, data.ignore()))
-	assert.False(this.T(), testdata.MongoCompare[dataMxSet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data, data.ignore()))
-
-	this.meta.major = false
-	this.meta.minor = true
-	data = &dataMxSet{
+	dataMongo := &dataMxSet{
 		Field: "mxset_mongo",
 		Value: utils.RandString(testdata.RandStringLength, testdata.RandStringLetter),
 	}
-	set = &Set[dataMxSet]{Meta: &this.meta, Key: data.Field, Data: data}
+
+	set := &Set[dataMxSet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: dataAll}
 	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), set.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), set.Complete())
-	assert.False(this.T(), testdata.RedisCompare[dataMxSet](this.major.Client(), this.meta.MajorKey(data.Field), data, data.ignore()))
-	assert.True(this.T(), testdata.MongoCompare[dataMxSet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data, data.ignore()))
+	assert.True(this.T(), testdata.RedisCompare[dataMxSet](this.major.Client(), this.meta.MajorKey(dataAll.Field), dataAll, dataAll.ignore()))
+	assert.True(this.T(), testdata.MongoCompare[dataMxSet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(dataAll.Field), dataAll, dataAll.ignore()))
 
-	this.meta.major = true
-	this.meta.minor = true
-	data.noSave = true
-	set = &Set[dataMxSet]{Meta: &this.meta, Key: data.Field, Data: data}
+	set = &Set[dataMxSet]{Meta: &this.meta, MajorEnable: true, MinorEnable: false, Key: dataRedis.Field, Data: dataRedis}
+	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	assert.Nil(this.T(), set.Prepare())
+	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+	assert.Nil(this.T(), set.Complete())
+	assert.True(this.T(), testdata.RedisCompare[dataMxSet](this.major.Client(), this.meta.MajorKey(dataRedis.Field), dataRedis, dataRedis.ignore()))
+	assert.False(this.T(), testdata.MongoCompare[dataMxSet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(dataRedis.Field), dataRedis, dataRedis.ignore()))
+
+	set = &Set[dataMxSet]{Meta: &this.meta, MajorEnable: false, MinorEnable: true, Key: dataMongo.Field, Data: dataMongo}
+	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	assert.Nil(this.T(), set.Prepare())
+	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+	assert.Nil(this.T(), set.Complete())
+	assert.False(this.T(), testdata.RedisCompare[dataMxSet](this.major.Client(), this.meta.MajorKey(dataMongo.Field), dataMongo, dataMongo.ignore()))
+	assert.True(this.T(), testdata.MongoCompare[dataMxSet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(dataMongo.Field), dataMongo, dataMongo.ignore()))
+
+	dataAll.noSave = true
+	set = &Set[dataMxSet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: dataAll}
 	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), set.Prepare())
 	assert.Nil(this.T(), set.Complete())
 
-	data.noSave = false
-	set = &Set[dataMxSet]{Meta: nil, Key: data.Field, Data: data}
+	dataAll.noSave = false
+	set = &Set[dataMxSet]{Meta: nil, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: dataAll}
 	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), set.Prepare())
 
-	set = &Set[dataMxSet]{Meta: &this.meta, Key: "", Data: data}
+	set = &Set[dataMxSet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: "", Data: dataAll}
 	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), set.Prepare())
 
-	set = &Set[dataMxSet]{Meta: &this.meta, Key: data.Field, Data: nil}
+	set = &Set[dataMxSet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: nil}
 	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), set.Prepare())
 
 	this.meta.table = false
 	this.meta.field = true
-	set = &Set[dataMxSet]{Meta: &this.meta, Key: data.Field, Data: data}
+	set = &Set[dataMxSet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: dataAll}
 	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), set.Prepare())
 
 	this.meta.table = true
 	this.meta.field = false
-	set = &Set[dataMxSet]{Meta: &this.meta, Key: data.Field, Data: data}
+	set = &Set[dataMxSet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: dataAll}
 	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), set.Prepare())
 }
 
 type metaMxSet struct {
-	major bool
-	minor bool
 	table bool
 	field bool
-}
-
-func (this *metaMxSet) Enable() (major, minor bool) {
-	return this.major, this.minor
 }
 
 func (this *metaMxSet) MajorKey(key any) string {

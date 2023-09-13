@@ -19,12 +19,14 @@ import (
 //   - 執行前設定好 Key 並且不能為空字串
 //   - 執行前設定好 Data 並且不能為nil
 type Set[T any] struct {
-	Behave                  // 行為物件
-	Meta   Metaer           // 元資料
-	Expire time.Duration    // 過期時間, 若為0表示不過期
-	Key    string           // 索引值
-	Data   *T               // 資料物件
-	set    *redis.StatusCmd // 命令結果
+	Behave                       // 行為物件
+	MajorEnable bool             // 啟用主要資料庫
+	MinorEnable bool             // 啟用次要資料庫
+	Meta        Metaer           // 元資料
+	Expire      time.Duration    // 過期時間, 若為0表示不過期
+	Key         string           // 索引值
+	Data        *T               // 資料物件
+	set         *redis.StatusCmd // 命令結果
 }
 
 // Prepare 前置處理
@@ -45,9 +47,7 @@ func (this *Set[T]) Prepare() error {
 		return nil
 	} // if
 
-	major, minor := this.Meta.Enable()
-
-	if major {
+	if this.MajorEnable {
 		key := this.Meta.MajorKey(this.Key)
 		data, err := json.Marshal(this.Data)
 
@@ -58,7 +58,7 @@ func (this *Set[T]) Prepare() error {
 		this.set = this.Major().Set(this.Ctx(), key, data, this.Expire)
 	} // if
 
-	if minor {
+	if this.MinorEnable {
 		if this.Meta.MinorTable() == "" {
 			return fmt.Errorf("set prepare: table empty")
 		} // if
@@ -81,9 +81,7 @@ func (this *Set[T]) Complete() error {
 		return nil
 	} // if
 
-	major, minor := this.Meta.Enable()
-
-	if major {
+	if this.MajorEnable {
 		data, err := this.set.Result()
 
 		if err != nil {
@@ -95,7 +93,7 @@ func (this *Set[T]) Complete() error {
 		} // if
 	} // if
 
-	if minor {
+	if this.MinorEnable {
 		key := this.Meta.MinorKey(this.Key)
 		table := this.Meta.MinorTable()
 		field := this.Meta.MinorField()

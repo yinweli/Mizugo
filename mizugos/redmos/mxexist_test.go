@@ -71,10 +71,6 @@ func (this *SuiteMxExist) TestExist() {
 type metaMxExist struct {
 }
 
-func (this *metaMxExist) Enable() (major, minor bool) {
-	return true, false
-}
-
 func (this *metaMxExist) MajorKey(key any) string {
 	return fmt.Sprintf("mxexist:%v", key)
 }

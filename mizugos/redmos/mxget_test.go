@@ -45,8 +45,6 @@ func (this *SuiteMxGet) TearDownTest() {
 }
 
 func (this *SuiteMxGet) TestGet() {
-	this.meta.major = true
-	this.meta.minor = true
 	this.meta.table = true
 	this.meta.field = true
 	majorSubmit := this.major.Submit()
@@ -55,7 +53,8 @@ func (this *SuiteMxGet) TestGet() {
 		Field: "mxget",
 		Value: utils.RandString(testdata.RandStringLength, testdata.RandStringLetter),
 	}
-	set := &Set[dataMxGet]{Meta: &this.meta, Key: data.Field, Data: data}
+
+	set := &Set[dataMxGet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}
 	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), set.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
@@ -63,70 +62,58 @@ func (this *SuiteMxGet) TestGet() {
 	assert.True(this.T(), testdata.RedisCompare[dataMxGet](this.major.Client(), this.meta.MajorKey(data.Field), data, data.ignore()))
 	assert.True(this.T(), testdata.MongoCompare[dataMxGet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data, data.ignore()))
 
-	get := &Get[dataMxGet]{Meta: &this.meta, Key: data.Field}
+	get := &Get[dataMxGet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field}
 	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), get.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), get.Complete())
 	assert.True(this.T(), cmp.Equal(data, get.Data, data.ignore()))
 
-	this.meta.major = true
-	this.meta.minor = false
-	get = &Get[dataMxGet]{Meta: &this.meta, Key: data.Field}
+	get = &Get[dataMxGet]{Meta: &this.meta, MajorEnable: true, MinorEnable: false, Key: data.Field}
 	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), get.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), get.Complete())
 	assert.True(this.T(), cmp.Equal(data, get.Data, data.ignore()))
 
-	this.meta.major = false
-	this.meta.minor = true
-	get = &Get[dataMxGet]{Meta: &this.meta, Key: data.Field}
+	get = &Get[dataMxGet]{Meta: &this.meta, MajorEnable: false, MinorEnable: true, Key: data.Field}
 	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), get.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), get.Complete())
 	assert.True(this.T(), cmp.Equal(data, get.Data, data.ignore()))
 
-	this.meta.major = true
-	this.meta.minor = true
-	get = &Get[dataMxGet]{Meta: &this.meta, Key: testdata.Unknown}
+	get = &Get[dataMxGet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: testdata.Unknown}
 	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), get.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), get.Complete())
 	assert.Nil(this.T(), get.Data)
 
-	get = &Get[dataMxGet]{Meta: nil, Key: data.Field}
+	get = &Get[dataMxGet]{Meta: nil, MajorEnable: true, MinorEnable: true, Key: data.Field}
 	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), get.Prepare())
 
-	get = &Get[dataMxGet]{Meta: &this.meta, Key: ""}
+	get = &Get[dataMxGet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: ""}
 	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), get.Prepare())
 
 	this.meta.table = false
 	this.meta.field = true
-	get = &Get[dataMxGet]{Meta: &this.meta, Key: data.Field}
+	get = &Get[dataMxGet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field}
 	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), get.Prepare())
 
 	this.meta.table = true
 	this.meta.field = false
-	get = &Get[dataMxGet]{Meta: &this.meta, Key: data.Field}
+	get = &Get[dataMxGet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field}
 	get.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), get.Prepare())
 }
 
 type metaMxGet struct {
-	major bool
-	minor bool
 	table bool
 	field bool
-}
-
-func (this *metaMxGet) Enable() (major, minor bool) {
-	return this.major, this.minor
 }
 
 func (this *metaMxGet) MajorKey(key any) string {
