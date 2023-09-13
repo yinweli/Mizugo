@@ -43,8 +43,6 @@ func (this *SuiteMxDel) TearDownTest() {
 }
 
 func (this *SuiteMxDel) TestDel() {
-	this.meta.major = true
-	this.meta.minor = true
 	this.meta.table = true
 	this.meta.field = true
 	majorSubmit := this.major.Submit()
@@ -53,7 +51,8 @@ func (this *SuiteMxDel) TestDel() {
 		Field: "mxdel_redis+mongo",
 		Value: utils.RandString(testdata.RandStringLength, testdata.RandStringLetter),
 	}
-	set := &Set[dataMxDel]{Meta: &this.meta, Key: data.Field, Data: data}
+
+	set := &Set[dataMxDel]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}
 	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), set.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
@@ -61,7 +60,7 @@ func (this *SuiteMxDel) TestDel() {
 	assert.True(this.T(), testdata.RedisCompare[dataMxDel](this.major.Client(), this.meta.MajorKey(data.Field), data))
 	assert.True(this.T(), testdata.MongoCompare[dataMxDel](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data))
 
-	del := &Del{Meta: &this.meta, Key: data.Field}
+	del := &Del{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field}
 	del.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), del.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
@@ -69,36 +68,30 @@ func (this *SuiteMxDel) TestDel() {
 	assert.False(this.T(), testdata.RedisExist(this.major.Client(), this.meta.MajorKey(data.Field)))
 	assert.False(this.T(), testdata.MongoExist(this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field)))
 
-	del = &Del{Meta: nil, Key: data.Field}
+	del = &Del{Meta: nil, MajorEnable: true, MinorEnable: true, Key: data.Field}
 	del.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), del.Prepare())
 
-	del = &Del{Meta: &this.meta, Key: ""}
+	del = &Del{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: ""}
 	del.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), del.Prepare())
 
 	this.meta.table = false
 	this.meta.field = true
-	del = &Del{Meta: &this.meta, Key: data.Field}
+	del = &Del{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field}
 	del.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), del.Prepare())
 
 	this.meta.table = true
 	this.meta.field = false
-	del = &Del{Meta: &this.meta, Key: data.Field}
+	del = &Del{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field}
 	del.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), del.Prepare())
 }
 
 type metaMxDel struct {
-	major bool
-	minor bool
 	table bool
 	field bool
-}
-
-func (this *metaMxDel) Enable() (major, minor bool) {
-	return this.major, this.minor
 }
 
 func (this *metaMxDel) MajorKey(key any) string {

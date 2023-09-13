@@ -17,11 +17,13 @@ import (
 //   - 執行前設定好 Data, 如果為nil, 則內部程序會自己建立
 //   - 執行後可用 Data 來取得資料
 type Get[T any] struct {
-	Behave                  // 行為物件
-	Meta   Metaer           // 元資料
-	Key    string           // 索引值
-	Data   *T               // 資料物件
-	get    *redis.StringCmd // 命令結果
+	Behave                       // 行為物件
+	MajorEnable bool             // 啟用主要資料庫
+	MinorEnable bool             // 啟用次要資料庫
+	Meta        Metaer           // 元資料
+	Key         string           // 索引值
+	Data        *T               // 資料物件
+	get         *redis.StringCmd // 命令結果
 }
 
 // Prepare 前置處理
@@ -34,14 +36,12 @@ func (this *Get[T]) Prepare() error {
 		return fmt.Errorf("get prepare: key empty")
 	} // if
 
-	major, minor := this.Meta.Enable()
-
-	if major {
+	if this.MajorEnable {
 		key := this.Meta.MajorKey(this.Key)
 		this.get = this.Major().Get(this.Ctx(), key)
 	} // if
 
-	if minor {
+	if this.MinorEnable {
 		if this.Meta.MinorTable() == "" {
 			return fmt.Errorf("get prepare: table empty")
 		} // if
@@ -60,9 +60,7 @@ func (this *Get[T]) Complete() error {
 		return fmt.Errorf("get complete: meta nil")
 	} // if
 
-	major, minor := this.Meta.Enable()
-
-	if major {
+	if this.MajorEnable {
 		data, err := this.get.Result()
 
 		if err != nil && err != redis.Nil {
@@ -78,11 +76,11 @@ func (this *Get[T]) Complete() error {
 				return fmt.Errorf("get complete: %w: %v", err, this.Key)
 			} // if
 
-			minor = false // 如果主要資料庫讀取成功, 就不必執行次要資料庫了
+			return nil // 如果主要資料庫讀取成功, 就不必執行次要資料庫了
 		} // if
 	} // if
 
-	if minor {
+	if this.MinorEnable {
 		key := this.Meta.MinorKey(this.Key)
 		table := this.Meta.MinorTable()
 		field := this.Meta.MinorField()

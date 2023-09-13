@@ -24,23 +24,18 @@ func (this *Exist) Prepare() error {
 		return fmt.Errorf("exist prepare: meta nil")
 	} // if
 
-	major, _ := this.Meta.Enable()
-
-	if major {
-		if len(this.Key) == 0 {
-			return fmt.Errorf("exist prepare: key empty")
-		} // if
-
-		key := make([]string, 0, len(this.Key))
-
-		for _, itor := range this.Key {
-			key = append(key, this.Meta.MajorKey(itor))
-		} // for
-
-		this.Count = 0
-		this.exist = this.Major().Exists(this.Ctx(), key...)
+	if len(this.Key) == 0 {
+		return fmt.Errorf("exist prepare: key empty")
 	} // if
 
+	key := make([]string, 0, len(this.Key))
+
+	for _, itor := range this.Key {
+		key = append(key, this.Meta.MajorKey(itor))
+	} // for
+
+	this.Count = 0
+	this.exist = this.Major().Exists(this.Ctx(), key...)
 	return nil
 }
 
@@ -50,17 +45,12 @@ func (this *Exist) Complete() error {
 		return fmt.Errorf("exist complete: meta nil")
 	} // if
 
-	major, _ := this.Meta.Enable()
+	count, err := this.exist.Result()
 
-	if major {
-		count, err := this.exist.Result()
-
-		if err != nil {
-			return fmt.Errorf("exist complete: %w: %v", err, this.Key)
-		} // if
-
-		this.Count = int(count)
+	if err != nil {
+		return fmt.Errorf("exist complete: %w: %v", err, this.Key)
 	} // if
 
+	this.Count = int(count)
 	return nil
 }
