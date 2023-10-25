@@ -41,12 +41,12 @@ func main() {
 
 // initialize 初始化處理
 func initialize() error {
-	server.logger = features.NewLogger()
-	server.pool = features.NewPool()
-	server.metrics = features.NewMetrics()
-	server.auth = entrys.NewAuth()
-	server.json = entrys.NewJson()
-	server.proto = entrys.NewProto()
+	client.logger = features.NewLogger()
+	client.pool = features.NewPool()
+	client.metrics = features.NewMetrics()
+	client.auth = entrys.NewAuth()
+	client.json = entrys.NewJson()
+	client.proto = entrys.NewProto()
 
 	mizugos.Configmgr().AddPath(defines.ConfigPath)
 
@@ -54,27 +54,27 @@ func initialize() error {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := server.logger.Initialize(); err != nil {
+	if err := client.logger.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := server.pool.Initialize(); err != nil {
+	if err := client.pool.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := server.metrics.Initialize(); err != nil {
+	if err := client.metrics.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := server.auth.Initialize(); err != nil {
+	if err := client.auth.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := server.json.Initialize(); err != nil {
+	if err := client.json.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
-	if err := server.proto.Initialize(); err != nil {
+	if err := client.proto.Initialize(); err != nil {
 		return fmt.Errorf("initialize: %w", err)
 	} // if
 
@@ -83,16 +83,16 @@ func initialize() error {
 
 // finalize 結束處理
 func finalize() {
-	server.auth.Finalize()
-	server.json.Finalize()
-	server.proto.Finalize()
-	server.metrics.Finalize()
-	server.pool.Finalize()
-	server.logger.Finalize()
+	client.auth.Finalize()
+	client.json.Finalize()
+	client.proto.Finalize()
+	client.metrics.Finalize()
+	client.pool.Finalize()
+	client.logger.Finalize()
 }
 
-// server 伺服器資料
-var server struct {
+// client 客戶端資料
+var client struct {
 	logger  *features.Logger  // 日誌資料
 	pool    *features.Pool    // 執行緒池資料
 	metrics *features.Metrics // 度量資料
