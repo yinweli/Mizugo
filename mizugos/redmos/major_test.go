@@ -64,7 +64,7 @@ func BenchmarkMajorSet(b *testing.B) {
 	submit := target.Submit()
 
 	for i := 0; i < b.N; i++ {
-		value := utils.RandString(testdata.RandStringLength, testdata.RandStringLetter)
+		value := utils.RandStringDefault()
 		_, _ = submit.Set(ctxs.Get().Ctx(), value, value, testdata.RedisTimeout).Result()
 	} // for
 
@@ -76,7 +76,7 @@ func BenchmarkMajorSet(b *testing.B) {
 func BenchmarkMajorGet(b *testing.B) {
 	target, _ := newMajor(testdata.RedisURI)
 	submit := target.Submit()
-	value := utils.RandString(testdata.RandStringLength, testdata.RandStringLetter)
+	value := utils.RandStringDefault()
 	_, _ = submit.Set(ctxs.Get().Ctx(), value, value, 0).Result()
 
 	for i := 0; i < b.N; i++ {

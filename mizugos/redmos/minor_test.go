@@ -80,14 +80,14 @@ func BenchmarkMinorSet(b *testing.B) {
 
 	name := "benchmark minor"
 	data := &myData{
-		Key:  utils.RandString(testdata.RandStringLength, testdata.RandStringLetter),
-		Data: utils.RandString(testdata.RandStringLength, testdata.RandStringLetter),
+		Key:  utils.RandStringDefault(),
+		Data: utils.RandStringDefault(),
 	}
 	target, _ := newMinor(testdata.MongoURI, name)
 	submit := target.Submit()
 
 	for i := 0; i < b.N; i++ {
-		data.Data = utils.RandString(testdata.RandStringLength, testdata.RandStringLetter)
+		data.Data = utils.RandStringDefault()
 		_, _ = submit.Table(name).ReplaceOne(ctxs.Get().Ctx(), bson.D{{Key: "key", Value: data.Key}}, data, options.Replace().SetUpsert(true))
 	} // for
 

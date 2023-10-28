@@ -77,6 +77,6 @@ func RandString(length int, letter string) string {
 // RandStringDefault 取得預設配置的隨機字串
 func RandStringDefault() string {
 	const length = 10
-	const letter = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	const letter = StrNumberAlpha
 	return RandString(length, letter)
 }

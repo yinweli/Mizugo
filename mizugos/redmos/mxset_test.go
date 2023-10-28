@@ -51,15 +51,15 @@ func (this *SuiteMxSet) TestSet() {
 	minorSubmit := this.minor.Submit()
 	dataAll := &dataMxSet{
 		Field: "mxset_redis+mongo",
-		Value: utils.RandString(testdata.RandStringLength, testdata.RandStringLetter),
+		Value: utils.RandStringDefault(),
 	}
 	dataRedis := &dataMxSet{
 		Field: "mxset_redis",
-		Value: utils.RandString(testdata.RandStringLength, testdata.RandStringLetter),
+		Value: utils.RandStringDefault(),
 	}
 	dataMongo := &dataMxSet{
 		Field: "mxset_mongo",
-		Value: utils.RandString(testdata.RandStringLength, testdata.RandStringLetter),
+		Value: utils.RandStringDefault(),
 	}
 
 	set := &Set[dataMxSet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: dataAll}

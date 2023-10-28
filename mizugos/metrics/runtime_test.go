@@ -59,7 +59,7 @@ func BenchmarkRuntimeRec(b *testing.B) {
 	metricsmgr := NewMetricsmgr()
 	_ = metricsmgr.Initialize(8080)
 
-	target := metricsmgr.NewRuntime(utils.RandString(10, testdata.RandStringLetter))
+	target := metricsmgr.NewRuntime(utils.RandStringDefault())
 
 	for i := 0; i < b.N; i++ {
 		target.Rec()()
@@ -72,7 +72,7 @@ func BenchmarkRuntimeString(b *testing.B) {
 	metricsmgr := NewMetricsmgr()
 	_ = metricsmgr.Initialize(8080)
 
-	target := metricsmgr.NewRuntime(utils.RandString(10, testdata.RandStringLetter))
+	target := metricsmgr.NewRuntime(utils.RandStringDefault())
 	target.Rec()()
 	target.Rec()()
 	target.Rec()()

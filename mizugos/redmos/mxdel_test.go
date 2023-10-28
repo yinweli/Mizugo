@@ -49,7 +49,7 @@ func (this *SuiteMxDel) TestDel() {
 	minorSubmit := this.minor.Submit()
 	data := &dataMxDel{
 		Field: "mxdel_redis+mongo",
-		Value: utils.RandString(testdata.RandStringLength, testdata.RandStringLetter),
+		Value: utils.RandStringDefault(),
 	}
 
 	set := &Set[dataMxDel]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}

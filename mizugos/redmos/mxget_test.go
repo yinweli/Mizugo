@@ -51,7 +51,7 @@ func (this *SuiteMxGet) TestGet() {
 	minorSubmit := this.minor.Submit()
 	data := &dataMxGet{
 		Field: "mxget",
-		Value: utils.RandString(testdata.RandStringLength, testdata.RandStringLetter),
+		Value: utils.RandStringDefault(),
 	}
 
 	set := &Set[dataMxGet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}
