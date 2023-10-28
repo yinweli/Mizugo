@@ -5,7 +5,6 @@ import (
 	"net"
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos/events"
 	"github.com/yinweli/Mizugo/mizugos/labels"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/procs"
@@ -25,7 +24,7 @@ func NewEntity(entityID EntityID) *Entity {
 // 建立實體時, 需要遵循以下流程
 //   - 到實體管理器新增實體
 //   - 如果實體需要使用模組相關功能, 呼叫 SetModulemap 設置 entitys.Modulemap
-//   - 如果實體需要使用事件相關功能, 呼叫 SetEventmgr 設置 events.Eventmgr
+//   - 如果實體需要使用事件相關功能, 呼叫 SetEventmap 設置 entitys.Eventmap
 //   - 如果實體將要代表某個連線, 呼叫 SetProcess 設置 procs.Processor, 呼叫 SetSession 設置 nets.Sessioner
 //   - 新增模組到實體中
 //   - 執行實體的初始化處理
@@ -36,7 +35,7 @@ func NewEntity(entityID EntityID) *Entity {
 // 需要在實體初始化之前設置 entitys.Modulemap
 //
 // 使用者可以到實體訂閱事件, 事件可以被訂閱多次, 發布事件時會每個訂閱者都會執行一次;
-// 需要在實體初始化之前設置 events.Eventmgr
+// 需要在實體初始化之前設置 entitys.Eventmap
 //
 // 使用者可以到實體發布事件, 發布事件有以下模式
 //   - 單次事件: 事件只執行一次
@@ -56,13 +55,13 @@ func NewEntity(entityID EntityID) *Entity {
 // 實體可以設置會話功能, 負責網路相關功能;
 // 需要在實體初始化之前設置 nets.Sessioner
 type Entity struct {
-	*labels.Labelobj                                  // 標籤物件
-	entityID         EntityID                         // 實體編號
-	once             utils.SyncOnce                   // 單次執行物件
-	modulemap        utils.SyncAttr[*Modulemap]       // 模組列表
-	eventmgr         utils.SyncAttr[*events.Eventmgr] // 事件管理器
-	process          utils.SyncAttr[procs.Processor]  // 處理物件
-	session          utils.SyncAttr[nets.Sessioner]   // 會話物件
+	*labels.Labelobj                                 // 標籤物件
+	entityID         EntityID                        // 實體編號
+	once             utils.SyncOnce                  // 單次執行物件
+	modulemap        utils.SyncAttr[*Modulemap]      // 模組列表
+	eventmap         utils.SyncAttr[*Eventmap]       // 事件列表
+	process          utils.SyncAttr[procs.Processor] // 處理物件
+	session          utils.SyncAttr[nets.Sessioner]  // 會話物件
 }
 
 // ===== 基礎功能 =====
@@ -101,26 +100,26 @@ func (this *Entity) Initialize(wrong Wrong) (err error) {
 			} // if
 		} // for
 
-		eventmgr := this.eventmgr.Get()
+		eventmap := this.eventmap.Get()
 
-		if eventmgr == nil {
-			err = fmt.Errorf("entity initialize: eventmgr nil")
+		if eventmap == nil {
+			err = fmt.Errorf("entity initialize: eventmap nil")
 			return
 		} // if
 
-		eventmgr.Sub(EventRecv, func(param any) {
+		eventmap.Sub(EventRecv, func(param any) {
 			if err := this.process.Get().Process(param); err != nil {
 				wrong.Do(fmt.Errorf("entity recv: %w", err))
 			} // if
 		})
-		eventmgr.Sub(EventShutdown, func(_ any) {
+		eventmap.Sub(EventShutdown, func(_ any) {
 			if session := this.session.Get(); session != nil {
 				session.Stop()
 			} // if
 		})
-		eventmgr.PubFixed(EventUpdate, nil, UpdateInterval)
+		eventmap.PubFixed(EventUpdate, nil, UpdateInterval)
 
-		if err = eventmgr.Initialize(); err != nil {
+		if err = eventmap.Initialize(); err != nil {
 			err = fmt.Errorf("entity initialize: %w", err)
 			return
 		} // if
@@ -135,10 +134,10 @@ func (this *Entity) Finalize() {
 		return
 	} // if
 
-	if eventmgr := this.eventmgr.Get(); eventmgr != nil {
-		eventmgr.PubOnce(EventDispose, nil)
-		eventmgr.PubOnce(EventShutdown, nil)
-		eventmgr.Finalize()
+	if eventmap := this.eventmap.Get(); eventmap != nil {
+		eventmap.PubOnce(EventDispose, nil)
+		eventmap.PubOnce(EventShutdown, nil)
+		eventmap.Finalize()
 	} // if
 }
 
@@ -147,7 +146,7 @@ func (this *Entity) Bundle() *nets.Bundle {
 	return &nets.Bundle{
 		Encode:  this.process.Get().Encode,
 		Decode:  this.process.Get().Decode,
-		Publish: this.eventmgr.Get().PubOnce,
+		Publish: this.eventmap.Get().PubOnce,
 	}
 }
 
@@ -199,44 +198,44 @@ func (this *Entity) GetModule(moduleID ModuleID) Moduler {
 
 // ===== 事件功能 =====
 
-// SetEventmgr 設定事件管理器, 初始化完成後就不能設定事件物件
-func (this *Entity) SetEventmgr(eventmgr *events.Eventmgr) error {
+// SetEventmap 設定事件列表, 初始化完成後就不能設定事件物件
+func (this *Entity) SetEventmap(eventmap *Eventmap) error {
 	if this.once.Done() {
-		return fmt.Errorf("entity set eventmgr: overdue")
+		return fmt.Errorf("entity set eventmap: overdue")
 	} // if
 
-	this.eventmgr.Set(eventmgr)
+	this.eventmap.Set(eventmap)
 	return nil
 }
 
-// GetEventmgr 取得事件管理器
-func (this *Entity) GetEventmgr() *events.Eventmgr {
-	return this.eventmgr.Get()
+// GetEventmap 取得事件列表
+func (this *Entity) GetEventmap() *Eventmap {
+	return this.eventmap.Get()
 }
 
 // Subscribe 訂閱事件
-func (this *Entity) Subscribe(name string, process events.Process) string {
-	return this.eventmgr.Get().Sub(name, process)
+func (this *Entity) Subscribe(name string, process Process) string {
+	return this.eventmap.Get().Sub(name, process)
 }
 
 // Unsubscribe 取消訂閱事件
 func (this *Entity) Unsubscribe(subID string) {
-	this.eventmgr.Get().Unsub(subID)
+	this.eventmap.Get().Unsub(subID)
 }
 
 // PublishOnce 發布單次事件
 func (this *Entity) PublishOnce(name string, param any) {
-	this.eventmgr.Get().PubOnce(name, param)
+	this.eventmap.Get().PubOnce(name, param)
 }
 
 // PublishDelay 發布延遲事件, 事件會延遲一段時間才發布, 但仍是單次事件
 func (this *Entity) PublishDelay(name string, param any, delay time.Duration) {
-	this.eventmgr.Get().PubDelay(name, param, delay)
+	this.eventmap.Get().PubDelay(name, param, delay)
 }
 
 // PublishFixed 發布定時事件, 請注意! 由於不能刪除定時事件, 因此發布定時事件前請多想想
 func (this *Entity) PublishFixed(name string, param any, interval time.Duration) {
-	this.eventmgr.Get().PubFixed(name, param, interval)
+	this.eventmap.Get().PubFixed(name, param, interval)
 }
 
 // ===== 處理功能 =====

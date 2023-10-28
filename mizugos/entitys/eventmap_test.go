@@ -1,4 +1,4 @@
-package events
+package entitys
 
 import (
 	"sync/atomic"
@@ -11,29 +11,29 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestEventmgr(t *testing.T) {
-	suite.Run(t, new(SuiteEventmgr))
+func TestEventmap(t *testing.T) {
+	suite.Run(t, new(SuiteEventmap))
 }
 
-type SuiteEventmgr struct {
+type SuiteEventmap struct {
 	suite.Suite
 	testdata.Env
 }
 
-func (this *SuiteEventmgr) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-events-eventmgr")
+func (this *SuiteEventmap) SetupSuite() {
+	this.Env = testdata.EnvSetup("test-events-eventmap")
 }
 
-func (this *SuiteEventmgr) TearDownSuite() {
+func (this *SuiteEventmap) TearDownSuite() {
 	testdata.EnvRestore(this.Env)
 }
 
-func (this *SuiteEventmgr) TearDownTest() {
+func (this *SuiteEventmap) TearDownTest() {
 	testdata.Leak(this.T(), true)
 }
 
-func (this *SuiteEventmgr) TestEventmgr() {
-	target := NewEventmgr(100)
+func (this *SuiteEventmap) TestEventmap() {
+	target := NewEventmap(100)
 	assert.NotNil(this.T(), target)
 	target.Finalize() // 初始化前執行, 這次應該不執行
 	assert.Nil(this.T(), target.Initialize())
@@ -42,8 +42,8 @@ func (this *SuiteEventmgr) TestEventmgr() {
 	target.Finalize() // 故意結束兩次, 這次應該不執行
 }
 
-func (this *SuiteEventmgr) TestPubOnce() {
-	target := NewEventmgr(100)
+func (this *SuiteEventmap) TestPubOnce() {
+	target := NewEventmap(100)
 	assert.Nil(this.T(), target.Initialize())
 
 	value := "value once"
@@ -63,8 +63,8 @@ func (this *SuiteEventmgr) TestPubOnce() {
 	target.Unsub("")
 }
 
-func (this *SuiteEventmgr) TestPubDelay() {
-	target := NewEventmgr(100)
+func (this *SuiteEventmap) TestPubDelay() {
+	target := NewEventmap(100)
 	assert.Nil(this.T(), target.Initialize())
 
 	value := "value delay"
@@ -84,8 +84,8 @@ func (this *SuiteEventmgr) TestPubDelay() {
 	target.Unsub("")
 }
 
-func (this *SuiteEventmgr) TestPubFixed() {
-	target := NewEventmgr(100)
+func (this *SuiteEventmap) TestPubFixed() {
+	target := NewEventmap(100)
 	assert.Nil(this.T(), target.Initialize())
 
 	value := "value fixed"
@@ -105,7 +105,7 @@ func (this *SuiteEventmgr) TestPubFixed() {
 	target.Unsub("")
 }
 
-func (this *SuiteEventmgr) TestPubsub() {
+func (this *SuiteEventmap) TestPubsub() {
 	target := newPubsub()
 	value := "value pubsub"
 	valid := 0
@@ -144,7 +144,7 @@ func (this *SuiteEventmgr) TestPubsub() {
 	assert.Equal(this.T(), 1, valid2)
 }
 
-func (this *SuiteEventmgr) TestSubID() {
+func (this *SuiteEventmap) TestSubID() {
 	name1 := "subID"
 	serial1 := int64(1)
 	name2, serial2, ok := subIDDecode(subIDEncode(name1, serial1))

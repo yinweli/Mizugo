@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/events"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/testdata"
@@ -40,7 +39,7 @@ func (this *SuiteEntity) TestEntity() {
 	target := NewEntity(EntityID(1))
 	assert.NotNil(this.T(), target)
 	assert.Nil(this.T(), target.SetModulemap(NewModulemap()))
-	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
+	assert.Nil(this.T(), target.SetEventmap(NewEventmap(1)))
 	assert.Nil(this.T(), target.SetProcess(procs.NewJson()))
 	assert.Nil(this.T(), target.Initialize(nil))
 	bundle := target.Bundle()
@@ -55,7 +54,7 @@ func (this *SuiteEntity) TestEntity() {
 func (this *SuiteEntity) TestInitialize() {
 	target := NewEntity(EntityID(1))
 	assert.Nil(this.T(), target.SetModulemap(NewModulemap()))
-	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
+	assert.Nil(this.T(), target.SetEventmap(NewEventmap(1)))
 	target.Finalize() // 初始化前執行, 這次應該不執行
 	assert.Nil(this.T(), target.Initialize(nil))
 	assert.NotNil(this.T(), target.Initialize(nil)) // 故意啟動兩次, 這次應該失敗
@@ -64,7 +63,7 @@ func (this *SuiteEntity) TestInitialize() {
 
 	target = NewEntity(EntityID(1))
 	assert.Nil(this.T(), target.SetModulemap(NewModulemap()))
-	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
+	assert.Nil(this.T(), target.SetEventmap(NewEventmap(1)))
 	module := newModuleTester(true, true, ModuleID(1))
 	assert.Nil(this.T(), target.AddModule(module))
 	assert.Nil(this.T(), target.Initialize(nil))
@@ -74,13 +73,13 @@ func (this *SuiteEntity) TestInitialize() {
 
 	target = NewEntity(EntityID(1))
 	assert.Nil(this.T(), target.SetModulemap(NewModulemap()))
-	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
+	assert.Nil(this.T(), target.SetEventmap(NewEventmap(1)))
 	assert.Nil(this.T(), target.AddModule(newModuleTester(false, true, ModuleID(1))))
 	assert.NotNil(this.T(), target.Initialize(nil))
 
 	target = NewEntity(EntityID(1))
 	assert.Nil(this.T(), target.SetModulemap(NewModulemap()))
-	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
+	assert.Nil(this.T(), target.SetEventmap(NewEventmap(1)))
 	assert.Nil(this.T(), target.AddModule(newModuleTester(true, false, ModuleID(1))))
 	assert.NotNil(this.T(), target.Initialize(nil))
 
@@ -95,7 +94,7 @@ func (this *SuiteEntity) TestInitialize() {
 func (this *SuiteEntity) TestModule() {
 	target := NewEntity(EntityID(1))
 	assert.Nil(this.T(), target.SetModulemap(NewModulemap()))
-	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
+	assert.Nil(this.T(), target.SetEventmap(NewEventmap(1)))
 
 	assert.NotNil(this.T(), target.GetModulemap())
 
@@ -112,10 +111,10 @@ func (this *SuiteEntity) TestModule() {
 func (this *SuiteEntity) TestEvent() {
 	target := NewEntity(EntityID(1))
 	assert.Nil(this.T(), target.SetModulemap(NewModulemap()))
-	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
+	assert.Nil(this.T(), target.SetEventmap(NewEventmap(1)))
 	assert.Nil(this.T(), target.Initialize(nil))
 
-	assert.NotNil(this.T(), target.GetEventmgr())
+	assert.NotNil(this.T(), target.GetEventmap())
 
 	onceValue := "once"
 	onceValid := atomic.Bool{}
@@ -154,7 +153,7 @@ func (this *SuiteEntity) TestEvent() {
 func (this *SuiteEntity) TestProcess() {
 	target := NewEntity(EntityID(1))
 	assert.Nil(this.T(), target.SetModulemap(NewModulemap()))
-	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
+	assert.Nil(this.T(), target.SetEventmap(NewEventmap(1)))
 
 	process := procs.NewJson()
 	assert.Nil(this.T(), target.SetProcess(process))
@@ -171,7 +170,7 @@ func (this *SuiteEntity) TestProcess() {
 func (this *SuiteEntity) TestSession() {
 	target := NewEntity(EntityID(1))
 	assert.Nil(this.T(), target.SetModulemap(NewModulemap()))
-	assert.Nil(this.T(), target.SetEventmgr(events.NewEventmgr(1)))
+	assert.Nil(this.T(), target.SetEventmap(NewEventmap(1)))
 
 	conn, _ := net.Dial("tcp", net.JoinHostPort("google.com", "80"))
 	session := nets.NewTCPSession(conn)
