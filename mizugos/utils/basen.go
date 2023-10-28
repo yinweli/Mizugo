@@ -74,7 +74,7 @@ func FromBaseN(model, input string) (uint64, error) {
 		index := strings.IndexRune(model, itor)
 
 		if index == -1 {
-			return 0, fmt.Errorf("invalid character %v in %v", itor, input)
+			return 0, fmt.Errorf("fromBaseN: invalid character %v in %v", itor, input)
 		} // if
 
 		value += uint64(index)

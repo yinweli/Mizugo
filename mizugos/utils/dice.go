@@ -30,7 +30,7 @@ func (this *Dice) Clear() {
 // One 填入一筆資料
 func (this *Dice) One(payload any, weight int64) error {
 	if weight < 0 {
-		return fmt.Errorf("weight < 0")
+		return fmt.Errorf("dice one: weight < 0")
 	} // if
 
 	if weight == 0 {
@@ -48,12 +48,12 @@ func (this *Dice) One(payload any, weight int64) error {
 // Fill 填入多筆資料
 func (this *Dice) Fill(payload []any, weight []int64) error {
 	if len(payload) != len(weight) {
-		return fmt.Errorf("len mismatch")
+		return fmt.Errorf("dice fill: len mismatch")
 	} // if
 
 	for i := range payload {
 		if err := this.One(payload[i], weight[i]); err != nil {
-			return fmt.Errorf("fill: %w", err)
+			return fmt.Errorf("dice fill: %w", err)
 		} // if
 	} // for
 
@@ -69,7 +69,7 @@ func (this *Dice) Complete(payload any, max int64) error {
 	} // if
 
 	if err := this.One(payload, weight); err != nil {
-		return fmt.Errorf("complete: %w", err)
+		return fmt.Errorf("dice complete: %w", err)
 	} // if
 
 	return nil
