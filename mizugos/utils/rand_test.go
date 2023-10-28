@@ -54,4 +54,8 @@ func (this *SuiteRand) TestRand() {
 	assert.NotNil(this.T(), values)
 	assert.Len(this.T(), values, 64)
 	fmt.Println(values)
+	values = RandStringDefault()
+	assert.NotNil(this.T(), values)
+	assert.Len(this.T(), values, 10)
+	fmt.Println(values)
 }

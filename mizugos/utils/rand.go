@@ -64,12 +64,19 @@ func RandReal64n(min, max int64) int64 {
 // RandString 取得指定位數的隨機字串
 func RandString(length int, letter string) string {
 	builder := bytes.Buffer{}
-	max := len(letter) - 1
+	lettern := len(letter) - 1
 
 	for i := 0; i < length; i++ {
-		index := RandIntn(0, max)
+		index := RandIntn(0, lettern)
 		builder.WriteByte(letter[index])
 	} // for
 
 	return builder.String()
+}
+
+// RandStringDefault 取得預設配置的隨機字串
+func RandStringDefault() string {
+	const length = 10
+	const letter = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	return RandString(length, letter)
 }
