@@ -10,28 +10,28 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestString(t *testing.T) {
-	suite.Run(t, new(SuiteString))
+func TestExpvar(t *testing.T) {
+	suite.Run(t, new(SuiteExpvar))
 }
 
-type SuiteString struct {
+type SuiteExpvar struct {
 	suite.Suite
 	testdata.Env
 }
 
-func (this *SuiteString) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-utils-string")
+func (this *SuiteExpvar) SetupSuite() {
+	this.Env = testdata.EnvSetup("test-utils-expvar")
 }
 
-func (this *SuiteString) TearDownSuite() {
+func (this *SuiteExpvar) TearDownSuite() {
 	testdata.EnvRestore(this.Env)
 }
 
-func (this *SuiteString) TearDownTest() {
+func (this *SuiteExpvar) TearDownTest() {
 	testdata.Leak(this.T(), true)
 }
 
-func (this *SuiteString) TestExpvarStr() {
+func (this *SuiteExpvar) TestExpvarStr() {
 	expvarStat := []ExpvarStat{
 		{"value1", nil},
 		{"value2", 1001},
@@ -46,7 +46,7 @@ func (this *SuiteString) TestExpvarStr() {
 	assert.Equal(this.T(), expected, ExpvarStr(expvarStat))
 }
 
-func (this *SuiteString) TestExpvarStat() {
+func (this *SuiteExpvar) TestExpvarStat() {
 	assert.True(this.T(), ExpvarStat{Name: "", Data: nil}.stringType())
 	assert.False(this.T(), ExpvarStat{Name: "", Data: 1001}.stringType())
 	assert.True(this.T(), ExpvarStat{Name: "", Data: "data"}.stringType())

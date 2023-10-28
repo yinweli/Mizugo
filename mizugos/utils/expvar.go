@@ -7,10 +7,6 @@ import (
 	"time"
 )
 
-const StrAlphaLower = "abcdefghijklmnopqrstuvwxyz" // 小寫英文字母列表
-const StrAlphaUpper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" // 大寫英文字母列表
-const StrNumber = "0123456789"                     // 數字列表
-
 // ExpvarStr 取得度量字串
 func ExpvarStr(expvarStat []ExpvarStat) string {
 	builder := &strings.Builder{}
