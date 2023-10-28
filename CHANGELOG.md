@@ -6,8 +6,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Planning]
 - Configmgr新增從遠端讀取配置(viper的ReadRemoteConfig)
-- IAP組件(Apple / Google)
-    - https://github.com/awa/go-iap
 - 第三方登入組件(Apple / Google / FB)
     - Apple
         - https://github.com/pikann/go-verify-apple-id-token/tree/master
@@ -20,6 +18,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - FB
         - https://developers.facebook.com/docs/graph-api/reference/v17.0/debug_token
         - https://blog.csdn.net/huqiankunlol/article/details/102721611
-- redmo的mix操作要可以選擇 使用redis+mongo / 只用redis / 只用mongo
 
 ## [Unrelease]

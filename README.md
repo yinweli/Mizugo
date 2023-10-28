@@ -80,16 +80,31 @@ func main() {
 請參閱[客戶端組件說明][client-unity]  
 請參閱[proto組件說明][proto-unity]  
 
+# 軟體包階層
+以下為[mizugo]內部軟體包的階層  
+下面的軟體包可以引用上面的軟體包  
+上面的軟體包不能引用下面的軟體包  
+相同階層的不能互相引用
+
+| 軟體包名稱列表                                     |
+|:---------------------------------------------------|
+| testdata                                           |
+| ctxs, helps, msgs                                  |
+| cryptos, iaps, nets, pools, procs                  |
+| configs, entitys, labels, loggers, metrics, redmos |
+
+
 # 專案目錄說明
 
 | 目錄                   | 說明                            |
 |:-----------------------|:--------------------------------|
-| mizugos                | 核心程式碼                      |
+| mizugos                | mizugo程式碼                    |
 | mizugos/configs        | 配置組件                        |
 | mizugos/cryptos        | 加密/解密組件                   |
 | mizugos/ctxs           | context組件                     |
-| mizugos/entitys        | 實體與模組組件                  |
-| mizugos/events         | 事件組件                        |
+| mizugos/entitys        | 實體, 模組, 事件組件            |
+| mizugos/helps          | 協助組件                        |
+| mizugos/iaps           | 購買驗證組件                    |
 | mizugos/labels         | 標籤組件                        |
 | mizugos/loggers        | 日誌組件                        |
 | mizugos/metrics        | 度量組件                        |
@@ -98,7 +113,6 @@ func main() {
 | mizugos/pools          | 執行緒池組件                    |
 | mizugos/procs          | 處理器組件                      |
 | mizugos/redmos         | 雙層式資料庫組件(redis + mongo) |
-| mizugos/utils          | 協助組件                        |
 | support                | 支援專案                        |
 | support/client-unity   | unity客戶端組件                 |
 | support/proto          | proto定義檔                     |
