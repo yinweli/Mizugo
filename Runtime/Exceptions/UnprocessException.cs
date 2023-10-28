@@ -7,7 +7,6 @@ namespace Mizugo
     /// </summary>
     public class UnprocessException : Exception
     {
-        public UnprocessException(params int[] messageID)
-            : base(string.Join(",", messageID) + " unprocess") { }
+        public UnprocessException(params int[] messageID) : base(string.Join(",", messageID) + " unprocess") { }
     }
 }
