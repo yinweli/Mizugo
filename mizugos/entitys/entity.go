@@ -24,7 +24,7 @@ func NewEntity(entityID EntityID) *Entity {
 //
 // 建立實體時, 需要遵循以下流程
 //   - 到實體管理器新增實體
-//   - 如果實體需要使用模組相關功能, 呼叫 SetModulemgr 設置 entitys.Modulemgr
+//   - 如果實體需要使用模組相關功能, 呼叫 SetModulemap 設置 entitys.Modulemap
 //   - 如果實體需要使用事件相關功能, 呼叫 SetEventmgr 設置 events.Eventmgr
 //   - 如果實體將要代表某個連線, 呼叫 SetProcess 設置 procs.Processor, 呼叫 SetSession 設置 nets.Sessioner
 //   - 新增模組到實體中
@@ -33,7 +33,7 @@ func NewEntity(entityID EntityID) *Entity {
 // 結束實體時, 需要執行 Finalize
 //
 // 實體可以新增模組, 用於分類與實作遊戲功能/訊息處理等; 如果想要新增模組, 需要在實體初始化之前完成;
-// 需要在實體初始化之前設置 entitys.Modulemgr
+// 需要在實體初始化之前設置 entitys.Modulemap
 //
 // 使用者可以到實體訂閱事件, 事件可以被訂閱多次, 發布事件時會每個訂閱者都會執行一次;
 // 需要在實體初始化之前設置 events.Eventmgr
@@ -59,7 +59,7 @@ type Entity struct {
 	*labels.Labelobj                                  // 標籤物件
 	entityID         EntityID                         // 實體編號
 	once             utils.SyncOnce                   // 單次執行物件
-	modulemgr        utils.SyncAttr[*Modulemgr]       // 模組管理器
+	modulemap        utils.SyncAttr[*Modulemap]       // 模組列表
 	eventmgr         utils.SyncAttr[*events.Eventmgr] // 事件管理器
 	process          utils.SyncAttr[procs.Processor]  // 處理物件
 	session          utils.SyncAttr[nets.Sessioner]   // 會話物件
@@ -74,14 +74,14 @@ func (this *Entity) Initialize(wrong Wrong) (err error) {
 	} // if
 
 	this.once.Do(func() {
-		modulemgr := this.modulemgr.Get()
+		modulemap := this.modulemap.Get()
 
-		if modulemgr == nil {
-			err = fmt.Errorf("entity initialize: modulemgr nil")
+		if modulemap == nil {
+			err = fmt.Errorf("entity initialize: modulemap nil")
 			return
 		} // if
 
-		module := modulemgr.All()
+		module := modulemap.All()
 
 		for _, itor := range module {
 			if awaker, ok := itor.(Awaker); ok {
@@ -163,19 +163,19 @@ func (this *Entity) Enable() bool {
 
 // ===== 模組功能 =====
 
-// SetModulemgr 設定模組管理器, 初始化完成後就不能設定模組物件
-func (this *Entity) SetModulemgr(modulemgr *Modulemgr) error {
+// SetModulemap 設定模組列表, 初始化完成後就不能設定模組物件
+func (this *Entity) SetModulemap(modulemap *Modulemap) error {
 	if this.once.Done() {
-		return fmt.Errorf("entity set modulemgr: overdue")
+		return fmt.Errorf("entity set modulemap: overdue")
 	} // if
 
-	this.modulemgr.Set(modulemgr)
+	this.modulemap.Set(modulemap)
 	return nil
 }
 
-// GetModulemgr 取得模組管理器
-func (this *Entity) GetModulemgr() *Modulemgr {
-	return this.modulemgr.Get()
+// GetModulemap 取得模組列表
+func (this *Entity) GetModulemap() *Modulemap {
+	return this.modulemap.Get()
 }
 
 // AddModule 新增模組, 初始化完成後就不能新增模組
@@ -184,7 +184,7 @@ func (this *Entity) AddModule(module Moduler) error {
 		return fmt.Errorf("entity add module: overdue")
 	} // if
 
-	if err := this.modulemgr.Get().Add(module); err != nil {
+	if err := this.modulemap.Get().Add(module); err != nil {
 		return fmt.Errorf("entity add module: %w", err)
 	} // if
 
@@ -194,7 +194,7 @@ func (this *Entity) AddModule(module Moduler) error {
 
 // GetModule 取得模組
 func (this *Entity) GetModule(moduleID ModuleID) Moduler {
-	return this.modulemgr.Get().Get(moduleID)
+	return this.modulemap.Get().Get(moduleID)
 }
 
 // ===== 事件功能 =====

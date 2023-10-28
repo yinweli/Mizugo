@@ -6,28 +6,28 @@ import (
 	"sync"
 )
 
-// NewModulemgr 建立模組管理器
-func NewModulemgr() *Modulemgr {
-	return &Modulemgr{
+// NewModulemap 建立模組列表
+func NewModulemap() *Modulemap {
+	return &Modulemap{
 		data: map[ModuleID]Moduler{},
 	}
 }
 
-// Modulemgr 模組管理器, 負責新增/刪除/取得模組等功能
-type Modulemgr struct {
+// Modulemap 模組列表, 負責新增/刪除/取得模組等功能
+type Modulemap struct {
 	data map[ModuleID]Moduler // 模組列表
 	lock sync.RWMutex         // 執行緒鎖
 }
 
 // Add 新增模組
-func (this *Modulemgr) Add(module Moduler) error {
+func (this *Modulemap) Add(module Moduler) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	moduleID := module.ModuleID()
 
 	if _, ok := this.data[moduleID]; ok {
-		return fmt.Errorf("modulemgr add: duplicate module: %v", moduleID)
+		return fmt.Errorf("modulemap add: duplicate module: %v", moduleID)
 	} // if
 
 	this.data[moduleID] = module
@@ -35,7 +35,7 @@ func (this *Modulemgr) Add(module Moduler) error {
 }
 
 // Del 刪除模組
-func (this *Modulemgr) Del(moduleID ModuleID) Moduler {
+func (this *Modulemap) Del(moduleID ModuleID) Moduler {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -48,7 +48,7 @@ func (this *Modulemgr) Del(moduleID ModuleID) Moduler {
 }
 
 // Get 取得模組
-func (this *Modulemgr) Get(moduleID ModuleID) Moduler {
+func (this *Modulemap) Get(moduleID ModuleID) Moduler {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 
@@ -56,7 +56,7 @@ func (this *Modulemgr) Get(moduleID ModuleID) Moduler {
 }
 
 // All 取得模組列表
-func (this *Modulemgr) All() []Moduler {
+func (this *Modulemap) All() []Moduler {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 
@@ -73,7 +73,7 @@ func (this *Modulemgr) All() []Moduler {
 }
 
 // Count 取得模組數量
-func (this *Modulemgr) Count() int {
+func (this *Modulemap) Count() int {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 
