@@ -19,7 +19,7 @@ type SuiteIAPGoogle struct {
 }
 
 func (this *SuiteIAPGoogle) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-utils-iapGoogle")
+	this.Env = testdata.EnvSetup("test-helps-iapGoogle")
 }
 
 func (this *SuiteIAPGoogle) TearDownSuite() {

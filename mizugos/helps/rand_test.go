@@ -1,4 +1,4 @@
-package utils
+package helps
 
 import (
 	"fmt"
@@ -20,7 +20,7 @@ type SuiteRand struct {
 }
 
 func (this *SuiteRand) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-utils-rand")
+	this.Env = testdata.EnvSetup("test-helps-rand")
 }
 
 func (this *SuiteRand) TearDownSuite() {

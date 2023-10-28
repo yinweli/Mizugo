@@ -1,4 +1,4 @@
-package utils
+package helps
 
 import (
 	"testing"
@@ -19,7 +19,7 @@ type SuiteDice struct {
 }
 
 func (this *SuiteDice) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-utils-dice")
+	this.Env = testdata.EnvSetup("test-helps-dice")
 }
 
 func (this *SuiteDice) TearDownSuite() {

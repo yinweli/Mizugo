@@ -1,4 +1,4 @@
-package utils
+package helps
 
 import (
 	"math"
@@ -20,7 +20,7 @@ type SuitePercent struct {
 }
 
 func (this *SuitePercent) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-utils-percent")
+	this.Env = testdata.EnvSetup("test-helps-percent")
 }
 
 func (this *SuitePercent) TearDownSuite() {

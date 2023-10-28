@@ -1,4 +1,4 @@
-package utils
+package helps
 
 import (
 	"fmt"
@@ -21,7 +21,7 @@ type SuiteTime struct {
 }
 
 func (this *SuiteTime) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-utils-time")
+	this.Env = testdata.EnvSetup("test-helps-time")
 }
 
 func (this *SuiteTime) TearDownSuite() {

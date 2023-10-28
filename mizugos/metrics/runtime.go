@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/yinweli/Mizugo/mizugos/helps"
 	"github.com/yinweli/Mizugo/mizugos/pools"
-	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
 // Runtime 執行度量, 記錄了以下數據
@@ -72,7 +72,7 @@ func (this *Runtime) String() string {
 		timeAvg = (stat.time / time.Duration(stat.count)).String()
 	} // if
 
-	return utils.ExpvarStr([]utils.ExpvarStat{
+	return helps.ExpvarStr([]helps.ExpvarStat{
 		{Name: "time", Data: stat.time},
 		{Name: "time(max)", Data: stat.timeMax},
 		{Name: "time(avg)", Data: timeAvg},

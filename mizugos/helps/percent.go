@@ -1,4 +1,4 @@
-package utils
+package helps
 
 // NewP100 建立百分比計算器
 func NewP100() *Percent {

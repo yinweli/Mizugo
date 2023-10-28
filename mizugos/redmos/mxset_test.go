@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
-	"github.com/yinweli/Mizugo/mizugos/utils"
+	"github.com/yinweli/Mizugo/mizugos/helps"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -51,15 +51,15 @@ func (this *SuiteMxSet) TestSet() {
 	minorSubmit := this.minor.Submit()
 	dataAll := &dataMxSet{
 		Field: "mxset_redis+mongo",
-		Value: utils.RandStringDefault(),
+		Value: helps.RandStringDefault(),
 	}
 	dataRedis := &dataMxSet{
 		Field: "mxset_redis",
-		Value: utils.RandStringDefault(),
+		Value: helps.RandStringDefault(),
 	}
 	dataMongo := &dataMxSet{
 		Field: "mxset_mongo",
-		Value: utils.RandStringDefault(),
+		Value: helps.RandStringDefault(),
 	}
 
 	set := &Set[dataMxSet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: dataAll}

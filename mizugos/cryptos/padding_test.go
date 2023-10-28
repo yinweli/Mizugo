@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/utils"
+	"github.com/yinweli/Mizugo/mizugos/helps"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -36,7 +36,7 @@ func (this *SuitePadding) TestPadding() {
 	blockSize := 64
 	length1 := 99
 	length2 := 199
-	source := []byte(utils.RandString(length1, utils.StrNumberAlpha))
+	source := []byte(helps.RandString(length1, helps.StrNumberAlpha))
 	padstr := pad(PaddingZero, source, blockSize)
 	result := unpad(PaddingZero, padstr)
 	assert.Equal(this.T(), source, result)
@@ -45,7 +45,7 @@ func (this *SuitePadding) TestPadding() {
 	fmt.Printf("padstr=%v\n", padstr)
 	fmt.Printf("result=%v\n", result)
 
-	source = []byte(utils.RandString(length2, utils.StrNumberAlpha))
+	source = []byte(helps.RandString(length2, helps.StrNumberAlpha))
 	padstr = pad(PaddingZero, source, blockSize)
 	result = unpad(PaddingZero, padstr)
 	assert.Equal(this.T(), source, result)
@@ -54,7 +54,7 @@ func (this *SuitePadding) TestPadding() {
 	fmt.Printf("padstr=%v\n", padstr)
 	fmt.Printf("result=%v\n", result)
 
-	source = []byte(utils.RandString(length1, utils.StrNumberAlpha))
+	source = []byte(helps.RandString(length1, helps.StrNumberAlpha))
 	padstr = pad(PaddingPKCS7, source, blockSize)
 	result = unpad(PaddingPKCS7, padstr)
 	assert.Equal(this.T(), source, result)
@@ -63,7 +63,7 @@ func (this *SuitePadding) TestPadding() {
 	fmt.Printf("padstr=%v\n", padstr)
 	fmt.Printf("result=%v\n", result)
 
-	source = []byte(utils.RandString(length2, utils.StrNumberAlpha))
+	source = []byte(helps.RandString(length2, helps.StrNumberAlpha))
 	padstr = pad(PaddingPKCS7, source, blockSize)
 	result = unpad(PaddingPKCS7, padstr)
 	assert.Equal(this.T(), source, result)

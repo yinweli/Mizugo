@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/utils"
+	"github.com/yinweli/Mizugo/mizugos/helps"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -36,7 +36,7 @@ func (this *SuiteDes) TearDownTest() {
 func (this *SuiteDes) TestDesECB() {
 	for size := 16; size <= 64; size++ {
 		key := RandDesKey()
-		input := []byte(utils.RandString(size, utils.StrNumberAlpha))
+		input := []byte(helps.RandString(size, helps.StrNumberAlpha))
 		crypto, err := DesECBEncrypt(PaddingPKCS7, key, input)
 		assert.Nil(this.T(), err)
 		output, err := DesECBDecrypt(PaddingPKCS7, key, crypto)
@@ -50,9 +50,9 @@ func (this *SuiteDes) TestDesECB() {
 		fmt.Printf("crypto=%v\n", hex.EncodeToString(crypto))
 	} // for
 
-	keyValid := []byte(utils.RandString(DesKeySize, utils.StrNumberAlpha))
-	keyInvalid := []byte(utils.RandString(15, utils.StrNumberAlpha))
-	dataInvalid := []byte(utils.RandString(15, utils.StrNumberAlpha))
+	keyValid := []byte(helps.RandString(DesKeySize, helps.StrNumberAlpha))
+	keyInvalid := []byte(helps.RandString(15, helps.StrNumberAlpha))
+	dataInvalid := []byte(helps.RandString(15, helps.StrNumberAlpha))
 
 	_, err := DesECBEncrypt(PaddingPKCS7, keyInvalid, dataInvalid)
 	assert.NotNil(this.T(), err)
@@ -67,7 +67,7 @@ func (this *SuiteDes) TestDesECB() {
 func (this *SuiteDes) TestDesCBC() {
 	for size := 16; size <= 64; size++ {
 		key := RandDesKey()
-		input := []byte(utils.RandString(size, utils.StrNumberAlpha))
+		input := []byte(helps.RandString(size, helps.StrNumberAlpha))
 		crypto, err := DesCBCEncrypt(PaddingPKCS7, key, key, input)
 		assert.Nil(this.T(), err)
 		output, err := DesCBCDecrypt(PaddingPKCS7, key, key, crypto)
@@ -81,9 +81,9 @@ func (this *SuiteDes) TestDesCBC() {
 		fmt.Printf("crypto=%v\n", hex.EncodeToString(crypto))
 	} // for
 
-	keyValid := []byte(utils.RandString(DesKeySize, utils.StrNumberAlpha))
-	keyInvalid := []byte(utils.RandString(15, utils.StrNumberAlpha))
-	dataInvalid := []byte(utils.RandString(15, utils.StrNumberAlpha))
+	keyValid := []byte(helps.RandString(DesKeySize, helps.StrNumberAlpha))
+	keyInvalid := []byte(helps.RandString(15, helps.StrNumberAlpha))
+	dataInvalid := []byte(helps.RandString(15, helps.StrNumberAlpha))
 
 	_, err := DesCBCEncrypt(PaddingPKCS7, keyInvalid, keyValid, dataInvalid)
 	assert.NotNil(this.T(), err)
@@ -113,7 +113,7 @@ func (this *SuiteDes) TestRandDesKey() {
 
 func BenchmarkDesECBEncrypt1024(b *testing.B) {
 	key := RandDesKey()
-	input := []byte(utils.RandString(1024, utils.StrNumberAlpha))
+	input := []byte(helps.RandString(1024, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_, _ = DesECBEncrypt(PaddingPKCS7, key, input)
@@ -122,7 +122,7 @@ func BenchmarkDesECBEncrypt1024(b *testing.B) {
 
 func BenchmarkDesECBEncrypt2048(b *testing.B) {
 	key := RandDesKey()
-	input := []byte(utils.RandString(2048, utils.StrNumberAlpha))
+	input := []byte(helps.RandString(2048, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_, _ = DesECBEncrypt(PaddingPKCS7, key, input)
@@ -131,7 +131,7 @@ func BenchmarkDesECBEncrypt2048(b *testing.B) {
 
 func BenchmarkDesECBEncrypt4096(b *testing.B) {
 	key := RandDesKey()
-	input := []byte(utils.RandString(4096, utils.StrNumberAlpha))
+	input := []byte(helps.RandString(4096, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_, _ = DesECBEncrypt(PaddingPKCS7, key, input)
@@ -140,7 +140,7 @@ func BenchmarkDesECBEncrypt4096(b *testing.B) {
 
 func BenchmarkDesECBDecrypt1024(b *testing.B) {
 	key := RandDesKey()
-	input := []byte(utils.RandString(1024, utils.StrNumberAlpha))
+	input := []byte(helps.RandString(1024, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_, _ = DesECBDecrypt(PaddingPKCS7, key, input)
@@ -149,7 +149,7 @@ func BenchmarkDesECBDecrypt1024(b *testing.B) {
 
 func BenchmarkDesECBDecrypt2048(b *testing.B) {
 	key := RandDesKey()
-	input := []byte(utils.RandString(2048, utils.StrNumberAlpha))
+	input := []byte(helps.RandString(2048, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_, _ = DesECBDecrypt(PaddingPKCS7, key, input)
@@ -158,7 +158,7 @@ func BenchmarkDesECBDecrypt2048(b *testing.B) {
 
 func BenchmarkDesECBDecrypt4096(b *testing.B) {
 	key := RandDesKey()
-	input := []byte(utils.RandString(4096, utils.StrNumberAlpha))
+	input := []byte(helps.RandString(4096, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_, _ = DesECBDecrypt(PaddingPKCS7, key, input)
@@ -167,7 +167,7 @@ func BenchmarkDesECBDecrypt4096(b *testing.B) {
 
 func BenchmarkDesCBCEncrypt1024(b *testing.B) {
 	key := RandDesKey()
-	input := []byte(utils.RandString(1024, utils.StrNumberAlpha))
+	input := []byte(helps.RandString(1024, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_, _ = DesCBCEncrypt(PaddingPKCS7, key, key, input)
@@ -176,7 +176,7 @@ func BenchmarkDesCBCEncrypt1024(b *testing.B) {
 
 func BenchmarkDesCBCEncrypt2048(b *testing.B) {
 	key := RandDesKey()
-	input := []byte(utils.RandString(2048, utils.StrNumberAlpha))
+	input := []byte(helps.RandString(2048, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_, _ = DesCBCEncrypt(PaddingPKCS7, key, key, input)
@@ -185,7 +185,7 @@ func BenchmarkDesCBCEncrypt2048(b *testing.B) {
 
 func BenchmarkDesCBCEncrypt4096(b *testing.B) {
 	key := RandDesKey()
-	input := []byte(utils.RandString(4096, utils.StrNumberAlpha))
+	input := []byte(helps.RandString(4096, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_, _ = DesCBCEncrypt(PaddingPKCS7, key, key, input)
@@ -194,7 +194,7 @@ func BenchmarkDesCBCEncrypt4096(b *testing.B) {
 
 func BenchmarkDesCBCDecrypt1024(b *testing.B) {
 	key := RandDesKey()
-	input := []byte(utils.RandString(1024, utils.StrNumberAlpha))
+	input := []byte(helps.RandString(1024, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_, _ = DesCBCDecrypt(PaddingPKCS7, key, key, input)
@@ -203,7 +203,7 @@ func BenchmarkDesCBCDecrypt1024(b *testing.B) {
 
 func BenchmarkDesCBCDecrypt2048(b *testing.B) {
 	key := RandDesKey()
-	input := []byte(utils.RandString(2048, utils.StrNumberAlpha))
+	input := []byte(helps.RandString(2048, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_, _ = DesCBCDecrypt(PaddingPKCS7, key, key, input)
@@ -212,7 +212,7 @@ func BenchmarkDesCBCDecrypt2048(b *testing.B) {
 
 func BenchmarkDesCBCDecrypt4096(b *testing.B) {
 	key := RandDesKey()
-	input := []byte(utils.RandString(4096, utils.StrNumberAlpha))
+	input := []byte(helps.RandString(4096, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_, _ = DesCBCDecrypt(PaddingPKCS7, key, key, input)

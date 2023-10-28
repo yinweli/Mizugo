@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
+	"github.com/yinweli/Mizugo/mizugos/helps"
 	"github.com/yinweli/Mizugo/mizugos/pools"
-	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
 const separateSubID = "@" // 訂閱索引分隔字串
@@ -30,7 +30,7 @@ type Eventmap struct {
 	ctx    ctxs.Ctx       // ctx物件
 	notify chan notify    // 通知通道
 	pubsub *pubsub        // 訂閱/發布資料
-	once   utils.SyncOnce // 單次執行物件
+	once   helps.SyncOnce // 單次執行物件
 	close  atomic.Bool    // 關閉旗標
 }
 

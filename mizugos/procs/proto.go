@@ -7,8 +7,8 @@ import (
 	"google.golang.org/protobuf/types/known/anypb"
 
 	"github.com/yinweli/Mizugo/mizugos/cryptos"
+	"github.com/yinweli/Mizugo/mizugos/helps"
 	"github.com/yinweli/Mizugo/mizugos/msgs"
-	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
 // NewProto 建立proto處理器
@@ -32,7 +32,7 @@ type Proto struct {
 
 // Encode 封包編碼
 func (this *Proto) Encode(input any) (output []byte, err error) {
-	message, err := utils.CastPointer[msgs.ProtoMsg](input)
+	message, err := helps.CastPointer[msgs.ProtoMsg](input)
 
 	if err != nil {
 		return nil, fmt.Errorf("proto encode: %w", err)
@@ -90,7 +90,7 @@ func (this *Proto) Decode(input []byte) (output any, err error) {
 
 // Process 訊息處理
 func (this *Proto) Process(input any) error {
-	message, err := utils.CastPointer[msgs.ProtoMsg](input)
+	message, err := helps.CastPointer[msgs.ProtoMsg](input)
 
 	if err != nil {
 		return fmt.Errorf("proto process: %w", err)
@@ -144,7 +144,7 @@ func ProtoUnmarshal[T any](input any) (messageID MessageID, output *T, err error
 		return 0, nil, fmt.Errorf("proto unmarshal: input nil")
 	} // if
 
-	message, err := utils.CastPointer[msgs.ProtoMsg](input)
+	message, err := helps.CastPointer[msgs.ProtoMsg](input)
 
 	if err != nil {
 		return 0, nil, fmt.Errorf("proto unmarshal: %w", err)

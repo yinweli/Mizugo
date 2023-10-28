@@ -5,10 +5,10 @@ import (
 	"net"
 	"time"
 
+	"github.com/yinweli/Mizugo/mizugos/helps"
 	"github.com/yinweli/Mizugo/mizugos/labels"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
 // NewEntity 建立實體資料
@@ -57,11 +57,11 @@ func NewEntity(entityID EntityID) *Entity {
 type Entity struct {
 	*labels.Labelobj                                 // 標籤物件
 	entityID         EntityID                        // 實體編號
-	once             utils.SyncOnce                  // 單次執行物件
-	modulemap        utils.SyncAttr[*Modulemap]      // 模組列表
-	eventmap         utils.SyncAttr[*Eventmap]       // 事件列表
-	process          utils.SyncAttr[procs.Processor] // 處理物件
-	session          utils.SyncAttr[nets.Sessioner]  // 會話物件
+	once             helps.SyncOnce                  // 單次執行物件
+	modulemap        helps.SyncAttr[*Modulemap]      // 模組列表
+	eventmap         helps.SyncAttr[*Eventmap]       // 事件列表
+	process          helps.SyncAttr[procs.Processor] // 處理物件
+	session          helps.SyncAttr[nets.Sessioner]  // 會話物件
 }
 
 // ===== 基礎功能 =====

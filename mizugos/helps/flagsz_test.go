@@ -1,4 +1,4 @@
-package utils
+package helps
 
 import (
 	"testing"
@@ -19,7 +19,7 @@ type SuiteFlagsz struct {
 }
 
 func (this *SuiteFlagsz) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-utils-flagsz")
+	this.Env = testdata.EnvSetup("test-helps-flagsz")
 }
 
 func (this *SuiteFlagsz) TearDownSuite() {

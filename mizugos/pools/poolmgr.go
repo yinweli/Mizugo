@@ -6,7 +6,7 @@ import (
 
 	"github.com/panjf2000/ants/v2"
 
-	"github.com/yinweli/Mizugo/mizugos/utils"
+	"github.com/yinweli/Mizugo/mizugos/helps"
 )
 
 // NewPoolmgr 建立執行緒池管理器
@@ -97,7 +97,7 @@ type Config struct {
 
 // String 取得字串
 func (this Config) String() string {
-	return utils.ExpvarStr([]utils.ExpvarStat{
+	return helps.ExpvarStr([]helps.ExpvarStat{
 		{Name: "capacity", Data: this.Capacity},
 		{Name: "expire", Data: this.Expire},
 		{Name: "preAlloc", Data: this.PreAlloc},
@@ -115,7 +115,7 @@ type Stat struct {
 
 // String 取得字串
 func (this Stat) String() string {
-	return utils.ExpvarStr([]utils.ExpvarStat{
+	return helps.ExpvarStr([]helps.ExpvarStat{
 		{Name: "running", Data: this.Running},
 		{Name: "available", Data: this.Available},
 		{Name: "capacity", Data: this.Capacity},

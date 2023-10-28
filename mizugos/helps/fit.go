@@ -1,4 +1,4 @@
-package utils
+package helps
 
 // NewFit 建立數值檢測資料
 func NewFit[T int | int32 | int64](maxCap, minCap FitCap[T]) *Fit[T] {

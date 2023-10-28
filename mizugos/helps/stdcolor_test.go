@@ -1,4 +1,4 @@
-package utils
+package helps
 
 import (
 	"os"
@@ -20,7 +20,7 @@ type SuiteStdColor struct {
 }
 
 func (this *SuiteStdColor) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-utils-stdColor")
+	this.Env = testdata.EnvSetup("test-helps-stdColor")
 }
 
 func (this *SuiteStdColor) TearDownSuite() {

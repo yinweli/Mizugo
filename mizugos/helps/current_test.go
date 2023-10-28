@@ -1,4 +1,4 @@
-package utils
+package helps
 
 import (
 	"testing"
@@ -19,7 +19,7 @@ type SuiteCurrent struct {
 }
 
 func (this *SuiteCurrent) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-utils-current")
+	this.Env = testdata.EnvSetup("test-helps-current")
 }
 
 func (this *SuiteCurrent) TearDownSuite() {

@@ -1,4 +1,4 @@
-package utils
+package helps
 
 import (
 	"testing"
@@ -20,7 +20,7 @@ type SuiteExpvar struct {
 }
 
 func (this *SuiteExpvar) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-utils-expvar")
+	this.Env = testdata.EnvSetup("test-helps-expvar")
 }
 
 func (this *SuiteExpvar) TearDownSuite() {

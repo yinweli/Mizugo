@@ -1,4 +1,4 @@
-package utils
+package helps
 
 import (
 	"testing"
@@ -19,7 +19,7 @@ type SuiteFit struct {
 }
 
 func (this *SuiteFit) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-utils-fit")
+	this.Env = testdata.EnvSetup("test-helps-fit")
 }
 
 func (this *SuiteFit) TearDownSuite() {

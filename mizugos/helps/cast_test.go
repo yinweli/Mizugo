@@ -1,4 +1,4 @@
-package utils
+package helps
 
 import (
 	"testing"
@@ -19,7 +19,7 @@ type SuiteCast struct {
 }
 
 func (this *SuiteCast) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-utils-cast")
+	this.Env = testdata.EnvSetup("test-helps-cast")
 }
 
 func (this *SuiteCast) TearDownSuite() {

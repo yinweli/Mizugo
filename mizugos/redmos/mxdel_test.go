@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
-	"github.com/yinweli/Mizugo/mizugos/utils"
+	"github.com/yinweli/Mizugo/mizugos/helps"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -49,7 +49,7 @@ func (this *SuiteMxDel) TestDel() {
 	minorSubmit := this.minor.Submit()
 	data := &dataMxDel{
 		Field: "mxdel_redis+mongo",
-		Value: utils.RandStringDefault(),
+		Value: helps.RandStringDefault(),
 	}
 
 	set := &Set[dataMxDel]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}

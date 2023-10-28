@@ -19,7 +19,7 @@ type SuiteIAPApple struct {
 }
 
 func (this *SuiteIAPApple) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-utils-iapApple")
+	this.Env = testdata.EnvSetup("test-helps-iapApple")
 }
 
 func (this *SuiteIAPApple) TearDownSuite() {
