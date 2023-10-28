@@ -53,7 +53,7 @@ func (this *Dice) Fill(payload []any, weight []int64) error {
 
 	for i := range payload {
 		if err := this.One(payload[i], weight[i]); err != nil {
-			return err
+			return fmt.Errorf("fill: %w", err)
 		} // if
 	} // for
 
@@ -69,7 +69,7 @@ func (this *Dice) Complete(payload any, max int64) error {
 	} // if
 
 	if err := this.One(payload, weight); err != nil {
-		return err
+		return fmt.Errorf("complete: %w", err)
 	} // if
 
 	return nil
