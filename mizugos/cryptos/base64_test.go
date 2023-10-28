@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/utils"
+	"github.com/yinweli/Mizugo/mizugos/helps"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -40,7 +40,7 @@ func (this *SuiteBase64) TestBase64() {
 }
 
 func BenchmarkBase64Encode1024(b *testing.B) {
-	input := []byte(utils.RandString(1024, testdata.RandStringLetter))
+	input := []byte(helps.RandString(1024, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_ = Base64Encode(input)
@@ -48,7 +48,7 @@ func BenchmarkBase64Encode1024(b *testing.B) {
 }
 
 func BenchmarkBase64Encode2048(b *testing.B) {
-	input := []byte(utils.RandString(2048, testdata.RandStringLetter))
+	input := []byte(helps.RandString(2048, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_ = Base64Encode(input)
@@ -56,7 +56,7 @@ func BenchmarkBase64Encode2048(b *testing.B) {
 }
 
 func BenchmarkBase64Encode4096(b *testing.B) {
-	input := []byte(utils.RandString(4096, testdata.RandStringLetter))
+	input := []byte(helps.RandString(4096, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_ = Base64Encode(input)
@@ -64,7 +64,7 @@ func BenchmarkBase64Encode4096(b *testing.B) {
 }
 
 func BenchmarkBase64Decode1024(b *testing.B) {
-	input := []byte(utils.RandString(1024, testdata.RandStringLetter))
+	input := []byte(helps.RandString(1024, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_, _ = Base64Decode(input)
@@ -72,7 +72,7 @@ func BenchmarkBase64Decode1024(b *testing.B) {
 }
 
 func BenchmarkBase64Decode2048(b *testing.B) {
-	input := []byte(utils.RandString(2048, testdata.RandStringLetter))
+	input := []byte(helps.RandString(2048, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_, _ = Base64Decode(input)
@@ -80,7 +80,7 @@ func BenchmarkBase64Decode2048(b *testing.B) {
 }
 
 func BenchmarkBase64Decode4096(b *testing.B) {
-	input := []byte(utils.RandString(4096, testdata.RandStringLetter))
+	input := []byte(helps.RandString(4096, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_, _ = Base64Decode(input)

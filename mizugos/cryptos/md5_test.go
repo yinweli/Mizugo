@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/utils"
+	"github.com/yinweli/Mizugo/mizugos/helps"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -40,7 +40,7 @@ func (this *SuiteMD5) TestMD5String() {
 }
 
 func BenchmarkMD5String1024(b *testing.B) {
-	input := []byte(utils.RandString(1024, testdata.RandStringLetter))
+	input := []byte(helps.RandString(1024, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_ = MD5String(input)
@@ -48,7 +48,7 @@ func BenchmarkMD5String1024(b *testing.B) {
 }
 
 func BenchmarkMD5String2048(b *testing.B) {
-	input := []byte(utils.RandString(2048, testdata.RandStringLetter))
+	input := []byte(helps.RandString(2048, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_ = MD5String(input)
@@ -56,7 +56,7 @@ func BenchmarkMD5String2048(b *testing.B) {
 }
 
 func BenchmarkMD5String4096(b *testing.B) {
-	input := []byte(utils.RandString(4096, testdata.RandStringLetter))
+	input := []byte(helps.RandString(4096, helps.StrNumberAlpha))
 
 	for i := 0; i < b.N; i++ {
 		_ = MD5String(input)

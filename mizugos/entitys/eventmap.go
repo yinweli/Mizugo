@@ -1,4 +1,4 @@
-package events
+package entitys
 
 import (
 	"fmt"
@@ -9,35 +9,35 @@ import (
 	"time"
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
+	"github.com/yinweli/Mizugo/mizugos/helps"
 	"github.com/yinweli/Mizugo/mizugos/pools"
-	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
 const separateSubID = "@" // 訂閱索引分隔字串
 
-// NewEventmgr 建立事件管理器
-func NewEventmgr(capacity int) *Eventmgr {
-	return &Eventmgr{
+// NewEventmap 建立事件列表
+func NewEventmap(capacity int) *Eventmap {
+	return &Eventmap{
 		ctx:    ctxs.Get().WithCancel(),
 		notify: make(chan notify, capacity),
 		pubsub: newPubsub(),
 	}
 }
 
-// Eventmgr 事件管理器, 提供了事件訂閱/發布等功能, 事件管理器本身是執行緒安全的,
+// Eventmap 事件列表, 提供了事件訂閱/發布等功能, 事件列表本身是執行緒安全的,
 // 但是發布的事件會在單一的事件執行緒中被執行, 以此保證了事件有序執行
-type Eventmgr struct {
+type Eventmap struct {
 	ctx    ctxs.Ctx       // ctx物件
 	notify chan notify    // 通知通道
 	pubsub *pubsub        // 訂閱/發布資料
-	once   utils.SyncOnce // 單次執行物件
+	once   helps.SyncOnce // 單次執行物件
 	close  atomic.Bool    // 關閉旗標
 }
 
 // Initialize 初始化處理
-func (this *Eventmgr) Initialize() error {
+func (this *Eventmap) Initialize() error {
 	if this.once.Done() {
-		return fmt.Errorf("eventmgr initialize: already initialize")
+		return fmt.Errorf("eventmap initialize: already initialize")
 	} // if
 
 	this.once.Do(func() {
@@ -71,7 +71,7 @@ func (this *Eventmgr) Initialize() error {
 }
 
 // Finalize 結束處理
-func (this *Eventmgr) Finalize() {
+func (this *Eventmap) Finalize() {
 	if this.once.Done() == false {
 		return
 	} // if
@@ -81,12 +81,12 @@ func (this *Eventmgr) Finalize() {
 }
 
 // Sub 訂閱事件
-func (this *Eventmgr) Sub(name string, process Process) string {
+func (this *Eventmap) Sub(name string, process Process) string {
 	return this.pubsub.sub(name, process)
 }
 
 // Unsub 取消訂閱事件
-func (this *Eventmgr) Unsub(subID string) {
+func (this *Eventmap) Unsub(subID string) {
 	if this.close.Load() {
 		return
 	} // if
@@ -98,7 +98,7 @@ func (this *Eventmgr) Unsub(subID string) {
 }
 
 // PubOnce 發布單次事件
-func (this *Eventmgr) PubOnce(name string, param any) {
+func (this *Eventmap) PubOnce(name string, param any) {
 	if this.close.Load() {
 		return
 	} // if
@@ -111,7 +111,7 @@ func (this *Eventmgr) PubOnce(name string, param any) {
 }
 
 // PubDelay 發布延遲事件, 事件會延遲一段時間才發布, 但仍是單次事件
-func (this *Eventmgr) PubDelay(name string, param any, delay time.Duration) {
+func (this *Eventmap) PubDelay(name string, param any, delay time.Duration) {
 	if this.close.Load() {
 		return
 	} // if
@@ -139,7 +139,7 @@ func (this *Eventmgr) PubDelay(name string, param any, delay time.Duration) {
 }
 
 // PubFixed 發布定時事件, 請注意! 由於不能刪除定時事件, 因此發布定時事件前請多想想
-func (this *Eventmgr) PubFixed(name string, param any, interval time.Duration) {
+func (this *Eventmap) PubFixed(name string, param any, interval time.Duration) {
 	if this.close.Load() {
 		return
 	} // if

@@ -1,4 +1,4 @@
-package utils
+package helps
 
 import (
 	"fmt"
@@ -20,7 +20,7 @@ type SuiteRand struct {
 }
 
 func (this *SuiteRand) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-utils-rand")
+	this.Env = testdata.EnvSetup("test-helps-rand")
 }
 
 func (this *SuiteRand) TearDownSuite() {
@@ -46,12 +46,16 @@ func (this *SuiteRand) TestRand() {
 	fmt.Println(RandReal64())
 	value64 = RandReal64n(-5, 5)
 	assert.True(this.T(), value64 >= -5 && value64 <= 5)
-	values := RandString(32, testdata.RandStringLetter)
+	values := RandString(32, StrNumberAlpha)
 	assert.NotNil(this.T(), values)
 	assert.Len(this.T(), values, 32)
 	fmt.Println(values)
-	values = RandString(64, testdata.RandStringLetter)
+	values = RandString(64, StrNumberAlpha)
 	assert.NotNil(this.T(), values)
 	assert.Len(this.T(), values, 64)
+	fmt.Println(values)
+	values = RandStringDefault()
+	assert.NotNil(this.T(), values)
+	assert.Len(this.T(), values, 10)
 	fmt.Println(values)
 }

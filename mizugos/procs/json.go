@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/yinweli/Mizugo/mizugos/cryptos"
+	"github.com/yinweli/Mizugo/mizugos/helps"
 	"github.com/yinweli/Mizugo/mizugos/msgs"
-	"github.com/yinweli/Mizugo/mizugos/utils"
 )
 
 // NewJson 建立json處理器
@@ -31,7 +31,7 @@ type Json struct {
 
 // Encode 封包編碼
 func (this *Json) Encode(input any) (output []byte, err error) {
-	message, err := utils.CastPointer[msgs.JsonMsg](input)
+	message, err := helps.CastPointer[msgs.JsonMsg](input)
 
 	if err != nil {
 		return nil, fmt.Errorf("json encode: %w", err)
@@ -89,7 +89,7 @@ func (this *Json) Decode(input []byte) (output any, err error) {
 
 // Process 訊息處理
 func (this *Json) Process(input any) error {
-	message, err := utils.CastPointer[msgs.JsonMsg](input)
+	message, err := helps.CastPointer[msgs.JsonMsg](input)
 
 	if err != nil {
 		return fmt.Errorf("json process: %w", err)
@@ -143,7 +143,7 @@ func JsonUnmarshal[T any](input any) (messageID MessageID, output *T, err error)
 		return 0, nil, fmt.Errorf("json unmarshal: input nil")
 	} // if
 
-	message, err := utils.CastPointer[msgs.JsonMsg](input)
+	message, err := helps.CastPointer[msgs.JsonMsg](input)
 
 	if err != nil {
 		return 0, nil, fmt.Errorf("json unmarshal: %w", err)

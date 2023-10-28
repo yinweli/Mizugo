@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
           os: [ubuntu-latest] # 由於要使用到docker來執行redis跟mongo, 所以只能測試linux了
-          go: [1.19.x]
+          go: [1.20.x]
           proto: [3.x]
           redis: [6]
           mongo: ['6.0']

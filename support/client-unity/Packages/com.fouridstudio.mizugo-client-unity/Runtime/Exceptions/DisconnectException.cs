@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace Mizugo
 {
@@ -7,7 +7,6 @@ namespace Mizugo
     /// </summary>
     public class DisconnectException : Exception
     {
-        public DisconnectException()
-            : base("disconnect") { }
+        public DisconnectException() : base("disconnect") { }
     }
 }

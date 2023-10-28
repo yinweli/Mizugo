@@ -5,12 +5,12 @@ import (
 	"time"
 )
 
-// WaitTimeout 等待超時時間, 可以輸入等待的毫秒數量, 如果未輸入毫秒數量, 則會等待200毫秒
-func WaitTimeout(count ...time.Duration) {
-	if len(count) > 0 {
-		time.Sleep(time.Millisecond * count[0])
+// WaitTimeout 等待超時時間, 可以輸入等待時間, 預設等待200毫秒
+func WaitTimeout(duration ...time.Duration) {
+	if len(duration) > 0 {
+		time.Sleep(duration[0])
 	} else {
-		time.Sleep(time.Millisecond * 200)
+		time.Sleep(Timeout)
 	} // if
 }
 

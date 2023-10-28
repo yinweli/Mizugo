@@ -6,7 +6,6 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/events"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
@@ -68,12 +67,12 @@ func (this *Auth) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.SetModulemgr(entitys.NewModulemgr()); err != nil {
+	if err := entity.SetModulemap(entitys.NewModulemap()); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
-	if err := entity.SetEventmgr(events.NewEventmgr(defines.EventCapacity)); err != nil {
+	if err := entity.SetEventmap(entitys.NewEventmap(defines.EventCapacity)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if

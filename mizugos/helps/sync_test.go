@@ -1,4 +1,4 @@
-package utils
+package helps
 
 import (
 	"sync/atomic"
@@ -21,7 +21,7 @@ type SuiteSync struct {
 }
 
 func (this *SuiteSync) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-utils-sync")
+	this.Env = testdata.EnvSetup("test-helps-sync")
 }
 
 func (this *SuiteSync) TearDownSuite() {
