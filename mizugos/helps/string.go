@@ -11,7 +11,6 @@ const (
 	StrNumberAlpha = StrNumber + StrAlphaLower + StrAlphaUpper // 數字+小寫英文字母+大寫英文字母列表
 	StrAlphaLower  = "abcdefghijklmnopqrstuvwxyz"              // 小寫英文字母列表
 	StrAlphaUpper  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"              // 大寫英文字母列表
-	StrNameRegexp  = "^[a-zA-Z0-9\u4e00-\u9fa5]*$"             // 名稱檢查正規表達式
 	StrPercent     = 100                                       // 百分比乘數
 )
 
