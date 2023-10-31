@@ -16,7 +16,7 @@ type Del struct {
 	MinorEnable bool          // 啟用次要資料庫
 	Meta        Metaer        // 元資料
 	Key         string        // 索引值
-	del         *redis.IntCmd // 命令結果
+	cmd         *redis.IntCmd // 命令結果
 }
 
 // Prepare 前置處理
@@ -31,7 +31,7 @@ func (this *Del) Prepare() error {
 
 	if this.MajorEnable {
 		key := this.Meta.MajorKey(this.Key)
-		this.del = this.Major().Del(this.Ctx(), key)
+		this.cmd = this.Major().Del(this.Ctx(), key)
 	} // if
 
 	if this.MinorEnable {
@@ -54,7 +54,7 @@ func (this *Del) Complete() error {
 	} // if
 
 	if this.MajorEnable {
-		if _, err := this.del.Result(); err != nil {
+		if _, err := this.cmd.Result(); err != nil {
 			return fmt.Errorf("del complete: %w: %v", err, this.Key)
 		} // if
 	} // if

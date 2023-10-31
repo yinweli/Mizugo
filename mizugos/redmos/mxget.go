@@ -23,7 +23,7 @@ type Get[T any] struct {
 	Meta        Metaer           // 元資料
 	Key         string           // 索引值
 	Data        *T               // 資料物件
-	get         *redis.StringCmd // 命令結果
+	cmd         *redis.StringCmd // 命令結果
 }
 
 // Prepare 前置處理
@@ -38,7 +38,7 @@ func (this *Get[T]) Prepare() error {
 
 	if this.MajorEnable {
 		key := this.Meta.MajorKey(this.Key)
-		this.get = this.Major().Get(this.Ctx(), key)
+		this.cmd = this.Major().Get(this.Ctx(), key)
 	} // if
 
 	if this.MinorEnable {
@@ -61,7 +61,7 @@ func (this *Get[T]) Complete() error {
 	} // if
 
 	if this.MajorEnable {
-		data, err := this.get.Result()
+		data, err := this.cmd.Result()
 
 		if err != nil && err != redis.Nil {
 			return fmt.Errorf("get complete: %w: %v", err, this.Key)
