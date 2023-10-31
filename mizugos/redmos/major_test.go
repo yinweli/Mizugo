@@ -39,7 +39,7 @@ func (this *SuiteMajor) TestMajor() {
 	assert.NotNil(this.T(), target.Submit())
 	assert.NotNil(this.T(), target.Client())
 	assert.Nil(this.T(), target.SwitchDB(1))
-	assert.NotNil(this.T(), target.SwitchDB(9999))
+	assert.NotNil(this.T(), target.SwitchDB(999999))
 	target.DropDB()
 
 	_, err = newMajor("")

@@ -15,7 +15,7 @@ type Exist struct {
 	Meta   Metaer        // 元資料
 	Key    []string      // 索引列表
 	Count  int           // 存在的索引數量
-	exist  *redis.IntCmd // 命令結果
+	cmd    *redis.IntCmd // 命令結果
 }
 
 // Prepare 前置處理
@@ -35,7 +35,7 @@ func (this *Exist) Prepare() error {
 	} // for
 
 	this.Count = 0
-	this.exist = this.Major().Exists(this.Ctx(), key...)
+	this.cmd = this.Major().Exists(this.Ctx(), key...)
 	return nil
 }
 
@@ -45,7 +45,7 @@ func (this *Exist) Complete() error {
 		return fmt.Errorf("exist complete: meta nil")
 	} // if
 
-	count, err := this.exist.Result()
+	count, err := this.cmd.Result()
 
 	if err != nil {
 		return fmt.Errorf("exist complete: %w: %v", err, this.Key)
