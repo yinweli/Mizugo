@@ -11,7 +11,6 @@ const (
 	StrNumberAlpha = StrNumber + StrAlphaLower + StrAlphaUpper // 數字+小寫英文字母+大寫英文字母列表
 	StrAlphaLower  = "abcdefghijklmnopqrstuvwxyz"              // 小寫英文字母列表
 	StrAlphaUpper  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"              // 大寫英文字母列表
-	StrPercent     = 100                                       // 百分比乘數
 )
 
 // StringJoin 以分隔字串來組合字串列表, 實際上就是使用了 strings.Join 只是轉換了參數順序而已
@@ -41,5 +40,5 @@ func StringDisplayLength(input string) int {
 
 // StrPercentage 取得百分比字串
 func StrPercentage(count, total int) string {
-	return fmt.Sprintf("%.2f%%", float64(count)/float64(total)*StrPercent)
+	return fmt.Sprintf("%.2f%%", float64(count)/float64(total)*PercentRatio100)
 }

@@ -1,18 +1,24 @@
 package helps
 
+const (
+	PercentRatio100 = 100   // 百分比例值
+	PercentRatio1K  = 1000  // 千分比例值
+	PercentRatio10K = 10000 // 萬分比例值
+)
+
 // NewP100 建立百分比計算器
 func NewP100() *Percent {
-	return NewPercent(100) //nolint:gomnd
+	return NewPercent(PercentRatio100)
 }
 
-// NewP1000 建立千分比計算器
-func NewP1000() *Percent {
-	return NewPercent(1000) //nolint:gomnd
+// NewP1K 建立千分比計算器
+func NewP1K() *Percent {
+	return NewPercent(PercentRatio1K)
 }
 
-// NewP10000 建立萬分比計算器
-func NewP10000() *Percent {
-	return NewPercent(10000) //nolint:gomnd
+// NewP10K 建立萬分比計算器
+func NewP10K() *Percent {
+	return NewPercent(PercentRatio10K)
 }
 
 // NewPercent 建立比例計算器

@@ -65,8 +65,8 @@ func (this *SuitePercent) TestPercent100() {
 	assert.Equal(this.T(), int64(76), target.Calc64(75, math.Floor))
 }
 
-func (this *SuitePercent) TestPercent1000() {
-	target := NewP1000()
+func (this *SuitePercent) TestPercent1K() {
+	target := NewP1K()
 	assert.NotNil(this.T(), target)
 	assert.Equal(this.T(), int32(1000), target.Base())
 	assert.NotNil(this.T(), target.Set(10))
@@ -99,8 +99,8 @@ func (this *SuitePercent) TestPercent1000() {
 	assert.Equal(this.T(), int64(75), target.Calc64(75, math.Floor))
 }
 
-func (this *SuitePercent) TestPercent10000() {
-	target := NewP10000()
+func (this *SuitePercent) TestPercent10K() {
+	target := NewP10K()
 	assert.NotNil(this.T(), target)
 	assert.Equal(this.T(), int32(10000), target.Base())
 	assert.NotNil(this.T(), target.Set(10))
