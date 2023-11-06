@@ -100,11 +100,22 @@ func Daily(now, last time.Time, hour int) bool {
 	return now.Equal(next) || now.After(next)
 }
 
-// DailyNext 取得下次的每日更新時間
+// DailyPrev 取得上次的每日時間
+func DailyPrev(now time.Time, hour int) time.Time {
+	prev := Date(now.Year(), now.Month(), now.Day(), hour, 0, 0, 0)
+
+	if now.Before(prev) { // 如果已經經過時間, 就設定為昨天
+		prev = prev.AddDate(0, 0, -1)
+	} // if
+
+	return prev
+}
+
+// DailyNext 取得下次的每日時間
 func DailyNext(now time.Time, hour int) time.Time {
 	next := Date(now.Year(), now.Month(), now.Day(), hour, 0, 0, 0)
 
-	if now.Equal(next) || now.After(next) { // 如果已經經過更新時間, 就設定為明天
+	if now.Equal(next) || now.After(next) { // 如果已經經過時間, 就設定為明天
 		next = next.AddDate(0, 0, 1)
 	} // if
 
@@ -117,15 +128,31 @@ func Weekly(now, last time.Time, wday, hour int) bool {
 	return now.Equal(next) || now.After(next)
 }
 
-// WeeklyNext 取得下次的每週更新時間, wday是 time.Weekday, 週日為0, 週一為1, 依此類推
+// WeeklyPrev 取得上次的每週時間, wday是 time.Weekday, 週日為0, 週一為1, 依此類推
+func WeeklyPrev(now time.Time, wday, hour int) time.Time {
+	day := int(time.Weekday(wday) - now.Weekday())
+
+	if day > 0 { // 如果還沒到時間, 就設定為上週
+		day -= 7
+	} // if
+
+	if day == 0 && now.Hour() < hour { // 如果還沒到時間, 就設定為上週
+		day -= 7
+	} // if
+
+	prev := now.AddDate(0, 0, day)
+	return time.Date(prev.Year(), prev.Month(), prev.Day(), hour, 0, 0, 0, now.Location())
+}
+
+// WeeklyNext 取得下次的每週時間, wday是 time.Weekday, 週日為0, 週一為1, 依此類推
 func WeeklyNext(now time.Time, wday, hour int) time.Time {
 	day := int(time.Weekday(wday) - now.Weekday())
 
-	if day < 0 { // 如果已經經過更新時間, 就設定為下週
+	if day < 0 { // 如果已經經過時間, 就設定為下週
 		day += 7
 	} // if
 
-	if day == 0 && now.Hour() >= hour { // 如果已經經過更新時間, 就設定為下週
+	if day == 0 && now.Hour() >= hour { // 如果已經經過時間, 就設定為下週
 		day += 7
 	} // if
 
@@ -139,11 +166,27 @@ func Monthly(now, last time.Time, mday, hour int) bool {
 	return now.Equal(next) || now.After(next)
 }
 
-// MonthlyNext 取得下次的每月更新時間, mday是month-day
+// MonthlyPrev 取得上次的每月時間, mday是month-day
+func MonthlyPrev(now time.Time, mday, hour int) time.Time {
+	prev := Date(now.Year(), now.Month(), mday, hour, 0, 0, 0)
+
+	if now.Before(prev) || now.Hour() < hour { // 如果還沒到時間，就設定為上個月
+		prev = prev.AddDate(0, -1, 0)
+	} // if
+
+	// 當月份日數不同時, 例如輸入的日數為31, 但是當月日數最多只到28時, 就會將日期減1, 直到日期有效為止
+	for prev.Month() == now.Month() && prev.Day() != mday {
+		prev = prev.AddDate(0, 0, -1)
+	} // if
+
+	return prev
+}
+
+// MonthlyNext 取得下次的每月時間, mday是month-day
 func MonthlyNext(now time.Time, mday, hour int) time.Time {
 	next := Date(now.Year(), now.Month(), mday, hour, 0, 0, 0)
 
-	if now.Equal(next) || now.After(next) { // 如果已經經過更新時間, 就設定為下個月
+	if now.Equal(next) || now.After(next) { // 如果已經經過時間, 就設定為下個月
 		next = next.AddDate(0, 1, 0)
 	} // if
 
