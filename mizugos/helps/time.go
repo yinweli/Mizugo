@@ -30,6 +30,16 @@ func SetTimeZone(timeZone string) error {
 	return nil
 }
 
+// SetTimeZoneUTC 設定時區資料為UTC時間
+func SetTimeZoneUTC() {
+	location = time.UTC
+}
+
+// SetTimeZoneLocal 設定時區資料為本地時間
+func SetTimeZoneLocal() {
+	location = time.Local
+}
+
 // GetTimeZone 取得時區資料
 func GetTimeZone() *time.Location {
 	if location == nil {
