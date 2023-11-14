@@ -37,6 +37,10 @@ func (this *SuiteTime) TestTimeZone() {
 	assert.Nil(this.T(), SetTimeZone("Asia/Taipei"))
 	assert.NotNil(this.T(), GetTimeZone())
 	assert.NotNil(this.T(), SetTimeZone(testdata.Unknown))
+	SetTimeZoneUTC()
+	assert.NotNil(this.T(), GetTimeZone())
+	SetTimeZoneLocal()
+	assert.NotNil(this.T(), GetTimeZone())
 }
 
 func (this *SuiteTime) TestTime() {
