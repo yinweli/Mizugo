@@ -77,7 +77,8 @@ func (this *SuiteURI) TestRedisURIOption() {
 			"maxRedirects=1&" +
 			"readOnly=false&" +
 			"routeByLatency=false&" +
-			"routeRandomly=false").option()
+			"routeRandomly=false&" +
+			"masterName=master").option()
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), option)
 	assert.Equal(this.T(), "name", option.ClientName)
@@ -99,6 +100,7 @@ func (this *SuiteURI) TestRedisURIOption() {
 	assert.Equal(this.T(), false, option.ReadOnly)
 	assert.Equal(this.T(), false, option.RouteByLatency)
 	assert.Equal(this.T(), false, option.RouteRandomly)
+	assert.Equal(this.T(), "master", option.MasterName)
 
 	_, err = RedisURI("unknown://").option()
 	assert.NotNil(this.T(), err)

@@ -21,7 +21,7 @@ import (
 //   - [username:password@]
 //     @必選 指定連接時使用的帳號密碼
 //   - host1:port1[,host2:port2,...,hostN:portN]/
-//     @必選 指定連接位址與埠號, 如果要連接到叢集的話, 就需要設定多組位址與埠號
+//     @必選 指定連接位址與埠號, 如果要連接到叢集或是哨兵的話, 就需要設定多組位址與埠號
 //   - [?options]
 //     @必選 設定連接選項, 選項以'&'符號分隔, 例如: name=value&name=value
 //
@@ -65,6 +65,8 @@ import (
 //     @叢集專用 控制是否允許將只讀命令路由到最近的主節點或從節點, 它會自動啟用readOnly
 //   - routeRandomly
 //     @叢集專用 控制是否允許將只讀命令路由到隨機主節點或從節點, 它會自動啟用readOnly
+//   - masterName
+//     @哨兵專用 設定連接redis的主節點名稱, 當設定此項後, 就會改用哨兵模式來連接到redis
 //
 // 也可以到以下網址查看選項詳細說明
 //   - https://github.com/redis/go-redis/blob/master/options.go
@@ -204,6 +206,9 @@ func (this RedisURI) option() (option *redis.UniversalOptions, err error) {
 
 			case "routeRandomly":
 				option.RouteRandomly = cast.ToBool(value)
+
+			case "masterName":
+				option.MasterName = value
 			} // switch
 		} // for
 	} // if
