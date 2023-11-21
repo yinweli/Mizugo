@@ -88,23 +88,32 @@ func (this *Submit) UnlockIf(key string, unlock bool) *Submit {
 //   - 執行所有行為的 Prepare 函式, 如果有錯誤就中止執行
 //   - 執行主要資料庫的管線處理
 //   - 執行所有行為的 Complete 函式, 如果有錯誤就中止執行
+//   - 執行次要資料庫的管線處理
 //   - 清除管線資料
 func (this *Submit) Exec() error {
 	for _, itor := range this.behavior {
 		if err := itor.Prepare(); err != nil {
-			return fmt.Errorf("submit exec prepare: %w", err)
+			return fmt.Errorf("submit queue prepare: %w", err)
 		} // if
 	} // for
 
 	if len(this.behavior) > 0 {
-		_, _ = this.major.Exec(this.context)
+		if _, err := this.major.Exec(this.context); err != nil {
+			return fmt.Errorf("submit queue major: %w", err)
+		} // if
 	} // if
 
 	for _, itor := range this.behavior {
 		if err := itor.Complete(); err != nil {
-			return fmt.Errorf("submit exec complete: %w", err)
+			return fmt.Errorf("submit queue complete: %w", err)
 		} // if
 	} // for
+
+	if len(this.behavior) > 0 {
+		if err := this.minor.Exec(this.context); err != nil {
+			return fmt.Errorf("submit queue minor: %w", err)
+		} // if
+	} // if
 
 	this.behavior = nil
 	return nil

@@ -5,11 +5,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
-	"github.com/yinweli/Mizugo/mizugos/helps"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -42,16 +40,9 @@ func (this *SuiteMinor) TestMinor() {
 	assert.NotNil(this.T(), target.Client())
 	assert.NotNil(this.T(), target.Database())
 	assert.Nil(this.T(), target.SwitchDB("minor"))
+	assert.NotNil(this.T(), target.SwitchDB(""))
 	target.DropDB()
-
-	_, err = newMinor("", "minor")
-	assert.NotNil(this.T(), err)
-
-	_, err = newMinor(testdata.MongoURI, "")
-	assert.NotNil(this.T(), err)
-
 	assert.Nil(this.T(), target.Client().Ping(ctxs.Get().Ctx(), nil))
-
 	target.stop()
 	assert.Nil(this.T(), target.Submit())
 	assert.Nil(this.T(), target.Client())
@@ -59,37 +50,19 @@ func (this *SuiteMinor) TestMinor() {
 	assert.NotNil(this.T(), target.SwitchDB("minor"))
 	target.DropDB()
 
+	_, err = newMinor("", "minor")
+	assert.NotNil(this.T(), err)
+	_, err = newMinor(testdata.MongoURI, "")
+	assert.NotNil(this.T(), err)
 	_, err = newMinor(testdata.MongoURIInvalid, "minor")
 	assert.NotNil(this.T(), err)
 }
 
 func (this *SuiteMinor) TestMinorSubmit() {
-	target, _ := newMinor(testdata.MongoURI, "minor")
-	submit := target.Submit()
-	assert.NotNil(this.T(), submit)
-	assert.NotNil(this.T(), submit.Table("minor"))
-	assert.NotNil(this.T(), submit.Database())
-	target.stop()
-}
-
-func BenchmarkMinorSet(b *testing.B) {
-	type myData struct {
-		Key  string `bson:"key"`
-		Data string `bson:"data"`
-	}
-
-	name := "benchmark minor"
-	data := &myData{
-		Key:  helps.RandStringDefault(),
-		Data: helps.RandStringDefault(),
-	}
-	target, _ := newMinor(testdata.MongoURI, name)
-	submit := target.Submit()
-
-	for i := 0; i < b.N; i++ {
-		data.Data = helps.RandStringDefault()
-		_, _ = submit.Table(name).ReplaceOne(ctxs.Get().Ctx(), bson.D{{Key: "key", Value: data.Key}}, data, options.Replace().SetUpsert(true))
-	} // for
-
-	_ = submit.Drop(ctxs.Get().Ctx())
+	minor, _ := newMinor(testdata.MongoURI, "minor")
+	target := minor.Submit()
+	assert.NotNil(this.T(), target.Collection("minor"))
+	assert.NotNil(this.T(), target.Operate("minor", mongo.NewReplaceOneModel()))
+	target = minor.Submit()
+	assert.Nil(this.T(), target.Exec(ctxs.Get().Ctx()))
 }

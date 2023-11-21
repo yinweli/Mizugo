@@ -1,6 +1,7 @@
 package redmos
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -49,7 +50,7 @@ func (this *SuiteMixed) TestSubmit() {
 }
 
 func (this *SuiteMixed) TestExec() {
-	key := "mixed exec"
+	key := "mixed queue"
 	target := newMixed(this.major, this.minor)
 	assert.Nil(this.T(), target.Submit(ctxs.Get().Ctx()).Add(newBehaveTester(true, true)).Exec())
 	assert.Nil(this.T(), target.Submit(ctxs.Get().Ctx()).Add(newBehaveTester(true, true), newBehaveTester(true, true)).Exec())
@@ -69,4 +70,51 @@ func (this *SuiteMixed) TestBehave() {
 	assert.NotNil(this.T(), target.Ctx())
 	assert.NotNil(this.T(), target.Major())
 	assert.NotNil(this.T(), target.Minor())
+}
+
+// newBehaveTester 建立測試行為
+func newBehaveTester(prepare, result bool) Behavior {
+	return &behaveTester{
+		prepare: prepare,
+		result:  result,
+	}
+}
+
+// behaveTester 測試行為
+type behaveTester struct {
+	Behave
+	prepare      bool
+	result       bool
+	validPrepare bool
+	validResult  bool
+}
+
+func (this *behaveTester) Prepare() error {
+	if this.Ctx() == nil {
+		return fmt.Errorf("ctx nil")
+	} // if
+
+	if this.Major() == nil {
+		return fmt.Errorf("major nil")
+	} // if
+
+	if this.Minor() == nil {
+		return fmt.Errorf("minor nil")
+	} // if
+
+	if this.prepare == false {
+		return fmt.Errorf("prepare failed")
+	} // if
+
+	this.validPrepare = true
+	return nil
+}
+
+func (this *behaveTester) Complete() error {
+	if this.result == false {
+		return fmt.Errorf("complete failed")
+	} // if
+
+	this.validResult = true
+	return nil
 }

@@ -5,10 +5,12 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Del 刪除行為, 以索引字串與資料到主要/次要資料庫中刪除資料, 使用上有以下幾點須注意
-//   - 需要事先建立好與 Metaer 介面符合的元資料結構, 並填寫到 Meta
+//   - 執行前設定好 MajorEnable, MinorEnable
+//   - 執行前設定好 Meta, 這需要事先建立好與 Metaer 介面符合的元資料結構
 //   - 執行前設定好 Key 並且不能為空字串
 type Del struct {
 	Behave                    // 行為物件
@@ -60,14 +62,11 @@ func (this *Del) Complete() error {
 	} // if
 
 	if this.MinorEnable {
-		key := this.Meta.MinorKey(this.Key)
 		table := this.Meta.MinorTable()
 		field := this.Meta.MinorField()
+		key := this.Meta.MinorKey(this.Key)
 		filter := bson.D{{Key: field, Value: key}}
-
-		if _, err := this.Minor().Table(table).DeleteOne(this.Ctx(), filter); err != nil {
-			return fmt.Errorf("del complete: %w: %v", err, this.Key)
-		} // if
+		this.Minor().Operate(table, mongo.NewDeleteOneModel().SetFilter(filter))
 	} // if
 
 	return nil
