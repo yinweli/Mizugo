@@ -1,6 +1,7 @@
 package redmos
 
 import (
+	"context"
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -40,6 +41,7 @@ func (this *Minor) Submit() *MinorSubmit {
 	if this.client != nil && this.database != nil {
 		return &MinorSubmit{
 			database: this.database,
+			operate:  map[string][]mongo.WriteModel{},
 		}
 	} // if
 
@@ -86,15 +88,30 @@ func (this *Minor) stop() {
 	} // if
 }
 
-// MinorSubmit 資料庫執行器, 實際上就是mongo集合;
-// 使用時必須先執行 Table 來初始化表格物件, 否則會造成錯誤
+// MinorSubmit 資料庫執行器
 type MinorSubmit struct {
-	database          *mongo.Database // 資料庫物件
-	*mongo.Collection                 // 表格物件
+	database *mongo.Database               // 資料庫物件
+	operate  map[string][]mongo.WriteModel // 批量操作列表
 }
 
-// Table 初始化表格物件, 執行之後才能開始用表格操作
-func (this *MinorSubmit) Table(tableName string) *MinorSubmit {
-	this.Collection = this.database.Collection(tableName)
+// Collection 取得表格物件
+func (this *MinorSubmit) Collection(table string) *mongo.Collection {
+	return this.database.Collection(table)
+}
+
+// Operate 新增批量操作
+func (this *MinorSubmit) Operate(table string, operate mongo.WriteModel) *MinorSubmit {
+	this.operate[table] = append(this.operate[table], operate)
 	return this
+}
+
+// Exec 執行批量操作
+func (this *MinorSubmit) Exec(ctx context.Context) error {
+	for table, itor := range this.operate {
+		if _, err := this.database.Collection(table).BulkWrite(ctx, itor); err != nil {
+			return fmt.Errorf("minorSubmit exec: %w", err)
+		} // if
+	} // for
+
+	return nil
 }

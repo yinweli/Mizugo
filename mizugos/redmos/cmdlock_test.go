@@ -10,24 +10,24 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestMxLock(t *testing.T) {
-	suite.Run(t, new(SuiteMxLock))
+func TestCmdLock(t *testing.T) {
+	suite.Run(t, new(SuiteCmdLock))
 }
 
-type SuiteMxLock struct {
+type SuiteCmdLock struct {
 	suite.Suite
 	testdata.Env
 	major *Major
 	minor *Minor
 }
 
-func (this *SuiteMxLock) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-redmos-mxlock")
+func (this *SuiteCmdLock) SetupSuite() {
+	this.Env = testdata.EnvSetup("test-redmos-cmdlock")
 	this.major, _ = newMajor(testdata.RedisURI)
-	this.minor, _ = newMinor(testdata.MongoURI, "mxlock")
+	this.minor, _ = newMinor(testdata.MongoURI, "cmdlock")
 }
 
-func (this *SuiteMxLock) TearDownSuite() {
+func (this *SuiteCmdLock) TearDownSuite() {
 	testdata.EnvRestore(this.Env)
 	this.major.DropDB()
 	this.major.stop()
@@ -35,14 +35,14 @@ func (this *SuiteMxLock) TearDownSuite() {
 	this.minor.stop()
 }
 
-func (this *SuiteMxLock) TearDownTest() {
+func (this *SuiteCmdLock) TearDownTest() {
 	testdata.Leak(this.T(), true)
 }
 
-func (this *SuiteMxLock) TestLock() {
+func (this *SuiteCmdLock) TestLock() {
 	majorSubmit := this.major.Submit()
 
-	key := "mxlock"
+	key := "lock"
 	lock := &Lock{Key: key, time: testdata.RedisTimeout}
 	lock.Initialize(ctxs.Get().Ctx(), majorSubmit, nil)
 	unlock := &Unlock{Key: key}

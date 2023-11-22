@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
-	"github.com/yinweli/Mizugo/mizugos/helps"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -57,34 +56,4 @@ func (this *SuiteMajor) TestMajor() {
 
 	_, err = newMajor(testdata.RedisURIInvalid)
 	assert.NotNil(this.T(), err)
-}
-
-func BenchmarkMajorSet(b *testing.B) {
-	target, _ := newMajor(testdata.RedisURI)
-	submit := target.Submit()
-
-	for i := 0; i < b.N; i++ {
-		value := helps.RandStringDefault()
-		_, _ = submit.Set(ctxs.Get().Ctx(), value, value, testdata.RedisTimeout).Result()
-	} // for
-
-	_, _ = submit.Exec(ctxs.Get().Ctx())
-	target.DropDB()
-	target.stop()
-}
-
-func BenchmarkMajorGet(b *testing.B) {
-	target, _ := newMajor(testdata.RedisURI)
-	submit := target.Submit()
-	value := helps.RandStringDefault()
-	_, _ = submit.Set(ctxs.Get().Ctx(), value, value, 0).Result()
-
-	for i := 0; i < b.N; i++ {
-		_, _ = submit.Get(ctxs.Get().Ctx(), value).Result()
-	} // for
-
-	_, _ = submit.Del(ctxs.Get().Ctx(), value).Result()
-	_, _ = submit.Exec(ctxs.Get().Ctx())
-	target.DropDB()
-	target.stop()
 }
