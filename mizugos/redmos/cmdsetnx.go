@@ -44,7 +44,7 @@ func (this *SetNX[T]) Prepare() error {
 		return fmt.Errorf("setnx prepare: data nil")
 	} // if
 
-	if save, ok := any(this.Data).(Saver); ok && save.Get() == false {
+	if save, ok := any(this.Data).(Saver); ok && save.GetSave() == false {
 		return nil
 	} // if
 
@@ -78,7 +78,7 @@ func (this *SetNX[T]) Complete() error {
 		return fmt.Errorf("setnx complete: meta nil")
 	} // if
 
-	if save, ok := any(this.Data).(Saver); ok && save.Get() == false {
+	if save, ok := any(this.Data).(Saver); ok && save.GetSave() == false {
 		return nil
 	} // if
 
