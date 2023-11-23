@@ -98,9 +98,7 @@ func (this *Submit) Exec() error {
 	} // for
 
 	if len(this.behavior) > 0 {
-		if _, err := this.major.Exec(this.context); err != nil {
-			return fmt.Errorf("submit queue major: %w", err)
-		} // if
+		_, _ = this.major.Exec(this.context)
 	} // if
 
 	for _, itor := range this.behavior {
