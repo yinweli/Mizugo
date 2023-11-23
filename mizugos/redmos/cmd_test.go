@@ -31,7 +31,8 @@ func (this *SuiteMX) TearDownTest() {
 }
 
 func (this *SuiteMX) TestSave() {
-	target := &Save{}
-	target.Set()
-	assert.True(this.T(), target.Get())
+	target := NewSave()
+	assert.NotNil(this.T(), target)
+	target.SetSave()
+	assert.True(this.T(), target.GetSave())
 }

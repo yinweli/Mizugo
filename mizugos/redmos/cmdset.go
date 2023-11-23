@@ -44,7 +44,7 @@ func (this *Set[T]) Prepare() error {
 		return fmt.Errorf("set prepare: data nil")
 	} // if
 
-	if save, ok := any(this.Data).(Saver); ok && save.Get() == false {
+	if save, ok := any(this.Data).(Saver); ok && save.GetSave() == false {
 		return nil
 	} // if
 
@@ -78,7 +78,7 @@ func (this *Set[T]) Complete() error {
 		return fmt.Errorf("set complete: meta nil")
 	} // if
 
-	if save, ok := any(this.Data).(Saver); ok && save.Get() == false {
+	if save, ok := any(this.Data).(Saver); ok && save.GetSave() == false {
 		return nil
 	} // if
 

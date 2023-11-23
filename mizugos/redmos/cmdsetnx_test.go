@@ -113,7 +113,7 @@ func (this *SuiteCmdSetNX) TestSetNXSave() {
 	this.meta.field = true
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
-	data := &dataSetNXSave{Save: &Save{}, Field: helps.RandStringDefault(), Value: helps.RandStringDefault()}
+	data := &dataSetNXSave{Save: NewSave(), Field: helps.RandStringDefault(), Value: helps.RandStringDefault()}
 	opt := cmpopts.IgnoreFields(dataSetNXSave{}, "Save")
 
 	data.save = true
