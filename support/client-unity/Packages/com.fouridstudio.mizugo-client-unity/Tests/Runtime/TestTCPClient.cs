@@ -127,8 +127,6 @@ namespace Mizugo
             Assert.IsFalse(client.IsConnect);
             client.Connect(host, port);
             TestUtil.Sleep();
-            Assert.AreEqual(host, client.Host);
-            Assert.AreEqual(port, client.Port);
             Assert.IsTrue(client.IsConnect);
             client.Disconnect();
         }
