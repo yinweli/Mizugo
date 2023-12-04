@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 
 namespace Mizugo
 {
     /// <summary>
-    /// '已經啟動'異常
+    /// 已經啟動異常
     /// </summary>
     public class AlreadyStartException : Exception
     {

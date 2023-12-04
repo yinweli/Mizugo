@@ -34,10 +34,7 @@ namespace Mizugo
                     throw new ArgumentNullException("procmgr");
 
                 if (client != null)
-                    throw new AlreadyStartException("tcp client");
-
-                this.host = host;
-                this.port = port;
+                    throw new AlreadyStartException("client");
 
                 client = new TcpClient();
                 client.NoDelay = true;
@@ -61,7 +58,9 @@ namespace Mizugo
                                 sendHandler = new SendHandler();
                                 sendHandler.Start(equeue, stream, procmgr);
                                 equeue.Enqueue(EventID.Connect, null);
-                            } // if
+                            }
+                            else
+                                equeue.Enqueue(EventID.Disconnect, null);
                         } // try
                         catch (Exception e)
                         {
@@ -99,10 +98,10 @@ namespace Mizugo
 
             try
             {
-                if (data.eventID != EventID.Message)
-                    eventmgr?.Process(data.eventID, data.param);
-                else
+                if (data.eventID == EventID.Message)
                     procmgr?.Process(data.param);
+                else
+                    eventmgr?.Process(data.eventID, data.param);
             } // try
             catch (Exception e)
             {
@@ -137,16 +136,6 @@ namespace Mizugo
             procmgr?.Del(messageID);
         }
 
-        public string Host
-        {
-            get { return host; }
-        }
-
-        public int Port
-        {
-            get { return port; }
-        }
-
         public bool IsConnect
         {
             get { return (client != null && client.Connected) || connecting; }
@@ -156,16 +145,6 @@ namespace Mizugo
         {
             get { return IsConnect || equeue.IsEmpty == false; }
         }
-
-        /// <summary>
-        /// 連線位址
-        /// </summary>
-        private string host = string.Empty;
-
-        /// <summary>
-        /// 連線埠號
-        /// </summary>
-        private int port = 0;
 
         /// <summary>
         /// 事件處理器
@@ -273,11 +252,14 @@ namespace Mizugo
                             equeue.Enqueue(EventID.Recv, null);
                             read = 0;
                         } // try
+                        catch (DisconnectException)
+                        {
+                            equeue.Enqueue(EventID.Disconnect, null);
+                            return;
+                        } // catch
                         catch (Exception e)
                         {
-                            if (e is DisconnectException == false)
-                                equeue.Enqueue(EventID.Error, e);
-
+                            equeue.Enqueue(EventID.Error, e);
                             equeue.Enqueue(EventID.Disconnect, null);
                             return;
                         } // catch
