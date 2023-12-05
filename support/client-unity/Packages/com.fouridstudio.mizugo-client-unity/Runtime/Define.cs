@@ -130,16 +130,6 @@ namespace Mizugo
         public void DelProcess(MessageID messageID);
 
         /// <summary>
-        /// 取得連線位址
-        /// </summary>
-        public string Host { get; }
-
-        /// <summary>
-        /// 取得連線埠號
-        /// </summary>
-        public int Port { get; }
-
-        /// <summary>
         /// 取得是否連線
         /// </summary>
         public bool IsConnect { get; }
