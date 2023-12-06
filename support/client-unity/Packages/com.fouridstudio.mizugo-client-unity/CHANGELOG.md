@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [0.2.4] - 2023-12-06
+### Fixed
+- 修正錯誤時只需要通知錯誤事件即可
+
 ## [0.2.3] - 2023-12-05
 ### Removed
 - 移除Host與Port函式

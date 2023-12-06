@@ -31,6 +31,13 @@ namespace Mizugo
                     validDisconnect = true;
                 }
             );
+            client.AddEvent(
+                EventID.Error,
+                (object _) =>
+                {
+                    validDisconnect = true;
+                }
+            );
 
             client.Connect(host, port);
             TestUtil.Sleep();
@@ -231,7 +238,14 @@ namespace Mizugo
                     validSend = true;
                 }
             );
-            client.AddEvent(EventID.Error, TestUtil.Log);
+            client.AddEvent(
+                EventID.Error,
+                (object param) =>
+                {
+                    validDisconnect = true;
+                    TestUtil.Log(param);
+                }
+            );
             client.AddProcess(
                 (int)MsgID.JsonA,
                 (object param) =>
@@ -306,7 +320,14 @@ namespace Mizugo
                     validSend = true;
                 }
             );
-            client.AddEvent(EventID.Error, TestUtil.Log);
+            client.AddEvent(
+                EventID.Error,
+                (object param) =>
+                {
+                    validDisconnect = true;
+                    TestUtil.Log(param);
+                }
+            );
             client.AddProcess(
                 (int)MsgID.ProtoA,
                 (object param) =>
