@@ -260,7 +260,6 @@ namespace Mizugo
                         catch (Exception e)
                         {
                             equeue.Enqueue(EventID.Error, e);
-                            equeue.Enqueue(EventID.Disconnect, null);
                             return;
                         } // catch
                     } // while
