@@ -132,6 +132,11 @@ func main() {
 | client-unity-sample | 客戶端組件範例分支                                       |
 | proto-unity         | protobuf組件分支, 提供給[unity]的[package manager]安裝用 |
 
+# JetBrains licenses
+[mizugo]使用了JetBrains的Goland的免費開發許可, 在此表示感謝  
+<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo (Main) logo." style="width:200px;">
+<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/GoLand_icon.png" alt="GoLand logo." style="width:200px;">
+
 [go]: https://go.dev/dl/
 [package manager]: https://docs.unity3d.com/Manual/Packages.html
 [proto]: https://github.com/protocolbuffers/protobuf
