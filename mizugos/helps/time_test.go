@@ -221,133 +221,55 @@ func (this *SuiteTime) TestMonthly() {
 }
 
 func (this *SuiteTime) TestFixedPrev() {
-	duration := TimeHour
+	assert.Equal(this.T(),
+		Date(1970, 1, 1, 0, 0, 0, 0),
+		FixedPrev(time.Time{}, time.Time{}, TimeHour))
 	assert.Equal(this.T(),
 		Date(2023, 1, 1, 8, 0, 0, 0),
-		FixedPrev(Date(2023, 1, 1, 8, 0, 0, 0), duration))
+		FixedPrev(time.Time{}, Date(2023, 1, 1, 8, 0, 0, 0), TimeHour))
 	assert.Equal(this.T(),
 		Date(2023, 1, 1, 8, 0, 0, 0),
-		FixedPrev(Date(2023, 1, 1, 8, 10, 0, 0), duration))
+		FixedPrev(Date(1970, 1, 1, 8, 0, 0, 0), Date(2023, 1, 1, 8, 0, 0, 0), TimeHour))
 	assert.Equal(this.T(),
 		Date(2023, 1, 1, 8, 0, 0, 0),
-		FixedPrev(Date(2023, 1, 1, 8, 50, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 1, 23, 0, 0, 0),
-		FixedPrev(Date(2023, 1, 1, 23, 0, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 1, 23, 0, 0, 0),
-		FixedPrev(Date(2023, 1, 1, 23, 10, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 1, 23, 0, 0, 0),
-		FixedPrev(Date(2023, 1, 1, 23, 50, 0, 0), duration))
-	duration = TimeHour * 2
+		FixedPrev(Date(1970, 1, 1, 8, 0, 0, 0), Date(2023, 1, 1, 8, 10, 0, 0), TimeHour))
 	assert.Equal(this.T(),
 		Date(2023, 1, 1, 8, 0, 0, 0),
-		FixedPrev(Date(2023, 1, 1, 8, 0, 0, 0), duration))
+		FixedPrev(Date(1970, 1, 1, 8, 0, 0, 0), Date(2023, 1, 1, 8, 50, 0, 0), TimeHour))
+	assert.Equal(this.T(),
+		Date(2023, 1, 1, 7, 0, 0, 0),
+		FixedPrev(Date(1970, 1, 1, 1, 0, 0, 0), Date(2023, 1, 1, 8, 1, 0, 0), TimeHour*3))
 	assert.Equal(this.T(),
 		Date(2023, 1, 1, 8, 0, 0, 0),
-		FixedPrev(Date(2023, 1, 1, 8, 10, 0, 0), duration))
+		FixedPrev(Date(1970, 1, 1, 2, 0, 0, 0), Date(2023, 1, 1, 8, 1, 0, 0), TimeHour*3))
 	assert.Equal(this.T(),
-		Date(2023, 1, 1, 8, 0, 0, 0),
-		FixedPrev(Date(2023, 1, 1, 8, 50, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 1, 22, 0, 0, 0),
-		FixedPrev(Date(2023, 1, 1, 23, 0, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 1, 22, 0, 0, 0),
-		FixedPrev(Date(2023, 1, 1, 23, 10, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 1, 22, 0, 0, 0),
-		FixedPrev(Date(2023, 1, 1, 23, 50, 0, 0), duration))
-	duration = TimeHour * 3
-	assert.Equal(this.T(),
-		Date(2023, 1, 1, 6, 0, 0, 0),
-		FixedPrev(Date(2023, 1, 1, 8, 0, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 1, 6, 0, 0, 0),
-		FixedPrev(Date(2023, 1, 1, 8, 10, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 1, 6, 0, 0, 0),
-		FixedPrev(Date(2023, 1, 1, 8, 50, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 1, 21, 0, 0, 0),
-		FixedPrev(Date(2023, 1, 1, 23, 0, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 1, 21, 0, 0, 0),
-		FixedPrev(Date(2023, 1, 1, 23, 10, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 1, 21, 0, 0, 0),
-		FixedPrev(Date(2023, 1, 1, 23, 50, 0, 0), duration))
+		Date(2023, 1, 1, 6, 30, 0, 0),
+		FixedPrev(Date(1970, 1, 1, 3, 30, 0, 0), Date(2023, 1, 1, 8, 1, 0, 0), TimeHour*3))
 }
 
 func (this *SuiteTime) TestFixedNext() {
-	duration := TimeHour
+	assert.Equal(this.T(),
+		Date(1970, 1, 1, 1, 0, 0, 0),
+		FixedNext(time.Time{}, time.Time{}, TimeHour))
 	assert.Equal(this.T(),
 		Date(2023, 1, 1, 9, 0, 0, 0),
-		FixedNext(Date(2023, 1, 1, 8, 0, 0, 0), duration))
+		FixedNext(time.Time{}, Date(2023, 1, 1, 8, 0, 0, 0), TimeHour))
 	assert.Equal(this.T(),
 		Date(2023, 1, 1, 9, 0, 0, 0),
-		FixedNext(Date(2023, 1, 1, 8, 10, 0, 0), duration))
+		FixedNext(Date(1970, 1, 1, 8, 0, 0, 0), Date(2023, 1, 1, 8, 0, 0, 0), TimeHour))
 	assert.Equal(this.T(),
 		Date(2023, 1, 1, 9, 0, 0, 0),
-		FixedNext(Date(2023, 1, 1, 8, 50, 0, 0), duration))
+		FixedNext(Date(1970, 1, 1, 8, 0, 0, 0), Date(2023, 1, 1, 8, 10, 0, 0), TimeHour))
 	assert.Equal(this.T(),
-		Date(2023, 1, 2, 0, 0, 0, 0),
-		FixedNext(Date(2023, 1, 1, 23, 0, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 2, 0, 0, 0, 0),
-		FixedNext(Date(2023, 1, 1, 23, 10, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 2, 0, 0, 0, 0),
-		FixedNext(Date(2023, 1, 1, 23, 50, 0, 0), duration))
-	duration = TimeHour * 2
+		Date(2023, 1, 1, 9, 0, 0, 0),
+		FixedNext(Date(1970, 1, 1, 8, 0, 0, 0), Date(2023, 1, 1, 8, 50, 0, 0), TimeHour))
 	assert.Equal(this.T(),
 		Date(2023, 1, 1, 10, 0, 0, 0),
-		FixedNext(Date(2023, 1, 1, 8, 0, 0, 0), duration))
+		FixedNext(Date(1970, 1, 1, 1, 0, 0, 0), Date(2023, 1, 1, 8, 1, 0, 0), TimeHour*3))
 	assert.Equal(this.T(),
-		Date(2023, 1, 1, 10, 0, 0, 0),
-		FixedNext(Date(2023, 1, 1, 8, 10, 0, 0), duration))
+		Date(2023, 1, 1, 11, 0, 0, 0),
+		FixedNext(Date(1970, 1, 1, 2, 0, 0, 0), Date(2023, 1, 1, 8, 1, 0, 0), TimeHour*3))
 	assert.Equal(this.T(),
-		Date(2023, 1, 1, 10, 0, 0, 0),
-		FixedNext(Date(2023, 1, 1, 8, 50, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 2, 0, 0, 0, 0),
-		FixedNext(Date(2023, 1, 1, 23, 0, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 2, 0, 0, 0, 0),
-		FixedNext(Date(2023, 1, 1, 23, 10, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 2, 0, 0, 0, 0),
-		FixedNext(Date(2023, 1, 1, 23, 50, 0, 0), duration))
-	duration = TimeHour * 3
-	assert.Equal(this.T(),
-		Date(2023, 1, 1, 9, 0, 0, 0),
-		FixedNext(Date(2023, 1, 1, 8, 0, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 1, 9, 0, 0, 0),
-		FixedNext(Date(2023, 1, 1, 8, 10, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 1, 9, 0, 0, 0),
-		FixedNext(Date(2023, 1, 1, 8, 50, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 2, 0, 0, 0, 0),
-		FixedNext(Date(2023, 1, 1, 23, 0, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 2, 0, 0, 0, 0),
-		FixedNext(Date(2023, 1, 1, 23, 10, 0, 0), duration))
-	assert.Equal(this.T(),
-		Date(2023, 1, 2, 0, 0, 0, 0),
-		FixedNext(Date(2023, 1, 1, 23, 50, 0, 0), duration))
-}
-
-func (this *SuiteTime) TestFixedCheck() {
-	assert.True(this.T(), FixedCheck(TimeHour))
-	assert.True(this.T(), FixedCheck(TimeHour*2))
-	assert.True(this.T(), FixedCheck(TimeHour*3))
-	assert.True(this.T(), FixedCheck(TimeHour*4))
-	assert.False(this.T(), FixedCheck(TimeHour*5))
-	assert.True(this.T(), FixedCheck(TimeHour*6))
-	assert.False(this.T(), FixedCheck(TimeHour*7))
-	assert.True(this.T(), FixedCheck(TimeHour*8))
-	assert.False(this.T(), FixedCheck(TimeHour*9))
+		Date(2023, 1, 1, 9, 30, 0, 0),
+		FixedNext(Date(1970, 1, 1, 3, 30, 0, 0), Date(2023, 1, 1, 8, 1, 0, 0), TimeHour*3))
 }

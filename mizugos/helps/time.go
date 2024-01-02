@@ -16,6 +16,7 @@ const (
 	TimeYear        = TimeDay * 365         // 1年時間
 	LayoutSecond    = "2006-01-02 15:04:05" // 時間字串格式, 使用年月日時分秒
 	LayoutMinute    = "2006-01-02 15:04"    // 時間字串格式, 使用年月日時分
+	firstYear       = 1970                  // unix計時的第一年
 )
 
 // SetTimeZone 設定時區資料
@@ -203,25 +204,54 @@ func MonthlyNext(now time.Time, mday, hour int) time.Time {
 	return next
 }
 
-// FixedPrev 取得上個固定間隔時間; duration 不能小於1秒, 並且 86400秒 % duration必須為0, 否則會造成計算誤差, 可以用 FixedCheck 檢查 duration 是否正確
-func FixedPrev(now time.Time, duration time.Duration) time.Time {
-	nsec := now.Unix()
+// FixedPrev 取得上個固定間隔時間;
+// base 若小於1970年, base 會被改為從1970年開始;
+// now 若小於 base, now 會被改為 base;
+// duration 不能小於1秒, 會造成計算錯誤
+func FixedPrev(base, now time.Time, duration time.Duration) time.Time {
+	if base.Before(Date(firstYear, 1, 1, 0, 0, 0, 0)) {
+		base = Date(firstYear, base.Month(), base.Day(), base.Hour(), base.Minute(), base.Second(), 0)
+	} // if
+
+	if now.Before(base) {
+		now = base
+	} // if
+
+	nsec := int64(now.Sub(base).Seconds())
 	dsec := int64(duration.Seconds())
 	quotient := nsec / dsec
-	return time.Unix(quotient*dsec, 0).In(GetTimeZone())
+
+	if quotient < 0 {
+		quotient = 0
+	} // if
+
+	return base.Add(time.Duration(quotient*dsec) * time.Second).In(GetTimeZone())
 }
 
-// FixedNext 取得下個固定間隔時間; duration 不能小於1秒, 並且 86400秒 % duration必須為0, 否則會造成計算誤差, 可以用 FixedCheck 檢查 duration 是否正確
-func FixedNext(now time.Time, duration time.Duration) time.Time {
-	nsec := now.Unix()
+// FixedNext 取得下個固定間隔時間;
+// base 若小於1970年, base 會被改為從1970年開始;
+// now 若小於 base, now 會被改為 base;
+// duration 不能小於1秒, 會造成計算錯誤
+func FixedNext(base, now time.Time, duration time.Duration) time.Time {
+	if base.Before(Date(firstYear, 1, 1, 0, 0, 0, 0)) {
+		base = Date(firstYear, base.Month(), base.Day(), base.Hour(), base.Minute(), base.Second(), 0)
+	} // if
+
+	if now.Before(base) {
+		now = base
+	} // if
+
+	nsec := int64(now.Sub(base).Seconds())
 	dsec := int64(duration.Seconds())
-	quotient := nsec/dsec + 1
-	return time.Unix(quotient*dsec, 0).In(GetTimeZone())
-}
+	quotient := nsec / dsec
 
-// FixedCheck 檢查提供給 FixedPrev 與 FixedNext 的 duration 是否正確
-func FixedCheck(duration time.Duration) bool {
-	return TimeDay%duration == 0
+	if quotient < 0 {
+		quotient = 1
+	} else {
+		quotient++
+	} // if
+
+	return base.Add(time.Duration(quotient*dsec) * time.Second).In(GetTimeZone())
 }
 
 var location *time.Location // 時區資料
