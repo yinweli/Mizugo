@@ -122,7 +122,7 @@ type metaGet struct {
 }
 
 func (this *metaGet) MajorKey(key any) string {
-	return fmt.Sprintf("mxget:%v", key)
+	return fmt.Sprintf("cmdget:%v", key)
 }
 
 func (this *metaGet) MinorKey(key any) string {
@@ -131,7 +131,7 @@ func (this *metaGet) MinorKey(key any) string {
 
 func (this *metaGet) MinorTable() string {
 	if this.table {
-		return "mxget"
+		return "cmdget"
 	} // if
 
 	return ""

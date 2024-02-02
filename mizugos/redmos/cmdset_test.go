@@ -141,7 +141,7 @@ type metaSet struct {
 }
 
 func (this *metaSet) MajorKey(key any) string {
-	return fmt.Sprintf("mxset:%v", key)
+	return fmt.Sprintf("cmdset:%v", key)
 }
 
 func (this *metaSet) MinorKey(key any) string {
@@ -150,7 +150,7 @@ func (this *metaSet) MinorKey(key any) string {
 
 func (this *metaSet) MinorTable() string {
 	if this.table {
-		return "mxset"
+		return "cmdset"
 	} // if
 
 	return ""
