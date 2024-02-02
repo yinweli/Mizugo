@@ -141,7 +141,7 @@ type metaSetNX struct {
 }
 
 func (this *metaSetNX) MajorKey(key any) string {
-	return fmt.Sprintf("mxsetnx:%v", key)
+	return fmt.Sprintf("cmdsetnx:%v", key)
 }
 
 func (this *metaSetNX) MinorKey(key any) string {
@@ -150,7 +150,7 @@ func (this *metaSetNX) MinorKey(key any) string {
 
 func (this *metaSetNX) MinorTable() string {
 	if this.table {
-		return "mxsetnx"
+		return "cmdsetnx"
 	} // if
 
 	return ""

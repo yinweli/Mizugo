@@ -76,7 +76,7 @@ type metaExist struct {
 }
 
 func (this *metaExist) MajorKey(key any) string {
-	return fmt.Sprintf("mxexist:%v", key)
+	return fmt.Sprintf("cmdexist:%v", key)
 }
 
 func (this *metaExist) MinorKey(key any) string {
@@ -84,7 +84,7 @@ func (this *metaExist) MinorKey(key any) string {
 }
 
 func (this *metaExist) MinorTable() string {
-	return "mxexist"
+	return "cmdexist"
 }
 
 func (this *metaExist) MinorField() string {

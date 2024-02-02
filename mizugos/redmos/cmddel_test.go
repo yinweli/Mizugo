@@ -98,7 +98,7 @@ type metaDel struct {
 }
 
 func (this *metaDel) MajorKey(key any) string {
-	return fmt.Sprintf("mxdel:%v", key)
+	return fmt.Sprintf("cmddel:%v", key)
 }
 
 func (this *metaDel) MinorKey(key any) string {
@@ -107,7 +107,7 @@ func (this *metaDel) MinorKey(key any) string {
 
 func (this *metaDel) MinorTable() string {
 	if this.table {
-		return "mxdel"
+		return "cmddel"
 	} // if
 
 	return ""

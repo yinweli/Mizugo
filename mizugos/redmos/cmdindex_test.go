@@ -89,7 +89,7 @@ type metaIndex struct {
 }
 
 func (this *metaIndex) MajorKey(key any) string {
-	return fmt.Sprintf("mxindex:%v", key)
+	return fmt.Sprintf("cmdindex:%v", key)
 }
 
 func (this *metaIndex) MinorKey(key any) string {
@@ -98,7 +98,7 @@ func (this *metaIndex) MinorKey(key any) string {
 
 func (this *metaIndex) MinorTable() string {
 	if this.table {
-		return "mxindex"
+		return "cmdindex"
 	} // if
 
 	return ""
