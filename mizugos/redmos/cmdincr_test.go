@@ -46,38 +46,38 @@ func (this *SuiteCmdIncr) TestIncr() {
 	this.meta.field = true
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
-	dataAll := &dataIncr{Field: "redis+mongo", Value: 1}
+	data := &dataIncr{Field: "redis+mongo", Value: 1}
 
-	target := &Incr[int64]{Meta: &this.meta, MinorEnable: true, Key: dataAll.Field, Incr: 1}
+	target := &Incr{Meta: &this.meta, MinorEnable: true, Key: data.Field, Incr: 1}
 	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), target.Complete())
 	_ = minorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Equal(this.T(), int64(1), target.Data)
-	assert.True(this.T(), testdata.MongoCompare[dataIncr](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(dataAll.Field), dataAll))
+	assert.True(this.T(), testdata.MongoCompare[dataIncr](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data))
 
-	target = &Incr[int64]{Meta: nil, MinorEnable: true, Key: dataAll.Field, Incr: 1}
+	target = &Incr{Meta: nil, MinorEnable: true, Key: data.Field, Incr: 1}
 	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
-	target = &Incr[int64]{Meta: &this.meta, MinorEnable: true, Key: "", Incr: 1}
+	target = &Incr{Meta: &this.meta, MinorEnable: true, Key: "", Incr: 1}
 	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	this.meta.table = false
 	this.meta.field = true
-	target = &Incr[int64]{Meta: &this.meta, MinorEnable: true, Key: dataAll.Field, Incr: 1}
+	target = &Incr{Meta: &this.meta, MinorEnable: true, Key: data.Field, Incr: 1}
 	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	this.meta.table = true
 	this.meta.field = false
-	target = &Incr[int64]{Meta: &this.meta, MinorEnable: true, Key: dataAll.Field, Incr: 1}
+	target = &Incr{Meta: &this.meta, MinorEnable: true, Key: data.Field, Incr: 1}
 	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
-	target = &Incr[int64]{Meta: nil, MinorEnable: true, Key: dataAll.Field, Incr: 1}
+	target = &Incr{Meta: nil, MinorEnable: true, Key: data.Field, Incr: 1}
 	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Complete())
 }
