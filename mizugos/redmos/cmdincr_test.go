@@ -2,6 +2,8 @@ package redmos
 
 import (
 	"fmt"
+	"sync"
+	"sync/atomic"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -84,6 +86,39 @@ func (this *SuiteCmdIncr) TestIncr() {
 	target = &Incr{Meta: nil, MinorEnable: true, Key: data.Field, Data: &IncrData{Incr: 1, Value: 0}}
 	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Complete())
+}
+
+func (this *SuiteCmdIncr) TestDuplicate() {
+	this.meta.table = true
+	this.meta.field = true
+	waitGroup := &sync.WaitGroup{}
+	waitGroup.Add(4)
+	count := atomic.Int64{}
+	check := func() {
+		testdata.WaitTimeout()
+
+		for i := 0; i < 250; i++ {
+			majorSubmit := this.major.Submit()
+			minorSubmit := this.minor.Submit()
+			data := &dataIncr{Field: "duplicate", Value: 1}
+			incr := &Incr{Meta: &this.meta, MinorEnable: false, Key: data.Field, Data: &IncrData{Incr: 1, Value: 0}}
+			incr.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+			_ = incr.Prepare()
+			_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+			_ = incr.Complete()
+			_ = minorSubmit.Exec(ctxs.Get().Ctx())
+			count.Add(incr.Data.Value)
+		} // for
+
+		waitGroup.Done()
+	}
+
+	go check()
+	go check()
+	go check()
+	go check()
+	waitGroup.Wait()
+	assert.Equal(this.T(), int64(500500), count.Load())
 }
 
 type metaIncr struct {
