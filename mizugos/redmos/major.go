@@ -18,6 +18,7 @@ func newMajor(uri RedisURI) (major *Major, err error) {
 
 	major = &Major{}
 	major.client = client
+	major.dbID = 0
 	return major, nil
 }
 
@@ -26,6 +27,7 @@ func newMajor(uri RedisURI) (major *Major, err error) {
 //   - 取得客戶端物件: 取得原生資料庫執行器, 可用來執行更細緻的命令
 type Major struct {
 	client redis.UniversalClient // 客戶端物件
+	dbID   int                   // 資料庫編號
 }
 
 // Submit 取得執行物件
@@ -42,6 +44,11 @@ func (this *Major) Client() redis.UniversalClient {
 	return this.client
 }
 
+// DBID 取得資料庫編號
+func (this *Major) DBID() int {
+	return this.dbID
+}
+
 // SwitchDB 切換資料庫, redis預設只能使用編號0~15的資料庫
 func (this *Major) SwitchDB(dbID int) error {
 	if this.client == nil {
@@ -52,6 +59,7 @@ func (this *Major) SwitchDB(dbID int) error {
 		return fmt.Errorf("major switch: %w", err)
 	} // if
 
+	this.dbID = dbID
 	return nil
 }
 
