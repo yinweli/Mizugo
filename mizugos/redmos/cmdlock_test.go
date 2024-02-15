@@ -1,7 +1,6 @@
 package redmos
 
 import (
-	"fmt"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -83,8 +82,6 @@ func (this *SuiteCmdLock) TestDuplicate() {
 		_ = lock.Prepare()
 		_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 
-		fmt.Println(">>> go!")
-
 		if lock.Complete() != nil {
 			return
 		} // if
@@ -92,8 +89,6 @@ func (this *SuiteCmdLock) TestDuplicate() {
 		testdata.WaitTimeout()
 		count.Add(1)
 		testdata.WaitTimeout()
-
-		fmt.Println(">>> go bb!")
 
 		unlock := &Unlock{Key: key}
 		unlock.Initialize(ctxs.Get().Ctx(), majorSubmit, nil)
@@ -113,15 +108,11 @@ func (this *SuiteCmdLock) TestDuplicate() {
 			_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 			_ = lock.Complete()
 
-			fmt.Println(">>> na!")
-
 			if lock.Complete() != nil {
 				continue
 			} // if
 
 			count.Add(1)
-
-			fmt.Println(">>> na bb!")
 
 			unlock := &Unlock{Key: key}
 			unlock.Initialize(ctxs.Get().Ctx(), majorSubmit, nil)
