@@ -98,7 +98,17 @@ func (this *Submit) Exec() error {
 	} // for
 
 	if len(this.behavior) > 0 {
-		_, _ = this.major.Exec(this.context)
+		cmd, err := this.major.Exec(this.context)
+
+		if err != nil {
+			return fmt.Errorf("submit queue exec: %w", err)
+		} // if
+
+		for _, itor := range cmd {
+			if err = itor.Err(); err != nil {
+				return fmt.Errorf("submit queue exec cmd: %w", err)
+			} // if
+		} // for
 	} // if
 
 	for _, itor := range this.behavior {
