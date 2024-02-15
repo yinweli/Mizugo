@@ -11,7 +11,7 @@ require (
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/otiai10/copy v1.14.0
 	github.com/panjf2000/ants/v2 v2.8.2
-	github.com/redis/go-redis/v9 v9.2.1
+	github.com/redis/go-redis/v9 v9.4.0
 	github.com/spf13/cast v1.5.1
 	github.com/spf13/viper v1.17.0
 	github.com/stretchr/testify v1.8.4
