@@ -108,7 +108,6 @@ func (this *SuiteCmdIncr) TestDuplicate() {
 			_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 			_ = incr.Complete()
 			count.Add(incr.Data.Value)
-			fmt.Println(incr.Data.Value)
 		} // for
 	}
 
