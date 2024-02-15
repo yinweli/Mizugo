@@ -91,32 +91,32 @@ func (this *SuiteCmdIncr) TestIncr() {
 func (this *SuiteCmdIncr) TestDuplicate() {
 	this.meta.table = true
 	this.meta.field = true
+	count := 4
+	total := atomic.Int64{}
 	waitGroup := &sync.WaitGroup{}
-	waitGroup.Add(4)
-	count := atomic.Int64{}
-	check := func() {
-		defer waitGroup.Done()
-		testdata.WaitTimeout()
+	waitGroup.Add(count)
 
-		for i := 0; i < 100; i++ {
-			majorSubmit := this.major.Submit()
-			minorSubmit := this.minor.Submit()
-			data := &dataIncr{Field: "duplicate", Value: 1}
-			incr := &Incr{Meta: &this.meta, MinorEnable: false, Key: data.Field, Data: &IncrData{Incr: 1, Value: 0}}
-			incr.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
-			_ = incr.Prepare()
-			_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
-			_ = incr.Complete()
-			count.Add(incr.Data.Value)
-		} // for
-	}
+	for i := 0; i < count; i++ {
+		go func() {
+			defer waitGroup.Done()
+			testdata.WaitTimeout()
 
-	go check()
-	go check()
-	go check()
-	go check()
+			for i := 0; i < 100; i++ {
+				majorSubmit := this.major.Submit()
+				minorSubmit := this.minor.Submit()
+				data := &dataIncr{Field: "cmdincr+duplicate", Value: 0}
+				incr := &Incr{Meta: &this.meta, MinorEnable: true, Key: data.Field, Data: &IncrData{Incr: 1, Value: 0}}
+				incr.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+				_ = incr.Prepare()
+				_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+				_ = incr.Complete()
+				total.Add(incr.Data.Value)
+			} // for
+		}()
+	} // for
+
 	waitGroup.Wait()
-	assert.Equal(this.T(), int64(80200), count.Load())
+	assert.Equal(this.T(), int64(80200), total.Load())
 }
 
 type metaIncr struct {

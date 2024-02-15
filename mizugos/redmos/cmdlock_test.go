@@ -70,11 +70,13 @@ func (this *SuiteCmdLock) TestLock() {
 }
 
 func (this *SuiteCmdLock) TestDuplicate() {
+	key := "lock+duplicate"
+	count := 4
+	total := atomic.Int64{}
 	waitGroup := &sync.WaitGroup{}
-	waitGroup.Add(4)
-	count := atomic.Int64{}
-	key := "lock"
-	pass := func() {
+	waitGroup.Add(count + 1)
+
+	go func() {
 		defer waitGroup.Done()
 		majorSubmit := this.major.Submit()
 		lock := &Lock{Key: key, time: testdata.RedisTimeout}
@@ -87,7 +89,7 @@ func (this *SuiteCmdLock) TestDuplicate() {
 		} // if
 
 		testdata.WaitTimeout()
-		count.Add(1)
+		total.Add(1)
 		testdata.WaitTimeout()
 
 		unlock := &Unlock{Key: key}
@@ -95,37 +97,36 @@ func (this *SuiteCmdLock) TestDuplicate() {
 		_ = unlock.Prepare()
 		_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 		_ = unlock.Complete()
-	}
-	check := func() {
-		defer waitGroup.Done()
-		testdata.WaitTimeout()
+	}()
 
-		for i := 0; i < 100; i++ {
-			majorSubmit := this.major.Submit()
-			lock := &Lock{Key: key, time: testdata.RedisTimeout}
-			lock.Initialize(ctxs.Get().Ctx(), majorSubmit, nil)
-			_ = lock.Prepare()
-			_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
-			_ = lock.Complete()
+	for i := 0; i < count; i++ {
+		go func() {
+			defer waitGroup.Done()
+			testdata.WaitTimeout()
 
-			if lock.Complete() != nil {
-				continue
-			} // if
+			for i := 0; i < 100; i++ {
+				majorSubmit := this.major.Submit()
+				lock := &Lock{Key: key, time: testdata.RedisTimeout}
+				lock.Initialize(ctxs.Get().Ctx(), majorSubmit, nil)
+				_ = lock.Prepare()
+				_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+				_ = lock.Complete()
 
-			count.Add(1)
+				if lock.Complete() != nil {
+					continue
+				} // if
 
-			unlock := &Unlock{Key: key}
-			unlock.Initialize(ctxs.Get().Ctx(), majorSubmit, nil)
-			_ = unlock.Prepare()
-			_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
-			_ = unlock.Complete()
-		} // for
-	}
+				total.Add(1)
 
-	go pass()
-	go check()
-	go check()
-	go check()
+				unlock := &Unlock{Key: key}
+				unlock.Initialize(ctxs.Get().Ctx(), majorSubmit, nil)
+				_ = unlock.Prepare()
+				_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+				_ = unlock.Complete()
+			} // for
+		}()
+	} // for
+
 	waitGroup.Wait()
-	assert.Equal(this.T(), int64(1), count.Load())
+	assert.Equal(this.T(), int64(1), total.Load())
 }
