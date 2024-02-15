@@ -60,6 +60,7 @@ func (this *SuiteURI) TestRedisURIOption() {
 	option, err = RedisURI(
 		"redisdb://username:password@host:port/?" +
 			"clientName=name&" +
+			"dbid=1&" +
 			"maxRetries=1&" +
 			"minRetryBackoff=1s&" +
 			"maxRetryBackoff=1s&" +
@@ -82,6 +83,7 @@ func (this *SuiteURI) TestRedisURIOption() {
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), option)
 	assert.Equal(this.T(), "name", option.ClientName)
+	assert.Equal(this.T(), 1, option.DB)
 	assert.Equal(this.T(), 1, option.MaxRetries)
 	assert.Equal(this.T(), time.Second, option.MinRetryBackoff)
 	assert.Equal(this.T(), time.Second, option.MaxRetryBackoff)
@@ -134,6 +136,13 @@ func (this *SuiteURI) TestRedisURIOption() {
 
 	_, err = RedisURI("redisdb://username:password@host:port/?unknown").option()
 	assert.NotNil(this.T(), err)
+}
+
+func (this *SuiteURI) TestRedisURIAdd() {
+	target := RedisURI("redisdb://username:password@host:port/")
+	assert.Equal(this.T(), target+"?"+testdata.Unknown, target.add(testdata.Unknown))
+	target = "redisdb://username:password@host:port/?"
+	assert.Equal(this.T(), target+"&"+testdata.Unknown, target.add(testdata.Unknown))
 }
 
 func (this *SuiteURI) TestMongoURIConnect() {

@@ -28,6 +28,8 @@ import (
 // 以下是連接選項說明
 //   - clientName
 //     設置連接名稱
+//   - dbid
+//     設置連接資料庫編號
 //   - maxRetries
 //     最大重試次數, 預設值為3, -1表示關閉此功能
 //   - minRetryBackoff
@@ -153,6 +155,9 @@ func (this RedisURI) option() (option *redis.UniversalOptions, err error) {
 			case "clientName":
 				option.ClientName = cast.ToString(value)
 
+			case "dbid":
+				option.DB = cast.ToInt(value)
+
 			case "maxRetries":
 				option.MaxRetries = cast.ToInt(value)
 
@@ -216,8 +221,21 @@ func (this RedisURI) option() (option *redis.UniversalOptions, err error) {
 	return option, nil
 }
 
+// add 新增連接選項
+func (this RedisURI) add(option string) RedisURI {
+	uri := string(this)
+
+	if strings.Contains(uri, "?") {
+		uri += "&"
+	} else {
+		uri += "?"
+	} // if
+
+	return RedisURI(uri + option)
+}
+
 // MongoURI mongo連接字串, 選項字串語法如下
-//   - mongodb://[username:password@]host1[:port1][,host2[:port2],...,hostN[:portN]][?options]]
+//   - mongodb://[username:password@]host1[:port1][,host2[:port2],...,hostN[:portN]]/[?options]]
 //
 // 語法中各組件的說明如下
 //   - mongodb://
