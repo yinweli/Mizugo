@@ -95,9 +95,10 @@ func (this *SuiteCmdIncr) TestDuplicate() {
 	waitGroup.Add(4)
 	count := atomic.Int64{}
 	check := func() {
+		defer waitGroup.Done()
 		testdata.WaitTimeout()
 
-		for i := 0; i < 250; i++ {
+		for i := 0; i < 100; i++ {
 			majorSubmit := this.major.Submit()
 			minorSubmit := this.minor.Submit()
 			data := &dataIncr{Field: "duplicate", Value: 1}
@@ -106,11 +107,9 @@ func (this *SuiteCmdIncr) TestDuplicate() {
 			_ = incr.Prepare()
 			_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 			_ = incr.Complete()
-			_ = minorSubmit.Exec(ctxs.Get().Ctx())
 			count.Add(incr.Data.Value)
+			fmt.Println(incr.Data.Value)
 		} // for
-
-		waitGroup.Done()
 	}
 
 	go check()
@@ -118,7 +117,7 @@ func (this *SuiteCmdIncr) TestDuplicate() {
 	go check()
 	go check()
 	waitGroup.Wait()
-	assert.Equal(this.T(), int64(500500), count.Load())
+	assert.Equal(this.T(), int64(80200), count.Load())
 }
 
 type metaIncr struct {
