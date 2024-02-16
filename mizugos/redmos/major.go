@@ -46,6 +46,10 @@ func (this *Major) Client() redis.UniversalClient {
 
 // SwitchDB 切換資料庫, redis預設只能使用編號0~15的資料庫
 func (this *Major) SwitchDB(dbID int) error {
+	if this.client == nil {
+		return fmt.Errorf("major switch: client nil")
+	} // if
+
 	client, err := this.uri.add(fmt.Sprintf("dbid=%v", dbID)).Connect(ctxs.Get().Ctx())
 
 	if err != nil {

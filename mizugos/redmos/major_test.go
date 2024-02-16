@@ -51,6 +51,7 @@ func (this *SuiteMajor) TestMajor() {
 	target.stop()
 	assert.Nil(this.T(), target.Submit())
 	assert.Nil(this.T(), target.Client())
+	assert.NotNil(this.T(), target.SwitchDB(1))
 	target.DropDB()
 
 	_, err = newMajor(testdata.RedisURIInvalid)
