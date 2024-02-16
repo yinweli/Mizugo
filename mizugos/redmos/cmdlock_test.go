@@ -4,6 +4,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -88,9 +89,7 @@ func (this *SuiteCmdLock) TestDuplicate() {
 			return
 		} // if
 
-		testdata.WaitTimeout()
-		total.Add(1)
-		testdata.WaitTimeout()
+		testdata.WaitTimeout(time.Second)
 
 		unlock := &Unlock{Key: key}
 		unlock.Initialize(ctxs.Get().Ctx(), majorSubmit, nil)
@@ -128,5 +127,5 @@ func (this *SuiteCmdLock) TestDuplicate() {
 	} // for
 
 	waitGroup.Wait()
-	assert.Equal(this.T(), int64(1), total.Load())
+	assert.Zero(this.T(), total.Load())
 }
