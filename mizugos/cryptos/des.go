@@ -17,6 +17,10 @@ func DesECBEncrypt(padding Padding, key, src []byte) (out []byte, err error) {
 		return nil, fmt.Errorf("des-ecb encrypt: key len must %v", DesKeySize)
 	} // if
 
+	if len(src) == 0 {
+		return nil, fmt.Errorf("des-ecb encrypt: src nil")
+	} // if
+
 	block, err := des.NewCipher(key)
 
 	if err != nil {
@@ -41,6 +45,10 @@ func DesECBEncrypt(padding Padding, key, src []byte) (out []byte, err error) {
 func DesECBDecrypt(padding Padding, key, src []byte) (out []byte, err error) {
 	if len(key) != DesKeySize {
 		return nil, fmt.Errorf("des-ecb decrypt: key len must %v", DesKeySize)
+	} // if
+
+	if len(src) == 0 {
+		return nil, fmt.Errorf("des-ecb decrypt: src nil")
 	} // if
 
 	block, err := des.NewCipher(key)
@@ -74,6 +82,14 @@ func DesCBCEncrypt(padding Padding, key, iv, src []byte) (out []byte, err error)
 		return nil, fmt.Errorf("des-cbc encrypt: key len must %v", DesKeySize)
 	} // if
 
+	if len(iv) == 0 {
+		return nil, fmt.Errorf("des-cbc encrypt: iv nil")
+	} // if
+
+	if len(src) == 0 {
+		return nil, fmt.Errorf("des-cbc encrypt: src nil")
+	} // if
+
 	block, err := des.NewCipher(key)
 
 	if err != nil {
@@ -97,6 +113,14 @@ func DesCBCEncrypt(padding Padding, key, iv, src []byte) (out []byte, err error)
 func DesCBCDecrypt(padding Padding, key, iv, src []byte) (out []byte, err error) {
 	if len(key) != DesKeySize {
 		return nil, fmt.Errorf("des-cbc decrypt: key len must %v", DesKeySize)
+	} // if
+
+	if len(iv) == 0 {
+		return nil, fmt.Errorf("des-cbc decrypt: iv nil")
+	} // if
+
+	if len(src) == 0 {
+		return nil, fmt.Errorf("des-cbc decrypt: src nil")
 	} // if
 
 	block, err := des.NewCipher(key)

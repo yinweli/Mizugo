@@ -57,10 +57,16 @@ func (this *SuiteDes) TestDesECB() {
 	_, err := DesECBEncrypt(PaddingPKCS7, keyInvalid, dataInvalid)
 	assert.NotNil(this.T(), err)
 
+	_, err = DesECBEncrypt(PaddingPKCS7, keyValid, nil)
+	assert.NotNil(this.T(), err)
+
 	_, err = DesECBDecrypt(PaddingPKCS7, keyInvalid, dataInvalid)
 	assert.NotNil(this.T(), err)
 
 	_, err = DesECBDecrypt(PaddingPKCS7, keyValid, dataInvalid)
+	assert.NotNil(this.T(), err)
+
+	_, err = DesECBDecrypt(PaddingPKCS7, keyValid, nil)
 	assert.NotNil(this.T(), err)
 }
 
@@ -91,6 +97,12 @@ func (this *SuiteDes) TestDesCBC() {
 	_, err = DesCBCEncrypt(PaddingPKCS7, keyValid, keyInvalid, dataInvalid)
 	assert.NotNil(this.T(), err)
 
+	_, err = DesCBCEncrypt(PaddingPKCS7, keyValid, nil, dataInvalid)
+	assert.NotNil(this.T(), err)
+
+	_, err = DesCBCEncrypt(PaddingPKCS7, keyValid, keyValid, nil)
+	assert.NotNil(this.T(), err)
+
 	_, err = DesCBCDecrypt(PaddingPKCS7, keyInvalid, keyValid, dataInvalid)
 	assert.NotNil(this.T(), err)
 
@@ -98,6 +110,12 @@ func (this *SuiteDes) TestDesCBC() {
 	assert.NotNil(this.T(), err)
 
 	_, err = DesCBCDecrypt(PaddingPKCS7, keyValid, keyValid, dataInvalid)
+	assert.NotNil(this.T(), err)
+
+	_, err = DesCBCDecrypt(PaddingPKCS7, keyValid, nil, dataInvalid)
+	assert.NotNil(this.T(), err)
+
+	_, err = DesCBCDecrypt(PaddingPKCS7, keyValid, keyValid, nil)
 	assert.NotNil(this.T(), err)
 }
 

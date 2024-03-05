@@ -1,6 +1,6 @@
-using Mizugo;
 using System;
 using System.Diagnostics;
+using Mizugo;
 using UnityEngine;
 
 /// <summary>
@@ -14,10 +14,7 @@ public class SampleJson : MonoBehaviour
 {
     private void Awake()
     {
-        client = new TCPClient(
-            new Eventmgr(),
-            new JsonProc().SetBase64(true).SetDesCBC(true, key, key)
-        );
+        client = new TCPClient(new Eventmgr(), new JsonProc().SetBase64(true).SetDesCBC(true, key, key));
         client.AddEvent(EventID.Connect, OnConnect);
         client.AddEvent(EventID.Disconnect, OnDisconnect);
         client.AddEvent(EventID.Recv, OnRecv);
@@ -114,10 +111,7 @@ public class SampleJson : MonoBehaviour
     /// </summary>
     private void SendMJsonQ()
     {
-        var message = JsonProc.Marshal(
-            (int)MsgID.JsonQ,
-            new MJsonQ { Time = stopwatch.ElapsedMilliseconds }
-        );
+        var message = JsonProc.Marshal((int)MsgID.JsonQ, new MJsonQ { Time = stopwatch.ElapsedMilliseconds });
 
         client.Send(message);
     }
