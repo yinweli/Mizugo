@@ -1,7 +1,7 @@
-using NUnit.Framework;
 using System;
 using System.Diagnostics;
 using System.Net.Sockets;
+using NUnit.Framework;
 
 namespace Mizugo
 {

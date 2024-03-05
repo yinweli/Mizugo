@@ -1,6 +1,6 @@
-using NUnit.Framework;
 using System;
 using System.Collections;
+using NUnit.Framework;
 
 namespace Mizugo
 {

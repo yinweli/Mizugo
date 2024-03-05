@@ -1,6 +1,6 @@
-using Mizugo;
 using System;
 using System.Diagnostics;
+using Mizugo;
 using UnityEngine;
 
 /// <summary>
@@ -14,10 +14,7 @@ public class SampleProto : MonoBehaviour
 {
     private void Awake()
     {
-        client = new TCPClient(
-            new Eventmgr(),
-            new ProtoProc().SetBase64(true).SetDesCBC(true, key, key)
-        );
+        client = new TCPClient(new Eventmgr(), new ProtoProc().SetBase64(true).SetDesCBC(true, key, key));
         client.AddEvent(EventID.Connect, OnConnect);
         client.AddEvent(EventID.Disconnect, OnDisconnect);
         client.AddEvent(EventID.Recv, OnRecv);
@@ -114,10 +111,7 @@ public class SampleProto : MonoBehaviour
     /// </summary>
     private void SendMProtoQ()
     {
-        var message = ProtoProc.Marshal(
-            (int)MsgID.ProtoQ,
-            new MProtoQ { Time = stopwatch.ElapsedMilliseconds }
-        );
+        var message = ProtoProc.Marshal((int)MsgID.ProtoQ, new MProtoQ { Time = stopwatch.ElapsedMilliseconds });
 
         client.Send(message);
     }
