@@ -78,14 +78,16 @@ tasks:
   dbredis:
     cmds:
       - docker pull redis:latest
-      - docker rm -f -v mizugo-test-redis
-      - docker run --name mizugo-test-redis -p 6379:6379 -v mizugo-redis-volume:/data -d redis redis-server
+      - docker rm -f -v mizugo-redis
+      - docker volume rm mizugo-redis-volume || true
+      - docker run -d --name mizugo-redis -v mizugo-redis-volume:/data -p 6379:6379 redis:latest redis-server
 
   dbmongo:
     cmds:
       - docker pull mongo:latest
-      - docker rm -f -v mizugo-test-mongo
-      - docker run --name mizugo-test-mongo -p 27017:27017 -v mizugo-mongo-volume:/data/db -d mongo:latest
+      - docker rm -f -v mizugo-mongo
+      - docker volume rm mizugo-mongo-volume || true
+      - docker run -d --name mizugo-mongo -v mizugo-mongo-volume:/data/db -p 27017:27017 mongo:latest
 
   # 安裝工具
   install:
