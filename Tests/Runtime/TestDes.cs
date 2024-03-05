@@ -1,6 +1,6 @@
-using NUnit.Framework;
 using System.Security.Cryptography;
 using System.Text;
+using NUnit.Framework;
 
 namespace Mizugo
 {
