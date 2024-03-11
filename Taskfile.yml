@@ -36,7 +36,17 @@ tasks:
     cmds:
       - golangci-lint -v run
 
-  # 產生proto message
+  # 進行單元測試
+  test:
+    cmds:
+      - go test ./... -cover
+
+  # 進行效能測試
+  bench:
+    cmds:
+      - go test ./... -bench=. -benchmem
+
+  # 更新訊息
   proto:
     cmds:
       - task: proto-mizugo
@@ -52,16 +62,6 @@ tasks:
     cmds:
       - cmd /C build.bat
 
-  # 進行程式碼測試
-  test:
-    cmds:
-      - go test ./... -cover
-
-  # 進行效能測試
-  bench:
-    cmds:
-      - go test ./... -bench=. -benchmem
-
   # 更新子專案分支
   subtree:
     cmds:
@@ -69,25 +69,26 @@ tasks:
       - git subtree split --prefix support/client-unity/Packages/com.fouridstudio.mizugo-client-unity --branch client-unity
       - git subtree split --prefix support/test-client-cs --branch client-unity-sample
 
-  # 在docker上啟動資料庫
+  # 啟動資料庫
   db:
     cmds:
-      - task: dbredis
-      - task: dbmongo
-
-  dbredis:
-    cmds:
+      # 檢查網路是否存在, 不然就建立它
+      - |
+        if ! docker network ls | grep -qw dev; then
+          docker network create dev
+        fi
+      # 啟動redis
       - docker pull redis:latest
-      - docker rm -f -v mizugo-redis
-      - docker volume rm mizugo-redis-volume || true
-      - docker run -d --name mizugo-redis -v mizugo-redis-volume:/data -p 6379:6379 redis:latest redis-server
-
-  dbmongo:
-    cmds:
+      - docker rm -f -v dbredis
+      - docker volume rm dbredis-volume || true
+      - docker run -d --name dbredis --network dev -v dbredis-volume:/data -p 6379:6379 redis:latest redis-server
+      # 啟動mongo
       - docker pull mongo:latest
-      - docker rm -f -v mizugo-mongo
-      - docker volume rm mizugo-mongo-volume || true
-      - docker run -d --name mizugo-mongo -v mizugo-mongo-volume:/data/db -p 27017:27017 mongo:latest
+      - docker rm -f -v dbmongo
+      - docker volume rm dbmongo-volume || true
+      - docker run -d --name dbmongo --network dev -v dbmongo-volume:/data/db -p 27017:27017 mongo:latest
+      # 清除懸空鏡像
+      - docker image prune -f
 
   # 安裝工具
   install:
