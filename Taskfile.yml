@@ -78,10 +78,10 @@ tasks:
           docker network create dev
         fi
       # 啟動redis
-      - docker pull redis:latest
-      - docker rm -f -v dbredis
+      - docker build -t dbredis -f docker/docker-redis .
+      - docker rm -f -v dbredis || true
       - docker volume rm dbredis-volume || true
-      - docker run -d --name dbredis --network dev -v dbredis-volume:/data -p 6379:6379 redis:latest redis-server
+      - docker run -d --name dbredis --network dev -v dbredis-volume:/data -p 6379:6379 dbredis redis-server /usr/local/etc/redis/redis.conf
       # 啟動mongo
       - docker pull mongo:latest
       - docker rm -f -v dbmongo

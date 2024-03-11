@@ -1,0 +1,5 @@
+# 從redis建置鏡像檔
+FROM redis:latest
+
+# 複製設定檔
+COPY docker/redis.conf /usr/local/etc/redis/redis.conf
