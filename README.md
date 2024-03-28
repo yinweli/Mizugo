@@ -4,13 +4,21 @@
 ![codecov](https://codecov.io/gh/yinweli/Mizugo/branch/main/graph/badge.svg?token=1DGCDV1S69)
 
 # Mizugo
-以[go]做成的遊戲伺服器框架, 包括TCP網路通訊, 資料庫組件等  
+以[go]做成的遊戲伺服器框架, 包括TCP網路通訊, 資料庫組件等
+
+# 分支列表
+| 分支                | 說明                                                     |
+|:--------------------|:---------------------------------------------------------|
+| main                | 主分支                                                   |
+| client-unity        | 客戶端組件分支, 提供給[unity]的[package manager]安裝用   |
+| client-unity-sample | 客戶端組件範例分支                                       |
+| proto-unity         | protobuf組件分支, 提供給[unity]的[package manager]安裝用 |
 
 # 系統需求
 * [go]1.19以上
 * [proto]3以上
 
-# 安裝說明
+# 如何安裝
 * 安裝[go]
 * 安裝[protoc]
 * 安裝[protoc-go], 在終端執行以下命令
@@ -21,15 +29,6 @@
   ```sh
   go get github.com/yinweli/Mizugo
   ```
-
-# Task命令說明
-Task是一個運行/構建task的工具, 可以到[task]查看更多資訊; 可在命令列執行以下命令  
-* `task lint`: 進行程式碼檢查
-* `task proto`: 產生proto message
-* `task test`: 進行程式碼測試
-* `task bench`: 進行效能測試
-* `task subtree`: 更新子專案分支
-* `task db`: 開啟docker容器, 單元測試前需要執行此命令
 
 # 如何使用伺服器組件
 [mizugo]實際上是多個伺服器工具的集合, 最簡單啟動mizugo伺服器的程式碼範例如下  
@@ -77,25 +76,10 @@ func main() {
 伺服器程式碼的範例可以到 support/test-server 查看  
 
 # 如何使用客戶端組件
-請參閱[客戶端組件說明][client-unity]  
-請參閱[proto組件說明][proto-unity]  
-
-# 軟體包階層
-以下為[mizugo]內部軟體包的階層  
-下面的軟體包可以引用上面的軟體包  
-上面的軟體包不能引用下面的軟體包  
-相同階層的不能互相引用
-
-| 軟體包名稱列表                                     |
-|:---------------------------------------------------|
-| testdata                                           |
-| ctxs, helps, msgs                                  |
-| cryptos, iaps, nets, pools, procs                  |
-| configs, entitys, labels, loggers, metrics, redmos |
-
+請參閱[客戶端組件說明](support/client-unity/Packages/com.fouridstudio.mizugo-client-unity/README.md)  
+請參閱[proto組件說明](support/client-unity/Packages/com.fouridstudio.mizugo-proto-unity/README.md)
 
 # 專案目錄說明
-
 | 目錄                   | 說明                            |
 |:-----------------------|:--------------------------------|
 | mizugos                | mizugo程式碼                    |
@@ -123,14 +107,30 @@ func main() {
 | support/test-server    | 測試伺服器                      |
 | testdata               | 測試資料與測試工具              |
 
-# 專案分支說明
+# 軟體包階層
+| 軟體包名稱列表                                     |
+|:---------------------------------------------------|
+| testdata                                           |
+| ctxs, helps, msgs                                  |
+| cryptos, iaps, nets, pools, procs                  |
+| configs, entitys, labels, loggers, metrics, redmos |
 
-| 分支                | 說明                                                     |
-|:--------------------|:---------------------------------------------------------|
-| main                | 主分支                                                   |
-| client-unity        | 客戶端組件分支, 提供給[unity]的[package manager]安裝用   |
-| client-unity-sample | 客戶端組件範例分支                                       |
-| proto-unity         | protobuf組件分支, 提供給[unity]的[package manager]安裝用 |
+下面的軟體包可以引用上面的軟體包  
+上面的軟體包不能引用下面的軟體包  
+相同階層的不能互相引用
+
+# Task命令說明
+輸入 `task 命令名稱` 來執行命令, 如果無法使用, 表示還沒有安裝[task]
+
+| 命令名稱       | 命令說明         |
+|:---------------|:-----------------|
+| lint           | 進行程式碼檢查   |
+| test           | 進行程式碼測試   |
+| bench          | 進行效能測試     |
+| proto          | 更新訊息         |
+| subtree        | 更新子專案分支   |
+| stop           | 停止容器         |
+| db             | 啟動資料庫       |
 
 # JetBrains licenses
 [mizugo]使用了JetBrains的Goland的免費開發許可, 在此表示感謝  
@@ -138,13 +138,10 @@ func main() {
 <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/GoLand_icon.png" alt="GoLand logo." style="width:200px;">
 
 [go]: https://go.dev/dl/
+[mizugo]: https://github.com/yinweli/mizugo
 [package manager]: https://docs.unity3d.com/Manual/Packages.html
 [proto]: https://github.com/protocolbuffers/protobuf
 [protoc-go]: https://github.com/protocolbuffers/protobuf-go
 [protoc]: https://github.com/protocolbuffers/protobuf
 [task]: https://taskfile.dev/
 [unity]: https://unity.com/
-
-[mizugo]: https://github.com/yinweli/mizugo
-[client-unity]: support/client-unity/Packages/com.fouridstudio.mizugo-client-unity/README.md
-[proto-unity]: support/client-unity/Packages/com.fouridstudio.mizugo-proto-unity/README.md

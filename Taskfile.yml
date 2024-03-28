@@ -69,6 +69,11 @@ tasks:
       - git subtree split --prefix support/client-unity/Packages/com.fouridstudio.mizugo-client-unity --branch client-unity
       - git subtree split --prefix support/test-client-cs --branch client-unity-sample
 
+  # 停止容器
+  stop:
+    cmds:
+      - docker stop $(docker ps -q)
+
   # 啟動資料庫
   db:
     cmds:
