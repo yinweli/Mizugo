@@ -30,50 +30,30 @@
   go get github.com/yinweli/Mizugo
   ```
 
-# 如何使用伺服器組件
-[mizugo]實際上是多個伺服器工具的集合, 最簡單啟動mizugo伺服器的程式碼範例如下  
-```go
-func main() {
-    defer func() {
-        if cause := recover(); cause != nil {
-            // 處理崩潰錯誤
-        } // if
-    }()
-    
-    ctx := ctxs.Get().WithCancel()
-    name := "伺服器名稱"
-    mizugos.Start() // 啟動伺服器
-    
-    // 使用者自訂的初始化程序
-    // 如果有任何失敗, 執行 mizugos.Stop() 後退出
-    
-    fmt.Printf("%v start\n", name)
-    
-    for range ctx.Done() { // 進入無限迴圈直到執行 ctx.Cancel()
-    } // for
-    
-    // 使用者自訂的結束程序
-    // 如果有任何失敗, 執行 mizugos.Stop() 後退出
-    
-    mizugos.Stop() // 關閉伺服器
-    fmt.Printf("%v shutdown\n", name)
-}
-```
-在 mizugos/mizugo.go 中包含了啟動/關閉伺服器的函式, 以及事先建立好的各管理器以及其取得函式  
+# 管理器
+[mizugo]實際上是多個伺服器工具的集合, 其中最重要的功能都實作為管理器, 使用者可以依自己的需求來建立並使用這些管理器  
+以下表格概述了[mizugo]中各個管理器的基本資訊, 包括它們的功能、程式碼位置、軟體包與類別名稱, 以及如何創建這些管理器的方法
 
-| 項目                 | 說明           |
-|:---------------------|:---------------|
-| mizugos.Configmgr()  | 配置管理器     |
-| mizugos.Metricsmgr() | 度量管理器     |
-| mizugos.Logmgr()     | 日誌管理器     |
-| mizugos.Netmgr()     | 網路管理器     |
-| mizugos.Redmomgr()   | 資料庫管理器   |
-| mizugos.Entitymgr()  | 實體管理器     |
-| mizugos.Labelmgr()   | 標籤管理器     |
-| mizugos.Poolmgr()    | 執行緒池管理器 |
+| 名稱           | 程式碼位置     | 軟體包與類別名稱   | 建立函式              |
+|:---------------|:---------------|:-------------------|:----------------------|
+| 配置管理器     | mizugo/configs | configs.Configmgr  | configs.NewConfigmgr  |
+| 實體管理器     | mizugo/entitys | entitys.Entitymgr  | entitys.NewEntitymgr  |
+| 標籤管理器     | mizugo/labels  | labels.Labelmgr    | labels.NewLabelmgr    |
+| 日誌管理器     | mizugo/loggers | loggers.Logmgr     | loggers.NewLogmgr     |
+| 度量管理器     | mizugo/metrics | metrics.Metricsmgr | metrics.NewMetricsmgr |
+| 網路管理器     | mizugo/nets    | nets.Netmgr        | nets.NewNetmgr        |
+| 執行緒池管理器 | mizugo/pools   | pools.Poolmgr      | pools.DefaultPool     |
+| 資料庫管理器   | mizugo/redmos  | redmos.Redmomgr    | redmos.NewRedmomgr    |
 
-這些管理器在啟動伺服器之後可用, 若在啟動伺服器之前(或是關閉伺服器之後)使用會碰到panic  
-伺服器程式碼的範例可以到 support/test-server 查看  
+需要注意的是, 執行緒池管理器與其他管理器略有不同, 雖然它確實有一個 pools.NewPoolmgr 函式, 但建議使用時採用事先建立好的 pools.DefaultPool 實例
+
+# 伺服器範例
+伺服器的範例位於 support/test-server 路徑下, 以下介紹一些關鍵的目錄和檔案及其用途  
+- features: 此目錄存放各種管理器以及它們的初始化和結束處理函式
+- entrys: 此目錄存放入口組件以及它們的初始化和結束處理函式. 每一個入口都會監聽一個特定的埠號, 以便當客戶端通過該埠號建立連接時, 能夠使用預設的模組來創建相應的實例
+- modules: 此目錄存放負責處理訊息交換的模組, 這些模組實現了伺服器與客戶端間通訊的具體邏輯
+- querys: 此目錄存放負責處理與資料庫的組件, 包括數據的新增與查詢等操作
+- cmd/server.go: 伺服器啟動的入口點, 這個檔案中的 main 函式負責錯誤處理、初始化管理器、初始化入口以及保持伺服器的持續運行
 
 # 如何使用客戶端組件
 請參閱[客戶端組件說明](support/client-unity/Packages/com.fouridstudio.mizugo-client-unity/README.md)  
@@ -82,21 +62,21 @@ func main() {
 # 專案目錄說明
 | 目錄                   | 說明                            |
 |:-----------------------|:--------------------------------|
-| mizugos                | mizugo程式碼                    |
-| mizugos/configs        | 配置組件                        |
-| mizugos/cryptos        | 加密/解密組件                   |
-| mizugos/ctxs           | context組件                     |
-| mizugos/entitys        | 實體, 模組, 事件組件            |
-| mizugos/helps          | 協助組件                        |
-| mizugos/iaps           | 購買驗證組件                    |
-| mizugos/labels         | 標籤組件                        |
-| mizugos/loggers        | 日誌組件                        |
-| mizugos/metrics        | 度量組件                        |
-| mizugos/msgs           | 封包結構                        |
-| mizugos/nets           | 網路組件                        |
-| mizugos/pools          | 執行緒池組件                    |
-| mizugos/procs          | 處理器組件                      |
-| mizugos/redmos         | 雙層式資料庫組件(redis + mongo) |
+| mizugo                 | mizugo程式碼                    |
+| mizugo/configs         | 配置組件                        |
+| mizugo/cryptos         | 加密/解密組件                   |
+| mizugo/ctxs            | context組件                     |
+| mizugo/entitys         | 實體, 模組, 事件組件            |
+| mizugo/helps           | 協助組件                        |
+| mizugo/iaps            | 購買驗證組件                    |
+| mizugo/labels          | 標籤組件                        |
+| mizugo/loggers         | 日誌組件                        |
+| mizugo/metrics         | 度量組件                        |
+| mizugo/msgs            | 封包結構                        |
+| mizugo/nets            | 網路組件                        |
+| mizugo/pools           | 執行緒池組件                    |
+| mizugo/procs           | 處理器組件                      |
+| mizugo/redmos          | 雙層式資料庫組件(redis + mongo) |
 | support                | 支援專案                        |
 | support/client-unity   | unity客戶端組件                 |
 | support/proto          | proto定義檔                     |
