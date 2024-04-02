@@ -37,7 +37,10 @@ func (this *SuitePoolmgr) TestPoolmgr() {
 	target := NewPoolmgr()
 	assert.NotNil(this.T(), target)
 	config := &Config{
-		Logger: &loggerTester{},
+		Logger: func(format string, args ...any) {
+			fmt.Printf(format, args...)
+			fmt.Printf("\n")
+		},
 	}
 
 	target.Finalize() // 初始化前執行, 這次應該不執行
@@ -51,7 +54,10 @@ func (this *SuitePoolmgr) TestPoolmgr() {
 func (this *SuitePoolmgr) TestSubmit() {
 	target := NewPoolmgr()
 	config := &Config{
-		Logger: &loggerTester{},
+		Logger: func(format string, args ...any) {
+			fmt.Printf(format, args...)
+			fmt.Printf("\n")
+		},
 	}
 	valid := atomic.Int64{}
 	validFunc := func() {
@@ -84,7 +90,10 @@ func (this *SuitePoolmgr) TestStatus() {
 
 	target = NewPoolmgr()
 	assert.Nil(this.T(), target.Initialize(&Config{
-		Logger: &loggerTester{},
+		Logger: func(format string, args ...any) {
+			fmt.Printf(format, args...)
+			fmt.Printf("\n")
+		},
 	}))
 	assert.Equal(this.T(), Stat{Available: -1, Capacity: -1}, target.Status())
 	target.Finalize()
@@ -100,12 +109,4 @@ func (this *SuitePoolmgr) TestStat() {
 	stat := Stat{}
 	fmt.Println(stat)
 	assert.NotNil(this.T(), stat.String())
-}
-
-type loggerTester struct {
-}
-
-func (this *loggerTester) Printf(format string, args ...any) {
-	fmt.Printf(format, args...)
-	fmt.Printf("\n")
 }
