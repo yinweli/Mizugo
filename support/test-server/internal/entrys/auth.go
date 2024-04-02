@@ -3,7 +3,6 @@ package entrys
 import (
 	"fmt"
 
-	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/procs"
@@ -12,16 +11,25 @@ import (
 	"github.com/yinweli/Mizugo/support/test-server/internal/modules"
 )
 
-// NewAuth 建立Auth入口
-func NewAuth() *Auth {
-	return &Auth{
-		name: "auth",
-	}
+// InitializeAuth 初始化Auth
+func InitializeAuth() (err error) {
+	if err = features.Config.Unmarshal(auth.name, &auth.config); err != nil {
+		return fmt.Errorf("%v initialize: %w", auth.name, err)
+	} // if
+
+	auth.listenID = features.Net.AddListenTCP(auth.config.IP, auth.config.Port, auth.bind, auth.unbind, auth.listenWrong)
+	features.LogSystem.Get().Info(auth.name).Message("initialize").EndFlush()
+	return nil
+}
+
+// FinalizeAuth 結束Auth
+func FinalizeAuth() {
+	features.Net.DelListen(auth.listenID)
 }
 
 // Auth Auth入口
 type Auth struct {
-	name     string        // 系統名稱
+	name     string        // 名稱
 	config   AuthConfig    // 配置資料
 	listenID nets.ListenID // 接聽編號
 }
@@ -32,26 +40,9 @@ type AuthConfig struct {
 	Port string `yaml:"port"` // 埠號
 }
 
-// Initialize 初始化處理
-func (this *Auth) Initialize() error {
-	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
-	} // if
-
-	this.listenID = mizugos.Netmgr().AddListenTCP(this.config.IP, this.config.Port, this.bind, this.unbind, this.listenWrong)
-	features.LogSystem.Get().Info(this.name).Message("entry start").KV("config", this.config).Caller(0).EndFlush()
-	return nil
-}
-
-// Finalize 結束處理
-func (this *Auth) Finalize() {
-	mizugos.Netmgr().DelListen(this.listenID)
-	features.LogSystem.Get().Info(this.name).Message("entry finalize").Caller(0).EndFlush()
-}
-
 // bind 綁定處理
 func (this *Auth) bind(session nets.Sessioner) *nets.Bundle {
-	entity := mizugos.Entitymgr().Add()
+	entity := features.Entity.Add()
 
 	var wrong error
 
@@ -85,12 +76,12 @@ func (this *Auth) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.Initialize(this.bindWrong); err != nil {
+	if err := entity.Initialize(auth.bindWrong); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
-	mizugos.Labelmgr().Add(entity, this.name)
+	features.Label.Add(entity, this.name)
 	session.SetOwner(entity)
 	features.LogSystem.Get().Info(this.name).Message("bind").Caller(0).EndFlush()
 	return entity.Bundle()
@@ -98,8 +89,8 @@ func (this *Auth) bind(session nets.Sessioner) *nets.Bundle {
 Error:
 	if entity != nil {
 		entity.Finalize()
-		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.Labelmgr().Erase(entity)
+		features.Entity.Del(entity.EntityID())
+		features.Label.Erase(entity)
 	} // if
 
 	session.Stop()
@@ -111,8 +102,8 @@ Error:
 func (this *Auth) unbind(session nets.Sessioner) {
 	if entity, ok := session.GetOwner().(*entitys.Entity); ok {
 		entity.Finalize()
-		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.Labelmgr().Erase(entity)
+		features.Entity.Del(entity.EntityID())
+		features.Label.Erase(entity)
 	} // if
 }
 
@@ -125,3 +116,5 @@ func (this *Auth) listenWrong(err error) {
 func (this *Auth) bindWrong(err error) {
 	features.LogSystem.Get().Warn(this.name).Caller(1).Error(err).EndFlush()
 }
+
+var auth = &Auth{name: "auth"} // Auth入口

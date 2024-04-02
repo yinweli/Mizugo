@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sync/atomic"
 
-	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/procs"
@@ -13,14 +12,23 @@ import (
 	"github.com/yinweli/Mizugo/support/test-server/internal/modules"
 )
 
-// NewProto 建立Proto入口
-func NewProto() *Proto {
-	return &Proto{
-		name: "proto",
-	}
+// InitializeProto 初始化Proto
+func InitializeProto() error {
+	if err := features.Config.Unmarshal(proto.name, &proto.config); err != nil {
+		return fmt.Errorf("%v initialize: %w", proto.name, err)
+	} // if
+
+	proto.listenID = features.Net.AddListenTCP(proto.config.IP, proto.config.Port, proto.bind, proto.unbind, proto.listenWrong)
+	features.LogSystem.Get().Info(proto.name).Message("initialize").EndFlush()
+	return nil
 }
 
-// Proto Proto入口
+// FinalizeProto 結束Proto
+func FinalizeProto() {
+	features.Net.DelListen(proto.listenID)
+}
+
+// Proto Proto資料
 type Proto struct {
 	name     string        // 系統名稱
 	config   ProtoConfig   // 配置資料
@@ -35,26 +43,9 @@ type ProtoConfig struct {
 	Key  string `yaml:"key"`  // 密鑰
 }
 
-// Initialize 初始化處理
-func (this *Proto) Initialize() error {
-	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
-	} // if
-
-	this.listenID = mizugos.Netmgr().AddListenTCP(this.config.IP, this.config.Port, this.bind, this.unbind, this.listenWrong)
-	features.LogSystem.Get().Info(this.name).Message("entry start").KV("config", this.config).Caller(0).EndFlush()
-	return nil
-}
-
-// Finalize 結束處理
-func (this *Proto) Finalize() {
-	mizugos.Netmgr().DelListen(this.listenID)
-	features.LogSystem.Get().Info(this.name).Message("entry finalize").Caller(0).EndFlush()
-}
-
 // bind 綁定處理
 func (this *Proto) bind(session nets.Sessioner) *nets.Bundle {
-	entity := mizugos.Entitymgr().Add()
+	entity := features.Entity.Add()
 
 	var wrong error
 
@@ -93,7 +84,7 @@ func (this *Proto) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	mizugos.Labelmgr().Add(entity, this.name)
+	features.Label.Add(entity, this.name)
 	session.SetOwner(entity)
 	features.LogSystem.Get().Info(this.name).Message("bind").Caller(0).EndFlush()
 	return entity.Bundle()
@@ -101,8 +92,8 @@ func (this *Proto) bind(session nets.Sessioner) *nets.Bundle {
 Error:
 	if entity != nil {
 		entity.Finalize()
-		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.Labelmgr().Erase(entity)
+		features.Entity.Del(entity.EntityID())
+		features.Label.Erase(entity)
 	} // if
 
 	session.Stop()
@@ -114,8 +105,8 @@ Error:
 func (this *Proto) unbind(session nets.Sessioner) {
 	if entity, ok := session.GetOwner().(*entitys.Entity); ok {
 		entity.Finalize()
-		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.Labelmgr().Erase(entity)
+		features.Entity.Del(entity.EntityID())
+		features.Label.Erase(entity)
 	} // if
 }
 
@@ -128,3 +119,5 @@ func (this *Proto) listenWrong(err error) {
 func (this *Proto) bindWrong(err error) {
 	features.LogSystem.Get().Warn(this.name).Caller(1).Error(err).EndFlush()
 }
+
+var proto = &Proto{name: "proto"} // Proto入口

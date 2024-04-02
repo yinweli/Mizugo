@@ -3,21 +3,36 @@ package features
 import (
 	"fmt"
 
-	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/metrics"
 )
 
-// NewMetrics 建立度量資料
-func NewMetrics() *Metrics {
-	return &Metrics{
-		name: "metrics",
-	}
+// InitializeMetrics 初始化度量管理器
+func InitializeMetrics() error {
+	name := "metrics"
+	config := &MetricsConfig{}
+	Metrics = metrics.NewMetricsmgr()
+
+	if err := Config.Unmarshal(name, config); err != nil {
+		return fmt.Errorf("%v initialize: %w", name, err)
+	} // if
+
+	if err := Metrics.Initialize(config.Port); err != nil {
+		return fmt.Errorf("%v initialize: %w", name, err)
+	} // if
+
+	MeterLogin = Metrics.NewRuntime("login")
+	MeterUpdate = Metrics.NewRuntime("update")
+	MeterJson = Metrics.NewRuntime("json")
+	MeterProto = Metrics.NewRuntime("proto")
+	LogSystem.Get().Info(name).Message("initialize").EndFlush()
+	return nil
 }
 
-// Metrics 度量資料
-type Metrics struct {
-	name   string        // 系統名稱
-	config MetricsConfig // 配置資料
+// FinalizeMetrics 結束度量管理器
+func FinalizeMetrics() {
+	if Metrics != nil {
+		Metrics.Finalize()
+	} // if
 }
 
 // MetricsConfig 配置資料
@@ -25,29 +40,7 @@ type MetricsConfig struct {
 	Port int `yaml:"port"` // 埠號
 }
 
-// Initialize 初始化處理
-func (this *Metrics) Initialize() error {
-	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
-	} // if
-
-	if err := mizugos.Metricsmgr().Initialize(this.config.Port); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
-	} // if
-
-	MeterLogin = mizugos.Metricsmgr().NewRuntime("login")
-	MeterUpdate = mizugos.Metricsmgr().NewRuntime("update")
-	MeterJson = mizugos.Metricsmgr().NewRuntime("json")
-	MeterProto = mizugos.Metricsmgr().NewRuntime("proto")
-	LogSystem.Get().Info(this.name).Message("initialize").KV("config", this.config).Caller(0).EndFlush()
-	return nil
-}
-
-// Finalize 結束處理
-func (this *Metrics) Finalize() {
-	mizugos.Metricsmgr().Finalize()
-}
-
+var Metrics *metrics.Metricsmgr  // 度量管理器
 var MeterLogin *metrics.Runtime  // Login訊息度量物件
 var MeterUpdate *metrics.Runtime // Update訊息度量物件
 var MeterJson *metrics.Runtime   // Json訊息度量物件

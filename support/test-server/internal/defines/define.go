@@ -4,10 +4,6 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 )
 
-const ( // 程式名稱
-	CmdServer = "test-server" // 測試伺服器名稱
-)
-
 const ( // 常數定義
 	EventCapacity = 1000 // 事件容量
 )

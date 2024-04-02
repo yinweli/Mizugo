@@ -1,16 +1,3 @@
-log-system:
-  name: server-system.log
-  path: log
-  json: false
-  console: true
-  file: true
-  level: debug
-  timeLayout: "2006-01-02T15:04:05.000Z"
-  maxSize: 100
-  maxTime: 0
-  maxBackups: 0
-  compress: false
-
 log-crash:
   name: server-crash.log
   path: log
@@ -19,6 +6,21 @@ log-crash:
   file: true
   level: debug
   timeLayout: "2006-01-02T15:04:05.000Z"
+  timeZone: "Asia/Taipei"
+  maxSize: 100
+  maxTime: 0
+  maxBackups: 0
+  compress: false
+
+log-system:
+  name: server-system.log
+  path: log
+  json: false
+  console: true
+  file: true
+  level: debug
+  timeLayout: "2006-01-02T15:04:05.000Z"
+  timeZone: "Asia/Taipei"
   maxSize: 100
   maxTime: 0
   maxBackups: 0
@@ -32,13 +34,12 @@ pool:
   maxBlocking: 0
 
 metrics:
-  port: 9101
+  port: 9010
 
 redmo:
   majorURI: redisdb://127.0.0.1:6379/
-  majorDebug: false
   minorURI: mongodb://127.0.0.1:27017/
-  minorDBName: test
+  minorDBName: mizugo-test
 
 auth:
   ip:
