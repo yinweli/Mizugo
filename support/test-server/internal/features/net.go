@@ -1,7 +1,7 @@
 package features
 
 import (
-	"github.com/yinweli/Mizugo/mizugos/nets"
+	"github.com/yinweli/Mizugo/mizugo/nets"
 )
 
 // InitializeNet 初始化網路管理器

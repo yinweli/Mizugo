@@ -3,7 +3,7 @@ package features
 import (
 	"fmt"
 
-	"github.com/yinweli/Mizugo/mizugos/metrics"
+	"github.com/yinweli/Mizugo/mizugo/metrics"
 )
 
 // InitializeMetrics 初始化度量管理器

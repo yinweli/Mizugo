@@ -3,7 +3,7 @@ package features
 import (
 	"fmt"
 
-	"github.com/yinweli/Mizugo/mizugos/pools"
+	"github.com/yinweli/Mizugo/mizugo/pools"
 )
 
 // InitializePool 初始化執行緒池管理器

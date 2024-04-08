@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
+	"github.com/yinweli/Mizugo/mizugo/ctxs"
 	"github.com/yinweli/Mizugo/support/test-server/internal/entrys"
 	"github.com/yinweli/Mizugo/support/test-server/internal/features"
 )

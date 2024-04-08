@@ -1,7 +1,7 @@
 package features
 
 import (
-	"github.com/yinweli/Mizugo/mizugos/labels"
+	"github.com/yinweli/Mizugo/mizugo/labels"
 )
 
 // InitializeLabel 初始化標籤管理器

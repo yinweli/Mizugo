@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/nets"
-	"github.com/yinweli/Mizugo/mizugos/procs"
+	"github.com/yinweli/Mizugo/mizugo/entitys"
+	"github.com/yinweli/Mizugo/mizugo/nets"
+	"github.com/yinweli/Mizugo/mizugo/procs"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/features"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/modules"

@@ -3,7 +3,7 @@ package features
 import (
 	"fmt"
 
-	"github.com/yinweli/Mizugo/mizugos/configs"
+	"github.com/yinweli/Mizugo/mizugo/configs"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
 )
 

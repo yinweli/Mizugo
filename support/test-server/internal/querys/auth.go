@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos/redmos"
+	"github.com/yinweli/Mizugo/mizugo/redmos"
 )
 
 // MetaAuth 元資料: 認證資料

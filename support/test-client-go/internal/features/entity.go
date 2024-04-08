@@ -1,7 +1,7 @@
 package features
 
 import (
-	"github.com/yinweli/Mizugo/mizugos/entitys"
+	"github.com/yinweli/Mizugo/mizugo/entitys"
 )
 
 // InitializeEntity 初始化實體管理器
