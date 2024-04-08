@@ -4,21 +4,34 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/nets"
-	"github.com/yinweli/Mizugo/mizugos/procs"
+	"github.com/yinweli/Mizugo/mizugo/entitys"
+	"github.com/yinweli/Mizugo/mizugo/nets"
+	"github.com/yinweli/Mizugo/mizugo/procs"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/features"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/miscs"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/modules"
 )
 
-// NewJson 建立Json入口
-func NewJson() *Json {
-	return &Json{
-		name: "json",
-	}
+// InitializeJson 初始化Json
+func InitializeJson() (err error) {
+	if err = features.Config.Unmarshal(json.name, &json.config); err != nil {
+		return fmt.Errorf("%v initialize: %w", json.name, err)
+	} // if
+
+	if json.config.Enable {
+		miscs.GenerateConnection(json.config.Interval, json.config.Count, json.config.Batch, func() {
+			features.Net.AddConnectTCP(json.config.IP, json.config.Port, json.config.Timeout, json.bind, json.unbind, json.connectWrong)
+		})
+	} // if
+
+	features.LogSystem.Get().Info(json.name).Message("initialize").EndFlush()
+	return nil
+}
+
+// FinalizeJson 結束Json
+func FinalizeJson() {
+	features.LogSystem.Get().Info(json.name).Message("finalize").EndFlush()
 }
 
 // Json Json入口
@@ -41,30 +54,9 @@ type JsonConfig struct {
 	Disconnect bool          `yaml:"disconnect"` // 斷線旗標
 }
 
-// Initialize 初始化處理
-func (this *Json) Initialize() error {
-	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
-	} // if
-
-	if this.config.Enable {
-		miscs.GenerateConnection(this.config.Interval, this.config.Count, this.config.Batch, func() {
-			mizugos.Netmgr().AddConnectTCP(this.config.IP, this.config.Port, this.config.Timeout, this.bind, this.unbind, this.connectWrong)
-		})
-	} // if
-
-	features.LogSystem.Get().Info(this.name).Message("entry start").KV("config", this.config).Caller(0).EndFlush()
-	return nil
-}
-
-// Finalize 結束處理
-func (this *Json) Finalize() {
-	features.LogSystem.Get().Info(this.name).Message("entry finalize").Caller(0).EndFlush()
-}
-
 // bind 綁定處理
 func (this *Json) bind(session nets.Sessioner) *nets.Bundle {
-	entity := mizugos.Entitymgr().Add()
+	entity := features.Entity.Add()
 
 	var wrong error
 
@@ -103,7 +95,7 @@ func (this *Json) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	mizugos.Labelmgr().Add(entity, this.name)
+	features.Label.Add(entity, this.name)
 	session.SetOwner(entity)
 	features.MeterConnect.Add(1)
 	features.LogSystem.Get().Info(this.name).Message("bind").Caller(0).EndFlush()
@@ -112,8 +104,8 @@ func (this *Json) bind(session nets.Sessioner) *nets.Bundle {
 Error:
 	if entity != nil {
 		entity.Finalize()
-		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.Labelmgr().Erase(entity)
+		features.Entity.Del(entity.EntityID())
+		features.Label.Erase(entity)
 	} // if
 
 	session.Stop()
@@ -125,8 +117,8 @@ Error:
 func (this *Json) unbind(session nets.Sessioner) {
 	if entity, ok := session.GetOwner().(*entitys.Entity); ok {
 		entity.Finalize()
-		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.Labelmgr().Erase(entity)
+		features.Entity.Del(entity.EntityID())
+		features.Label.Erase(entity)
 		features.MeterConnect.Add(-1)
 	} // if
 }
@@ -140,3 +132,5 @@ func (this *Json) connectWrong(err error) {
 func (this *Json) bindWrong(err error) {
 	features.LogSystem.Get().Warn(this.name).Caller(1).Error(err).EndFlush()
 }
+
+var json = &Json{name: "json"} // Json入口

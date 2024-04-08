@@ -4,106 +4,97 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
-	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
+	"github.com/yinweli/Mizugo/mizugo/ctxs"
 	"github.com/yinweli/Mizugo/support/test-server/internal/entrys"
 	"github.com/yinweli/Mizugo/support/test-server/internal/features"
 )
 
 func main() {
+	defer features.FinalizeLogger()
 	defer func() {
-		if cause := recover(); cause != nil {
+		if cause := recover(); cause != nil && features.LogCrash != nil {
 			features.LogCrash.Get().Error("crash").KV("stack", string(debug.Stack())).Error(fmt.Errorf("%s", cause)).EndFlush()
 		} // if
 	}()
 
-	ctx := ctxs.Get().WithCancel()
-	name := defines.CmdServer
-	mizugos.Start()
+	fmt.Println("test-server start")
+	err := error(nil)
 
-	if err := initialize(); err != nil { // 初始化測試伺服器的各項組件
-		fmt.Println(fmt.Errorf("%v start: %w", name, err))
-		mizugos.Stop()
+	if err = features.InitializeConfig(); err != nil {
+		fmt.Println(err)
 		return
 	} // if
 
-	fmt.Printf("%v start\n", name)
+	if err = features.InitializeLogger(); err != nil {
+		fmt.Println(err)
+		return
+	} // if
+
+	if err = features.InitializeEntity(); err != nil {
+		fmt.Println(err)
+		return
+	} // if
+
+	if err = features.InitializeLabel(); err != nil {
+		fmt.Println(err)
+		return
+	} // if
+
+	if err = features.InitializeMetrics(); err != nil {
+		fmt.Println(err)
+		return
+	} // if
+
+	defer features.FinalizeMetrics()
+
+	if err = features.InitializeNet(); err != nil {
+		fmt.Println(err)
+		return
+	} // if
+
+	defer features.FinalizeNet()
+
+	if err = features.InitializeRedmo(); err != nil {
+		fmt.Println(err)
+		return
+	} // if
+
+	defer features.FinalizeRedmo()
+
+	if err = features.InitializePool(); err != nil {
+		fmt.Println(err)
+		return
+	} // if
+
+	defer features.FinalizePool()
+
+	if err = entrys.InitializeAuth(); err != nil {
+		fmt.Println(err)
+		return
+	} // if
+
+	defer entrys.FinalizeAuth()
+
+	if err = entrys.InitializeJson(); err != nil {
+		fmt.Println(err)
+		return
+	} // if
+
+	defer entrys.FinalizeJson()
+
+	if err = entrys.InitializeProto(); err != nil {
+		fmt.Println(err)
+		return
+	} // if
+
+	defer entrys.FinalizeProto()
+
+	fmt.Println("test-server running")
+	ctx := ctxs.Get().WithCancel()
 
 	for range ctx.Done() {
 		// do nothing...
 	} // for
 
-	finalize() // 結束測試伺服器的各項組件
-	mizugos.Stop()
-	fmt.Printf("%v shutdown\n", name)
-}
-
-// initialize 初始化處理
-func initialize() error {
-	server.logger = features.NewLogger()
-	server.pool = features.NewPool()
-	server.metrics = features.NewMetrics()
-	server.redmo = features.NewRedmo()
-	server.auth = entrys.NewAuth()
-	server.json = entrys.NewJson()
-	server.proto = entrys.NewProto()
-
-	mizugos.Configmgr().AddPath(defines.ConfigPath)
-
-	if err := mizugos.Configmgr().ReadFile(defines.ConfigFile, defines.ConfigType); err != nil {
-		return fmt.Errorf("initialize: %w", err)
-	} // if
-
-	if err := server.logger.Initialize(); err != nil {
-		return fmt.Errorf("initialize: %w", err)
-	} // if
-
-	if err := server.pool.Initialize(); err != nil {
-		return fmt.Errorf("initialize: %w", err)
-	} // if
-
-	if err := server.metrics.Initialize(); err != nil {
-		return fmt.Errorf("initialize: %w", err)
-	} // if
-
-	if err := server.redmo.Initialize(); err != nil {
-		return fmt.Errorf("initialize: %w", err)
-	} // if
-
-	if err := server.auth.Initialize(); err != nil {
-		return fmt.Errorf("initialize: %w", err)
-	} // if
-
-	if err := server.json.Initialize(); err != nil {
-		return fmt.Errorf("initialize: %w", err)
-	} // if
-
-	if err := server.proto.Initialize(); err != nil {
-		return fmt.Errorf("initialize: %w", err)
-	} // if
-
-	return nil
-}
-
-// finalize 結束處理
-func finalize() {
-	server.auth.Finalize()
-	server.json.Finalize()
-	server.proto.Finalize()
-	server.redmo.Finalize()
-	server.metrics.Finalize()
-	server.pool.Finalize()
-	server.logger.Finalize()
-}
-
-// server 伺服器資料
-var server struct {
-	logger  *features.Logger  // 日誌資料
-	pool    *features.Pool    // 執行緒池資料
-	metrics *features.Metrics // 度量資料
-	redmo   *features.Redmo   // 資料庫資料
-	auth    *entrys.Auth      // Auth入口, 當客戶端連接或是傳送訊息到Auth入口指定的埠號時, 由此組件負責處理
-	json    *entrys.Json      // Json入口, 當客戶端連接或是傳送訊息到Json入口指定的埠號時, 由此組件負責處理
-	proto   *entrys.Proto     // Proto入口, 當客戶端連接或是傳送訊息到Proto入口指定的埠號時, 由此組件負責處理
+	fmt.Println("test-server shutdown")
 }

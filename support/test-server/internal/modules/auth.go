@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
-	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/procs"
+	"github.com/yinweli/Mizugo/mizugo/ctxs"
+	"github.com/yinweli/Mizugo/mizugo/entitys"
+	"github.com/yinweli/Mizugo/mizugo/procs"
 	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-server/internal/features"
 	"github.com/yinweli/Mizugo/support/test-server/internal/querys"
@@ -49,28 +49,26 @@ func (this *Auth) procMLoginQ(message any) {
 		return
 	} // if
 
-	authGet := querys.NewAuthGet(msg.Account, nil)
+	auth := querys.NewAuth(msg.Account)
 
-	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Lock(msg.Account).Add(authGet).Exec(); err != nil {
+	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Lock(msg.Account).Add(auth.NewGetter()).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
 		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMLoginQ: %w", err)).EndFlush()
 		return
 	} // if
 
-	authSet := querys.NewAuthSet(msg.Account, &querys.Auth{
-		Account: msg.Account,
-		Token:   uuid.NewString(),
-		Time:    time.Now(),
-	})
+	auth.Token = uuid.NewString()
+	auth.Time = time.Now()
+	auth.SetSave()
 
-	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Add(authSet).Unlock(msg.Account).Exec(); err != nil {
+	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Add(auth.NewSetter()).Unlock(msg.Account).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
 		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMLoginQ: %w", err)).EndFlush()
 		return
 	} // if
 
-	this.sendMLoginA(msg, msgs.ErrID_Success, authSet.Data.Token)
-	features.LogSystem.Get().Info(this.name).KV("account", authSet.Data.Account).KV("token", authSet.Data.Token).Caller(0).EndFlush()
+	this.sendMLoginA(msg, msgs.ErrID_Success, auth.Token)
+	features.LogSystem.Get().Info(this.name).KV("account", auth.Account).KV("token", auth.Token).Caller(0).EndFlush()
 }
 
 // sendMLoginA 傳送回應登入
@@ -102,34 +100,32 @@ func (this *Auth) procMUpdateQ(message any) {
 		return
 	} // if
 
-	authGet := querys.NewAuthGet(msg.Account, nil)
+	auth := querys.NewAuth(msg.Account)
 
-	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Lock(msg.Account).Add(authGet).Exec(); err != nil {
+	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Lock(msg.Account).Add(auth.NewGetter()).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
 		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMUpdateQ: %w", err)).EndFlush()
 		return
 	} // if
 
-	if authGet.Data.Token != msg.Token {
+	if auth.Token != msg.Token {
 		this.sendMUpdateA(msg, msgs.ErrID_TokenNotMatch, "")
 		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMUpdateQ: %w", err)).EndFlush()
 		return
 	} // if
 
-	authSet := querys.NewAuthSet(msg.Account, &querys.Auth{
-		Account: msg.Account,
-		Token:   uuid.NewString(),
-		Time:    time.Now(),
-	})
+	auth.Token = uuid.NewString()
+	auth.Time = time.Now()
+	auth.SetSave()
 
-	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Add(authSet).Unlock(msg.Account).Exec(); err != nil {
+	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Add(auth.NewSetter()).Unlock(msg.Account).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
 		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMUpdateQ: %w", err)).EndFlush()
 		return
 	} // if
 
-	this.sendMUpdateA(msg, msgs.ErrID_Success, authSet.Data.Token)
-	features.LogSystem.Get().Info(this.name).KV("account", authSet.Data.Account).KV("token", authSet.Data.Token).Caller(0).EndFlush()
+	this.sendMUpdateA(msg, msgs.ErrID_Success, auth.Token)
+	features.LogSystem.Get().Info(this.name).KV("account", auth.Account).KV("token", auth.Token).Caller(0).EndFlush()
 }
 
 // sendMUpdateA 傳送回應登入

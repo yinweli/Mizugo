@@ -1,16 +1,3 @@
-log-system:
-  name: client-system.log
-  path: log
-  json: false
-  console: true
-  file: true
-  level: debug
-  timeLayout: "2006-01-02T15:04:05.000Z"
-  maxSize: 100
-  maxTime: 0
-  maxBackups: 0
-  compress: false
-
 log-crash:
   name: client-crash.log
   path: log
@@ -19,6 +6,21 @@ log-crash:
   file: true
   level: debug
   timeLayout: "2006-01-02T15:04:05.000Z"
+  timeZone: "Asia/Taipei"
+  maxSize: 100
+  maxTime: 0
+  maxBackups: 0
+  compress: false
+
+log-system:
+  name: client-system.log
+  path: log
+  json: false
+  console: true
+  file: true
+  level: debug
+  timeLayout: "2006-01-02T15:04:05.000Z"
+  timeZone: "Asia/Taipei"
   maxSize: 100
   maxTime: 0
   maxBackups: 0
@@ -35,24 +37,24 @@ metrics:
   port: 9101
 
 auth:
-  enable: false
+  enable: true
   ip:
   port: 9000
   timeout: 1s
-  delay: 50ms
+  delay: 100ms
   account: test-auth-0001
   update: 10
 
 json:
-  enable: false
+  enable: true
   ip:
   port: 9001
   key: key-@@@@
   timeout: 1s
-  interval: 10ms
+  interval: 20ms
   count: 1000
   batch: 100
-  delay: 50ms
+  delay: 100ms
   disconnect: true
 
 proto:
@@ -61,8 +63,8 @@ proto:
   port: 9002
   key: key-####
   timeout: 1s
-  interval: 10ms
+  interval: 20ms
   count: 1000
   batch: 100
-  delay: 50ms
+  delay: 100ms
   disconnect: true

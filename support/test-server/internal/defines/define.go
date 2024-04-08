@@ -1,11 +1,7 @@
 package defines
 
 import (
-	"github.com/yinweli/Mizugo/mizugos/entitys"
-)
-
-const ( // 程式名稱
-	CmdServer = "test-server" // 測試伺服器名稱
+	"github.com/yinweli/Mizugo/mizugo/entitys"
 )
 
 const ( // 常數定義

@@ -1,11 +1,7 @@
 package defines
 
 import (
-	"github.com/yinweli/Mizugo/mizugos/entitys"
-)
-
-const ( // 程式名稱
-	CmdClient = "test-client-go" // 測試客戶端名稱
+	"github.com/yinweli/Mizugo/mizugo/entitys"
 )
 
 const ( // 常數定義
@@ -16,11 +12,6 @@ const ( // 配置定義
 	ConfigPath = "config" // 配置路徑
 	ConfigFile = "config" // 配置名稱
 	ConfigType = "yaml"   // 配置類型
-)
-
-const ( // 日誌名稱
-	LogSystem = "log-system" // 系統日誌名稱
-	LogCrash  = "log-crash"  // 崩潰日誌名稱
 )
 
 const ( // 事件名稱
