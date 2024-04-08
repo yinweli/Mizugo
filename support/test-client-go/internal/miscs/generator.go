@@ -3,12 +3,12 @@ package miscs
 import (
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos"
+	"github.com/yinweli/Mizugo/support/test-client-go/internal/features"
 )
 
 // GenerateConnection 產生連線
 func GenerateConnection(internal time.Duration, count, batch int, done func()) {
-	mizugos.Poolmgr().Submit(func() {
+	features.Pool.Submit(func() {
 		timeout := time.NewTicker(internal)
 
 		for range timeout.C {

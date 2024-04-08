@@ -25,6 +25,11 @@ func main() {
 		return
 	} // if
 
+	if err = features.InitializeLogger(); err != nil {
+		fmt.Println(err)
+		return
+	} // if
+
 	if err = features.InitializeEntity(); err != nil {
 		fmt.Println(err)
 		return
@@ -35,10 +40,12 @@ func main() {
 		return
 	} // if
 
-	if err = features.InitializeLogger(); err != nil {
+	if err = features.InitializeMetrics(); err != nil {
 		fmt.Println(err)
 		return
 	} // if
+
+	defer features.FinalizeMetrics()
 
 	if err = features.InitializeNet(); err != nil {
 		fmt.Println(err)
@@ -60,13 +67,6 @@ func main() {
 	} // if
 
 	defer features.FinalizePool()
-
-	if err = features.InitializeMetrics(); err != nil {
-		fmt.Println(err)
-		return
-	} // if
-
-	defer features.FinalizeMetrics()
 
 	if err = entrys.InitializeAuth(); err != nil {
 		fmt.Println(err)

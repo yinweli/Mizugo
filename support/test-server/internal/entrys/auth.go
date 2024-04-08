@@ -25,6 +25,7 @@ func InitializeAuth() (err error) {
 // FinalizeAuth 結束Auth
 func FinalizeAuth() {
 	features.Net.DelListen(auth.listenID)
+	features.LogSystem.Get().Info(auth.name).Message("finalize").EndFlush()
 }
 
 // Auth Auth入口

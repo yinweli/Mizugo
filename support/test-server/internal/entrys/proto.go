@@ -26,6 +26,7 @@ func InitializeProto() error {
 // FinalizeProto 結束Proto
 func FinalizeProto() {
 	features.Net.DelListen(proto.listenID)
+	features.LogSystem.Get().Info(proto.name).Message("finalize").EndFlush()
 }
 
 // Proto Proto資料

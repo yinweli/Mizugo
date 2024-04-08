@@ -26,6 +26,7 @@ func InitializeJson() error {
 // FinalizeJson 結束Json
 func FinalizeJson() {
 	features.Net.DelListen(json.listenID)
+	features.LogSystem.Get().Info(json.name).Message("finalize").EndFlush()
 }
 
 // Json Json入口
