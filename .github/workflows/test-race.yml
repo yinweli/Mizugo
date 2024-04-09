@@ -10,18 +10,18 @@ jobs:
   test:
     strategy:
       matrix:
-          os: [ubuntu-latest] # 由於要使用到docker來執行redis跟mongo, 所以只能測試linux了
-          go: [1.20.x]
-          proto: [3.x]
-          redis: [6]
-          mongo: ['6.0']
+        os: [ubuntu-latest] # 由於要使用到docker來執行redis跟mongo, 所以只能測試linux了
+        go: [1.20.x]
+        proto: [3.x]
+        redis: [6]
+        mongo: ['6.0']
     name: ${{ matrix.os }} | go ${{ matrix.go }} | proto ${{ matrix.proto }} | redis ${{ matrix.redis }} | mongo ${{ matrix.mongo }}
     runs-on: ${{ matrix.os }}
     steps:
     - name: checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: setup go ${{ matrix.go }}
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v4
       with:
         go-version: ${{ matrix.go }}
     - name: setup protoc
@@ -32,11 +32,11 @@ jobs:
     - name: setup protoc-go
       run: go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
     - name: setup redis
-      uses: supercharge/redis-github-action@1.5.0
+      uses: supercharge/redis-github-action@1.8.0
       with:
         redis-version: ${{ matrix.redis }}
     - name: setup mongo
-      uses: supercharge/mongodb-github-action@1.8.0
+      uses: supercharge/mongodb-github-action@1.10.0
       with:
         mongodb-version: ${{ matrix.mongo }}
     - name: test

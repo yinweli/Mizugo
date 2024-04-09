@@ -2,7 +2,6 @@ package entrys //nolint:dupl
 
 import (
 	"fmt"
-	"sync/atomic"
 
 	"github.com/yinweli/Mizugo/mizugos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
@@ -13,19 +12,24 @@ import (
 	"github.com/yinweli/Mizugo/support/test-server/internal/modules"
 )
 
-// NewJson 建立Json入口
-func NewJson() *Json {
-	return &Json{
-		name: "json",
-	}
+// JsonInitialize 初始化Json入口
+func JsonInitialize() (err error) {
+	config := &JsonConfig{}
+
+	if err = mizugos.Config.Unmarshal("json", config); err != nil {
+		return fmt.Errorf("json initialize: %w", err)
+	} // if
+
+	json.listenID = mizugos.Network.AddListenTCP(config.IP, config.Port, json.bind, json.unbind, json.listenWrong)
+	json.key = config.Key
+	features.LogSystem.Get().Info("json").Message("initialize").EndFlush()
+	return nil
 }
 
 // Json Json入口
 type Json struct {
-	name     string        // 系統名稱
-	config   JsonConfig    // 配置資料
-	count    atomic.Int64  // 計數器
 	listenID nets.ListenID // 接聽編號
+	key      string        // 密鑰
 }
 
 // JsonConfig 配置資料
@@ -35,26 +39,9 @@ type JsonConfig struct {
 	Key  string `yaml:"key"`  // 密鑰
 }
 
-// Initialize 初始化處理
-func (this *Json) Initialize() error {
-	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
-	} // if
-
-	this.listenID = mizugos.Netmgr().AddListenTCP(this.config.IP, this.config.Port, this.bind, this.unbind, this.listenWrong)
-	features.LogSystem.Get().Info(this.name).Message("entry start").KV("config", this.config).Caller(0).EndFlush()
-	return nil
-}
-
-// Finalize 結束處理
-func (this *Json) Finalize() {
-	mizugos.Netmgr().DelListen(this.listenID)
-	features.LogSystem.Get().Info(this.name).Message("entry finalize").Caller(0).EndFlush()
-}
-
 // bind 綁定處理
 func (this *Json) bind(session nets.Sessioner) *nets.Bundle {
-	entity := mizugos.Entitymgr().Add()
+	entity := mizugos.Entity.Add()
 
 	var wrong error
 
@@ -73,7 +60,7 @@ func (this *Json) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.SetProcess(procs.NewJson().Base64(true).DesCBC(true, this.config.Key, this.config.Key)); err != nil {
+	if err := entity.SetProcess(procs.NewJson().Base64(true).DesCBC(true, this.key, this.key)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
@@ -83,7 +70,7 @@ func (this *Json) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.AddModule(modules.NewJson(this.count.Add)); err != nil {
+	if err := entity.AddModule(modules.NewJson()); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
@@ -93,20 +80,18 @@ func (this *Json) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	mizugos.Labelmgr().Add(entity, this.name)
 	session.SetOwner(entity)
-	features.LogSystem.Get().Info(this.name).Message("bind").Caller(0).EndFlush()
+	features.LogSystem.Get().Info("json").Message("bind").Caller(0).EndFlush()
 	return entity.Bundle()
 
 Error:
 	if entity != nil {
 		entity.Finalize()
-		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.Labelmgr().Erase(entity)
+		mizugos.Entity.Del(entity.EntityID())
 	} // if
 
 	session.Stop()
-	features.LogSystem.Get().Error(this.name).Caller(0).Error(wrong).EndFlush()
+	features.LogSystem.Get().Error("json").Caller(0).Error(wrong).EndFlush()
 	return nil
 }
 
@@ -114,17 +99,18 @@ Error:
 func (this *Json) unbind(session nets.Sessioner) {
 	if entity, ok := session.GetOwner().(*entitys.Entity); ok {
 		entity.Finalize()
-		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.Labelmgr().Erase(entity)
+		mizugos.Entity.Del(entity.EntityID())
 	} // if
 }
 
 // listenWrong 監聽錯誤處理
 func (this *Json) listenWrong(err error) {
-	features.LogSystem.Get().Error(this.name).Caller(1).Error(err).EndFlush()
+	features.LogSystem.Get().Error("json").Caller(1).Error(err).EndFlush()
 }
 
 // bindWrong 綁定錯誤處理
 func (this *Json) bindWrong(err error) {
-	features.LogSystem.Get().Warn(this.name).Caller(1).Error(err).EndFlush()
+	features.LogSystem.Get().Warn("json").Caller(1).Error(err).EndFlush()
 }
+
+var json = &Json{} // Json入口

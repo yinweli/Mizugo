@@ -30,6 +30,7 @@ func (this *Poolmgr) Initialize(config *Config) (err error) {
 		return fmt.Errorf("poolmgr initialize: already initialize")
 	} // if
 
+	logger := &Logger{logger: config.Logger}
 	this.pool, err = ants.NewPool(
 		config.Capacity,
 		ants.WithExpiryDuration(config.Expire),
@@ -37,9 +38,9 @@ func (this *Poolmgr) Initialize(config *Config) (err error) {
 		ants.WithNonblocking(config.Nonblocking),
 		ants.WithMaxBlockingTasks(config.MaxBlocking),
 		ants.WithPanicHandler(config.PanicHandler),
-		ants.WithLogger(config.Logger),
+		ants.WithLogger(this.logger),
 	)
-	this.logger = config.Logger
+	this.logger = logger
 
 	if err != nil {
 		err = fmt.Errorf("poolmgr initialize: %w", err)
@@ -86,13 +87,13 @@ func (this *Poolmgr) Status() Stat {
 
 // Config 配置資料
 type Config struct {
-	Capacity     int           `yaml:"capacity"`    // 執行緒池容量, 0表示容量無限
-	Expire       time.Duration `yaml:"expire"`      // 執行緒超時時間, 詳細說明請查看ants.Options.ExpiryDuration的說明
-	PreAlloc     bool          `yaml:"preAlloc"`    // 是否預先分配記憶體, 詳細說明請查看ants.Options.PreAlloc的說明
-	Nonblocking  bool          `yaml:"nonblocking"` // 是否在執行緒耗盡時阻塞Submit的執行, 詳細說明請查看ants.Options.Nonblocking的說明
-	MaxBlocking  int           `yaml:"maxBlocking"` // 最大阻塞執行緒數量, 0表示無限制, 詳細說明請查看ants.Options.MaxBlockingTasks的說明
-	PanicHandler func(any)     `yaml:"-" json:"-"`  // 失敗處理函式, 詳細說明請查看ants.Options.PanicHandler的說明
-	Logger       ants.Logger   `yaml:"-" json:"-"`  // 日誌物件, 詳細說明請查看ants.Options.Logger的說明
+	Capacity     int                              `yaml:"capacity"`    // 執行緒池容量, 0表示容量無限
+	Expire       time.Duration                    `yaml:"expire"`      // 執行緒超時時間, 詳細說明請查看ants.Options.ExpiryDuration的說明
+	PreAlloc     bool                             `yaml:"preAlloc"`    // 是否預先分配記憶體, 詳細說明請查看ants.Options.PreAlloc的說明
+	Nonblocking  bool                             `yaml:"nonblocking"` // 是否在執行緒耗盡時阻塞Submit的執行, 詳細說明請查看ants.Options.Nonblocking的說明
+	MaxBlocking  int                              `yaml:"maxBlocking"` // 最大阻塞執行緒數量, 0表示無限制, 詳細說明請查看ants.Options.MaxBlockingTasks的說明
+	PanicHandler func(any)                        `yaml:"-" json:"-"`  // 失敗處理函式, 詳細說明請查看ants.Options.PanicHandler的說明
+	Logger       func(format string, args ...any) `yaml:"-" json:"-"`  // 日誌函式
 }
 
 // String 取得字串
@@ -104,6 +105,18 @@ func (this Config) String() string {
 		{Name: "nonblocking", Data: this.Nonblocking},
 		{Name: "maxBlocking", Data: this.MaxBlocking},
 	})
+}
+
+// Logger 日誌資料
+type Logger struct {
+	logger func(format string, args ...any)
+}
+
+// Printf 輸出日誌
+func (this *Logger) Printf(format string, args ...any) {
+	if this.logger != nil {
+		this.logger(format, args...)
+	} // if
 }
 
 // Stat 狀態資料

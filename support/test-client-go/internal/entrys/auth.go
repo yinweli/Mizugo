@@ -13,17 +13,31 @@ import (
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/modules"
 )
 
-// NewAuth 建立Auth入口
-func NewAuth() *Auth {
-	return &Auth{
-		name: "auth",
-	}
+// AuthInitialize 初始化Auth入口
+func AuthInitialize() (err error) {
+	config := &AuthConfig{}
+
+	if err = mizugos.Config.Unmarshal("auth", config); err != nil {
+		return fmt.Errorf("auth initialize: %w", err)
+	} // if
+
+	auth.delay = config.Delay
+	auth.account = config.Account
+	auth.update = config.Update
+
+	if config.Enable {
+		mizugos.Network.AddConnectTCP(config.IP, config.Port, config.Timeout, auth.bind, auth.unbind, auth.connectWrong)
+	} // if
+
+	features.LogSystem.Get().Info("auth").Message("initialize").EndFlush()
+	return nil
 }
 
 // Auth Auth入口
 type Auth struct {
-	name   string     // 系統名稱
-	config AuthConfig // 配置資料
+	delay   time.Duration // 延遲時間
+	account string        // 帳號
+	update  int           // 更新次數
 }
 
 // AuthConfig 配置資料
@@ -37,28 +51,9 @@ type AuthConfig struct {
 	Update  int           `yaml:"update"`  // 更新次數
 }
 
-// Initialize 初始化處理
-func (this *Auth) Initialize() error {
-	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
-	} // if
-
-	if this.config.Enable {
-		mizugos.Netmgr().AddConnectTCP(this.config.IP, this.config.Port, this.config.Timeout, this.bind, this.unbind, this.connectWrong)
-	} // if
-
-	features.LogSystem.Get().Info(this.name).Message("entry start").KV("config", this.config).Caller(0).EndFlush()
-	return nil
-}
-
-// Finalize 結束處理
-func (this *Auth) Finalize() {
-	features.LogSystem.Get().Info(this.name).Message("entry finalize").Caller(0).EndFlush()
-}
-
 // bind 綁定處理
 func (this *Auth) bind(session nets.Sessioner) *nets.Bundle {
-	entity := mizugos.Entitymgr().Add()
+	entity := mizugos.Entity.Add()
 
 	var wrong error
 
@@ -87,7 +82,7 @@ func (this *Auth) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.AddModule(modules.NewAuth(this.config.Delay, this.config.Account, this.config.Update)); err != nil {
+	if err := entity.AddModule(modules.NewAuth(this.delay, this.account, this.update)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
@@ -97,21 +92,19 @@ func (this *Auth) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	mizugos.Labelmgr().Add(entity, this.name)
 	session.SetOwner(entity)
 	features.MeterConnect.Add(1)
-	features.LogSystem.Get().Info(this.name).Message("bind").Caller(0).EndFlush()
+	features.LogSystem.Get().Info("auth").Message("bind").Caller(0).EndFlush()
 	return entity.Bundle()
 
 Error:
 	if entity != nil {
 		entity.Finalize()
-		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.Labelmgr().Erase(entity)
+		mizugos.Entity.Del(entity.EntityID())
 	} // if
 
 	session.Stop()
-	features.LogSystem.Get().Error(this.name).Caller(0).Error(wrong).EndFlush()
+	features.LogSystem.Get().Error("auth").Caller(0).Error(wrong).EndFlush()
 	return nil
 }
 
@@ -119,18 +112,19 @@ Error:
 func (this *Auth) unbind(session nets.Sessioner) {
 	if entity, ok := session.GetOwner().(*entitys.Entity); ok {
 		entity.Finalize()
-		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.Labelmgr().Erase(entity)
+		mizugos.Entity.Del(entity.EntityID())
 		features.MeterConnect.Add(-1)
 	} // if
 }
 
 // connectWrong 連接錯誤處理
 func (this *Auth) connectWrong(err error) {
-	features.LogSystem.Get().Error(this.name).Caller(1).Error(err).EndFlush()
+	features.LogSystem.Get().Error("auth").Caller(1).Error(err).EndFlush()
 }
 
 // bindWrong 綁定錯誤處理
 func (this *Auth) bindWrong(err error) {
-	features.LogSystem.Get().Warn(this.name).Caller(1).Error(err).EndFlush()
+	features.LogSystem.Get().Warn("auth").Caller(1).Error(err).EndFlush()
 }
+
+var auth = &Auth{} // Auth入口

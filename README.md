@@ -30,8 +30,7 @@
   go get github.com/yinweli/Mizugo
   ```
 
-# 如何使用伺服器組件
-[mizugo]實際上是多個伺服器工具的集合, 最簡單啟動mizugo伺服器的程式碼範例如下  
+# 範例程式
 ```go
 func main() {
     defer func() {
@@ -39,41 +38,37 @@ func main() {
             // 處理崩潰錯誤
         } // if
     }()
-    
-    ctx := ctxs.Get().WithCancel()
-    name := "伺服器名稱"
+
     mizugos.Start() // 啟動伺服器
-    
+    ctx := ctxs.Get().WithCancel()
+
     // 使用者自訂的初始化程序
     // 如果有任何失敗, 執行 mizugos.Stop() 後退出
-    
-    fmt.Printf("%v start\n", name)
-    
+
     for range ctx.Done() { // 進入無限迴圈直到執行 ctx.Cancel()
     } // for
-    
+
     // 使用者自訂的結束程序
     // 如果有任何失敗, 執行 mizugos.Stop() 後退出
-    
+
     mizugos.Stop() // 關閉伺服器
-    fmt.Printf("%v shutdown\n", name)
 }
 ```
-在 mizugos/mizugo.go 中包含了啟動/關閉伺服器的函式, 以及事先建立好的各管理器以及其取得函式  
 
-| 項目                 | 說明           |
-|:---------------------|:---------------|
-| mizugos.Configmgr()  | 配置管理器     |
-| mizugos.Metricsmgr() | 度量管理器     |
-| mizugos.Logmgr()     | 日誌管理器     |
-| mizugos.Netmgr()     | 網路管理器     |
-| mizugos.Redmomgr()   | 資料庫管理器   |
-| mizugos.Entitymgr()  | 實體管理器     |
-| mizugos.Labelmgr()   | 標籤管理器     |
-| mizugos.Poolmgr()    | 執行緒池管理器 |
+# 管理器
+[mizugo]實際上是多個伺服器工具的集合, 擁有多個負責不同功能的管理器, 使用者可以依自己的需求來使用這些管理器  
+以下概述了管理器的基本資訊, 包括它們的軟體包與類別名稱, 管理器位置
 
-這些管理器在啟動伺服器之後可用, 若在啟動伺服器之前(或是關閉伺服器之後)使用會碰到panic  
-伺服器程式碼的範例可以到 support/test-server 查看  
+| 名稱           | 軟體包與類別名稱   | 管理器位置     |
+|:---------------|:-------------------|:---------------|
+| 配置管理器     | configs.Configmgr  | mizugos.Config |
+| 度量管理器     | metrics.Metricsmgr | mizugos.Meter  |
+| 日誌管理器     | loggers.Logmgr     | mizugos.Log    |
+| 網路管理器     | nets.Netmgr        | mizugos.Net    |
+| 資料庫管理器   | redmos.Redmomgr    | mizugos.Redmo  |
+| 實體管理器     | entitys.Entitymgr  | mizugos.Entity |
+| 標籤管理器     | labels.Labelmgr    | mizugos.Label  |
+| 執行緒池管理器 | pools.Poolmgr      | mizugos.Pool   |
 
 # 如何使用客戶端組件
 請參閱[客戶端組件說明](support/client-unity/Packages/com.fouridstudio.mizugo-client-unity/README.md)  

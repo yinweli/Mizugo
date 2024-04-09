@@ -1,8 +1,6 @@
 package mizugos
 
 import (
-	"sync"
-
 	"github.com/yinweli/Mizugo/mizugos/configs"
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
@@ -16,7 +14,7 @@ import (
 
 // Start 啟動伺服器
 //
-// 啟動伺服器後按使用者的需要, 可以參考以下的寫法
+// 範例:
 //
 //	defer func() {
 //	    if cause := recover(); cause != nil {
@@ -24,14 +22,11 @@ import (
 //	    } // if
 //	}()
 //
-//	ctx := ctxs.Get().WithCancel()
-//	name := "伺服器名稱"
 //	mizugos.Start() // 啟動伺服器
+//	ctx := ctxs.Get().WithCancel()
 //
 //	// 使用者自訂的初始化程序
 //	// 如果有任何失敗, 執行 mizugos.Stop() 後退出
-//
-//	fmt.Printf("%v start\n", name)
 //
 //	for range ctx.Done() { // 進入無限迴圈直到執行 ctx.Cancel()
 //	} // for
@@ -40,112 +35,65 @@ import (
 //	// 如果有任何失敗, 執行 mizugos.Stop() 後退出
 //
 //	mizugos.Stop() // 關閉伺服器
-//	fmt.Printf("%v shutdown\n", name)
 func Start() {
-	server.lock.Lock()
-	defer server.lock.Unlock()
-
-	server.configmgr = configs.NewConfigmgr()
-	server.metricsmgr = metrics.NewMetricsmgr()
-	server.logmgr = loggers.NewLogmgr()
-	server.netmgr = nets.NewNetmgr()
-	server.redmomgr = redmos.NewRedmomgr()
-	server.entitymgr = entitys.NewEntitymgr()
-	server.labelmgr = labels.NewLabelmgr()
-	server.poolmgr = pools.DefaultPool // 執行緒池管理器直接用預設的
+	Config = configs.NewConfigmgr()
+	Metrics = metrics.NewMetricsmgr()
+	Logger = loggers.NewLogmgr()
+	Network = nets.NewNetmgr()
+	Redmo = redmos.NewRedmomgr()
+	Entity = entitys.NewEntitymgr()
+	Label = labels.NewLabelmgr()
+	Pool = pools.DefaultPool // 執行緒池管理器直接用預設的
 }
 
 // Stop 關閉伺服器
 func Stop() {
-	server.lock.Lock()
-	defer server.lock.Unlock()
+	if Config != nil {
+		Config = nil
+	} // if
 
-	server.configmgr = nil
-	server.metricsmgr = nil
-	server.logmgr = nil
-	server.netmgr = nil
-	server.redmomgr = nil
-	server.entitymgr = nil
-	server.labelmgr = nil
-	server.poolmgr = nil
+	if Metrics != nil {
+		Metrics.Finalize()
+		Metrics = nil
+	} // if
+
+	if Logger != nil {
+		Logger.Finalize()
+		Logger = nil
+	} // if
+
+	if Network != nil {
+		Network.Stop()
+		Network = nil
+	} // if
+
+	if Redmo != nil {
+		Redmo.Finalize()
+		Redmo = nil
+	} // if
+
+	if Entity != nil {
+		Entity.Clear()
+		Entity = nil
+	} // if
+
+	if Label != nil {
+		Label = nil
+	} // if
+
+	if Pool != nil {
+		Pool.Finalize()
+		Pool = nil
+	} // if
+
 	ctxs.Get().Cancel() // 關閉由contexts.Ctx()衍生出來的執行緒, 避免goroutine洩漏
 }
 
-// ===== 管理器功能 =====
-
-// Configmgr 取得配置管理器
-func Configmgr() *configs.Configmgr {
-	server.lock.RLock()
-	defer server.lock.RUnlock()
-
-	return server.configmgr
-}
-
-// Metricsmgr 取得度量管理器
-func Metricsmgr() *metrics.Metricsmgr {
-	server.lock.RLock()
-	defer server.lock.RUnlock()
-
-	return server.metricsmgr
-}
-
-// Logmgr 取得日誌管理器
-func Logmgr() *loggers.Logmgr {
-	server.lock.RLock()
-	defer server.lock.RUnlock()
-
-	return server.logmgr
-}
-
-// Netmgr 取得網路管理器
-func Netmgr() *nets.Netmgr {
-	server.lock.RLock()
-	defer server.lock.RUnlock()
-
-	return server.netmgr
-}
-
-// Redmomgr 取得資料庫管理器
-func Redmomgr() *redmos.Redmomgr {
-	server.lock.RLock()
-	defer server.lock.RUnlock()
-
-	return server.redmomgr
-}
-
-// Entitymgr 取得實體管理器
-func Entitymgr() *entitys.Entitymgr {
-	server.lock.RLock()
-	defer server.lock.RUnlock()
-
-	return server.entitymgr
-}
-
-// Labelmgr 取得標籤管理器
-func Labelmgr() *labels.Labelmgr {
-	server.lock.RLock()
-	defer server.lock.RUnlock()
-
-	return server.labelmgr
-}
-
-// Poolmgr 取得執行緒池管理器
-func Poolmgr() *pools.Poolmgr {
-	server.lock.RLock()
-	defer server.lock.RUnlock()
-
-	return server.poolmgr
-}
-
-// server 伺服器資料
-var server struct {
-	configmgr  *configs.Configmgr  // 配置管理器
-	metricsmgr *metrics.Metricsmgr // 度量管理器
-	logmgr     *loggers.Logmgr     // 日誌管理器
-	netmgr     *nets.Netmgr        // 網路管理器
-	redmomgr   *redmos.Redmomgr    // 資料庫管理器
-	entitymgr  *entitys.Entitymgr  // 實體管理器
-	labelmgr   *labels.Labelmgr    // 標籤管理器
-	poolmgr    *pools.Poolmgr      // 執行緒池管理器
-	lock       sync.RWMutex        // 執行緒鎖
-}
+var Config *configs.Configmgr   // 配置管理器
+var Metrics *metrics.Metricsmgr // 度量管理器
+var Logger *loggers.Logmgr      // 日誌管理器
+var Network *nets.Netmgr        // 網路管理器
+var Redmo *redmos.Redmomgr      // 資料庫管理器
+var Entity *entitys.Entitymgr   // 實體管理器
+var Label *labels.Labelmgr      // 標籤管理器
+var Pool *pools.Poolmgr         // 執行緒池管理器

@@ -14,17 +14,33 @@ import (
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/modules"
 )
 
-// NewProto 建立Proto入口
-func NewProto() *Proto {
-	return &Proto{
-		name: "proto",
-	}
+// ProtoInitialize 初始化Proto入口
+func ProtoInitialize() (err error) {
+	config := &ProtoConfig{}
+
+	if err = mizugos.Config.Unmarshal("proto", config); err != nil {
+		return fmt.Errorf("proto initialize: %w", err)
+	} // if
+
+	proto.key = config.Key
+	proto.delay = config.Delay
+	proto.disconnect = config.Disconnect
+
+	if config.Enable {
+		miscs.GenerateConnection(config.Interval, config.Count, config.Batch, func() {
+			mizugos.Network.AddConnectTCP(config.IP, config.Port, config.Timeout, proto.bind, proto.unbind, proto.connectWrong)
+		})
+	} // if
+
+	features.LogSystem.Get().Info("proto").Message("initialize").EndFlush()
+	return nil
 }
 
 // Proto Proto入口
 type Proto struct {
-	name   string      // 系統名稱
-	config ProtoConfig // 配置資料
+	key        string        // 密鑰
+	delay      time.Duration // 延遲時間
+	disconnect bool          // 斷線旗標
 }
 
 // ProtoConfig 配置資料
@@ -41,30 +57,9 @@ type ProtoConfig struct {
 	Disconnect bool          `yaml:"disconnect"` // 斷線旗標
 }
 
-// Initialize 初始化處理
-func (this *Proto) Initialize() error {
-	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
-	} // if
-
-	if this.config.Enable {
-		miscs.GenerateConnection(this.config.Interval, this.config.Count, this.config.Batch, func() {
-			mizugos.Netmgr().AddConnectTCP(this.config.IP, this.config.Port, this.config.Timeout, this.bind, this.unbind, this.connectWrong)
-		})
-	} // if
-
-	features.LogSystem.Get().Info(this.name).Message("entry start").KV("config", this.config).Caller(0).EndFlush()
-	return nil
-}
-
-// Finalize 結束處理
-func (this *Proto) Finalize() {
-	features.LogSystem.Get().Info(this.name).Message("entry finalize").Caller(0).EndFlush()
-}
-
 // bind 綁定處理
 func (this *Proto) bind(session nets.Sessioner) *nets.Bundle {
-	entity := mizugos.Entitymgr().Add()
+	entity := mizugos.Entity.Add()
 
 	var wrong error
 
@@ -83,7 +78,7 @@ func (this *Proto) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.SetProcess(procs.NewProto().Base64(true).DesCBC(true, this.config.Key, this.config.Key)); err != nil {
+	if err := entity.SetProcess(procs.NewProto().Base64(true).DesCBC(true, this.key, this.key)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
@@ -93,7 +88,7 @@ func (this *Proto) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	if err := entity.AddModule(modules.NewProto(this.config.Delay, this.config.Disconnect)); err != nil {
+	if err := entity.AddModule(modules.NewProto(this.delay, this.disconnect)); err != nil {
 		wrong = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
@@ -103,21 +98,19 @@ func (this *Proto) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	mizugos.Labelmgr().Add(entity, this.name)
 	session.SetOwner(entity)
 	features.MeterConnect.Add(1)
-	features.LogSystem.Get().Info(this.name).Message("bind").Caller(0).EndFlush()
+	features.LogSystem.Get().Info("proto").Message("bind").Caller(0).EndFlush()
 	return entity.Bundle()
 
 Error:
 	if entity != nil {
 		entity.Finalize()
-		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.Labelmgr().Erase(entity)
+		mizugos.Entity.Del(entity.EntityID())
 	} // if
 
 	session.Stop()
-	features.LogSystem.Get().Error(this.name).Caller(0).Error(wrong).EndFlush()
+	features.LogSystem.Get().Error("proto").Caller(0).Error(wrong).EndFlush()
 	return nil
 }
 
@@ -125,18 +118,19 @@ Error:
 func (this *Proto) unbind(session nets.Sessioner) {
 	if entity, ok := session.GetOwner().(*entitys.Entity); ok {
 		entity.Finalize()
-		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.Labelmgr().Erase(entity)
+		mizugos.Entity.Del(entity.EntityID())
 		features.MeterConnect.Add(-1)
 	} // if
 }
 
 // connectWrong 連接錯誤處理
 func (this *Proto) connectWrong(err error) {
-	features.LogSystem.Get().Error(this.name).Caller(1).Error(err).EndFlush()
+	features.LogSystem.Get().Error("proto").Caller(1).Error(err).EndFlush()
 }
 
 // bindWrong 綁定錯誤處理
 func (this *Proto) bindWrong(err error) {
-	features.LogSystem.Get().Warn(this.name).Caller(1).Error(err).EndFlush()
+	features.LogSystem.Get().Warn("proto").Caller(1).Error(err).EndFlush()
 }
+
+var proto = &Proto{} // Proto入口
