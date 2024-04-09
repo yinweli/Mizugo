@@ -7,49 +7,29 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/loggers"
 )
 
-// NewLogger 建立日誌資料
-func NewLogger() *Logger {
-	return &Logger{
-		name: "logger",
-	}
-}
-
-// Logger 日誌資料
-type Logger struct {
-	name string // 系統名稱
-}
-
-// Initialize 初始化處理
-func (this *Logger) Initialize() (err error) {
-	if LogCrash, err = this.create("log-crash"); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
+// LoggerInitialize 初始化日誌
+func LoggerInitialize() (err error) {
+	if LogCrash, err = newLogger("log-crash"); err != nil {
+		return fmt.Errorf("logger initialize: %w", err)
 	} // if
 
-	if LogSystem, err = this.create("log-system"); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
+	if LogSystem, err = newLogger("log-system"); err != nil {
+		return fmt.Errorf("logger initialize: %w", err)
 	} // if
 
-	LogSystem.Get().
-		Info(this.name).Message("initialize crash log").KV("config", LogCrash).Caller(0).End().
-		Info(this.name).Message("initialize system log").KV("config", LogSystem).Caller(0).End().
-		Flush()
+	LogSystem.Get().Info("logger").Message("initialize").EndFlush()
 	return nil
 }
 
-// Finalize 結束處理
-func (this *Logger) Finalize() {
-	mizugos.Logmgr().Finalize()
-}
-
-// create 建立日誌物件
-func (this *Logger) create(name string) (logger loggers.Logger, err error) {
+// newLogger 建立日誌物件
+func newLogger(name string) (logger loggers.Logger, err error) {
 	logger = &loggers.ZapLogger{}
 
-	if err = mizugos.Configmgr().Unmarshal(name, logger); err != nil {
+	if err = mizugos.Config.Unmarshal(name, logger); err != nil {
 		return nil, fmt.Errorf("create: %v: %w", name, err)
 	} // if
 
-	if err = mizugos.Logmgr().Add(name, logger); err != nil {
+	if err = mizugos.Logger.Add(name, logger); err != nil {
 		return nil, fmt.Errorf("create: %v: %w", name, err)
 	} // if
 

@@ -8,7 +8,7 @@ import (
 
 // GenerateConnection 產生連線
 func GenerateConnection(internal time.Duration, count, batch int, done func()) {
-	mizugos.Poolmgr().Submit(func() {
+	mizugos.Pool.Submit(func() {
 		timeout := time.NewTicker(internal)
 
 		for range timeout.C {
