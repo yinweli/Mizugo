@@ -11,19 +11,17 @@ import (
 )
 
 // NewProto 建立Proto模組
-func NewProto(incr func(int64) int64) *Proto {
+func NewProto() *Proto {
 	return &Proto{
 		Module: entitys.NewModule(defines.ModuleIDProto),
 		name:   "proto",
-		incr:   incr,
 	}
 }
 
 // Proto Proto模組
 type Proto struct {
 	*entitys.Module
-	name string            // 系統名稱
-	incr func(int64) int64 // 計數函式
+	name string // 系統名稱
 }
 
 // Awake 喚醒處理
@@ -45,7 +43,7 @@ func (this *Proto) procMProtoQ(message any) {
 		return
 	} // if
 
-	count := this.incr(1)
+	count := features.ProtoCounter.Add(1)
 	this.sendMProtoA(msg, msgs.ErrID_Success, count)
 	features.LogSystem.Get().Info(this.name).KV("count", count).Caller(0).EndFlush()
 }

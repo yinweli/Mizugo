@@ -12,17 +12,21 @@ import (
 	"github.com/yinweli/Mizugo/support/test-server/internal/modules"
 )
 
-// NewAuth 建立Auth入口
-func NewAuth() *Auth {
-	return &Auth{
-		name: "auth",
-	}
+// AuthInitialize 初始化Auth入口
+func AuthInitialize() (err error) {
+	config := &AuthConfig{}
+
+	if err = mizugos.Config.Unmarshal("auth", config); err != nil {
+		return fmt.Errorf("auth initialize: %w", err)
+	} // if
+
+	auth.listenID = mizugos.Network.AddListenTCP(config.IP, config.Port, auth.bind, auth.unbind, auth.listenWrong)
+	features.LogSystem.Get().Info("auth").Message("initialize").EndFlush()
+	return nil
 }
 
 // Auth Auth入口
 type Auth struct {
-	name     string        // 系統名稱
-	config   AuthConfig    // 配置資料
 	listenID nets.ListenID // 接聽編號
 }
 
@@ -32,26 +36,9 @@ type AuthConfig struct {
 	Port string `yaml:"port"` // 埠號
 }
 
-// Initialize 初始化處理
-func (this *Auth) Initialize() error {
-	if err := mizugos.Configmgr().Unmarshal(this.name, &this.config); err != nil {
-		return fmt.Errorf("%v initialize: %w", this.name, err)
-	} // if
-
-	this.listenID = mizugos.Netmgr().AddListenTCP(this.config.IP, this.config.Port, this.bind, this.unbind, this.listenWrong)
-	features.LogSystem.Get().Info(this.name).Message("entry start").KV("config", this.config).Caller(0).EndFlush()
-	return nil
-}
-
-// Finalize 結束處理
-func (this *Auth) Finalize() {
-	mizugos.Netmgr().DelListen(this.listenID)
-	features.LogSystem.Get().Info(this.name).Message("entry finalize").Caller(0).EndFlush()
-}
-
 // bind 綁定處理
 func (this *Auth) bind(session nets.Sessioner) *nets.Bundle {
-	entity := mizugos.Entitymgr().Add()
+	entity := mizugos.Entity.Add()
 
 	var wrong error
 
@@ -90,20 +77,18 @@ func (this *Auth) bind(session nets.Sessioner) *nets.Bundle {
 		goto Error
 	} // if
 
-	mizugos.Labelmgr().Add(entity, this.name)
 	session.SetOwner(entity)
-	features.LogSystem.Get().Info(this.name).Message("bind").Caller(0).EndFlush()
+	features.LogSystem.Get().Info("auth").Message("bind").Caller(0).EndFlush()
 	return entity.Bundle()
 
 Error:
 	if entity != nil {
 		entity.Finalize()
-		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.Labelmgr().Erase(entity)
+		mizugos.Entity.Del(entity.EntityID())
 	} // if
 
 	session.Stop()
-	features.LogSystem.Get().Error(this.name).Caller(0).Error(wrong).EndFlush()
+	features.LogSystem.Get().Error("auth").Caller(0).Error(wrong).EndFlush()
 	return nil
 }
 
@@ -111,17 +96,18 @@ Error:
 func (this *Auth) unbind(session nets.Sessioner) {
 	if entity, ok := session.GetOwner().(*entitys.Entity); ok {
 		entity.Finalize()
-		mizugos.Entitymgr().Del(entity.EntityID())
-		mizugos.Labelmgr().Erase(entity)
+		mizugos.Entity.Del(entity.EntityID())
 	} // if
 }
 
 // listenWrong 監聽錯誤處理
 func (this *Auth) listenWrong(err error) {
-	features.LogSystem.Get().Error(this.name).Caller(1).Error(err).EndFlush()
+	features.LogSystem.Get().Error("auth").Caller(1).Error(err).EndFlush()
 }
 
 // bindWrong 綁定錯誤處理
 func (this *Auth) bindWrong(err error) {
-	features.LogSystem.Get().Warn(this.name).Caller(1).Error(err).EndFlush()
+	features.LogSystem.Get().Warn("auth").Caller(1).Error(err).EndFlush()
 }
+
+var auth = &Auth{} // Auth入口

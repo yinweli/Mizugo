@@ -11,19 +11,17 @@ import (
 )
 
 // NewJson 建立Json模組
-func NewJson(incr func(int64) int64) *Json {
+func NewJson() *Json {
 	return &Json{
 		Module: entitys.NewModule(defines.ModuleIDJson),
 		name:   "json",
-		incr:   incr,
 	}
 }
 
 // Json Json模組
 type Json struct {
 	*entitys.Module
-	name string            // 系統名稱
-	incr func(int64) int64 // 計數函式
+	name string // 系統名稱
 }
 
 // Awake 喚醒處理
@@ -45,7 +43,7 @@ func (this *Json) procMJsonQ(message any) {
 		return
 	} // if
 
-	count := this.incr(1)
+	count := features.JsonCounter.Add(1)
 	this.sendMJsonA(msg, msgs.ErrID_Success, count)
 	features.LogSystem.Get().Info(this.name).KV("count", count).Caller(0).EndFlush()
 }
