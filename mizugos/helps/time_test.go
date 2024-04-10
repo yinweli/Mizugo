@@ -82,6 +82,19 @@ func (this *SuiteTime) TestBetweenf() {
 	assert.False(this.T(), Betweenf(LayoutSecond, testdata.Unknown, end, now.Add(TimeHour), true))
 }
 
+func (this *SuiteTime) TestOverlap() {
+	assert.True(this.T(), Overlap(
+		Date(2023, 6, 1, 0, 0, 0, 0),
+		Date(2023, 6, 10, 0, 0, 0, 0),
+		Date(2023, 6, 5, 0, 0, 0, 0),
+		Date(2023, 6, 15, 0, 0, 0, 0)))
+	assert.False(this.T(), Overlap(
+		Date(2023, 6, 1, 0, 0, 0, 0),
+		Date(2023, 6, 10, 0, 0, 0, 0),
+		Date(2023, 7, 5, 0, 0, 0, 0),
+		Date(2023, 7, 15, 0, 0, 0, 0)))
+}
+
 func (this *SuiteTime) TestSameDay() {
 	assert.True(this.T(), SameDay(
 		Date(2023, 6, 1, 0, 0, 0, 0),

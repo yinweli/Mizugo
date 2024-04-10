@@ -98,6 +98,11 @@ func Betweenf(layout, start, end string, now time.Time, preset bool) bool {
 	return Between(startTime, endTime, now, preset)
 }
 
+// Overlap 檢查兩個時間段是否有重疊
+func Overlap(start1, end1, start2, end2 time.Time) bool {
+	return end1.After(start2) && end2.After(start1)
+}
+
 // SameDay 檢查兩個時間是否為同一天
 func SameDay(t1, t2 time.Time) bool {
 	t1 = t1.In(location) // 轉換到相同時區, 避免時區問題
