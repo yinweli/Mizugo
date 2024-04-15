@@ -11,5 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 熱更新機制`hotfixs`
 
 ## [Unrelease]
+- 新增單元測試工具集`trials`
 
 ## [1.0.0] - 2024-04-15

@@ -94,6 +94,7 @@ func main() {
 | mizugos/pools          | 執行緒池組件                    |
 | mizugos/procs          | 處理器組件                      |
 | mizugos/redmos         | 雙層式資料庫組件(redis + mongo) |
+| mizugos/trials         | 單元測試工具                    |
 | support                | 支援專案                        |
 | support/client-unity   | unity客戶端組件                 |
 | support/proto          | proto定義檔                     |
@@ -102,12 +103,13 @@ func main() {
 | support/test-client-cs | unity測試客戶端                 |
 | support/test-client-go | go測試客戶端                    |
 | support/test-server    | 測試伺服器                      |
-| testdata               | 測試資料與測試工具              |
+| testdata               | 測試資料                        |
 
 # 軟體包階層
 | 軟體包名稱列表                                     |
 |:---------------------------------------------------|
 | testdata                                           |
+| trials                                             |
 | ctxs, helps, msgs                                  |
 | cryptos, iaps, nets, pools, procs                  |
 | configs, entitys, labels, loggers, metrics, redmos |
