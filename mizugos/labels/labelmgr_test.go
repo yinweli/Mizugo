@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -15,19 +16,15 @@ func TestLabelmgr(t *testing.T) {
 
 type SuiteLabelmgr struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteLabelmgr) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-labels-labelmgr")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-labels-labelmgr"))
 }
 
 func (this *SuiteLabelmgr) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteLabelmgr) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteLabelmgr) TestLabelmgr() {

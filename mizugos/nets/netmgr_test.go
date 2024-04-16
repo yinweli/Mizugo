@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -16,19 +17,15 @@ func TestNetmgr(t *testing.T) {
 
 type SuiteNetmgr struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteNetmgr) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-nets-netmgr")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-nets-netmgr"))
 }
 
 func (this *SuiteNetmgr) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteNetmgr) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteNetmgr) TestAddConnectTCP() {
@@ -36,15 +33,15 @@ func (this *SuiteNetmgr) TestAddConnectTCP() {
 	test := newTester(true, true, true)
 	target := NewNetmgr()
 	assert.NotNil(this.T(), target)
-	connectID := target.AddConnectTCP(addr.ip, addr.port, testdata.Timeout, test.bind, test.unbind, test.wrong)
+	connectID := target.AddConnectTCP(addr.ip, addr.port, trials.Timeout, test.bind, test.unbind, test.wrong)
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.True(this.T(), test.valid())
 	assert.NotNil(this.T(), target.GetConnect(connectID))
 	target.DelConnect(connectID)
 	assert.Nil(this.T(), target.GetConnect(connectID))
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	target.Stop()
 }
 
@@ -55,13 +52,13 @@ func (this *SuiteNetmgr) TestAddListenTCP() {
 	assert.NotNil(this.T(), target)
 	listenID := target.AddListenTCP(addr.ip, addr.port, test.bind, test.unbind, test.wrong)
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.True(this.T(), test.valid())
 	assert.NotNil(this.T(), target.GetListen(listenID))
 	target.DelListen(listenID)
 	assert.Nil(this.T(), target.GetListen(listenID))
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	target.Stop()
 }
 
@@ -70,15 +67,15 @@ func (this *SuiteNetmgr) TestStop() {
 	test := newTester(true, true, true)
 	target := NewNetmgr()
 	assert.NotNil(this.T(), target)
-	target.AddConnectTCP(addr.ip, addr.port, testdata.Timeout, test.bind, test.unbind, test.wrong)
+	target.AddConnectTCP(addr.ip, addr.port, trials.Timeout, test.bind, test.unbind, test.wrong)
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.True(this.T(), test.validSession())
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	target.Stop()
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.False(this.T(), test.validSession())
 }
 
@@ -89,9 +86,9 @@ func (this *SuiteNetmgr) TestStatus() {
 	target := NewNetmgr()
 	assert.NotNil(this.T(), target)
 	target.AddListenTCP(addr.ip, addr.port, testl.bind, testl.unbind, testl.wrong)
-	target.AddConnectTCP(addr.ip, addr.port, testdata.Timeout, testc.bind, testc.unbind, testc.wrong)
+	target.AddConnectTCP(addr.ip, addr.port, trials.Timeout, testc.bind, testc.unbind, testc.wrong)
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.True(this.T(), testl.valid())
 	assert.True(this.T(), testc.valid())
 	status := target.Status()
@@ -99,7 +96,7 @@ func (this *SuiteNetmgr) TestStatus() {
 	assert.Equal(this.T(), 1, status.Listen)
 	assert.Equal(this.T(), 2, status.Session)
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	target.Stop()
 }
 

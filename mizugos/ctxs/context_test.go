@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -17,19 +18,15 @@ func TestContext(t *testing.T) {
 
 type SuiteContext struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteContext) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-contexts-context")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-contexts-context"))
 }
 
 func (this *SuiteContext) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteContext) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteContext) TestRoot() {
@@ -43,7 +40,7 @@ func (this *SuiteContext) TestCtx() {
 	assert.NotNil(this.T(), target.Ctx())
 	withCancel := target.WithCancel()
 	assert.NotNil(this.T(), withCancel.Ctx())
-	withTimeout := target.WithTimeout(testdata.Timeout)
+	withTimeout := target.WithTimeout(trials.Timeout)
 	assert.NotNil(this.T(), withTimeout.Ctx())
 	withDeadline := target.WithDeadline(time.Now())
 	assert.NotNil(this.T(), withDeadline.Ctx())

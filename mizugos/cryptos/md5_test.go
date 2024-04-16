@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/mizugos/helps"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -17,19 +18,15 @@ func TestMD5(t *testing.T) {
 
 type SuiteMD5 struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteMD5) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-cryptos-md5")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-cryptos-md5"))
 }
 
 func (this *SuiteMD5) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteMD5) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteMD5) TestMD5String() {

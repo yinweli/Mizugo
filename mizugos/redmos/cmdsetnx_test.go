@@ -10,6 +10,7 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/helps"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -19,28 +20,24 @@ func TestCmdSetNX(t *testing.T) {
 
 type SuiteCmdSetNX struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 	meta  metaSetNX
 	major *Major
 	minor *Minor
 }
 
 func (this *SuiteCmdSetNX) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-redmos-cmdsetnx")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-redmos-cmdsetnx"))
 	this.major, _ = newMajor(testdata.RedisURI)
 	this.minor, _ = newMinor(testdata.MongoURI, "cmdsetnx")
 }
 
 func (this *SuiteCmdSetNX) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
+	trials.Restore(this.Catalog)
 	this.major.DropDB()
 	this.major.stop()
 	this.minor.DropDB()
 	this.minor.stop()
-}
-
-func (this *SuiteCmdSetNX) TearDownTest() {
-	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteCmdSetNX) TestSetNX() {
@@ -58,8 +55,8 @@ func (this *SuiteCmdSetNX) TestSetNX() {
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), target.Complete())
 	_ = minorSubmit.Exec(ctxs.Get().Ctx())
-	assert.True(this.T(), testdata.RedisCompare[dataSetNX](this.major.Client(), this.meta.MajorKey(dataAll.Field), dataAll))
-	assert.True(this.T(), testdata.MongoCompare[dataSetNX](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(dataAll.Field), dataAll))
+	assert.True(this.T(), trials.RedisCompare[dataSetNX](this.major.Client(), this.meta.MajorKey(dataAll.Field), dataAll))
+	assert.True(this.T(), trials.MongoCompare[dataSetNX](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(dataAll.Field), dataAll))
 
 	target = &SetNX[dataSetNX]{Meta: &this.meta, MajorEnable: true, MinorEnable: false, Key: dataRedis.Field, Data: dataRedis}
 	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
@@ -67,8 +64,8 @@ func (this *SuiteCmdSetNX) TestSetNX() {
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), target.Complete())
 	_ = minorSubmit.Exec(ctxs.Get().Ctx())
-	assert.True(this.T(), testdata.RedisCompare[dataSetNX](this.major.Client(), this.meta.MajorKey(dataRedis.Field), dataRedis))
-	assert.False(this.T(), testdata.MongoCompare[dataSetNX](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(dataRedis.Field), dataRedis))
+	assert.True(this.T(), trials.RedisCompare[dataSetNX](this.major.Client(), this.meta.MajorKey(dataRedis.Field), dataRedis))
+	assert.False(this.T(), trials.MongoCompare[dataSetNX](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(dataRedis.Field), dataRedis))
 
 	target = &SetNX[dataSetNX]{Meta: &this.meta, MajorEnable: false, MinorEnable: true, Key: dataMongo.Field, Data: dataMongo}
 	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
@@ -76,8 +73,8 @@ func (this *SuiteCmdSetNX) TestSetNX() {
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), target.Complete())
 	_ = minorSubmit.Exec(ctxs.Get().Ctx())
-	assert.False(this.T(), testdata.RedisCompare[dataSetNX](this.major.Client(), this.meta.MajorKey(dataMongo.Field), dataMongo))
-	assert.True(this.T(), testdata.MongoCompare[dataSetNX](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(dataMongo.Field), dataMongo))
+	assert.False(this.T(), trials.RedisCompare[dataSetNX](this.major.Client(), this.meta.MajorKey(dataMongo.Field), dataMongo))
+	assert.True(this.T(), trials.MongoCompare[dataSetNX](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(dataMongo.Field), dataMongo))
 
 	target = &SetNX[dataSetNX]{Meta: nil, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: dataAll}
 	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
@@ -123,8 +120,8 @@ func (this *SuiteCmdSetNX) TestSetNXSave() {
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), set.Complete())
 	_ = minorSubmit.Exec(ctxs.Get().Ctx())
-	assert.True(this.T(), testdata.RedisCompare[dataSetNXSave](this.major.Client(), this.meta.MajorKey(data.Field), data, opt))
-	assert.True(this.T(), testdata.MongoCompare[dataSetNXSave](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data, opt))
+	assert.True(this.T(), trials.RedisCompare[dataSetNXSave](this.major.Client(), this.meta.MajorKey(data.Field), data, opt))
+	assert.True(this.T(), trials.MongoCompare[dataSetNXSave](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data, opt))
 
 	data.save = false
 	set = &SetNX[dataSetNXSave]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}

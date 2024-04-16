@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -16,19 +17,15 @@ func TestPercent(t *testing.T) {
 
 type SuitePercent struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuitePercent) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-helps-percent")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-helps-percent"))
 }
 
 func (this *SuitePercent) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuitePercent) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuitePercent) TestPercent100() {

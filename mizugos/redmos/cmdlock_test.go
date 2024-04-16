@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -19,27 +20,23 @@ func TestCmdLock(t *testing.T) {
 
 type SuiteCmdLock struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 	major *Major
 	minor *Minor
 }
 
 func (this *SuiteCmdLock) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-redmos-cmdlock")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-redmos-cmdlock"))
 	this.major, _ = newMajor(testdata.RedisURI)
 	this.minor, _ = newMinor(testdata.MongoURI, "cmdlock")
 }
 
 func (this *SuiteCmdLock) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
+	trials.Restore(this.Catalog)
 	this.major.DropDB()
 	this.major.stop()
 	this.minor.DropDB()
 	this.minor.stop()
-}
-
-func (this *SuiteCmdLock) TearDownTest() {
-	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteCmdLock) TestLock() {
@@ -89,7 +86,7 @@ func (this *SuiteCmdLock) TestDuplicate() {
 			return
 		} // if
 
-		testdata.WaitTimeout(time.Second)
+		trials.WaitTimeout(time.Second)
 
 		unlock := &Unlock{Key: key}
 		unlock.Initialize(ctxs.Get().Ctx(), majorSubmit, nil)
@@ -101,7 +98,7 @@ func (this *SuiteCmdLock) TestDuplicate() {
 	for i := 0; i < count; i++ {
 		go func() {
 			defer waitGroup.Done()
-			testdata.WaitTimeout()
+			trials.WaitTimeout()
 
 			for i := 0; i < 100; i++ {
 				majorSubmit := this.major.Submit()

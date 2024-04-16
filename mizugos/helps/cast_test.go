@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -15,19 +16,15 @@ func TestCast(t *testing.T) {
 
 type SuiteCast struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteCast) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-helps-cast")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-helps-cast"))
 }
 
 func (this *SuiteCast) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteCast) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteCast) TestCastPointer() {

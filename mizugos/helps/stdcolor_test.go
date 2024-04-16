@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -16,19 +17,15 @@ func TestStdColor(t *testing.T) {
 
 type SuiteStdColor struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteStdColor) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-helps-stdColor")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-helps-stdColor"))
 }
 
 func (this *SuiteStdColor) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteStdColor) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteStdColor) TestStdColor() {

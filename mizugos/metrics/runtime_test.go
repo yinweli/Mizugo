@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/mizugos/helps"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -18,26 +19,22 @@ func TestRuntime(t *testing.T) {
 
 type SuiteRuntime struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteRuntime) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-metrics-runtime")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-metrics-runtime"))
 }
 
 func (this *SuiteRuntime) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteRuntime) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteRuntime) TestRuntime() {
 	port := 9101
 	metricsmgr := NewMetricsmgr()
 	assert.Nil(this.T(), metricsmgr.Initialize(port))
-	time.Sleep(testdata.Timeout) // 等待一下, 讓初始化有機會完成
+	time.Sleep(trials.Timeout) // 等待一下, 讓初始化有機會完成
 
 	target := metricsmgr.NewRuntime("test")
 	assert.NotNil(this.T(), target)

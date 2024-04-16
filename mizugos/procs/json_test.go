@@ -8,6 +8,7 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos/cryptos"
 	"github.com/yinweli/Mizugo/mizugos/msgs"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -17,19 +18,15 @@ func TestJson(t *testing.T) {
 
 type SuiteJson struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteJson) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-procs-json")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-procs-json"))
 }
 
 func (this *SuiteJson) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteJson) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteJson) TestEncode() {

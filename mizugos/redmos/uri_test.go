@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -17,19 +18,15 @@ func TestURI(t *testing.T) {
 
 type SuiteURI struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteURI) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-redmos-uri")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-redmos-uri"))
 }
 
 func (this *SuiteURI) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteURI) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteURI) TestRedisURIConnect() {

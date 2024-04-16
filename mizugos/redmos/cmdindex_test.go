@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -17,28 +18,24 @@ func TestCmdIndex(t *testing.T) {
 
 type SuiteCmdIndex struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 	meta  metaIndex
 	major *Major
 	minor *Minor
 }
 
 func (this *SuiteCmdIndex) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-redmos-cmdindex")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-redmos-cmdindex"))
 	this.major, _ = newMajor(testdata.RedisURI)
 	this.minor, _ = newMinor(testdata.MongoURI, "cmdindex")
 }
 
 func (this *SuiteCmdIndex) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
+	trials.Restore(this.Catalog)
 	this.major.DropDB()
 	this.major.stop()
 	this.minor.DropDB()
 	this.minor.stop()
-}
-
-func (this *SuiteCmdIndex) TearDownTest() {
-	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteCmdIndex) TestIndex() {

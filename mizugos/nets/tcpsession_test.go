@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -16,19 +17,15 @@ func TestTCPSession(t *testing.T) {
 
 type SuiteTCPSession struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteTCPSession) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-nets-tcpSession")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-nets-tcpSession"))
 }
 
 func (this *SuiteTCPSession) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteTCPSession) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteTCPSession) TestTCPSession() {
@@ -40,25 +37,25 @@ func (this *SuiteTCPSession) TestTCPSession() {
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
 	testc := newTester(true, true, true)
-	client := NewTCPConnect(addr.ip, addr.port, testdata.Timeout)
+	client := NewTCPConnect(addr.ip, addr.port, trials.Timeout)
 	client.Connect(testc.bind, testc.unbind, testc.wrong)
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.True(this.T(), testl.valid())
 	assert.True(this.T(), testc.valid())
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.NotNil(this.T(), testl.get().RemoteAddr())
 	assert.NotNil(this.T(), testl.get().LocalAddr())
 	assert.NotNil(this.T(), testc.get().RemoteAddr())
 	assert.NotNil(this.T(), testc.get().LocalAddr())
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	owner := "owner"
 	testc.get().SetOwner(owner)
 	assert.Equal(this.T(), owner, testc.get().GetOwner())
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	testc.get().StopWait()
 	assert.Nil(this.T(), listen.Stop())
 }
@@ -70,14 +67,14 @@ func (this *SuiteTCPSession) TestStart() {
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
 	testc1 := newTester(true, true, true)
-	client1 := NewTCPConnect(addr.ip, addr.port, testdata.Timeout)
+	client1 := NewTCPConnect(addr.ip, addr.port, trials.Timeout)
 	client1.Connect(testc1.bind, testc1.unbind, testc1.wrong)
 
 	testc2 := newTester(true, true, true)
-	client2 := NewTCPConnect(addr.ip, addr.port, testdata.Timeout)
+	client2 := NewTCPConnect(addr.ip, addr.port, trials.Timeout)
 	client2.Connect(testc2.bind, testc2.unbind, testc2.wrong)
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.True(this.T(), testl.valid())
 	assert.True(this.T(), testl.validBind())
 	assert.True(this.T(), testc1.valid())
@@ -87,12 +84,12 @@ func (this *SuiteTCPSession) TestStart() {
 	assert.True(this.T(), testc2.validBind())
 	assert.True(this.T(), testc2.validSession())
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	testc1.get().Stop()
 	testc2.get().StopWait()
 	assert.Nil(this.T(), listen.Stop())
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.True(this.T(), testc1.validUnbind())
 	assert.True(this.T(), testc1.validStart())
 	assert.True(this.T(), testc1.validStop())
@@ -110,14 +107,14 @@ func (this *SuiteTCPSession) TestStartFailed() {
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
 	testc := newTester(true, true, true)
-	client := NewTCPConnect(addr.ip, addr.port, testdata.Timeout)
+	client := NewTCPConnect(addr.ip, addr.port, trials.Timeout)
 	client.Connect(testc.bind, testc.unbind, testc.wrong)
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.True(this.T(), testl.valid())
 	assert.False(this.T(), testc.valid())
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.Nil(this.T(), listen.Stop())
 }
 
@@ -129,42 +126,42 @@ func (this *SuiteTCPSession) TestSend() {
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
 	testc := newTester(true, true, true)
-	client := NewTCPConnect(addr.ip, addr.port, testdata.Timeout)
+	client := NewTCPConnect(addr.ip, addr.port, trials.Timeout)
 	client.Connect(testc.bind, testc.unbind, testc.wrong)
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.True(this.T(), testl.valid())
 	assert.True(this.T(), testc.valid())
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	testl.get().Send(message)
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.True(this.T(), testl.validEncode())
 	assert.True(this.T(), testl.validSend())
 	assert.True(this.T(), testc.validDecode())
 	assert.True(this.T(), testc.validRecv())
 	assert.True(this.T(), testc.validMessage(message))
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	testc.get().Send(message)
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.True(this.T(), testc.validEncode())
 	assert.True(this.T(), testc.validSend())
 	assert.True(this.T(), testl.validDecode())
 	assert.True(this.T(), testl.validRecv())
 	assert.True(this.T(), testl.validMessage(message))
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	testc.get().Send("")
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.True(this.T(), testc.valid())
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	testl.get().Send("!?")
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.False(this.T(), testc.validMessage(message))
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	testc.get().StopWait()
 	assert.Nil(this.T(), listen.Stop())
 }
@@ -177,19 +174,19 @@ func (this *SuiteTCPSession) TestEncodeFailed() {
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
 	testc := newTester(true, true, true)
-	client := NewTCPConnect(addr.ip, addr.port, testdata.Timeout)
+	client := NewTCPConnect(addr.ip, addr.port, trials.Timeout)
 	client.Connect(testc.bind, testc.unbind, testc.wrong)
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.True(this.T(), testl.valid())
 	assert.True(this.T(), testc.valid())
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	testl.get().Send(message)
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.False(this.T(), testl.valid())
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.Nil(this.T(), listen.Stop()) // 因為編碼失敗, 會直接導致連接中斷, 所以不必關閉客戶端連接
 }
 
@@ -201,18 +198,18 @@ func (this *SuiteTCPSession) TestDecodeFailed() {
 	listen.Listen(testl.bind, testl.unbind, testl.wrong)
 
 	testc := newTester(true, true, false)
-	client := NewTCPConnect(addr.ip, addr.port, testdata.Timeout)
+	client := NewTCPConnect(addr.ip, addr.port, trials.Timeout)
 	client.Connect(testc.bind, testc.unbind, testc.wrong)
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.True(this.T(), testl.valid())
 	assert.True(this.T(), testc.valid())
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	testl.get().Send(message)
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.False(this.T(), testc.valid())
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.Nil(this.T(), listen.Stop()) // 因為解碼失敗, 會直接導致連接中斷, 所以不必關閉客戶端連接
 }

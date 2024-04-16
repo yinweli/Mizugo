@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -15,19 +16,15 @@ func TestRedmomgr(t *testing.T) {
 
 type SuiteRedmomgr struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteRedmomgr) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-redmos-redmomgr")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-redmos-redmomgr"))
 }
 
 func (this *SuiteRedmomgr) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteRedmomgr) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteRedmomgr) TestRedmomgr() {

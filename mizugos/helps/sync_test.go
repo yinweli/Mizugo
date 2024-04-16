@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -17,19 +18,15 @@ func TestSync(t *testing.T) {
 
 type SuiteSync struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteSync) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-helps-sync")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-helps-sync"))
 }
 
 func (this *SuiteSync) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteSync) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteSync) TestSyncOnce() {
@@ -40,7 +37,7 @@ func (this *SuiteSync) TestSyncOnce() {
 	}
 	go target.Do(validFunc)
 	go target.Do(validFunc)
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.Equal(this.T(), int64(1), valid.Load())
 	assert.True(this.T(), target.Done())
 }

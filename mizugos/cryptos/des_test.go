@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/mizugos/helps"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -18,19 +19,15 @@ func TestDes(t *testing.T) {
 
 type SuiteDes struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteDes) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-cryptos-des")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-cryptos-des"))
 }
 
 func (this *SuiteDes) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteDes) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteDes) TestDesECB() {

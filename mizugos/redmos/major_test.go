@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -16,19 +17,15 @@ func TestMajor(t *testing.T) {
 
 type SuiteMajor struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteMajor) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-redmos-major")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-redmos-major"))
 }
 
 func (this *SuiteMajor) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteMajor) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteMajor) TestMajor() {

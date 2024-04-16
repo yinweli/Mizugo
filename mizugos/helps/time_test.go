@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -17,19 +18,15 @@ func TestTime(t *testing.T) {
 
 type SuiteTime struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteTime) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-helps-time")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-helps-time"))
 }
 
 func (this *SuiteTime) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteTime) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteTime) TestTimeZone() {

@@ -11,6 +11,7 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/procs"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -20,19 +21,15 @@ func TestEntity(t *testing.T) {
 
 type SuiteEntity struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteEntity) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-entitys-entity")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-entitys-entity"))
 }
 
 func (this *SuiteEntity) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteEntity) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteEntity) TestEntity() {
@@ -138,10 +135,10 @@ func (this *SuiteEntity) TestEvent() {
 	assert.NotNil(this.T(), fixedSubID)
 
 	target.PublishOnce(onceValue, onceValue)
-	target.PublishDelay(onceValue, onceValue, testdata.Timeout)
-	target.PublishFixed(fixedValue, fixedValue, testdata.Timeout)
+	target.PublishDelay(onceValue, onceValue, trials.Timeout)
+	target.PublishFixed(fixedValue, fixedValue, trials.Timeout)
 
-	time.Sleep(testdata.Timeout * 2) // 多等一下讓定時事件發生
+	time.Sleep(trials.Timeout * 2) // 多等一下讓定時事件發生
 	assert.True(this.T(), onceValid.Load())
 	assert.True(this.T(), fixedValid.Load())
 
