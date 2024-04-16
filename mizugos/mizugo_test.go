@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -16,24 +17,20 @@ func TestMizugo(t *testing.T) {
 
 type SuiteMizugo struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteMizugo) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-mizugos-mizugo")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-mizugos-mizugo"))
 }
 
 func (this *SuiteMizugo) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteMizugo) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteMizugo) TestMizugo() {
 	Start()
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.NotNil(this.T(), Config)
 	assert.NotNil(this.T(), Metrics)
 	assert.NotNil(this.T(), Logger)
@@ -43,7 +40,7 @@ func (this *SuiteMizugo) TestMizugo() {
 	assert.NotNil(this.T(), Label)
 	assert.NotNil(this.T(), Pool)
 	Stop()
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.Nil(this.T(), Config)
 	assert.Nil(this.T(), Metrics)
 	assert.Nil(this.T(), Logger)

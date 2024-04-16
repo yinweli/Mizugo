@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/mizugos/helps"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -17,19 +18,15 @@ func TestPadding(t *testing.T) {
 
 type SuitePadding struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuitePadding) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-cryptos-padding")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-cryptos-padding"))
 }
 
 func (this *SuitePadding) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuitePadding) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuitePadding) TestPadding() {

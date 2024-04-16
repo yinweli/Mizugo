@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -15,19 +16,15 @@ func TestFlagsz(t *testing.T) {
 
 type SuiteFlagsz struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteFlagsz) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-helps-flagsz")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-helps-flagsz"))
 }
 
 func (this *SuiteFlagsz) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteFlagsz) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteFlagsz) TestFlagsz() {

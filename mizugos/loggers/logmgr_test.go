@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -15,19 +16,15 @@ func TestLogmgr(t *testing.T) {
 
 type SuiteLogmgr struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteLogmgr) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-loggers-logmgr")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-loggers-logmgr"))
 }
 
 func (this *SuiteLogmgr) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteLogmgr) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteLogmgr) TestLogmgr() {

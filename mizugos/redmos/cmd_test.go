@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -15,19 +16,15 @@ func TestMX(t *testing.T) {
 
 type SuiteMX struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteMX) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-redmos-mx")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-redmos-mx"))
 }
 
 func (this *SuiteMX) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteMX) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteMX) TestSave() {

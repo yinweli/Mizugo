@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap/zapcore"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -17,19 +18,15 @@ func TestZap(t *testing.T) {
 
 type SuiteZap struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteZap) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-loggers-zap")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-loggers-zap"))
 }
 
 func (this *SuiteZap) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteZap) TearDownTest() {
-	testdata.Leak(this.T(), false) // 由於不清楚(或是沒辦法)優雅的關閉zap的執行緒, 所以只好把這裡的執行緒洩漏檢查關閉
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteZap) TestZapLogger() {

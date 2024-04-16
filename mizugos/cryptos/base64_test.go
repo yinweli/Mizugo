@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/mizugos/helps"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -16,19 +17,15 @@ func TestBase64(t *testing.T) {
 
 type SuiteBase64 struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteBase64) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-cryptos-base64")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-cryptos-base64"))
 }
 
 func (this *SuiteBase64) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteBase64) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteBase64) TestBase64() {

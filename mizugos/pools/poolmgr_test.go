@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -18,19 +19,15 @@ func TestPoolmgr(t *testing.T) {
 
 type SuitePoolmgr struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuitePoolmgr) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-pools-poolmgr")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-pools-poolmgr"))
 }
 
 func (this *SuitePoolmgr) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuitePoolmgr) TearDownTest() {
-	testdata.Leak(this.T(), false) // 由於ants中有許多內部執行緒, 所以把這裡的執行緒洩漏檢查關閉
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuitePoolmgr) TestPoolmgr() {
@@ -64,17 +61,17 @@ func (this *SuitePoolmgr) TestSubmit() {
 		valid.Add(1)
 	}
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	target.Submit(validFunc)
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.Equal(this.T(), int64(1), valid.Load())
 
 	assert.Nil(this.T(), target.Initialize(config))
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	target.Submit(validFunc)
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	target.Finalize()
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.Equal(this.T(), int64(2), valid.Load())
 }
 

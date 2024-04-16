@@ -10,6 +10,7 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/helps"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -19,28 +20,24 @@ func TestCmdGet(t *testing.T) {
 
 type SuiteCmdGet struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 	meta  metaGet
 	major *Major
 	minor *Minor
 }
 
 func (this *SuiteCmdGet) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-redmos-cmdget")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-redmos-cmdget"))
 	this.major, _ = newMajor(testdata.RedisURI)
 	this.minor, _ = newMinor(testdata.MongoURI, "cmdget")
 }
 
 func (this *SuiteCmdGet) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
+	trials.Restore(this.Catalog)
 	this.major.DropDB()
 	this.major.stop()
 	this.minor.DropDB()
 	this.minor.stop()
-}
-
-func (this *SuiteCmdGet) TearDownTest() {
-	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteCmdGet) TestGet() {
@@ -56,8 +53,8 @@ func (this *SuiteCmdGet) TestGet() {
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), set.Complete())
 	_ = minorSubmit.Exec(ctxs.Get().Ctx())
-	assert.True(this.T(), testdata.RedisCompare[dataGet](this.major.Client(), this.meta.MajorKey(data.Field), data))
-	assert.True(this.T(), testdata.MongoCompare[dataGet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data))
+	assert.True(this.T(), trials.RedisCompare[dataGet](this.major.Client(), this.meta.MajorKey(data.Field), data))
+	assert.True(this.T(), trials.MongoCompare[dataGet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data))
 
 	target := &Get[dataGet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field}
 	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)

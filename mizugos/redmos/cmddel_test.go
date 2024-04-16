@@ -9,6 +9,7 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/helps"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -18,28 +19,24 @@ func TestCmdDel(t *testing.T) {
 
 type SuiteCmdDel struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 	meta  metaDel
 	major *Major
 	minor *Minor
 }
 
 func (this *SuiteCmdDel) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-redmos-cmddel")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-redmos-cmddel"))
 	this.major, _ = newMajor(testdata.RedisURI)
 	this.minor, _ = newMinor(testdata.MongoURI, "cmddel")
 }
 
 func (this *SuiteCmdDel) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
+	trials.Restore(this.Catalog)
 	this.major.DropDB()
 	this.major.stop()
 	this.minor.DropDB()
 	this.minor.stop()
-}
-
-func (this *SuiteCmdDel) TearDownTest() {
-	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteCmdDel) TestDel() {
@@ -55,8 +52,8 @@ func (this *SuiteCmdDel) TestDel() {
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), set.Complete())
 	_ = minorSubmit.Exec(ctxs.Get().Ctx())
-	assert.True(this.T(), testdata.RedisCompare[dataDel](this.major.Client(), this.meta.MajorKey(data.Field), data))
-	assert.True(this.T(), testdata.MongoCompare[dataDel](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data))
+	assert.True(this.T(), trials.RedisCompare[dataDel](this.major.Client(), this.meta.MajorKey(data.Field), data))
+	assert.True(this.T(), trials.MongoCompare[dataDel](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data))
 
 	target := &Del{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field}
 	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
@@ -64,8 +61,8 @@ func (this *SuiteCmdDel) TestDel() {
 	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Nil(this.T(), target.Complete())
 	_ = minorSubmit.Exec(ctxs.Get().Ctx())
-	assert.False(this.T(), testdata.RedisExist(this.major.Client(), this.meta.MajorKey(data.Field)))
-	assert.False(this.T(), testdata.MongoExist(this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field)))
+	assert.False(this.T(), trials.RedisExist(this.major.Client(), this.meta.MajorKey(data.Field)))
+	assert.False(this.T(), trials.MongoExist(this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field)))
 
 	target = &Del{Meta: nil, MajorEnable: true, MinorEnable: true, Key: data.Field}
 	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)

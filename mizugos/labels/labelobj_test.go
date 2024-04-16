@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -15,19 +16,15 @@ func TestLabelobj(t *testing.T) {
 
 type SuiteLabelobj struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteLabelobj) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-labels-labelobj")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-labels-labelobj"))
 }
 
 func (this *SuiteLabelobj) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteLabelobj) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteLabelobj) TestLabelobj() {

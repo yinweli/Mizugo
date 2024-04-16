@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -15,19 +16,15 @@ func TestFit(t *testing.T) {
 
 type SuiteFit struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteFit) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-helps-fit")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-helps-fit"))
 }
 
 func (this *SuiteFit) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteFit) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteFit) TestFit() {

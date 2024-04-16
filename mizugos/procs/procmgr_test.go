@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -15,19 +16,15 @@ func TestProcmgr(t *testing.T) {
 
 type SuiteProcmgr struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteProcmgr) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-procs-procmgr")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-procs-procmgr"))
 }
 
 func (this *SuiteProcmgr) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteProcmgr) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteProcmgr) TestNewProcmgr() {

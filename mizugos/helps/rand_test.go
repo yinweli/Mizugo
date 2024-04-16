@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -16,19 +17,15 @@ func TestRand(t *testing.T) {
 
 type SuiteRand struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteRand) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-helps-rand")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-helps-rand"))
 }
 
 func (this *SuiteRand) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteRand) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteRand) TestRand() {

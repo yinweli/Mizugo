@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -16,19 +17,15 @@ func TestEmpty(t *testing.T) {
 
 type SuiteEmpty struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteEmpty) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-loggers-empty")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-loggers-empty"))
 }
 
 func (this *SuiteEmpty) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteEmpty) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteEmpty) TestEmptyLogger() {

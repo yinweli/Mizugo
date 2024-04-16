@@ -9,6 +9,7 @@ import (
 
 	"github.com/yinweli/Mizugo/mizugos/cryptos"
 	"github.com/yinweli/Mizugo/mizugos/msgs"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -18,19 +19,15 @@ func TestProto(t *testing.T) {
 
 type SuiteProto struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteProto) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-procs-proto")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-procs-proto"))
 }
 
 func (this *SuiteProto) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteProto) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteProto) TestEncode() {

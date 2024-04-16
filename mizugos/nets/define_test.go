@@ -6,12 +6,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 )
 
 // newInformTester 建立測試器
 func newTester(bundle, encode, decode bool) *tester {
-	time.Sleep(testdata.Timeout) // 在這邊等待一下, 讓程序有機會完成
+	time.Sleep(trials.Timeout) // 在這邊等待一下, 讓程序有機會完成
 	return &tester{
 		bundle: bundle,
 		encode: encode,

@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -17,27 +18,23 @@ func TestMixed(t *testing.T) {
 
 type SuiteMixed struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 	major *Major
 	minor *Minor
 }
 
 func (this *SuiteMixed) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-redmos-mixed")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-redmos-mixed"))
 	this.major, _ = newMajor(testdata.RedisURI)
 	this.minor, _ = newMinor(testdata.MongoURI, "mixed")
 }
 
 func (this *SuiteMixed) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
+	trials.Restore(this.Catalog)
 	this.major.DropDB()
 	this.major.stop()
 	this.minor.DropDB()
 	this.minor.stop()
-}
-
-func (this *SuiteMixed) TearDownTest() {
-	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteMixed) TestMixed() {

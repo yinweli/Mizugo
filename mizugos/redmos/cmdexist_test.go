@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -17,28 +18,24 @@ func TestCmdExist(t *testing.T) {
 
 type SuiteCmdExist struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 	meta  metaExist
 	major *Major
 	minor *Minor
 }
 
 func (this *SuiteCmdExist) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-redmos-cmdexist")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-redmos-cmdexist"))
 	this.major, _ = newMajor(testdata.RedisURI)
 	this.minor, _ = newMinor(testdata.MongoURI, "cmdexist")
 }
 
 func (this *SuiteCmdExist) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
+	trials.Restore(this.Catalog)
 	this.major.DropDB()
 	this.major.stop()
 	this.minor.DropDB()
 	this.minor.stop()
-}
-
-func (this *SuiteCmdExist) TearDownTest() {
-	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteCmdExist) TestExist() {

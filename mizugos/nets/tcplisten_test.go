@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -17,19 +18,15 @@ func TestTCPListen(t *testing.T) {
 
 type SuiteTCPListen struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteTCPListen) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-nets-tcpListen")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-nets-tcpListen"))
 }
 
 func (this *SuiteTCPListen) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteTCPListen) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteTCPListen) TestTCPListen() {
@@ -40,14 +37,14 @@ func (this *SuiteTCPListen) TestTCPListen() {
 	target.Listen(testl.bind, testl.unbind, testl.wrong)
 
 	testc := newTester(true, true, true)
-	client := NewTCPConnect(addr.ip, addr.port, testdata.Timeout)
+	client := NewTCPConnect(addr.ip, addr.port, trials.Timeout)
 	client.Connect(testc.bind, testc.unbind, testc.wrong)
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.True(this.T(), testl.valid())
 	assert.True(this.T(), testc.valid())
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	testc.get().Stop()
 	assert.Nil(this.T(), target.Stop())
 
@@ -55,14 +52,14 @@ func (this *SuiteTCPListen) TestTCPListen() {
 	target = NewTCPListen("!?", addr.port)
 	target.Listen(testl.bind, testl.unbind, testl.wrong)
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.False(this.T(), testl.valid())
 
 	testl = newTester(true, true, true)
 	target = NewTCPListen("192.168.0.1", addr.port) // 故意要接聽錯誤位址才會引發錯誤
 	target.Listen(testl.bind, testl.unbind, testl.wrong)
 
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.False(this.T(), testl.valid())
 
 	target = NewTCPListen(addr.ip, addr.port)

@@ -1,4 +1,4 @@
-package testdata
+package trials
 
 import (
 	"context"

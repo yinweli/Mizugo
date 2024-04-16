@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -17,19 +18,15 @@ func TestEventmap(t *testing.T) {
 
 type SuiteEventmap struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteEventmap) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-events-eventmap")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-events-eventmap"))
 }
 
 func (this *SuiteEventmap) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteEventmap) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteEventmap) TestEventmap() {
@@ -55,7 +52,7 @@ func (this *SuiteEventmap) TestPubOnce() {
 	})
 
 	target.PubOnce(value, value)
-	time.Sleep(testdata.Timeout)
+	time.Sleep(trials.Timeout)
 	assert.True(this.T(), valid.Load())
 
 	target.Finalize()
@@ -75,12 +72,12 @@ func (this *SuiteEventmap) TestPubDelay() {
 		target.Unsub(subID)
 	})
 
-	target.PubDelay(value, value, testdata.Timeout)
-	time.Sleep(testdata.Timeout * 2) // 多等一下讓延遲事件發生
+	target.PubDelay(value, value, trials.Timeout)
+	time.Sleep(trials.Timeout * 2) // 多等一下讓延遲事件發生
 	assert.True(this.T(), valid.Load())
 
 	target.Finalize()
-	target.PubDelay(value, value, testdata.Timeout)
+	target.PubDelay(value, value, trials.Timeout)
 	target.Unsub("")
 }
 
@@ -96,12 +93,12 @@ func (this *SuiteEventmap) TestPubFixed() {
 		target.Unsub(subID)
 	})
 
-	target.PubFixed(value, value, testdata.Timeout)
-	time.Sleep(testdata.Timeout * 2) // 多等一下讓定時事件發生
+	target.PubFixed(value, value, trials.Timeout)
+	time.Sleep(trials.Timeout * 2) // 多等一下讓定時事件發生
 	assert.True(this.T(), valid.Load())
 
 	target.Finalize()
-	target.PubFixed(value, value, testdata.Timeout)
+	target.PubFixed(value, value, trials.Timeout)
 	target.Unsub("")
 }
 

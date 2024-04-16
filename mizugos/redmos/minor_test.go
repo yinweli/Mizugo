@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -17,19 +18,15 @@ func TestMinor(t *testing.T) {
 
 type SuiteMinor struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteMinor) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-redmos-minor")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-redmos-minor"))
 }
 
 func (this *SuiteMinor) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteMinor) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteMinor) TestMinor() {

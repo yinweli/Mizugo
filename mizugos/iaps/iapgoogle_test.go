@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -15,19 +16,15 @@ func TestIAPGoogle(t *testing.T) {
 
 type SuiteIAPGoogle struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteIAPGoogle) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-helps-iapGoogle")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-helps-iapGoogle"))
 }
 
 func (this *SuiteIAPGoogle) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteIAPGoogle) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteIAPGoogle) TestIAPGoogle() {

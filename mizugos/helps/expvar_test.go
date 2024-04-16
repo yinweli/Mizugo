@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -16,19 +17,15 @@ func TestExpvar(t *testing.T) {
 
 type SuiteExpvar struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 }
 
 func (this *SuiteExpvar) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-helps-expvar")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-helps-expvar"))
 }
 
 func (this *SuiteExpvar) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
-}
-
-func (this *SuiteExpvar) TearDownTest() {
-	testdata.Leak(this.T(), true)
+	trials.Restore(this.Catalog)
 }
 
 func (this *SuiteExpvar) TestExpvarStr() {

@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/mizugos/ctxs"
+	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
 
@@ -19,28 +20,24 @@ func TestCmdIncr(t *testing.T) {
 
 type SuiteCmdIncr struct {
 	suite.Suite
-	testdata.Env
+	trials.Catalog
 	meta  metaIncr
 	major *Major
 	minor *Minor
 }
 
 func (this *SuiteCmdIncr) SetupSuite() {
-	this.Env = testdata.EnvSetup("test-redmos-cmdincr")
+	this.Catalog = trials.Prepare(testdata.PathWork("test-redmos-cmdincr"))
 	this.major, _ = newMajor(testdata.RedisURI)
 	this.minor, _ = newMinor(testdata.MongoURI, "cmdincr")
 }
 
 func (this *SuiteCmdIncr) TearDownSuite() {
-	testdata.EnvRestore(this.Env)
+	trials.Restore(this.Catalog)
 	this.major.DropDB()
 	this.major.stop()
 	this.minor.DropDB()
 	this.minor.stop()
-}
-
-func (this *SuiteCmdIncr) TearDownTest() {
-	testdata.Leak(this.T(), true)
 }
 
 func (this *SuiteCmdIncr) TestIncr() {
@@ -57,7 +54,7 @@ func (this *SuiteCmdIncr) TestIncr() {
 	assert.Nil(this.T(), target.Complete())
 	_ = minorSubmit.Exec(ctxs.Get().Ctx())
 	assert.Equal(this.T(), int64(1), target.Data.Value)
-	assert.True(this.T(), testdata.MongoCompare[dataIncr](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data))
+	assert.True(this.T(), trials.MongoCompare[dataIncr](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data))
 
 	target = &Incr{Meta: nil, MinorEnable: true, Key: data.Field, Data: &IncrData{Incr: 1, Value: 0}}
 	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
@@ -99,7 +96,7 @@ func (this *SuiteCmdIncr) TestDuplicate() {
 	for i := 0; i < count; i++ {
 		go func() {
 			defer waitGroup.Done()
-			testdata.WaitTimeout()
+			trials.WaitTimeout()
 
 			for i := 0; i < 100; i++ {
 				majorSubmit := this.major.Submit()
