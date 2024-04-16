@@ -20,7 +20,7 @@ func RedisExist(client redis.Cmdable, key string) bool {
 }
 
 // RedisCompare 在redis中比對資料是否相同
-func RedisCompare[T any](client redis.Cmdable, key string, expected *T, cmpOpt ...cmp.Option) bool {
+func RedisCompare[T any](client redis.Cmdable, key string, expected *T, option ...cmp.Option) bool {
 	result, err := client.Get(context.Background(), key).Result()
 
 	if err != nil {
@@ -33,5 +33,5 @@ func RedisCompare[T any](client redis.Cmdable, key string, expected *T, cmpOpt .
 		return false
 	} // if
 
-	return cmp.Equal(expected, actual, cmpOpt...)
+	return cmp.Equal(expected, actual, option...)
 }

@@ -6,17 +6,18 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // MongoExist 在mongo中資料是否存在
-func MongoExist(database *mongo.Database, tableName, fieldName, key string) bool {
-	table := database.Collection(tableName)
+func MongoExist(database *mongo.Database, table, field, key string) bool {
+	collection := database.Collection(table)
 
-	if table == nil {
+	if collection == nil {
 		return false
 	} // if
 
-	if table.FindOne(context.Background(), bson.D{{Key: fieldName, Value: key}}).Err() != nil {
+	if collection.FindOne(context.Background(), bson.D{{Key: field, Value: key}}, options.FindOne()).Err() != nil {
 		return false
 	} // if
 
@@ -24,18 +25,18 @@ func MongoExist(database *mongo.Database, tableName, fieldName, key string) bool
 }
 
 // MongoCompare 在mongo中比對資料是否相同
-func MongoCompare[T any](database *mongo.Database, tableName, fieldName, key string, expected *T, cmpOpt ...cmp.Option) bool {
-	table := database.Collection(tableName)
+func MongoCompare[T any](database *mongo.Database, table, field, key string, expected *T, option ...cmp.Option) bool {
+	collection := database.Collection(table)
 
-	if table == nil {
+	if collection == nil {
 		return false
 	} // if
 
 	actual := new(T)
 
-	if table.FindOne(context.Background(), bson.D{{Key: fieldName, Value: key}}).Decode(actual) != nil {
+	if collection.FindOne(context.Background(), bson.D{{Key: field, Value: key}}, options.FindOne()).Decode(actual) != nil {
 		return false
 	} // if
 
-	return cmp.Equal(expected, actual, cmpOpt...)
+	return cmp.Equal(expected, actual, option...)
 }
