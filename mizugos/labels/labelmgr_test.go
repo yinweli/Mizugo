@@ -29,7 +29,7 @@ func (this *SuiteLabelmgr) TearDownSuite() {
 
 func (this *SuiteLabelmgr) TestLabelmgr() {
 	obj := &labelTester{
-		Labelobj: NewLabelobj(),
+		Label: NewLabel(),
 	}
 	label := []string{"label1", "label2", "label3"}
 	target := NewLabelmgr()
@@ -53,5 +53,5 @@ func (this *SuiteLabelmgr) TestLabelmgr() {
 }
 
 type labelTester struct {
-	*Labelobj
+	*Label
 }

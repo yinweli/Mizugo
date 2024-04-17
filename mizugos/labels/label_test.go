@@ -10,26 +10,26 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestLabelobj(t *testing.T) {
-	suite.Run(t, new(SuiteLabelobj))
+func TestLabel(t *testing.T) {
+	suite.Run(t, new(SuiteLabel))
 }
 
-type SuiteLabelobj struct {
+type SuiteLabel struct {
 	suite.Suite
 	trials.Catalog
 }
 
-func (this *SuiteLabelobj) SetupSuite() {
-	this.Catalog = trials.Prepare(testdata.PathWork("test-labels-labelobj"))
+func (this *SuiteLabel) SetupSuite() {
+	this.Catalog = trials.Prepare(testdata.PathWork("test-labels-label"))
 }
 
-func (this *SuiteLabelobj) TearDownSuite() {
+func (this *SuiteLabel) TearDownSuite() {
 	trials.Restore(this.Catalog)
 }
 
-func (this *SuiteLabelobj) TestLabelobj() {
+func (this *SuiteLabel) TestLabelobj() {
 	label := []string{"label1", "label2", "label3"}
-	target := NewLabelobj()
+	target := NewLabel()
 	assert.NotNil(this.T(), target)
 
 	target.add(label...)
