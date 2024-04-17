@@ -39,6 +39,7 @@ func (this *SuiteMizugo) TestMizugo() {
 	assert.NotNil(this.T(), Entity)
 	assert.NotNil(this.T(), Label)
 	assert.NotNil(this.T(), Pool)
+	assert.NotNil(this.T(), Trigger)
 	Stop()
 	time.Sleep(trials.Timeout)
 	assert.Nil(this.T(), Config)
@@ -49,4 +50,5 @@ func (this *SuiteMizugo) TestMizugo() {
 	assert.Nil(this.T(), Entity)
 	assert.Nil(this.T(), Label)
 	assert.Nil(this.T(), Pool)
+	assert.Nil(this.T(), Trigger)
 }
