@@ -14,7 +14,7 @@ func NewLabelmgr() *Labelmgr {
 }
 
 // Labelmgr 標籤管理器, 讓使用者可以在可管理物件上新增/刪除標籤, 也可以通過標籤來取得管理中的物件;
-// 建立可管理物件需要定義標籤結構, 並且把 Labelobj 作為結構的第一個成員;
+// 建立可管理物件需要定義標籤結構, 並且把 Label 作為結構的第一個成員;
 // 標籤必須是字串, 標籤可以關連到多個物件, 而物件也可以擁有多個標籤
 type Labelmgr struct {
 	data map[string]*hashset.Set // 標籤列表

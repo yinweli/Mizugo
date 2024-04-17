@@ -61,16 +61,17 @@ func main() {
 [mizugo]擁有多種功能, 這些功能透過不同的管理器提供, 使用者可以根據自己的需求選擇使用這些管理器  
 以下提供了各管理器的基本資訊, 包括它們的軟體包與類別名稱, 以及管理器所在的位置
 
-| 名稱           | 軟體包與類別名稱   | 管理器位置     |
-|:---------------|:-------------------|:---------------|
-| 配置管理器     | configs.Configmgr  | mizugos.Config |
-| 度量管理器     | metrics.Metricsmgr | mizugos.Meter  |
-| 日誌管理器     | loggers.Logmgr     | mizugos.Log    |
-| 網路管理器     | nets.Netmgr        | mizugos.Net    |
-| 資料庫管理器   | redmos.Redmomgr    | mizugos.Redmo  |
-| 實體管理器     | entitys.Entitymgr  | mizugos.Entity |
-| 標籤管理器     | labels.Labelmgr    | mizugos.Label  |
-| 執行緒池管理器 | pools.Poolmgr      | mizugos.Pool   |
+| 名稱           | 軟體包與類別名稱    | 管理器位置      |
+|:---------------|:--------------------|:----------------|
+| 配置管理器     | configs.Configmgr   | mizugos.Config  |
+| 度量管理器     | metrics.Metricsmgr  | mizugos.Meter   |
+| 日誌管理器     | loggers.Logmgr      | mizugos.Log     |
+| 網路管理器     | nets.Netmgr         | mizugos.Net     |
+| 資料庫管理器   | redmos.Redmomgr     | mizugos.Redmo   |
+| 實體管理器     | entitys.Entitymgr   | mizugos.Entity  |
+| 標籤管理器     | labels.Labelmgr     | mizugos.Label   |
+| 執行緒池管理器 | pools.Poolmgr       | mizugos.Pool    |
+| 信號調度管理器 | triggers.Triggermgr | mizugos.Trigger |
 
 # 如何使用客戶端組件
 請參閱[客戶端組件說明](support/client-unity/Packages/com.fouridstudio.mizugo-client-unity/README.md)  
@@ -94,7 +95,8 @@ func main() {
 | mizugos/pools          | 執行緒池組件                    |
 | mizugos/procs          | 處理器組件                      |
 | mizugos/redmos         | 雙層式資料庫組件(redis + mongo) |
-| mizugos/trials         | 單元測試工具                    |
+| mizugos/trials         | 單元測試組件                    |
+| mizugos/triggers       | 信號調度組件                    |
 | support                | 支援專案                        |
 | support/client-unity   | unity客戶端組件                 |
 | support/proto          | proto定義檔                     |
@@ -106,13 +108,25 @@ func main() {
 | testdata               | 測試資料                        |
 
 # 軟體包階層
-| 軟體包名稱列表                                     |
-|:---------------------------------------------------|
-| testdata                                           |
-| trials                                             |
-| ctxs, helps, msgs                                  |
-| cryptos, iaps, nets, pools, procs                  |
-| configs, entitys, labels, loggers, metrics, redmos |
+| 階層名稱 | 軟體包名稱       |
+|:---------|:-----------------|
+| 測試層   | testdata         |
+| 測試層   | mizugos/trials   |
+| 工具層   | mizugos/ctxs     |
+| 工具層   | mizugos/helps    |
+| 工具層   | mizugos/msgs     |
+| 通用層   | mizugos/cryptos  |
+| 通用層   | mizugos/iaps     |
+| 通用層   | mizugos/nets     |
+| 通用層   | mizugos/pools    |
+| 通用層   | mizugos/procs    |
+| 組件層   | mizugos/configs  |
+| 組件層   | mizugos/entitys  |
+| 組件層   | mizugos/labels   |
+| 組件層   | mizugos/loggers  |
+| 組件層   | mizugos/metrics  |
+| 組件層   | mizugos/redmos   |
+| 組件層   | mizugos/triggers |
 
 下面的軟體包可以引用上面的軟體包  
 上面的軟體包不能引用下面的軟體包  

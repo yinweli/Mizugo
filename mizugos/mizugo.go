@@ -10,6 +10,7 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/pools"
 	"github.com/yinweli/Mizugo/mizugos/redmos"
+	"github.com/yinweli/Mizugo/mizugos/triggers"
 )
 
 // Start 啟動伺服器
@@ -44,6 +45,7 @@ func Start() {
 	Entity = entitys.NewEntitymgr()
 	Label = labels.NewLabelmgr()
 	Pool = pools.DefaultPool // 執行緒池管理器直接用預設的
+	Trigger = triggers.NewTriggermgr()
 }
 
 // Stop 關閉伺服器
@@ -86,14 +88,20 @@ func Stop() {
 		Pool = nil
 	} // if
 
+	if Trigger != nil {
+		Trigger.Finalize()
+		Trigger = nil
+	} // if
+
 	ctxs.Get().Cancel() // 關閉由contexts.Ctx()衍生出來的執行緒, 避免goroutine洩漏
 }
 
-var Config *configs.Configmgr   // 配置管理器
-var Metrics *metrics.Metricsmgr // 度量管理器
-var Logger *loggers.Logmgr      // 日誌管理器
-var Network *nets.Netmgr        // 網路管理器
-var Redmo *redmos.Redmomgr      // 資料庫管理器
-var Entity *entitys.Entitymgr   // 實體管理器
-var Label *labels.Labelmgr      // 標籤管理器
-var Pool *pools.Poolmgr         // 執行緒池管理器
+var Config *configs.Configmgr    // 配置管理器
+var Metrics *metrics.Metricsmgr  // 度量管理器
+var Logger *loggers.Logmgr       // 日誌管理器
+var Network *nets.Netmgr         // 網路管理器
+var Redmo *redmos.Redmomgr       // 資料庫管理器
+var Entity *entitys.Entitymgr    // 實體管理器
+var Label *labels.Labelmgr       // 標籤管理器
+var Pool *pools.Poolmgr          // 執行緒池管理器
+var Trigger *triggers.Triggermgr // 信號調度管理器

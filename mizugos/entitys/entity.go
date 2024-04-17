@@ -14,7 +14,7 @@ import (
 // NewEntity 建立實體資料
 func NewEntity(entityID EntityID) *Entity {
 	return &Entity{
-		Labelobj: labels.NewLabelobj(),
+		Label:    labels.NewLabel(),
 		entityID: entityID,
 	}
 }
@@ -55,13 +55,13 @@ func NewEntity(entityID EntityID) *Entity {
 // 實體可以設置會話功能, 負責網路相關功能;
 // 需要在實體初始化之前設置 nets.Sessioner
 type Entity struct {
-	*labels.Labelobj                                 // 標籤物件
-	entityID         EntityID                        // 實體編號
-	once             helps.SyncOnce                  // 單次執行物件
-	modulemap        helps.SyncAttr[*Modulemap]      // 模組列表
-	eventmap         helps.SyncAttr[*Eventmap]       // 事件列表
-	process          helps.SyncAttr[procs.Processor] // 處理物件
-	session          helps.SyncAttr[nets.Sessioner]  // 會話物件
+	*labels.Label                                 // 標籤物件
+	entityID      EntityID                        // 實體編號
+	once          helps.SyncOnce                  // 單次執行物件
+	modulemap     helps.SyncAttr[*Modulemap]      // 模組列表
+	eventmap      helps.SyncAttr[*Eventmap]       // 事件列表
+	process       helps.SyncAttr[procs.Processor] // 處理物件
+	session       helps.SyncAttr[nets.Sessioner]  // 會話物件
 }
 
 // ===== 基礎功能 =====
