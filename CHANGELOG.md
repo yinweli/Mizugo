@@ -6,11 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Planning]
 - Configmgr新增從遠端讀取配置(viper的ReadRemoteConfig)
-- 訊息模組系統`raven`
-- 單元測試工具集`trials`
-- 熱更新機制`hotfixs`
 
 ## [Unrelease]
 - 新增單元測試工具集`trials`
+- 新增信號調度組件`triggers`
 
 ## [1.0.0] - 2024-04-15
