@@ -204,7 +204,6 @@ type list map[int64]Process
 func (this *pubsub) sub(name string, process Process) string {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-
 	this.serial++
 
 	if cell, ok := this.data[name]; ok {

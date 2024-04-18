@@ -23,7 +23,6 @@ type Modulemap struct {
 func (this *Modulemap) Add(module Moduler) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-
 	moduleID := module.ModuleID()
 
 	if _, ok := this.data[moduleID]; ok {
@@ -51,7 +50,6 @@ func (this *Modulemap) Del(moduleID ModuleID) Moduler {
 func (this *Modulemap) Get(moduleID ModuleID) Moduler {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
-
 	return this.data[moduleID]
 }
 
@@ -59,7 +57,6 @@ func (this *Modulemap) Get(moduleID ModuleID) Moduler {
 func (this *Modulemap) All() []Moduler {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
-
 	result := []Moduler{}
 
 	for _, itor := range this.data {
@@ -76,6 +73,5 @@ func (this *Modulemap) All() []Moduler {
 func (this *Modulemap) Count() int {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
-
 	return len(this.data)
 }

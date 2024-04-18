@@ -6,8 +6,6 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 
-	"github.com/yinweli/Mizugo/mizugos/cryptos"
-	"github.com/yinweli/Mizugo/mizugos/helps"
 	"github.com/yinweli/Mizugo/mizugos/msgs"
 )
 
@@ -18,70 +16,50 @@ func NewProto() *Proto {
 	}
 }
 
-// Proto proto處理器, 封包結構使用ProtoMsg, 可以選擇是否啟用base64編碼或是des-cbc加密
+// Proto proto處理器, 封包結構使用ProtoMsg
 //   - 訊息定義: support/proto/mizugo/protomsg.proto
-//   - 封包編碼: protobuf編碼成位元陣列, (可選)des-cbc加密, (可選)base64編碼
-//   - 封包解碼: (可選)base64解碼, (可選)des-cbc解密, protobuf解碼成訊息結構
+//   - 封包編碼: protobuf編碼成位元陣列
+//   - 封包解碼: protobuf解碼成訊息結構
 type Proto struct {
-	*Procmgr        // 管理器
-	base64   bool   // 是否啟用base64
-	desCBC   bool   // 是否啟用des-cbc加密
-	desKey   []byte // des密鑰
-	desIV    []byte // des初始向量
+	*Procmgr // 管理器
 }
 
 // Encode 封包編碼
-func (this *Proto) Encode(input any) (output []byte, err error) {
-	message, err := helps.CastPointer[msgs.ProtoMsg](input)
+func (this *Proto) Encode(input any) (output any, err error) {
+	if input == nil {
+		return nil, fmt.Errorf("proto encode: input nil")
+	} // if
+
+	temp, ok := input.(*msgs.ProtoMsg)
+
+	if ok == false {
+		return nil, fmt.Errorf("proto encode: input type")
+	} // if
+
+	output, err = proto.Marshal(temp)
 
 	if err != nil {
 		return nil, fmt.Errorf("proto encode: %w", err)
-	} // if
-
-	output, err = proto.Marshal(message)
-
-	if err != nil {
-		return nil, fmt.Errorf("proto encode: %w", err)
-	} // if
-
-	if this.desCBC {
-		if output, err = cryptos.DesCBCEncrypt(cryptos.PaddingPKCS7, this.desKey, this.desIV, output); err != nil {
-			return nil, fmt.Errorf("proto encode: %w", err)
-		} // if
-	} // if
-
-	if this.base64 {
-		output = cryptos.Base64Encode(output)
 	} // if
 
 	return output, nil
 }
 
 // Decode 封包解碼
-func (this *Proto) Decode(input []byte) (output any, err error) {
+func (this *Proto) Decode(input any) (output any, err error) {
 	if input == nil {
 		return nil, fmt.Errorf("proto decode: input nil")
 	} // if
 
-	if this.base64 {
-		input, err = cryptos.Base64Decode(input)
+	temp, ok := input.([]byte)
 
-		if err != nil {
-			return nil, fmt.Errorf("proto decode: %w", err)
-		} // if
-	} // if
-
-	if this.desCBC {
-		input, err = cryptos.DesCBCDecrypt(cryptos.PaddingPKCS7, this.desKey, this.desIV, input)
-
-		if err != nil {
-			return nil, fmt.Errorf("proto decode: %w", err)
-		} // if
+	if ok == false {
+		return nil, fmt.Errorf("proto decode: input type")
 	} // if
 
 	message := &msgs.ProtoMsg{}
 
-	if err = proto.Unmarshal(input, message); err != nil {
+	if err = proto.Unmarshal(temp, message); err != nil {
 		return nil, fmt.Errorf("proto decode: %w", err)
 	} // if
 
@@ -90,10 +68,14 @@ func (this *Proto) Decode(input []byte) (output any, err error) {
 
 // Process 訊息處理
 func (this *Proto) Process(input any) error {
-	message, err := helps.CastPointer[msgs.ProtoMsg](input)
+	if input == nil {
+		return fmt.Errorf("proto process: input nil")
+	} // if
 
-	if err != nil {
-		return fmt.Errorf("proto process: %w", err)
+	message, ok := input.(*msgs.ProtoMsg)
+
+	if ok == false {
+		return fmt.Errorf("proto process: input type")
 	} // if
 
 	process := this.Get(message.MessageID)
@@ -104,20 +86,6 @@ func (this *Proto) Process(input any) error {
 
 	process(message)
 	return nil
-}
-
-// Base64 設定是否啟用base64
-func (this *Proto) Base64(enable bool) *Proto {
-	this.base64 = enable
-	return this
-}
-
-// DesCBC 是否啟用des-cbc加密
-func (this *Proto) DesCBC(enable bool, key, iv string) *Proto {
-	this.desCBC = enable
-	this.desKey = []byte(key)
-	this.desIV = []byte(iv)
-	return this
 }
 
 // ProtoMarshal 序列化proto訊息
@@ -144,10 +112,10 @@ func ProtoUnmarshal[T any](input any) (messageID MessageID, output *T, err error
 		return 0, nil, fmt.Errorf("proto unmarshal: input nil")
 	} // if
 
-	message, err := helps.CastPointer[msgs.ProtoMsg](input)
+	message, ok := input.(*msgs.ProtoMsg)
 
-	if err != nil {
-		return 0, nil, fmt.Errorf("proto unmarshal: %w", err)
+	if ok == false {
+		return 0, nil, fmt.Errorf("proto unmarshal: input type")
 	} // if
 
 	temp, err := message.Message.UnmarshalNew()
@@ -156,7 +124,7 @@ func ProtoUnmarshal[T any](input any) (messageID MessageID, output *T, err error
 		return 0, nil, fmt.Errorf("proto unmarshal: %w", err)
 	} // if
 
-	output, ok := temp.(any).(*T)
+	output, ok = temp.(any).(*T)
 
 	if ok == false {
 		return 0, nil, fmt.Errorf("proto unmarshal: cast failed")

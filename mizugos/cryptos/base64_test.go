@@ -1,6 +1,8 @@
 package cryptos
 
 import (
+	"encoding/hex"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -30,56 +32,68 @@ func (this *SuiteBase64) TearDownSuite() {
 
 func (this *SuiteBase64) TestBase64() {
 	input := []byte("test base64 string")
-	packet := Base64Encode(input)
-	output, err := Base64Decode(packet)
+	target := NewBase64()
+	assert.NotNil(this.T(), target)
+	crypto, err := target.Encode(input)
+	assert.Nil(this.T(), err)
+	output, err := target.Decode(crypto)
 	assert.Nil(this.T(), err)
 	assert.Equal(this.T(), input, output)
+	fmt.Printf("input=%v\n", string(input))
+	fmt.Printf("output=%v\n", string(output.([]byte)))
+	fmt.Printf("crypto=%v\n", hex.EncodeToString(crypto.([]byte)))
 }
 
 func BenchmarkBase64Encode1024(b *testing.B) {
 	input := []byte(helps.RandString(1024, helps.StrNumberAlpha))
+	target := NewBase64()
 
 	for i := 0; i < b.N; i++ {
-		_ = Base64Encode(input)
+		_, _ = target.Encode(input)
 	} // for
 }
 
 func BenchmarkBase64Encode2048(b *testing.B) {
 	input := []byte(helps.RandString(2048, helps.StrNumberAlpha))
+	target := NewBase64()
 
 	for i := 0; i < b.N; i++ {
-		_ = Base64Encode(input)
+		_, _ = target.Encode(input)
 	} // for
 }
 
 func BenchmarkBase64Encode4096(b *testing.B) {
 	input := []byte(helps.RandString(4096, helps.StrNumberAlpha))
+	target := NewBase64()
 
 	for i := 0; i < b.N; i++ {
-		_ = Base64Encode(input)
+		_, _ = target.Encode(input)
 	} // for
 }
 
 func BenchmarkBase64Decode1024(b *testing.B) {
 	input := []byte(helps.RandString(1024, helps.StrNumberAlpha))
+	target := NewBase64()
 
 	for i := 0; i < b.N; i++ {
-		_, _ = Base64Decode(input)
+		_, _ = target.Decode(input)
 	} // for
 }
 
 func BenchmarkBase64Decode2048(b *testing.B) {
 	input := []byte(helps.RandString(2048, helps.StrNumberAlpha))
+	target := NewBase64()
 
 	for i := 0; i < b.N; i++ {
-		_, _ = Base64Decode(input)
+		_, _ = target.Decode(input)
 	} // for
 }
 
 func BenchmarkBase64Decode4096(b *testing.B) {
 	input := []byte(helps.RandString(4096, helps.StrNumberAlpha))
+	target := NewBase64()
 
 	for i := 0; i < b.N; i++ {
-		_, _ = Base64Decode(input)
+		_, _ = target.Decode(input)
 	} // for
 }

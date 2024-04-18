@@ -21,7 +21,6 @@ type Procmgr struct {
 func (this *Procmgr) Add(messageID MessageID, process Process) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-
 	this.data[messageID] = process
 }
 
@@ -29,7 +28,6 @@ func (this *Procmgr) Add(messageID MessageID, process Process) {
 func (this *Procmgr) Del(messageID MessageID) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-
 	delete(this.data, messageID)
 }
 
@@ -37,6 +35,5 @@ func (this *Procmgr) Del(messageID MessageID) {
 func (this *Procmgr) Get(messageID MessageID) Process {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
-
 	return this.data[messageID]
 }

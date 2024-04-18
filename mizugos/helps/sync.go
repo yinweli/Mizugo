@@ -40,7 +40,6 @@ type SyncAttr[T any] struct {
 func (this *SyncAttr[T]) Set(attr T) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-
 	this.attr = attr
 }
 
@@ -48,6 +47,5 @@ func (this *SyncAttr[T]) Set(attr T) {
 func (this *SyncAttr[T]) Get() T {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
-
 	return this.attr
 }

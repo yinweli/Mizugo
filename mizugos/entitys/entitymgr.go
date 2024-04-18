@@ -23,7 +23,6 @@ type Entitymgr struct {
 func (this *Entitymgr) Add() *Entity {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-
 	this.entityID++
 	entity := NewEntity(this.entityID)
 	this.data[this.entityID] = entity
@@ -47,7 +46,6 @@ func (this *Entitymgr) Del(entityID EntityID) *Entity {
 func (this *Entitymgr) Clear() {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-
 	this.data = map[EntityID]*Entity{}
 }
 
@@ -55,7 +53,6 @@ func (this *Entitymgr) Clear() {
 func (this *Entitymgr) Get(entityID EntityID) *Entity {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
-
 	return this.data[entityID]
 }
 
@@ -63,7 +60,6 @@ func (this *Entitymgr) Get(entityID EntityID) *Entity {
 func (this *Entitymgr) All() []*Entity {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
-
 	result := []*Entity{}
 
 	for _, itor := range this.data {
@@ -80,6 +76,5 @@ func (this *Entitymgr) All() []*Entity {
 func (this *Entitymgr) Count() int {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
-
 	return len(this.data)
 }

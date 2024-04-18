@@ -49,11 +49,9 @@ func NewEntity(entityID EntityID) *Entity {
 //   - EventRecv: 接收訊息事件, 當接收訊息後觸發, 參數是訊息物件
 //   - EventSend: 傳送訊息事件, 當傳送訊息後觸發, 參數是訊息物件
 //
-// 實體可以設置處理功能, 負責封包編/解碼, 管理訊息處理函式;
-// 需要在實體初始化之前設置 procs.Processor
+// 實體可以設置處理功能, 負責訊息處理功能; 需要在實體初始化之前設置 procs.Processor
 //
-// 實體可以設置會話功能, 負責網路相關功能;
-// 需要在實體初始化之前設置 nets.Sessioner
+// 實體可以設置會話功能, 負責網路相關功能; 需要在實體初始化之前設置 nets.Sessioner
 type Entity struct {
 	*labels.Label                                 // 標籤物件
 	entityID      EntityID                        // 實體編號
@@ -139,15 +137,6 @@ func (this *Entity) Finalize() {
 		eventmap.PubOnce(EventShutdown, nil)
 		eventmap.Finalize()
 	} // if
-}
-
-// Bundle 取得綁定資料
-func (this *Entity) Bundle() *nets.Bundle {
-	return &nets.Bundle{
-		Encode:  this.process.Get().Encode,
-		Decode:  this.process.Get().Decode,
-		Publish: this.eventmap.Get().PubOnce,
-	}
 }
 
 // EntityID 取得實體編號
