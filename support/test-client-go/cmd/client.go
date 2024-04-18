@@ -17,7 +17,6 @@ func main() {
 			features.LogCrash.Get().Error("crash").KV("stack", string(debug.Stack())).Error(fmt.Errorf("%s", cause)).EndFlush()
 		} // if
 	}()
-
 	fmt.Println("test-client initialize")
 	mizugos.Start()
 	err := error(nil)

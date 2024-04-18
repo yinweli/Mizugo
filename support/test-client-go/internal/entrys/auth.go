@@ -26,7 +26,7 @@ func AuthInitialize() (err error) {
 	auth.update = config.Update
 
 	if config.Enable {
-		mizugos.Network.AddConnectTCP(config.IP, config.Port, config.Timeout, auth.bind, auth.unbind, auth.connectWrong)
+		mizugos.Network.AddConnectTCP(config.IP, config.Port, config.Timeout, auth.bind, auth.unbind, auth.wrong)
 	} // if
 
 	features.LogSystem.Get().Info("auth").Message("initialize").EndFlush()
@@ -52,50 +52,54 @@ type AuthConfig struct {
 }
 
 // bind 綁定處理
-func (this *Auth) bind(session nets.Sessioner) *nets.Bundle {
+func (this *Auth) bind(session nets.Sessioner) bool {
+	err := error(nil)
 	entity := mizugos.Entity.Add()
+	process := procs.NewJson()
 
-	var wrong error
+	session.SetPublish(entity.PublishOnce)
+	session.SetWrong(this.wrong)
+	session.SetCodec(process)
 
 	if entity == nil {
-		wrong = fmt.Errorf("bind: entity nil")
+		err = fmt.Errorf("bind: entity nil")
 		goto Error
 	} // if
 
-	if err := entity.SetModulemap(entitys.NewModulemap()); err != nil {
-		wrong = fmt.Errorf("bind: %w", err)
+	if err = entity.SetModulemap(entitys.NewModulemap()); err != nil {
+		err = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
-	if err := entity.SetEventmap(entitys.NewEventmap(defines.EventCapacity)); err != nil {
-		wrong = fmt.Errorf("bind: %w", err)
+	if err = entity.SetEventmap(entitys.NewEventmap(defines.EventCapacity)); err != nil {
+		err = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
-	if err := entity.SetProcess(procs.NewJson()); err != nil {
-		wrong = fmt.Errorf("bind: %w", err)
+	if err = entity.SetProcess(process); err != nil {
+		err = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
-	if err := entity.SetSession(session); err != nil {
-		wrong = fmt.Errorf("bind: %w", err)
+	if err = entity.SetSession(session); err != nil {
+		err = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
-	if err := entity.AddModule(modules.NewAuth(this.delay, this.account, this.update)); err != nil {
-		wrong = fmt.Errorf("bind: %w", err)
+	if err = entity.AddModule(modules.NewAuth(this.delay, this.account, this.update)); err != nil {
+		err = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
-	if err := entity.Initialize(this.bindWrong); err != nil {
-		wrong = fmt.Errorf("bind: %w", err)
+	if err = entity.Initialize(this.wrong); err != nil {
+		err = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
 	session.SetOwner(entity)
 	features.MeterConnect.Add(1)
 	features.LogSystem.Get().Info("auth").Message("bind").Caller(0).EndFlush()
-	return entity.Bundle()
+	return true
 
 Error:
 	if entity != nil {
@@ -104,8 +108,8 @@ Error:
 	} // if
 
 	session.Stop()
-	features.LogSystem.Get().Error("auth").Caller(0).Error(wrong).EndFlush()
-	return nil
+	features.LogSystem.Get().Error("auth").Caller(0).Error(err).EndFlush()
+	return false
 }
 
 // unbind 解綁處理
@@ -117,14 +121,9 @@ func (this *Auth) unbind(session nets.Sessioner) {
 	} // if
 }
 
-// connectWrong 連接錯誤處理
-func (this *Auth) connectWrong(err error) {
+// wrong 錯誤處理
+func (this *Auth) wrong(err error) {
 	features.LogSystem.Get().Error("auth").Caller(1).Error(err).EndFlush()
-}
-
-// bindWrong 綁定錯誤處理
-func (this *Auth) bindWrong(err error) {
-	features.LogSystem.Get().Warn("auth").Caller(1).Error(err).EndFlush()
 }
 
 var auth = &Auth{} // Auth入口
