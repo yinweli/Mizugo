@@ -4,7 +4,6 @@ import (
 	"net"
 	"sync/atomic"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -138,7 +137,7 @@ func (this *SuiteEntity) TestEvent() {
 	target.PublishDelay(onceValue, onceValue, trials.Timeout)
 	target.PublishFixed(fixedValue, fixedValue, trials.Timeout)
 
-	time.Sleep(trials.Timeout * 2) // 多等一下讓定時事件發生
+	trials.WaitTimeout(trials.Timeout * 2) // 多等一下讓定時事件發生
 	assert.True(this.T(), onceValid.Load())
 	assert.True(this.T(), fixedValid.Load())
 
