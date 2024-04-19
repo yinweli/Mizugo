@@ -49,12 +49,6 @@ namespace Mizugo
     }
 
     /// <summary>
-    /// 處理函式類型
-    /// </summary>
-    /// <param name="param">參數物件</param>
-    public delegate void OnTrigger(object param);
-
-    /// <summary>
     /// 網路定義
     /// </summary>
     public class Define
@@ -83,8 +77,6 @@ namespace Mizugo
         /// <summary>
         /// 連線處理
         /// </summary>
-        /// <param name="host">連線位址</param>
-        /// <param name="port">連線埠號</param>
         public void Connect(string host, int port);
 
         /// <summary>
@@ -100,34 +92,42 @@ namespace Mizugo
         /// <summary>
         /// 傳送訊息
         /// </summary>
-        /// <param name="message">訊息物件</param>
         public void Send(object message);
+
+        /// <summary>
+        /// 設定事件處理器
+        /// </summary>
+        public void SetEvent(IEventmgr eventmgr);
 
         /// <summary>
         /// 新增事件處理
         /// </summary>
-        /// <param name="eventID">事件編號</param>
-        /// <param name="onEvent">事件處理函式</param>
         public void AddEvent(EventID eventID, OnTrigger onEvent);
 
         /// <summary>
         /// 刪除事件處理
         /// </summary>
-        /// <param name="eventID">事件編號</param>
         public void DelEvent(EventID eventID);
+
+        /// <summary>
+        /// 設定訊息處理器
+        /// </summary>
+        public void SetProc(IProcmgr procmgr);
 
         /// <summary>
         /// 新增訊息處理
         /// </summary>
-        /// <param name="messageID">訊息編號</param>
-        /// <param name="onProcess">訊息處理函式</param>
         public void AddProcess(MessageID messageID, OnTrigger onProcess);
 
         /// <summary>
         /// 刪除訊息處理
         /// </summary>
-        /// <param name="messageID">訊息編號</param>
         public void DelProcess(MessageID messageID);
+
+        /// <summary>
+        /// 設定編碼/解碼
+        /// </summary>
+        public void SetCodec(params ICodec[] codec);
 
         /// <summary>
         /// 取得是否連線
@@ -148,21 +148,16 @@ namespace Mizugo
         /// <summary>
         /// 事件處理
         /// </summary>
-        /// <param name="eventID">事件編號</param>
-        /// <param name="param">事件參數</param>
         public void Process(EventID eventID, object param);
 
         /// <summary>
         /// 新增事件處理
         /// </summary>
-        /// <param name="eventID">事件編號</param>
-        /// <param name="onEvent">事件處理函式</param>
         public void Add(EventID eventID, OnTrigger onEvent);
 
         /// <summary>
         /// 刪除事件處理
         /// </summary>
-        /// <param name="eventID">事件編號</param>
         public void Del(EventID eventID);
     }
 
@@ -172,43 +167,44 @@ namespace Mizugo
     public interface IProcmgr
     {
         /// <summary>
-        /// 封包編碼
-        /// </summary>
-        /// <param name="input">輸入物件</param>
-        /// <returns>結果物件</returns>
-        public byte[] Encode(object input);
-
-        /// <summary>
-        /// 封包解碼
-        /// </summary>
-        /// <param name="input">輸入物件</param>
-        /// <returns>結果物件</returns>
-        public object Decode(byte[] input);
-
-        /// <summary>
         /// 訊息處理
         /// </summary>
-        /// <param name="input">輸入物件</param>
         public void Process(object input);
 
         /// <summary>
         /// 新增訊息處理
         /// </summary>
-        /// <param name="messageID">訊息編號</param>
-        /// <param name="onProcess">訊息處理函式</param>
         public void Add(MessageID messageID, OnTrigger onProcess);
 
         /// <summary>
         /// 刪除訊息處理
         /// </summary>
-        /// <param name="messageID">訊息編號</param>
         public void Del(MessageID messageID);
 
         /// <summary>
         /// 取得訊息處理
         /// </summary>
-        /// <param name="messageID">訊息編號</param>
-        /// <returns>訊息處理函式</returns>
         public OnTrigger Get(MessageID messageID);
     }
+
+    /// <summary>
+    /// 編碼/解碼介面
+    /// </summary>
+    public interface ICodec
+    {
+        /// <summary>
+        /// 編碼處理
+        /// </summary>
+        public object Encode(object input);
+
+        /// <summary>
+        /// 解碼處理
+        /// </summary>
+        public object Decode(object input);
+    }
+
+    /// <summary>
+    /// 處理函式類型
+    /// </summary>
+    public delegate void OnTrigger(object param);
 }

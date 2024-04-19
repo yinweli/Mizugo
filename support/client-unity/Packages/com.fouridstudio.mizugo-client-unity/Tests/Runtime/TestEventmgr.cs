@@ -10,29 +10,19 @@ namespace Mizugo
         [TestCase(3, null)]
         public void Add(EventID eventID, object param)
         {
-            var eventmgr = new Eventmgr();
+            var target = new Eventmgr();
             var expected = param;
             var valid = false;
 
-            eventmgr.Add(
+            target.Add(
                 eventID,
                 (object param) =>
                 {
                     valid = expected == param;
                 }
             );
-            eventmgr.Process(eventID, param);
+            target.Process(eventID, param);
             Assert.IsTrue(valid);
-        }
-
-        [Test]
-        public void AddNull()
-        {
-            var eventmgr = new Eventmgr();
-            var eventID = (EventID)1;
-
-            eventmgr.Add(eventID, null);
-            eventmgr.Process(eventID, null);
         }
 
         [Test]
@@ -41,19 +31,19 @@ namespace Mizugo
         [TestCase(3, null)]
         public void Del(EventID eventID, object param)
         {
-            var eventmgr = new Eventmgr();
+            var target = new Eventmgr();
             var expected = param;
             var valid = false;
 
-            eventmgr.Add(
+            target.Add(
                 eventID,
                 (object param) =>
                 {
                     valid = expected == param;
                 }
             );
-            eventmgr.Del(eventID);
-            eventmgr.Process(eventID, param);
+            target.Del(eventID);
+            target.Process(eventID, param);
             Assert.IsFalse(valid);
         }
     }

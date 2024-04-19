@@ -17,8 +17,6 @@ func NewJson() *Json {
 // Json json處理器, 封包結構使用JsonMsg
 //   - 訊息定義: support/proto/mizugo/msg-go/msgs-json/jsonmsg.go
 //   - 訊息定義: support/proto/mizugo/msg-cs/msgs-json/Jsonmsg.cs
-//   - 封包編碼: json編碼成位元陣列
-//   - 封包解碼: json解碼成訊息結構
 type Json struct {
 	*Procmgr // 管理器
 }

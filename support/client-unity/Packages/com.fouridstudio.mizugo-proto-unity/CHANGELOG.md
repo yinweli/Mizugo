@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [0.1.1] - 2024-04-19
+### Changed
+- 更新說明文件
+
 ## [0.1.0] - 2023-02-06
 ### Added
 - 新增protobuf v21.12組件

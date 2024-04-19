@@ -13,62 +13,24 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestDes(t *testing.T) {
-	suite.Run(t, new(SuiteDes))
+func TestDesCBC(t *testing.T) {
+	suite.Run(t, new(SuiteDesCBC))
 }
 
-type SuiteDes struct {
+type SuiteDesCBC struct {
 	suite.Suite
 	trials.Catalog
 }
 
-func (this *SuiteDes) SetupSuite() {
-	this.Catalog = trials.Prepare(testdata.PathWork("test-cryptos-des"))
+func (this *SuiteDesCBC) SetupSuite() {
+	this.Catalog = trials.Prepare(testdata.PathWork("test-cryptos-descbc"))
 }
 
-func (this *SuiteDes) TearDownSuite() {
+func (this *SuiteDesCBC) TearDownSuite() {
 	trials.Restore(this.Catalog)
 }
 
-func (this *SuiteDes) TestDesECB() {
-	keyValid := RandDesKeyString()
-	keyInvalid := helps.RandString(15, helps.StrNumberAlpha)
-	target := NewDesECB(PaddingPKCS7, keyValid)
-	assert.NotNil(this.T(), target)
-
-	for size := 16; size <= 64; size++ {
-		input := []byte(helps.RandString(size, helps.StrNumberAlpha))
-		crypto, err := target.Encode(input)
-		assert.Nil(this.T(), err)
-		output, err := target.Decode(crypto)
-		assert.Nil(this.T(), err)
-		assert.Equal(this.T(), input, output)
-
-		fmt.Printf("----- size: %v -----\n", size)
-		fmt.Printf("input=%v\n", string(input))
-		fmt.Printf("output=%v\n", string(output.([]byte)))
-		fmt.Printf("crypto=%v\n", hex.EncodeToString(crypto.([]byte)))
-	} // for
-
-	_, err := NewDesECB(PaddingPKCS7, keyInvalid).Encode(nil)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesECB(PaddingPKCS7, keyValid).Encode(nil)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesECB(PaddingPKCS7, keyValid).Encode(testdata.Unknown)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesECB(PaddingPKCS7, keyValid).Encode([]byte{})
-	assert.NotNil(this.T(), err)
-	_, err = NewDesECB(PaddingPKCS7, keyInvalid).Decode(nil)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesECB(PaddingPKCS7, keyValid).Decode(nil)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesECB(PaddingPKCS7, keyValid).Decode(testdata.Unknown)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesECB(PaddingPKCS7, keyValid).Decode([]byte{})
-	assert.NotNil(this.T(), err)
-}
-
-func (this *SuiteDes) TestDesCBC() {
+func (this *SuiteDesCBC) TestDesCBC() {
 	keyValid := RandDesKeyString()
 	keyInvalid := helps.RandString(15, helps.StrNumberAlpha)
 	ivValid := RandDesKeyString()
@@ -110,70 +72,6 @@ func (this *SuiteDes) TestDesCBC() {
 	assert.NotNil(this.T(), err)
 	_, err = NewDesCBC(PaddingPKCS7, keyValid, ivValid).Decode([]byte{})
 	assert.NotNil(this.T(), err)
-}
-
-func (this *SuiteDes) TestRandDesKey() {
-	key1 := RandDesKey()
-	assert.NotNil(this.T(), key1)
-	assert.Len(this.T(), key1, DesKeySize)
-
-	key2 := RandDesKeyString()
-	assert.NotNil(this.T(), key2)
-	assert.Len(this.T(), key2, DesKeySize)
-}
-
-func BenchmarkDesECBEncode1024(b *testing.B) {
-	input := []byte(helps.RandString(1024, helps.StrNumberAlpha))
-	target := NewDesECB(PaddingPKCS7, RandDesKeyString())
-
-	for i := 0; i < b.N; i++ {
-		_, _ = target.Encode(input)
-	} // for
-}
-
-func BenchmarkDesECBEncode2048(b *testing.B) {
-	input := []byte(helps.RandString(2048, helps.StrNumberAlpha))
-	target := NewDesECB(PaddingPKCS7, RandDesKeyString())
-
-	for i := 0; i < b.N; i++ {
-		_, _ = target.Encode(input)
-	} // for
-}
-
-func BenchmarkDesECBEncode4096(b *testing.B) {
-	input := []byte(helps.RandString(4096, helps.StrNumberAlpha))
-	target := NewDesECB(PaddingPKCS7, RandDesKeyString())
-
-	for i := 0; i < b.N; i++ {
-		_, _ = target.Encode(input)
-	} // for
-}
-
-func BenchmarkDesECBDecode1024(b *testing.B) {
-	input := []byte(helps.RandString(1024, helps.StrNumberAlpha))
-	target := NewDesECB(PaddingPKCS7, RandDesKeyString())
-
-	for i := 0; i < b.N; i++ {
-		_, _ = target.Decode(input)
-	} // for
-}
-
-func BenchmarkDesECBDecode2048(b *testing.B) {
-	input := []byte(helps.RandString(2048, helps.StrNumberAlpha))
-	target := NewDesECB(PaddingPKCS7, RandDesKeyString())
-
-	for i := 0; i < b.N; i++ {
-		_, _ = target.Decode(input)
-	} // for
-}
-
-func BenchmarkDesECBDecode4096(b *testing.B) {
-	input := []byte(helps.RandString(4096, helps.StrNumberAlpha))
-	target := NewDesECB(PaddingPKCS7, RandDesKeyString())
-
-	for i := 0; i < b.N; i++ {
-		_, _ = target.Decode(input)
-	} // for
 }
 
 func BenchmarkDesCBCEncode1024(b *testing.B) {

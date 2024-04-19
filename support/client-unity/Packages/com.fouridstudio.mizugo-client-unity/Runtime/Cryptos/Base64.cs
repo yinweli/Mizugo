@@ -1,33 +1,36 @@
 using System;
 using System.Text;
+using Google.Protobuf;
 
 namespace Mizugo
 {
     /// <summary>
-    /// base64編解碼
+    /// base64編碼/解碼
     /// </summary>
-    public class Base64
+    public class Base64 : ICodec
     {
-        /// <summary>
-        /// 編碼
-        /// </summary>
-        /// <param name="src">來源資料</param>
-        /// <returns>結果資料</returns>
-        public static byte[] Encode(byte[] src)
+        public object Encode(object input)
         {
-            var base64String = Convert.ToBase64String(src);
+            if (input == null)
+                throw new ArgumentNullException("input");
+
+            if (input is not byte[] temp)
+                throw new ArgumentException("input");
+
+            var base64String = Convert.ToBase64String(temp);
             var base64Bytes = Encoding.UTF8.GetBytes(base64String);
             return base64Bytes;
         }
 
-        /// <summary>
-        /// 解碼
-        /// </summary>
-        /// <param name="src">來源資料</param>
-        /// <returns>結果資料</returns>
-        public static byte[] Decode(byte[] src)
+        public object Decode(object input)
         {
-            var base64String = Encoding.UTF8.GetString(src);
+            if (input == null)
+                throw new ArgumentNullException("input");
+
+            if (input is not byte[] temp)
+                throw new ArgumentException("input");
+
+            var base64String = Encoding.UTF8.GetString(temp);
             var base64Bytes = Convert.FromBase64String(base64String);
             return base64Bytes;
         }

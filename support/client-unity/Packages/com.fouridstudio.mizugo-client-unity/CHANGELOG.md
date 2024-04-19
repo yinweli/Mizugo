@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [0.3.0] - 2024-04-19
+### Changed
+- 更新說明文件
+- 改變使用方式, 加密/解密與base64不再與JsonProc/ProtoProc組件綁定
+- TCPClient新增SetEvent, SetProc, SetCodec函式, 增加編碼/解碼的使用靈活度
+
 ## [0.2.4] - 2023-12-06
 ### Fixed
 - 修正錯誤時只需要通知錯誤事件即可

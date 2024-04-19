@@ -14,11 +14,11 @@ namespace Mizugo
         [TestCase(3, null)]
         public void Add(MessageID messageID, object param)
         {
-            var procmgr = new EmptyProc();
+            var target = new EmptyProc();
             var expected = param;
             var valid = false;
 
-            procmgr.Add(
+            target.Add(
                 messageID,
                 (object param) =>
                 {
@@ -26,7 +26,7 @@ namespace Mizugo
                 }
             );
 
-            var process = procmgr.Get(messageID);
+            var process = target.Get(messageID);
 
             Assert.IsNotNull(process);
             process(param);
@@ -38,34 +38,15 @@ namespace Mizugo
         [TestCase(2)]
         public void Del(MessageID messageID)
         {
-            var procmgr = new EmptyProc();
+            var target = new EmptyProc();
 
-            procmgr.Add(messageID, (object param) => { });
-            procmgr.Del(messageID);
-            Assert.IsNull(procmgr.Get(messageID));
-        }
-
-        public static IEnumerable DelCases
-        {
-            get
-            {
-                yield return new TestCaseData(1);
-                yield return new TestCaseData(2);
-            }
+            target.Add(messageID, (object param) => { });
+            target.Del(messageID);
+            Assert.IsNull(target.Get(messageID));
         }
 
         private class EmptyProc : Procmgr
         {
-            public override byte[] Encode(object input)
-            {
-                throw new System.NotImplementedException();
-            }
-
-            public override object Decode(byte[] input)
-            {
-                throw new System.NotImplementedException();
-            }
-
             public override void Process(object message)
             {
                 throw new System.NotImplementedException();
