@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using NUnit.Framework;
 
 namespace Mizugo
@@ -13,25 +14,32 @@ namespace Mizugo
         [TestCase("google.com", 80)]
         public void Connect(string host, int port)
         {
-            var client = new TCPClient(new Eventmgr(), new JsonProc());
+            var target = new TCPClient();
+            var eventmgr = new Eventmgr();
+            var process = new JsonProc();
+
+            target.SetEvent(eventmgr);
+            target.SetProc(process);
+            target.SetCodec(process);
+
             var validConnect = false;
             var validDisconnect = false;
 
-            client.AddEvent(
+            target.AddEvent(
                 EventID.Connect,
                 (object _) =>
                 {
                     validConnect = true;
                 }
             );
-            client.AddEvent(
+            target.AddEvent(
                 EventID.Disconnect,
                 (object _) =>
                 {
                     validDisconnect = true;
                 }
             );
-            client.AddEvent(
+            target.AddEvent(
                 EventID.Error,
                 (object _) =>
                 {
@@ -39,13 +47,13 @@ namespace Mizugo
                 }
             );
 
-            client.Connect(host, port);
+            target.Connect(host, port);
             TestUtil.Sleep();
-            client.Disconnect();
+            target.Disconnect();
             TestUtil.Sleep();
 
-            while (client.IsUpdate)
-                client.Update();
+            while (target.IsUpdate)
+                target.Update();
 
             Assert.IsTrue(validConnect);
             Assert.IsTrue(validDisconnect);
@@ -55,10 +63,18 @@ namespace Mizugo
         [TestCase("google.com", 80)]
         public void ConnectFailed(string host, int port)
         {
-            var client = new TCPClient(new Eventmgr(), new JsonProc());
+            var target = new TCPClient();
+            var eventmgr = new Eventmgr();
+            var process = new JsonProc();
+
+            target.SetEvent(eventmgr);
+            target.SetProc(process);
+            target.SetCodec(process);
+
             var validAlreadyStart = false;
             var validTimeout = false;
-            client.AddEvent(
+
+            target.AddEvent(
                 EventID.Error,
                 (object e) =>
                 {
@@ -70,17 +86,17 @@ namespace Mizugo
                 }
             );
 
-            client.Connect(host, port);
+            target.Connect(host, port);
             TestUtil.Sleep();
-            client.Connect(host, port);
+            target.Connect(host, port);
             TestUtil.Sleep();
-            client.Disconnect();
+            target.Disconnect();
             TestUtil.Sleep();
-            client.Connect(host, port + 1);
+            target.Connect(host, port + 1);
             TestUtil.Sleep();
 
-            while (client.IsUpdate)
-                client.Update();
+            while (target.IsUpdate)
+                target.Update();
 
             Assert.IsTrue(validAlreadyStart);
             Assert.IsTrue(validTimeout);
@@ -89,18 +105,13 @@ namespace Mizugo
         [Test]
         public void DisconnectFailed()
         {
-            var client = new TCPClient(new Eventmgr(), new JsonProc());
-
-            client.Disconnect();
+            new TCPClient().Disconnect();
         }
 
         [Test]
-        [TestCase("google.com", 80)]
-        public void UpdateFailed(string host, int port)
+        public void UpdateFailed()
         {
-            var client = new TCPClient(new Eventmgr(), new JsonProc());
-
-            client.Update();
+            new TCPClient().Update();
         }
 
         [Test]
@@ -108,10 +119,12 @@ namespace Mizugo
         [TestCase(EventID.Disconnect)]
         public void Event(EventID eventID)
         {
-            var client = new TCPClient(new Eventmgr(), new JsonProc());
+            var target = new TCPClient();
+            var eventmgr = new Eventmgr();
 
-            client.AddEvent(eventID, (object _) => { });
-            client.DelEvent(eventID);
+            target.SetEvent(eventmgr);
+            target.AddEvent(eventID, (object _) => { });
+            target.DelEvent(eventID);
         }
 
         [Test]
@@ -119,23 +132,31 @@ namespace Mizugo
         [TestCase(2)]
         public void Process(MessageID messageID)
         {
-            var client = new TCPClient(new Eventmgr(), new JsonProc());
+            var target = new TCPClient();
+            var process = new JsonProc();
 
-            client.AddProcess(messageID, (object _) => { });
-            client.DelProcess(messageID);
+            target.SetProc(process);
+            target.AddProcess(messageID, (object _) => { });
+            target.DelProcess(messageID);
         }
 
         [Test]
         [TestCase("google.com", 80)]
         public void Misc(string host, int port)
         {
-            var client = new TCPClient(new Eventmgr(), new JsonProc());
+            var target = new TCPClient();
+            var eventmgr = new Eventmgr();
+            var process = new JsonProc();
 
-            Assert.IsFalse(client.IsConnect);
-            client.Connect(host, port);
+            target.SetEvent(eventmgr);
+            target.SetProc(process);
+            target.SetCodec(process);
+
+            Assert.IsFalse(target.IsConnect);
+            target.Connect(host, port);
             TestUtil.Sleep();
-            Assert.IsTrue(client.IsConnect);
-            client.Disconnect();
+            Assert.IsTrue(target.IsConnect);
+            target.Disconnect();
         }
     }
 
@@ -148,25 +169,27 @@ namespace Mizugo
         [TestCase("127.0.0.1", 9001, "key-@@@@", 1000)]
         public void Test(string host, int port, string key, int count)
         {
-            var client = new TCPClient(new Eventmgr(), new JsonProc().SetBase64(true).SetDesCBC(true, key, key));
+            var target = new TCPClient();
+            var eventmgr = new Eventmgr();
+            var process = new JsonProc();
+
+            target.SetEvent(eventmgr);
+            target.SetProc(process);
+            target.SetCodec(process, new DesCBC(PaddingMode.PKCS7, key, key), new Base64());
+
             var stopwatch = new Stopwatch();
             var actual = 0;
 
-            void SendMPListQ()
-            {
-                client.Send(JsonProc.Marshal((int)MsgID.JsonQ, new MJsonQ { Time = stopwatch.ElapsedMilliseconds }));
-                actual++;
-            }
-
-            client.AddEvent(
+            target.AddEvent(
                 EventID.Connect,
                 (object _) =>
                 {
-                    SendMPListQ();
+                    target.Send(JsonProc.Marshal((int)MsgID.JsonQ, new MJsonQ { Time = stopwatch.ElapsedMilliseconds }));
+                    actual++;
                 }
             );
-            client.AddEvent(EventID.Error, TestUtil.Log);
-            client.AddProcess(
+            target.AddEvent(EventID.Error, TestUtil.Log);
+            target.AddProcess(
                 (int)MsgID.JsonA,
                 (object param) =>
                 {
@@ -175,18 +198,21 @@ namespace Mizugo
                     TestUtil.Log("count: " + message.Count);
 
                     if (actual < count)
-                        SendMPListQ();
+                    {
+                        target.Send(JsonProc.Marshal((int)MsgID.JsonQ, new MJsonQ { Time = stopwatch.ElapsedMilliseconds }));
+                        actual++;
+                    }
                     else
-                        client.Disconnect();
+                        target.Disconnect();
                 }
             );
 
             stopwatch.Start();
-            client.Connect(host, port);
+            target.Connect(host, port);
             TestUtil.Sleep();
 
-            while (client.IsUpdate)
-                client.Update();
+            while (target.IsUpdate)
+                target.Update();
 
             Assert.AreEqual(count, actual);
         }
@@ -201,7 +227,14 @@ namespace Mizugo
         [TestCase("127.0.0.1", 9001, "key-@@@@")]
         public void Test(string host, int port, string key)
         {
-            var client = new TCPClient(new Eventmgr(), new JsonProc().SetBase64(true).SetDesCBC(true, key, key));
+            var target = new TCPClient();
+            var eventmgr = new Eventmgr();
+            var process = new JsonProc();
+
+            target.SetEvent(eventmgr);
+            target.SetProc(process);
+            target.SetCodec(process, new DesCBC(PaddingMode.PKCS7, key, key), new Base64());
+
             var stopwatch = new Stopwatch();
             var validConnect = false;
             var validDisconnect = false;
@@ -209,36 +242,36 @@ namespace Mizugo
             var validSend = false;
             var validMessage = false;
 
-            client.AddEvent(
+            target.AddEvent(
                 EventID.Connect,
                 (object _) =>
                 {
                     validConnect = true;
                 }
             );
-            client.AddEvent(
+            target.AddEvent(
                 EventID.Disconnect,
                 (object _) =>
                 {
                     validDisconnect = true;
                 }
             );
-            client.AddEvent(
+            target.AddEvent(
                 EventID.Recv,
                 (object _) =>
                 {
                     validRecv = true;
-                    client.Disconnect();
+                    target.Disconnect();
                 }
             );
-            client.AddEvent(
+            target.AddEvent(
                 EventID.Send,
                 (object _) =>
                 {
                     validSend = true;
                 }
             );
-            client.AddEvent(
+            target.AddEvent(
                 EventID.Error,
                 (object param) =>
                 {
@@ -246,7 +279,7 @@ namespace Mizugo
                     TestUtil.Log(param);
                 }
             );
-            client.AddProcess(
+            target.AddProcess(
                 (int)MsgID.JsonA,
                 (object param) =>
                 {
@@ -258,13 +291,13 @@ namespace Mizugo
             );
 
             stopwatch.Start();
-            client.Connect(host, port);
+            target.Connect(host, port);
             TestUtil.Sleep();
-            client.Send(JsonProc.Marshal((int)MsgID.JsonQ, new MJsonQ { Time = stopwatch.ElapsedMilliseconds }));
+            target.Send(JsonProc.Marshal((int)MsgID.JsonQ, new MJsonQ { Time = stopwatch.ElapsedMilliseconds }));
             TestUtil.Sleep();
 
-            while (client.IsUpdate)
-                client.Update();
+            while (target.IsUpdate)
+                target.Update();
 
             Assert.IsTrue(validConnect);
             Assert.IsTrue(validDisconnect);
@@ -283,7 +316,14 @@ namespace Mizugo
         [TestCase("127.0.0.1", 9002, "key-####")]
         public void Test(string host, int port, string key)
         {
-            var client = new TCPClient(new Eventmgr(), new ProtoProc().SetBase64(true).SetDesCBC(true, key, key));
+            var target = new TCPClient();
+            var eventmgr = new Eventmgr();
+            var process = new ProtoProc();
+
+            target.SetEvent(eventmgr);
+            target.SetProc(process);
+            target.SetCodec(process, new DesCBC(PaddingMode.PKCS7, key, key), new Base64());
+
             var stopwatch = new Stopwatch();
             var validConnect = false;
             var validDisconnect = false;
@@ -291,36 +331,36 @@ namespace Mizugo
             var validSend = false;
             var validMessage = false;
 
-            client.AddEvent(
+            target.AddEvent(
                 EventID.Connect,
                 (object _) =>
                 {
                     validConnect = true;
                 }
             );
-            client.AddEvent(
+            target.AddEvent(
                 EventID.Disconnect,
                 (object _) =>
                 {
                     validDisconnect = true;
                 }
             );
-            client.AddEvent(
+            target.AddEvent(
                 EventID.Recv,
                 (object _) =>
                 {
                     validRecv = true;
-                    client.Disconnect();
+                    target.Disconnect();
                 }
             );
-            client.AddEvent(
+            target.AddEvent(
                 EventID.Send,
                 (object _) =>
                 {
                     validSend = true;
                 }
             );
-            client.AddEvent(
+            target.AddEvent(
                 EventID.Error,
                 (object param) =>
                 {
@@ -328,7 +368,7 @@ namespace Mizugo
                     TestUtil.Log(param);
                 }
             );
-            client.AddProcess(
+            target.AddProcess(
                 (int)MsgID.ProtoA,
                 (object param) =>
                 {
@@ -340,13 +380,13 @@ namespace Mizugo
             );
 
             stopwatch.Start();
-            client.Connect(host, port);
+            target.Connect(host, port);
             TestUtil.Sleep();
-            client.Send(ProtoProc.Marshal((int)MsgID.ProtoQ, new MProtoQ { Time = stopwatch.ElapsedMilliseconds }));
+            target.Send(ProtoProc.Marshal((int)MsgID.ProtoQ, new MProtoQ { Time = stopwatch.ElapsedMilliseconds }));
             TestUtil.Sleep();
 
-            while (client.IsUpdate)
-                client.Update();
+            while (target.IsUpdate)
+                target.Update();
 
             Assert.IsTrue(validConnect);
             Assert.IsTrue(validDisconnect);

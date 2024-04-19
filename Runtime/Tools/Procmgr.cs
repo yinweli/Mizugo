@@ -13,8 +13,6 @@ namespace Mizugo
     /// </summary>
     public abstract class Procmgr : IProcmgr
     {
-        public abstract byte[] Encode(object input);
-        public abstract object Decode(byte[] input);
         public abstract void Process(object input);
 
         public void Add(MessageID messageID, OnTrigger onProcess)
@@ -35,9 +33,6 @@ namespace Mizugo
             return null;
         }
 
-        /// <summary>
-        /// 處理列表
-        /// </summary>
         private Dictionary<MessageID, OnTrigger> data = new Dictionary<MessageID, OnTrigger>();
     }
 }

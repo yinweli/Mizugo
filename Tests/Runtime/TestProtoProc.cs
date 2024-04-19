@@ -4,6 +4,7 @@ using NUnit.Framework;
 
 namespace Mizugo
 {
+    using static UnityEngine.GraphicsBuffer;
     /// <summary>
     /// 訊息編號, 設置為int32以跟proto的列舉類型統一
     /// </summary>
@@ -13,55 +14,13 @@ namespace Mizugo
     {
         [Test]
         [TestCaseSource("EncodeCases")]
-        public void Encode(ProtoMsg message)
+        public void EncodeDecode(ProtoMsg message)
         {
-            var proc = new ProtoProc();
-            var encode = proc.Encode(message);
-            var decode = proc.Decode(encode);
+            var target = new ProtoProc();
+            var encode = target.Encode(message);
+            var decode = target.Decode(encode);
 
             Assert.IsTrue(TestUtil.EqualsByJson(message, decode));
-        }
-
-        [Test]
-        [TestCaseSource("EncodeCases")]
-        public void EncodeBase64(ProtoMsg message)
-        {
-            var proc = new ProtoProc().SetBase64(true);
-            var encode = proc.Encode(message);
-            var decode = proc.Decode(encode);
-
-            Assert.IsTrue(TestUtil.EqualsByJson(message, decode));
-        }
-
-        [Test]
-        [TestCaseSource("EncodeCases")]
-        public void EncodeDesCBC(ProtoMsg message)
-        {
-            var proc = new ProtoProc().SetDesCBC(true, key, key);
-            var encode = proc.Encode(message);
-            var decode = proc.Decode(encode);
-
-            Assert.IsTrue(TestUtil.EqualsByJson(message, decode));
-        }
-
-        [Test]
-        [TestCaseSource("EncodeCases")]
-        public void EncodeAll(ProtoMsg message)
-        {
-            var proc = new ProtoProc().SetBase64(true).SetDesCBC(true, key, key);
-            var encode = proc.Encode(message);
-            var decode = proc.Decode(encode);
-
-            Assert.IsTrue(TestUtil.EqualsByJson(message, decode));
-        }
-
-        public static IEnumerable EncodeCases
-        {
-            get
-            {
-                yield return new TestCaseData(ProtoProc.Marshal(1, new ProtoTest { Data = "test1" }));
-                yield return new TestCaseData(ProtoProc.Marshal(2, new ProtoTest { Data = "test2" }));
-            }
         }
 
         [Test]
@@ -73,7 +32,7 @@ namespace Mizugo
             {
                 proc.Encode(null);
             });
-            Assert.Throws<InvalidMessageException>(() =>
+            Assert.Throws<ArgumentException>(() =>
             {
                 proc.Encode(new object());
             });
@@ -82,11 +41,15 @@ namespace Mizugo
         [Test]
         public void DecodeFailed()
         {
-            var proc = new ProtoProc();
+            var target = new ProtoProc();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                proc.Decode(null);
+                target.Decode(null);
+            });
+            Assert.Throws<ArgumentException>(() =>
+            {
+                target.Encode(new object());
             });
         }
 
@@ -94,45 +57,36 @@ namespace Mizugo
         [TestCaseSource("ProcessCases")]
         public void Process(ProtoMsg message)
         {
-            var proc = new ProtoProc();
+            var target = new ProtoProc();
             var valid = false;
 
-            proc.Add(
+            target.Add(
                 message.MessageID,
                 (object param) =>
                 {
                     valid = TestUtil.EqualsByJson(message, param);
                 }
             );
-            proc.Process(message);
+            target.Process(message);
             Assert.IsTrue(valid);
-        }
-
-        public static IEnumerable ProcessCases
-        {
-            get
-            {
-                yield return new TestCaseData(ProtoProc.Marshal(1, new ProtoTest { Data = "test1" }));
-                yield return new TestCaseData(ProtoProc.Marshal(2, new ProtoTest { Data = "test2" }));
-            }
         }
 
         [Test]
         public void ProcessFailed()
         {
-            var proc = new ProtoProc();
+            var target = new ProtoProc();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                proc.Process(null);
+                target.Process(null);
             });
-            Assert.Throws<InvalidMessageException>(() =>
+            Assert.Throws<ArgumentException>(() =>
             {
-                proc.Process(new object());
+                target.Process(new object());
             });
             Assert.Throws<UnprocessException>(() =>
             {
-                proc.Process(new ProtoMsg { MessageID = 1 });
+                target.Process(new ProtoMsg { MessageID = 1 });
             });
         }
 
@@ -145,15 +99,6 @@ namespace Mizugo
             ProtoProc.Unmarshal<ProtoTest>(marshal, out var resultID, out var result);
             Assert.AreEqual(messageID, resultID);
             Assert.IsTrue(TestUtil.EqualsByJson(message, result));
-        }
-
-        public static IEnumerable MarshalCases
-        {
-            get
-            {
-                yield return new TestCaseData(1, new ProtoTest { Data = "test1" });
-                yield return new TestCaseData(2, new ProtoTest { Data = "test2" });
-            }
         }
 
         [Test]
@@ -172,12 +117,37 @@ namespace Mizugo
             {
                 JsonProc.Unmarshal<ProtoTest>(null, out var _, out var _);
             });
-            Assert.Throws<InvalidMessageException>(() =>
+            Assert.Throws<ArgumentException>(() =>
             {
                 JsonProc.Unmarshal<ProtoTest>(new object(), out var _, out var _);
             });
         }
 
-        private string key = "thisakey";
+        public static IEnumerable EncodeCases
+        {
+            get
+            {
+                yield return new TestCaseData(ProtoProc.Marshal(1, new ProtoTest { Data = "test1" }));
+                yield return new TestCaseData(ProtoProc.Marshal(2, new ProtoTest { Data = "test2" }));
+            }
+        }
+
+        public static IEnumerable ProcessCases
+        {
+            get
+            {
+                yield return new TestCaseData(ProtoProc.Marshal(1, new ProtoTest { Data = "test1" }));
+                yield return new TestCaseData(ProtoProc.Marshal(2, new ProtoTest { Data = "test2" }));
+            }
+        }
+
+        public static IEnumerable MarshalCases
+        {
+            get
+            {
+                yield return new TestCaseData(1, new ProtoTest { Data = "test1" });
+                yield return new TestCaseData(2, new ProtoTest { Data = "test2" });
+            }
+        }
     }
 }

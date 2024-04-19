@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Text;
 using NUnit.Framework;
 
@@ -6,14 +7,23 @@ namespace Mizugo
     internal class TestBase64
     {
         [Test]
-        public void Base64_()
+        [TestCaseSource("Base64Cases")]
+        public void Base64_(object input)
         {
-            var encode = Base64.Encode(src);
-            var output = Base64.Decode(encode);
+            var target = new Base64();
+            var encode = target.Encode(input);
+            var output = target.Decode(encode);
 
-            Assert.AreEqual(src, output);
+            Assert.AreEqual(input, output);
         }
 
-        private byte[] src = Encoding.UTF8.GetBytes("testdata");
+        public static IEnumerable Base64Cases
+        {
+            get
+            {
+                yield return new TestCaseData(Encoding.UTF8.GetBytes("testdata"));
+                yield return new TestCaseData(Encoding.UTF8.GetBytes("somedata"));
+            }
+        }
     }
 }
