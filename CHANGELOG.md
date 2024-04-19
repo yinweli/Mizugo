@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unrelease]
 - 新增單元測試工具集`trials`
 - 新增信號調度組件`triggers`
+- 新增產生錯誤工具
 - 更新網路組件
 
 ## [1.0.0] - 2024-04-15
