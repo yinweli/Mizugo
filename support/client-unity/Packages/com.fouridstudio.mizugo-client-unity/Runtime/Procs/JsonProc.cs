@@ -1,5 +1,4 @@
 using System;
-using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
 
@@ -11,53 +10,32 @@ namespace Mizugo
     using MessageID = Int32;
 
     /// <summary>
-    /// json處理器, 封包結構使用JsonMsg, 可以選擇是否啟用base64編碼或是des-cbc加密
+    /// json處理器, 封包結構使用JsonMs
     /// 訊息定義: support/proto/mizugo/msg-go/msgs-json/jsonmsg.go
     /// 訊息定義: support/proto/mizugo/msg-cs/msgs-json/Jsonmsg.cs
-    /// 封包編碼: json編碼成位元陣列, (可選)des-cbc加密, (可選)base64編碼
-    /// 封包解碼: (可選)base64解碼, (可選)des-cbc解密, json解碼成訊息結構
     /// </summary>
-    public partial class JsonProc : Procmgr
+    public partial class JsonProc : Procmgr, ICodec
     {
-        /// <summary>
-        /// json使用的填充模式
-        /// </summary>
-        private const PaddingMode padding = PaddingMode.PKCS7;
-
-        public override byte[] Encode(object input)
+        public object Encode(object input)
         {
             if (input == null)
                 throw new ArgumentNullException("input");
 
-            if (input is not JsonMsg message)
-                throw new InvalidMessageException("encode");
+            if (input is not JsonMsg temp)
+                throw new ArgumentException("input");
 
-            var json = JsonConvert.SerializeObject(message);
-            var output = Encoding.UTF8.GetBytes(json);
-
-            if (desCBC)
-                output = DesCBC.Encrypt(padding, desKey, desIV, output);
-
-            if (base64)
-                output = Base64.Encode(output);
-
-            return output;
+            return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp));
         }
 
-        public override object Decode(byte[] input)
+        public object Decode(object input)
         {
             if (input == null)
                 throw new ArgumentNullException("input");
 
-            if (base64)
-                input = Base64.Decode(input);
+            if (input is not byte[] temp)
+                throw new ArgumentException("input");
 
-            if (desCBC)
-                input = DesCBC.Decrypt(padding, desKey, desIV, input);
-
-            var json = Encoding.UTF8.GetString(input);
-            var message = JsonConvert.DeserializeObject<JsonMsg>(json);
-            return message;
+            return JsonConvert.DeserializeObject<JsonMsg>(Encoding.UTF8.GetString(temp));
         }
 
         public override void Process(object input)
@@ -66,7 +44,7 @@ namespace Mizugo
                 throw new ArgumentNullException("input");
 
             if (input is not JsonMsg message)
-                throw new InvalidMessageException("process");
+                throw new ArgumentException("input");
 
             var process = Get(message.MessageID);
 
@@ -75,40 +53,6 @@ namespace Mizugo
 
             process(message);
         }
-
-        public JsonProc SetBase64(bool enable)
-        {
-            base64 = enable;
-            return this;
-        }
-
-        public JsonProc SetDesCBC(bool enable, string key, string iv)
-        {
-            desCBC = enable;
-            desKey = Encoding.UTF8.GetBytes(key);
-            desIV = Encoding.UTF8.GetBytes(iv);
-            return this;
-        }
-
-        /// <summary>
-        /// 是否啟用base64
-        /// </summary>
-        private bool base64 = false;
-
-        /// <summary>
-        /// 是否啟用des-cbc加密
-        /// </summary>
-        private bool desCBC = false;
-
-        /// <summary>
-        /// des密鑰
-        /// </summary>
-        private byte[] desKey = null;
-
-        /// <summary>
-        /// des初始向量
-        /// </summary>
-        private byte[] desIV = null;
     }
 
     public partial class JsonProc
@@ -142,7 +86,7 @@ namespace Mizugo
                 throw new ArgumentNullException("input");
 
             if (input is not JsonMsg data)
-                throw new InvalidMessageException("unmarshal");
+                throw new ArgumentException("input");
 
             var json = Encoding.UTF8.GetString(data.Message);
 

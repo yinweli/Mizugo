@@ -14,80 +14,42 @@ namespace Mizugo
     {
         [Test]
         [TestCaseSource("EncodeCases")]
-        public void Encode(JsonMsg message)
+        public void EncodeDecode(JsonMsg message)
         {
-            var proc = new JsonProc();
-            var encode = proc.Encode(message);
-            var decode = proc.Decode(encode);
+            var target = new JsonProc();
+            var encode = target.Encode(message);
+            var decode = target.Decode(encode);
 
             Assert.IsTrue(TestUtil.EqualsByJson(message, decode));
-        }
-
-        [Test]
-        [TestCaseSource("EncodeCases")]
-        public void EncodeBase64(JsonMsg message)
-        {
-            var proc = new JsonProc().SetBase64(true);
-            var encode = proc.Encode(message);
-            var decode = proc.Decode(encode);
-
-            Assert.IsTrue(TestUtil.EqualsByJson(message, decode));
-        }
-
-        [Test]
-        [TestCaseSource("EncodeCases")]
-        public void EncodeDesCBC(JsonMsg message)
-        {
-            var proc = new JsonProc().SetDesCBC(true, key, key);
-            var encode = proc.Encode(message);
-            var decode = proc.Decode(encode);
-
-            Assert.IsTrue(TestUtil.EqualsByJson(message, decode));
-        }
-
-        [Test]
-        [TestCaseSource("EncodeCases")]
-        public void EncodeAll(JsonMsg message)
-        {
-            var proc = new JsonProc().SetBase64(true).SetDesCBC(true, key, key);
-            var encode = proc.Encode(message);
-            var decode = proc.Decode(encode);
-
-            Assert.IsTrue(TestUtil.EqualsByJson(message, decode));
-        }
-
-        public static IEnumerable EncodeCases
-        {
-            get
-            {
-                yield return new TestCaseData(JsonProc.Marshal(1, Encoding.UTF8.GetBytes("test")));
-                yield return new TestCaseData(JsonProc.Marshal(2, new byte[] { 0, 1, 2, }));
-            }
         }
 
         [Test]
         public void EncodeFailed()
         {
-            var proc = new JsonProc();
+            var target = new JsonProc();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                proc.Encode(null);
+                target.Encode(null);
             });
-            Assert.Throws<InvalidMessageException>(() =>
+            Assert.Throws<ArgumentException>(() =>
             {
-                proc.Encode(new object());
+                target.Encode(new object());
             });
         }
 
         [Test]
         public void DecodeFailed()
         {
-            var proc = new JsonProc();
+            var target = new JsonProc();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                proc.Decode(null);
+                target.Decode(null);
+            });
+            Assert.Throws<ArgumentException>(() =>
+            {
+                target.Encode(new object());
             });
         }
 
@@ -95,45 +57,36 @@ namespace Mizugo
         [TestCaseSource("ProcessCases")]
         public void Process(JsonMsg message)
         {
-            var proc = new JsonProc();
+            var target = new JsonProc();
             var valid = false;
 
-            proc.Add(
+            target.Add(
                 message.MessageID,
                 (object param) =>
                 {
                     valid = TestUtil.EqualsByJson(message, param);
                 }
             );
-            proc.Process(message);
+            target.Process(message);
             Assert.IsTrue(valid);
-        }
-
-        public static IEnumerable ProcessCases
-        {
-            get
-            {
-                yield return new TestCaseData(JsonProc.Marshal(1, Encoding.UTF8.GetBytes("test")));
-                yield return new TestCaseData(JsonProc.Marshal(2, new byte[] { 0, 1, 2, }));
-            }
         }
 
         [Test]
         public void ProcessFailed()
         {
-            var proc = new JsonProc();
+            var target = new JsonProc();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                proc.Process(null);
+                target.Process(null);
             });
-            Assert.Throws<InvalidMessageException>(() =>
+            Assert.Throws<ArgumentException>(() =>
             {
-                proc.Process(new object());
+                target.Process(new object());
             });
             Assert.Throws<UnprocessException>(() =>
             {
-                proc.Process(new JsonMsg { MessageID = 1 });
+                target.Process(new JsonMsg { MessageID = 1 });
             });
         }
 
@@ -146,15 +99,6 @@ namespace Mizugo
             JsonProc.Unmarshal<JsonTest>(marshal, out var resultID, out var result);
             Assert.AreEqual(messageID, resultID);
             Assert.IsTrue(TestUtil.EqualsByJson(message, result));
-        }
-
-        public static IEnumerable MarshalCases
-        {
-            get
-            {
-                yield return new TestCaseData(1, new JsonTest { Data = "test1" });
-                yield return new TestCaseData(2, new JsonTest { Data = "test2" });
-            }
         }
 
         [Test]
@@ -173,12 +117,37 @@ namespace Mizugo
             {
                 JsonProc.Unmarshal<JsonTest>(null, out var _, out var _);
             });
-            Assert.Throws<InvalidMessageException>(() =>
+            Assert.Throws<ArgumentException>(() =>
             {
                 JsonProc.Unmarshal<JsonTest>(new object(), out var _, out var _);
             });
         }
 
-        private string key = "thisakey";
+        public static IEnumerable EncodeCases
+        {
+            get
+            {
+                yield return new TestCaseData(JsonProc.Marshal(1, Encoding.UTF8.GetBytes("test")));
+                yield return new TestCaseData(JsonProc.Marshal(2, new byte[] { 0, 1, 2, }));
+            }
+        }
+
+        public static IEnumerable ProcessCases
+        {
+            get
+            {
+                yield return new TestCaseData(JsonProc.Marshal(1, Encoding.UTF8.GetBytes("test")));
+                yield return new TestCaseData(JsonProc.Marshal(2, new byte[] { 0, 1, 2, }));
+            }
+        }
+
+        public static IEnumerable MarshalCases
+        {
+            get
+            {
+                yield return new TestCaseData(1, new JsonTest { Data = "test1" });
+                yield return new TestCaseData(2, new JsonTest { Data = "test2" });
+            }
+        }
     }
 }
