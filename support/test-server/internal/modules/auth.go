@@ -40,7 +40,6 @@ func (this *Auth) Awake() error {
 func (this *Auth) procMLoginQ(message any) {
 	rec := features.MeterLogin.Rec()
 	defer rec()
-
 	_, msg, err := procs.JsonUnmarshal[msgs.MLoginQ](message)
 
 	if err != nil {
@@ -91,7 +90,6 @@ func (this *Auth) sendMLoginA(from *msgs.MLoginQ, errID msgs.ErrID, token string
 func (this *Auth) procMUpdateQ(message any) {
 	rec := features.MeterUpdate.Rec()
 	defer rec()
-
 	_, msg, err := procs.JsonUnmarshal[msgs.MUpdateQ](message)
 
 	if err != nil {

@@ -34,7 +34,6 @@ func (this *Proto) Awake() error {
 func (this *Proto) procMProtoQ(message any) {
 	rec := features.MeterProto.Rec()
 	defer rec()
-
 	_, msg, err := procs.ProtoUnmarshal[msgs.MProtoQ](message)
 
 	if err != nil {

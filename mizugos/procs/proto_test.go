@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/yinweli/Mizugo/mizugos/cryptos"
 	"github.com/yinweli/Mizugo/mizugos/msgs"
 	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
@@ -37,98 +36,6 @@ func (this *SuiteProto) TestEncode() {
 	}
 	target := NewProto()
 	assert.NotNil(this.T(), target)
-	input, _ := ProtoMarshal(messageID, message)
-
-	encode, err := target.Encode(input)
-	assert.Nil(this.T(), err)
-	assert.NotNil(this.T(), encode)
-
-	_, err = target.Encode(nil)
-	assert.NotNil(this.T(), err)
-
-	_, err = target.Encode("!?")
-	assert.NotNil(this.T(), err)
-
-	decode, err := target.Decode(encode)
-	assert.Nil(this.T(), err)
-	assert.NotNil(this.T(), decode)
-	assert.True(this.T(), proto.Equal(input, decode.(*msgs.ProtoMsg)))
-
-	_, err = target.Decode(nil)
-	assert.NotNil(this.T(), err)
-
-	_, err = target.Decode([]byte("unknown encode"))
-	assert.NotNil(this.T(), err)
-}
-
-func (this *SuiteProto) TestEncodeBase64() {
-	messageID := MessageID(1)
-	message := &msgs.ProtoTest{
-		Data: "proto test",
-	}
-	target := NewProto().Base64(true)
-	input, _ := ProtoMarshal(messageID, message)
-
-	encode, err := target.Encode(input)
-	assert.Nil(this.T(), err)
-	assert.NotNil(this.T(), encode)
-
-	_, err = target.Encode(nil)
-	assert.NotNil(this.T(), err)
-
-	_, err = target.Encode("!?")
-	assert.NotNil(this.T(), err)
-
-	decode, err := target.Decode(encode)
-	assert.Nil(this.T(), err)
-	assert.NotNil(this.T(), decode)
-	assert.True(this.T(), proto.Equal(input, decode.(*msgs.ProtoMsg)))
-
-	_, err = target.Decode(nil)
-	assert.NotNil(this.T(), err)
-
-	_, err = target.Decode([]byte("unknown encode"))
-	assert.NotNil(this.T(), err)
-}
-
-func (this *SuiteProto) TestEncodeDesCBC() {
-	key := cryptos.RandDesKeyString()
-	messageID := MessageID(1)
-	message := &msgs.ProtoTest{
-		Data: "proto test",
-	}
-	target := NewProto().DesCBC(true, key, key) // 這裡偷懶把key跟iv都設為key
-	input, _ := ProtoMarshal(messageID, message)
-
-	encode, err := target.Encode(input)
-	assert.Nil(this.T(), err)
-	assert.NotNil(this.T(), encode)
-
-	_, err = target.Encode(nil)
-	assert.NotNil(this.T(), err)
-
-	_, err = target.Encode("!?")
-	assert.NotNil(this.T(), err)
-
-	decode, err := target.Decode(encode)
-	assert.Nil(this.T(), err)
-	assert.NotNil(this.T(), decode)
-	assert.True(this.T(), proto.Equal(input, decode.(*msgs.ProtoMsg)))
-
-	_, err = target.Decode(nil)
-	assert.NotNil(this.T(), err)
-
-	_, err = target.Decode([]byte("unknown encode"))
-	assert.NotNil(this.T(), err)
-}
-
-func (this *SuiteProto) TestEncodeAll() {
-	key := cryptos.RandDesKeyString()
-	messageID := MessageID(1)
-	message := &msgs.ProtoTest{
-		Data: "proto test",
-	}
-	target := NewProto().Base64(true).DesCBC(true, key, key) // 這裡偷懶把key跟iv都設為key
 	input, _ := ProtoMarshal(messageID, message)
 
 	encode, err := target.Encode(input)
@@ -209,81 +116,8 @@ func BenchmarkProtoEncode(b *testing.B) {
 	} // for
 }
 
-func BenchmarkProtoEncodeBase64(b *testing.B) {
-	target := NewProto().Base64(true)
-	input, _ := ProtoMarshal(1, &msgs.ProtoTest{
-		Data: "benchmark encode",
-	})
-
-	for i := 0; i < b.N; i++ {
-		_, _ = target.Encode(input)
-	} // for
-}
-
-func BenchmarkProtoEncodeDesCBC(b *testing.B) {
-	key := cryptos.RandDesKeyString()
-	target := NewProto().DesCBC(true, key, key)
-	input, _ := ProtoMarshal(1, &msgs.ProtoTest{
-		Data: "benchmark encode",
-	})
-
-	for i := 0; i < b.N; i++ {
-		_, _ = target.Encode(input)
-	} // for
-}
-
-func BenchmarkProtoEncodeAll(b *testing.B) {
-	key := cryptos.RandDesKeyString()
-	target := NewProto().Base64(true).DesCBC(true, key, key)
-	input, _ := ProtoMarshal(1, &msgs.ProtoTest{
-		Data: "benchmark encode",
-	})
-
-	for i := 0; i < b.N; i++ {
-		_, _ = target.Encode(input)
-	} // for
-}
-
 func BenchmarkProtoDecode(b *testing.B) {
 	target := NewProto()
-	input, _ := ProtoMarshal(1, &msgs.ProtoTest{
-		Data: "benchmark decode",
-	})
-	encode, _ := target.Encode(input)
-
-	for i := 0; i < b.N; i++ {
-		_, _ = target.Decode(encode)
-	} // for
-}
-
-func BenchmarkProtoDecodeBase64(b *testing.B) {
-	target := NewProto().Base64(true)
-	input, _ := ProtoMarshal(1, &msgs.ProtoTest{
-		Data: "benchmark decode",
-	})
-	encode, _ := target.Encode(input)
-
-	for i := 0; i < b.N; i++ {
-		_, _ = target.Decode(encode)
-	} // for
-}
-
-func BenchmarkProtoDecodeDesCBC(b *testing.B) {
-	key := cryptos.RandDesKeyString()
-	target := NewProto().DesCBC(true, key, key)
-	input, _ := ProtoMarshal(1, &msgs.ProtoTest{
-		Data: "benchmark decode",
-	})
-	encode, _ := target.Encode(input)
-
-	for i := 0; i < b.N; i++ {
-		_, _ = target.Decode(encode)
-	} // for
-}
-
-func BenchmarkProtoDecodeAll(b *testing.B) {
-	key := cryptos.RandDesKeyString()
-	target := NewProto().Base64(true).DesCBC(true, key, key)
 	input, _ := ProtoMarshal(1, &msgs.ProtoTest{
 		Data: "benchmark decode",
 	})

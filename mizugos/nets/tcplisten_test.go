@@ -3,7 +3,6 @@ package nets
 import (
 	"net"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -34,33 +33,33 @@ func (this *SuiteTCPListen) TestTCPListen() {
 	testl := newTester(true, true, true)
 	target := NewTCPListen(addr.ip, addr.port)
 	assert.NotNil(this.T(), target)
-	target.Listen(testl.bind, testl.unbind, testl.wrong)
+	target.Listen(testl.Bind, testl.Unbind, testl.Wrong)
 
 	testc := newTester(true, true, true)
 	client := NewTCPConnect(addr.ip, addr.port, trials.Timeout)
-	client.Connect(testc.bind, testc.unbind, testc.wrong)
+	client.Connect(testc.Bind, testc.Unbind, testc.Wrong)
 
-	time.Sleep(trials.Timeout)
-	assert.True(this.T(), testl.valid())
-	assert.True(this.T(), testc.valid())
+	trials.WaitTimeout()
+	assert.True(this.T(), testl.Valid())
+	assert.True(this.T(), testc.Valid())
 
-	time.Sleep(trials.Timeout)
-	testc.get().Stop()
+	trials.WaitTimeout()
+	testc.Get().Stop()
 	assert.Nil(this.T(), target.Stop())
 
 	testl = newTester(true, true, true)
 	target = NewTCPListen("!?", addr.port)
-	target.Listen(testl.bind, testl.unbind, testl.wrong)
+	target.Listen(testl.Bind, testl.Unbind, testl.Wrong)
 
-	time.Sleep(trials.Timeout)
-	assert.False(this.T(), testl.valid())
+	trials.WaitTimeout()
+	assert.False(this.T(), testl.Valid())
 
 	testl = newTester(true, true, true)
 	target = NewTCPListen("192.168.0.1", addr.port) // 故意要接聽錯誤位址才會引發錯誤
-	target.Listen(testl.bind, testl.unbind, testl.wrong)
+	target.Listen(testl.Bind, testl.Unbind, testl.Wrong)
 
-	time.Sleep(trials.Timeout)
-	assert.False(this.T(), testl.valid())
+	trials.WaitTimeout()
+	assert.False(this.T(), testl.Valid())
 
 	target = NewTCPListen(addr.ip, addr.port)
 	assert.Equal(this.T(), net.JoinHostPort(addr.ip, addr.port), target.Address())

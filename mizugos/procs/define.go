@@ -15,10 +15,10 @@ package procs
 // mizugo提供的預設處理器有 Json, Proto
 type Processor interface {
 	// Encode 封包編碼
-	Encode(input any) (output []byte, err error)
+	Encode(input any) (output any, err error)
 
 	// Decode 封包解碼
-	Decode(input []byte) (output any, err error)
+	Decode(input any) (output any, err error)
 
 	// Process 訊息處理
 	Process(input any) error

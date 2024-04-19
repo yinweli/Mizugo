@@ -28,12 +28,10 @@ func NewNetmgr() *Netmgr {
 //   - 建立實體
 //   - 實體設置
 //   - 模組設置
-//   - 會話設置
-//   - 處理(與處理函式)設置
+//   - 處理設置
+//   - 會話設置(設定發布事件處理, 錯誤處理, 編碼/解碼, 擁有者)
 //   - 實體初始化
 //   - 標籤設置
-//   - 為會話物件設置實體
-//   - 回傳 Bundle 物件, 其中要設置好編碼/解碼/發布事件函式, 可以直接回傳實體的Bundle函式結果
 //   - 錯誤處理
 //
 // Unbind 通常要做的流程如下
@@ -111,7 +109,7 @@ func (this *Netmgr) Status() *Status {
 
 // wrapperBind 包裝綁定處理
 func (this *Netmgr) wrapperBind(bind Bind) Bind {
-	return func(session Sessioner) *Bundle {
+	return func(session Sessioner) bool {
 		this.sessionmgr.add(session)
 		return bind.Do(session)
 	}
@@ -143,7 +141,6 @@ type connectmgr struct {
 func (this *connectmgr) add(connect Connecter) ConnectID {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-
 	this.connectID++
 	this.data[this.connectID] = connect
 	return this.connectID
@@ -153,7 +150,6 @@ func (this *connectmgr) add(connect Connecter) ConnectID {
 func (this *connectmgr) del(connectID ConnectID) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-
 	delete(this.data, connectID)
 }
 
@@ -161,7 +157,6 @@ func (this *connectmgr) del(connectID ConnectID) {
 func (this *connectmgr) clear() {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-
 	this.data = map[ConnectID]Connecter{}
 }
 
@@ -169,7 +164,6 @@ func (this *connectmgr) clear() {
 func (this *connectmgr) get(connectID ConnectID) Connecter {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
-
 	return this.data[connectID]
 }
 
@@ -177,7 +171,6 @@ func (this *connectmgr) get(connectID ConnectID) Connecter {
 func (this *connectmgr) count() int {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
-
 	return len(this.data)
 }
 
@@ -199,7 +192,6 @@ type listenmgr struct {
 func (this *listenmgr) add(listen Listener) ListenID {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-
 	this.listenID++
 	this.data[this.listenID] = listen
 	return this.listenID
@@ -232,7 +224,6 @@ func (this *listenmgr) clear() {
 func (this *listenmgr) get(listenID ListenID) Listener {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
-
 	return this.data[listenID]
 }
 
@@ -240,7 +231,6 @@ func (this *listenmgr) get(listenID ListenID) Listener {
 func (this *listenmgr) count() int {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
-
 	return len(this.data)
 }
 
@@ -261,7 +251,6 @@ type sessionmgr struct {
 func (this *sessionmgr) add(session Sessioner) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-
 	this.data.Add(session)
 }
 
@@ -269,7 +258,6 @@ func (this *sessionmgr) add(session Sessioner) {
 func (this *sessionmgr) del(session Sessioner) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-
 	session.Stop()
 	this.data.Remove(session)
 }
@@ -290,6 +278,5 @@ func (this *sessionmgr) clear() {
 func (this *sessionmgr) count() int {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
-
 	return this.data.Size()
 }

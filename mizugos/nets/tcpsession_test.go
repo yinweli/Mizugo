@@ -2,7 +2,6 @@ package nets
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -34,182 +33,181 @@ func (this *SuiteTCPSession) TestTCPSession() {
 
 	testl := newTester(true, true, true)
 	listen := NewTCPListen(addr.ip, addr.port)
-	listen.Listen(testl.bind, testl.unbind, testl.wrong)
+	listen.Listen(testl.Bind, testl.Unbind, testl.Wrong)
 
 	testc := newTester(true, true, true)
 	client := NewTCPConnect(addr.ip, addr.port, trials.Timeout)
-	client.Connect(testc.bind, testc.unbind, testc.wrong)
+	client.Connect(testc.Bind, testc.Unbind, testc.Wrong)
 
-	time.Sleep(trials.Timeout)
-	assert.True(this.T(), testl.valid())
-	assert.True(this.T(), testc.valid())
+	trials.WaitTimeout()
+	assert.True(this.T(), testl.Valid())
+	assert.True(this.T(), testc.Valid())
 
-	time.Sleep(trials.Timeout)
-	assert.NotNil(this.T(), testl.get().RemoteAddr())
-	assert.NotNil(this.T(), testl.get().LocalAddr())
-	assert.NotNil(this.T(), testc.get().RemoteAddr())
-	assert.NotNil(this.T(), testc.get().LocalAddr())
+	trials.WaitTimeout()
+	assert.NotNil(this.T(), testl.Get().RemoteAddr())
+	assert.NotNil(this.T(), testl.Get().LocalAddr())
+	assert.NotNil(this.T(), testc.Get().RemoteAddr())
+	assert.NotNil(this.T(), testc.Get().LocalAddr())
 
-	time.Sleep(trials.Timeout)
+	trials.WaitTimeout()
 	owner := "owner"
-	testc.get().SetOwner(owner)
-	assert.Equal(this.T(), owner, testc.get().GetOwner())
+	testc.Get().SetOwner(owner)
+	assert.Equal(this.T(), owner, testc.Get().GetOwner())
 
-	time.Sleep(trials.Timeout)
-	testc.get().StopWait()
+	trials.WaitTimeout()
+	testc.Get().StopWait()
 	assert.Nil(this.T(), listen.Stop())
 }
 
 func (this *SuiteTCPSession) TestStart() {
-	addr := host{port: "9002"}
+	addr := host{port: "9003"}
 	testl := newTester(true, true, true)
 	listen := NewTCPListen(addr.ip, addr.port)
-	listen.Listen(testl.bind, testl.unbind, testl.wrong)
+	listen.Listen(testl.Bind, testl.Unbind, testl.Wrong)
 
 	testc1 := newTester(true, true, true)
 	client1 := NewTCPConnect(addr.ip, addr.port, trials.Timeout)
-	client1.Connect(testc1.bind, testc1.unbind, testc1.wrong)
+	client1.Connect(testc1.Bind, testc1.Unbind, testc1.Wrong)
 
 	testc2 := newTester(true, true, true)
 	client2 := NewTCPConnect(addr.ip, addr.port, trials.Timeout)
-	client2.Connect(testc2.bind, testc2.unbind, testc2.wrong)
+	client2.Connect(testc2.Bind, testc2.Unbind, testc2.Wrong)
 
-	time.Sleep(trials.Timeout)
-	assert.True(this.T(), testl.valid())
-	assert.True(this.T(), testl.validBind())
-	assert.True(this.T(), testc1.valid())
-	assert.True(this.T(), testc1.validBind())
-	assert.True(this.T(), testc1.validSession())
-	assert.True(this.T(), testc2.valid())
-	assert.True(this.T(), testc2.validBind())
-	assert.True(this.T(), testc2.validSession())
+	trials.WaitTimeout()
+	assert.True(this.T(), testl.Valid())
+	assert.True(this.T(), testl.ValidBind())
+	assert.True(this.T(), testc1.Valid())
+	assert.True(this.T(), testc1.ValidBind())
+	assert.True(this.T(), testc1.ValidSession())
+	assert.True(this.T(), testc2.Valid())
+	assert.True(this.T(), testc2.ValidBind())
+	assert.True(this.T(), testc2.ValidSession())
 
-	time.Sleep(trials.Timeout)
-	testc1.get().Stop()
-	testc2.get().StopWait()
+	trials.WaitTimeout()
+	testc1.Get().Stop()
+	testc2.Get().StopWait()
 	assert.Nil(this.T(), listen.Stop())
 
-	time.Sleep(trials.Timeout)
-	assert.True(this.T(), testc1.validUnbind())
-	assert.True(this.T(), testc1.validStart())
-	assert.True(this.T(), testc1.validStop())
-	assert.False(this.T(), testc1.validSession())
-	assert.True(this.T(), testc2.validUnbind())
-	assert.True(this.T(), testc2.validStart())
-	assert.True(this.T(), testc2.validStop())
-	assert.False(this.T(), testc2.validSession())
+	trials.WaitTimeout()
+	assert.True(this.T(), testc1.ValidUnbind())
+	assert.True(this.T(), testc1.ValidStart())
+	assert.True(this.T(), testc1.ValidStop())
+	assert.False(this.T(), testc1.ValidSession())
+	assert.True(this.T(), testc2.ValidUnbind())
+	assert.True(this.T(), testc2.ValidStart())
+	assert.True(this.T(), testc2.ValidStop())
+	assert.False(this.T(), testc2.ValidSession())
 }
 
 func (this *SuiteTCPSession) TestStartFailed() {
-	addr := host{port: "9002"}
+	addr := host{port: "9004"}
 	testl := newTester(false, true, true)
 	listen := NewTCPListen(addr.ip, addr.port)
-	listen.Listen(testl.bind, testl.unbind, testl.wrong)
+	listen.Listen(testl.Bind, testl.Unbind, testl.Wrong)
 
 	testc := newTester(true, true, true)
 	client := NewTCPConnect(addr.ip, addr.port, trials.Timeout)
-	client.Connect(testc.bind, testc.unbind, testc.wrong)
+	client.Connect(testc.Bind, testc.Unbind, testc.Wrong)
 
-	time.Sleep(trials.Timeout)
-	assert.True(this.T(), testl.valid())
-	assert.False(this.T(), testc.valid())
+	trials.WaitTimeout()
+	assert.True(this.T(), testl.ValidUnbind())
 
-	time.Sleep(trials.Timeout)
+	trials.WaitTimeout()
 	assert.Nil(this.T(), listen.Stop())
 }
 
 func (this *SuiteTCPSession) TestSend() {
-	addr := host{port: "9002"}
+	addr := host{port: "9005"}
 	message := "message"
 	testl := newTester(true, true, true)
 	listen := NewTCPListen(addr.ip, addr.port)
-	listen.Listen(testl.bind, testl.unbind, testl.wrong)
+	listen.Listen(testl.Bind, testl.Unbind, testl.Wrong)
 
 	testc := newTester(true, true, true)
 	client := NewTCPConnect(addr.ip, addr.port, trials.Timeout)
-	client.Connect(testc.bind, testc.unbind, testc.wrong)
+	client.Connect(testc.Bind, testc.Unbind, testc.Wrong)
 
-	time.Sleep(trials.Timeout)
-	assert.True(this.T(), testl.valid())
-	assert.True(this.T(), testc.valid())
+	trials.WaitTimeout()
+	assert.True(this.T(), testl.Valid())
+	assert.True(this.T(), testc.Valid())
 
-	time.Sleep(trials.Timeout)
-	testl.get().Send(message)
-	time.Sleep(trials.Timeout)
-	assert.True(this.T(), testl.validEncode())
-	assert.True(this.T(), testl.validSend())
-	assert.True(this.T(), testc.validDecode())
-	assert.True(this.T(), testc.validRecv())
-	assert.True(this.T(), testc.validMessage(message))
+	trials.WaitTimeout()
+	testl.Get().Send(message)
+	trials.WaitTimeout()
+	assert.True(this.T(), testl.ValidEncode())
+	assert.True(this.T(), testl.ValidSend())
+	assert.True(this.T(), testc.ValidDecode())
+	assert.True(this.T(), testc.ValidRecv())
+	assert.True(this.T(), testc.ValidMessage(message))
 
-	time.Sleep(trials.Timeout)
-	testc.get().Send(message)
-	time.Sleep(trials.Timeout)
-	assert.True(this.T(), testc.validEncode())
-	assert.True(this.T(), testc.validSend())
-	assert.True(this.T(), testl.validDecode())
-	assert.True(this.T(), testl.validRecv())
-	assert.True(this.T(), testl.validMessage(message))
+	trials.WaitTimeout()
+	testc.Get().Send(message)
+	trials.WaitTimeout()
+	assert.True(this.T(), testc.ValidEncode())
+	assert.True(this.T(), testc.ValidSend())
+	assert.True(this.T(), testl.ValidDecode())
+	assert.True(this.T(), testl.ValidRecv())
+	assert.True(this.T(), testl.ValidMessage(message))
 
-	time.Sleep(trials.Timeout)
-	testc.get().Send("")
-	time.Sleep(trials.Timeout)
-	assert.True(this.T(), testc.valid())
+	trials.WaitTimeout()
+	testc.Get().Send("")
+	trials.WaitTimeout()
+	assert.True(this.T(), testc.Valid())
 
-	time.Sleep(trials.Timeout)
-	testl.get().Send("!?")
-	time.Sleep(trials.Timeout)
-	assert.False(this.T(), testc.validMessage(message))
+	trials.WaitTimeout()
+	testl.Get().Send("!?")
+	trials.WaitTimeout()
+	assert.False(this.T(), testc.ValidMessage(message))
 
-	time.Sleep(trials.Timeout)
-	testc.get().StopWait()
+	trials.WaitTimeout()
+	testc.Get().StopWait()
 	assert.Nil(this.T(), listen.Stop())
 }
 
-func (this *SuiteTCPSession) TestEncodeFailed() {
-	addr := host{port: "9002"}
+func (this *SuiteTCPSession) TestSendFailed() {
+	addr := host{port: "9006"}
 	message := "message"
 	testl := newTester(true, false, true)
 	listen := NewTCPListen(addr.ip, addr.port)
-	listen.Listen(testl.bind, testl.unbind, testl.wrong)
+	listen.Listen(testl.Bind, testl.Unbind, testl.Wrong)
 
 	testc := newTester(true, true, true)
 	client := NewTCPConnect(addr.ip, addr.port, trials.Timeout)
-	client.Connect(testc.bind, testc.unbind, testc.wrong)
+	client.Connect(testc.Bind, testc.Unbind, testc.Wrong)
 
-	time.Sleep(trials.Timeout)
-	assert.True(this.T(), testl.valid())
-	assert.True(this.T(), testc.valid())
+	trials.WaitTimeout()
+	assert.True(this.T(), testl.Valid())
+	assert.True(this.T(), testc.Valid())
 
-	time.Sleep(trials.Timeout)
-	testl.get().Send(message)
-	time.Sleep(trials.Timeout)
-	assert.False(this.T(), testl.valid())
+	trials.WaitTimeout()
+	testl.Get().Send(message)
+	trials.WaitTimeout()
+	assert.False(this.T(), testl.Valid())
 
-	time.Sleep(trials.Timeout)
+	trials.WaitTimeout()
 	assert.Nil(this.T(), listen.Stop()) // 因為編碼失敗, 會直接導致連接中斷, 所以不必關閉客戶端連接
 }
 
-func (this *SuiteTCPSession) TestDecodeFailed() {
-	addr := host{port: "9002"}
+func (this *SuiteTCPSession) TestRecvFailed() {
+	addr := host{port: "9007"}
 	message := "message"
-	testl := newTester(true, true, true)
+	testl := newTester(true, true, false)
 	listen := NewTCPListen(addr.ip, addr.port)
-	listen.Listen(testl.bind, testl.unbind, testl.wrong)
+	listen.Listen(testl.Bind, testl.Unbind, testl.Wrong)
 
-	testc := newTester(true, true, false)
+	testc := newTester(true, true, true)
 	client := NewTCPConnect(addr.ip, addr.port, trials.Timeout)
-	client.Connect(testc.bind, testc.unbind, testc.wrong)
+	client.Connect(testc.Bind, testc.Unbind, testc.Wrong)
 
-	time.Sleep(trials.Timeout)
-	assert.True(this.T(), testl.valid())
-	assert.True(this.T(), testc.valid())
+	trials.WaitTimeout()
+	assert.True(this.T(), testl.Valid())
+	assert.True(this.T(), testc.Valid())
 
-	time.Sleep(trials.Timeout)
-	testl.get().Send(message)
-	time.Sleep(trials.Timeout)
-	assert.False(this.T(), testc.valid())
+	trials.WaitTimeout()
+	testc.Get().Send(message)
+	trials.WaitTimeout()
+	assert.False(this.T(), testl.Valid())
 
-	time.Sleep(trials.Timeout)
-	assert.Nil(this.T(), listen.Stop()) // 因為解碼失敗, 會直接導致連接中斷, 所以不必關閉客戶端連接
+	trials.WaitTimeout()
+	assert.Nil(this.T(), listen.Stop()) // 因為編碼失敗, 會直接導致連接中斷, 所以不必關閉客戶端連接
 }

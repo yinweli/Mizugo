@@ -2,7 +2,6 @@ package mizugos
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -30,7 +29,7 @@ func (this *SuiteMizugo) TearDownSuite() {
 
 func (this *SuiteMizugo) TestMizugo() {
 	Start()
-	time.Sleep(trials.Timeout)
+	trials.WaitTimeout()
 	assert.NotNil(this.T(), Config)
 	assert.NotNil(this.T(), Metrics)
 	assert.NotNil(this.T(), Logger)
@@ -41,7 +40,7 @@ func (this *SuiteMizugo) TestMizugo() {
 	assert.NotNil(this.T(), Pool)
 	assert.NotNil(this.T(), Trigger)
 	Stop()
-	time.Sleep(trials.Timeout)
+	trials.WaitTimeout()
 	assert.Nil(this.T(), Config)
 	assert.Nil(this.T(), Metrics)
 	assert.Nil(this.T(), Logger)

@@ -3,7 +3,6 @@ package entitys
 import (
 	"sync/atomic"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -52,7 +51,7 @@ func (this *SuiteEventmap) TestPubOnce() {
 	})
 
 	target.PubOnce(value, value)
-	time.Sleep(trials.Timeout)
+	trials.WaitTimeout()
 	assert.True(this.T(), valid.Load())
 
 	target.Finalize()
@@ -73,7 +72,7 @@ func (this *SuiteEventmap) TestPubDelay() {
 	})
 
 	target.PubDelay(value, value, trials.Timeout)
-	time.Sleep(trials.Timeout * 2) // 多等一下讓延遲事件發生
+	trials.WaitTimeout(trials.Timeout * 2) // 多等一下讓延遲事件發生
 	assert.True(this.T(), valid.Load())
 
 	target.Finalize()
@@ -94,7 +93,7 @@ func (this *SuiteEventmap) TestPubFixed() {
 	})
 
 	target.PubFixed(value, value, trials.Timeout)
-	time.Sleep(trials.Timeout * 2) // 多等一下讓定時事件發生
+	trials.WaitTimeout(trials.Timeout * 2) // 多等一下讓定時事件發生
 	assert.True(this.T(), valid.Load())
 
 	target.Finalize()

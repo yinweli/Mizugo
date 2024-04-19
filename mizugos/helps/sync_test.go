@@ -3,7 +3,6 @@ package helps
 import (
 	"sync/atomic"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -37,7 +36,7 @@ func (this *SuiteSync) TestSyncOnce() {
 	}
 	go target.Do(validFunc)
 	go target.Do(validFunc)
-	time.Sleep(trials.Timeout)
+	trials.WaitTimeout()
 	assert.Equal(this.T(), int64(1), valid.Load())
 	assert.True(this.T(), target.Done())
 }

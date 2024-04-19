@@ -4,7 +4,6 @@ import (
 	"net"
 	"sync/atomic"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -39,10 +38,6 @@ func (this *SuiteEntity) TestEntity() {
 	assert.Nil(this.T(), target.SetEventmap(NewEventmap(1)))
 	assert.Nil(this.T(), target.SetProcess(procs.NewJson()))
 	assert.Nil(this.T(), target.Initialize(nil))
-	bundle := target.Bundle()
-	assert.NotNil(this.T(), bundle.Encode)
-	assert.NotNil(this.T(), bundle.Decode)
-	assert.NotNil(this.T(), bundle.Publish)
 	assert.Equal(this.T(), EntityID(1), target.EntityID())
 	assert.True(this.T(), target.Enable())
 	target.Finalize()
@@ -138,7 +133,7 @@ func (this *SuiteEntity) TestEvent() {
 	target.PublishDelay(onceValue, onceValue, trials.Timeout)
 	target.PublishFixed(fixedValue, fixedValue, trials.Timeout)
 
-	time.Sleep(trials.Timeout * 2) // 多等一下讓定時事件發生
+	trials.WaitTimeout(trials.Timeout * 2) // 多等一下讓定時事件發生
 	assert.True(this.T(), onceValid.Load())
 	assert.True(this.T(), fixedValid.Load())
 

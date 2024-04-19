@@ -2,7 +2,6 @@ package metrics
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -35,13 +34,13 @@ func (this *SuiteMetricsmgr) TestMetricsmgr() {
 	target.Finalize() // 初始化前執行, 這次應該不執行
 	assert.Nil(this.T(), target.Initialize(port))
 	assert.NotNil(this.T(), target.Initialize(port)) // 故意啟動兩次, 這次應該失敗
-	time.Sleep(trials.Timeout)                       // 等待一下, 讓初始化有機會完成
+	trials.WaitTimeout()                             // 等待一下, 讓初始化有機會完成
 	target.Finalize()
 	target.Finalize() // 故意結束兩次, 這次應該不執行
 
 	target = NewMetricsmgr()
 	assert.Nil(this.T(), target.Initialize(port))
-	time.Sleep(trials.Timeout) // 等待一下, 讓初始化有機會完成
+	trials.WaitTimeout() // 等待一下, 讓初始化有機會完成
 	assert.NotNil(this.T(), target.NewInt("int"))
 	assert.NotNil(this.T(), target.NewFloat("float"))
 	assert.NotNil(this.T(), target.NewString("string"))

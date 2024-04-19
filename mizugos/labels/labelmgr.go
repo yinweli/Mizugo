@@ -85,7 +85,6 @@ func (this *Labelmgr) Erase(obj any) {
 func (this *Labelmgr) Get(label string) []any {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
-
 	return this.find(label).Values()
 }
 

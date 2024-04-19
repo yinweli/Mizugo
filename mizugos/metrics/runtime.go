@@ -38,7 +38,6 @@ type runtime struct {
 func (this *Runtime) Add(delta time.Duration) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-
 	this.curr.time += delta
 
 	if this.curr.timeMax < delta {

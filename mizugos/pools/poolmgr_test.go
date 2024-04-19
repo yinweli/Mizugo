@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sync/atomic"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -61,17 +60,17 @@ func (this *SuitePoolmgr) TestSubmit() {
 		valid.Add(1)
 	}
 
-	time.Sleep(trials.Timeout)
+	trials.WaitTimeout()
 	target.Submit(validFunc)
-	time.Sleep(trials.Timeout)
+	trials.WaitTimeout()
 	assert.Equal(this.T(), int64(1), valid.Load())
 
 	assert.Nil(this.T(), target.Initialize(config))
-	time.Sleep(trials.Timeout)
+	trials.WaitTimeout()
 	target.Submit(validFunc)
-	time.Sleep(trials.Timeout)
+	trials.WaitTimeout()
 	target.Finalize()
-	time.Sleep(trials.Timeout)
+	trials.WaitTimeout()
 	assert.Equal(this.T(), int64(2), valid.Load())
 }
 

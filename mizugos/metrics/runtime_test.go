@@ -34,7 +34,7 @@ func (this *SuiteRuntime) TestRuntime() {
 	port := 9101
 	metricsmgr := NewMetricsmgr()
 	assert.Nil(this.T(), metricsmgr.Initialize(port))
-	time.Sleep(trials.Timeout) // 等待一下, 讓初始化有機會完成
+	trials.WaitTimeout() // 等待一下, 讓初始化有機會完成
 
 	target := metricsmgr.NewRuntime("test")
 	assert.NotNil(this.T(), target)
@@ -45,7 +45,7 @@ func (this *SuiteRuntime) TestRuntime() {
 	target.Rec()()
 	target.Add(time.Second)
 	target.Rec()()
-	time.Sleep(time.Second * 2)
+	trials.WaitTimeout(time.Second * 2)
 	assert.NotNil(this.T(), target.String())
 	fmt.Println(target.String())
 

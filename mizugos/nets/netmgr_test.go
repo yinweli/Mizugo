@@ -2,7 +2,6 @@ package nets
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -33,15 +32,15 @@ func (this *SuiteNetmgr) TestAddConnectTCP() {
 	test := newTester(true, true, true)
 	target := NewNetmgr()
 	assert.NotNil(this.T(), target)
-	connectID := target.AddConnectTCP(addr.ip, addr.port, trials.Timeout, test.bind, test.unbind, test.wrong)
+	connectID := target.AddConnectTCP(addr.ip, addr.port, trials.Timeout, test.Bind, test.Unbind, test.Wrong)
 
-	time.Sleep(trials.Timeout)
-	assert.True(this.T(), test.valid())
+	trials.WaitTimeout()
+	assert.True(this.T(), test.Valid())
 	assert.NotNil(this.T(), target.GetConnect(connectID))
 	target.DelConnect(connectID)
 	assert.Nil(this.T(), target.GetConnect(connectID))
 
-	time.Sleep(trials.Timeout)
+	trials.WaitTimeout()
 	target.Stop()
 }
 
@@ -50,15 +49,15 @@ func (this *SuiteNetmgr) TestAddListenTCP() {
 	test := newTester(true, true, true)
 	target := NewNetmgr()
 	assert.NotNil(this.T(), target)
-	listenID := target.AddListenTCP(addr.ip, addr.port, test.bind, test.unbind, test.wrong)
+	listenID := target.AddListenTCP(addr.ip, addr.port, test.Bind, test.Unbind, test.Wrong)
 
-	time.Sleep(trials.Timeout)
-	assert.True(this.T(), test.valid())
+	trials.WaitTimeout()
+	assert.True(this.T(), test.Valid())
 	assert.NotNil(this.T(), target.GetListen(listenID))
 	target.DelListen(listenID)
 	assert.Nil(this.T(), target.GetListen(listenID))
 
-	time.Sleep(trials.Timeout)
+	trials.WaitTimeout()
 	target.Stop()
 }
 
@@ -67,16 +66,16 @@ func (this *SuiteNetmgr) TestStop() {
 	test := newTester(true, true, true)
 	target := NewNetmgr()
 	assert.NotNil(this.T(), target)
-	target.AddConnectTCP(addr.ip, addr.port, trials.Timeout, test.bind, test.unbind, test.wrong)
+	target.AddConnectTCP(addr.ip, addr.port, trials.Timeout, test.Bind, test.Unbind, test.Wrong)
 
-	time.Sleep(trials.Timeout)
-	assert.True(this.T(), test.validSession())
+	trials.WaitTimeout()
+	assert.True(this.T(), test.ValidSession())
 
-	time.Sleep(trials.Timeout)
+	trials.WaitTimeout()
 	target.Stop()
 
-	time.Sleep(trials.Timeout)
-	assert.False(this.T(), test.validSession())
+	trials.WaitTimeout()
+	assert.False(this.T(), test.ValidSession())
 }
 
 func (this *SuiteNetmgr) TestStatus() {
@@ -85,18 +84,18 @@ func (this *SuiteNetmgr) TestStatus() {
 	testc := newTester(true, true, true)
 	target := NewNetmgr()
 	assert.NotNil(this.T(), target)
-	target.AddListenTCP(addr.ip, addr.port, testl.bind, testl.unbind, testl.wrong)
-	target.AddConnectTCP(addr.ip, addr.port, trials.Timeout, testc.bind, testc.unbind, testc.wrong)
+	target.AddListenTCP(addr.ip, addr.port, testl.Bind, testl.Unbind, testl.Wrong)
+	target.AddConnectTCP(addr.ip, addr.port, trials.Timeout, testc.Bind, testc.Unbind, testc.Wrong)
 
-	time.Sleep(trials.Timeout)
-	assert.True(this.T(), testl.valid())
-	assert.True(this.T(), testc.valid())
+	trials.WaitTimeout()
+	assert.True(this.T(), testl.Valid())
+	assert.True(this.T(), testc.Valid())
 	status := target.Status()
 	assert.Equal(this.T(), 1, status.Connect)
 	assert.Equal(this.T(), 1, status.Listen)
 	assert.Equal(this.T(), 2, status.Session)
 
-	time.Sleep(trials.Timeout)
+	trials.WaitTimeout()
 	target.Stop()
 }
 

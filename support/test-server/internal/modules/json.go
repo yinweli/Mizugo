@@ -34,7 +34,6 @@ func (this *Json) Awake() error {
 func (this *Json) procMJsonQ(message any) {
 	rec := features.MeterJson.Rec()
 	defer rec()
-
 	_, msg, err := procs.JsonUnmarshal[msgs.MJsonQ](message)
 
 	if err != nil {

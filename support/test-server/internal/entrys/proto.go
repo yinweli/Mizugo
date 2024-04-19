@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/yinweli/Mizugo/mizugos"
+	"github.com/yinweli/Mizugo/mizugos/cryptos"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/procs"
@@ -20,7 +21,7 @@ func ProtoInitialize() (err error) {
 		return fmt.Errorf("proto initialize: %w", err)
 	} // if
 
-	proto.listenID = mizugos.Network.AddListenTCP(config.IP, config.Port, proto.bind, proto.unbind, proto.listenWrong)
+	proto.listenID = mizugos.Network.AddListenTCP(config.IP, config.Port, proto.bind, proto.unbind, proto.wrong)
 	proto.key = config.Key
 	features.LogSystem.Get().Info("proto").Message("initialize").EndFlush()
 	return nil
@@ -40,49 +41,55 @@ type ProtoConfig struct {
 }
 
 // bind 綁定處理
-func (this *Proto) bind(session nets.Sessioner) *nets.Bundle {
+func (this *Proto) bind(session nets.Sessioner) bool {
+	err := error(nil)
 	entity := mizugos.Entity.Add()
+	process := procs.NewProto()
+	desCBC := cryptos.NewDesCBC(cryptos.PaddingPKCS7, this.key, this.key)
+	base64 := cryptos.NewBase64()
 
-	var wrong error
+	session.SetPublish(entity.PublishOnce)
+	session.SetWrong(this.wrong)
+	session.SetCodec(process, desCBC, base64)
 
 	if entity == nil {
-		wrong = fmt.Errorf("bind: entity nil")
+		err = fmt.Errorf("bind: entity nil")
 		goto Error
 	} // if
 
-	if err := entity.SetModulemap(entitys.NewModulemap()); err != nil {
-		wrong = fmt.Errorf("bind: %w", err)
+	if err = entity.SetModulemap(entitys.NewModulemap()); err != nil {
+		err = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
-	if err := entity.SetEventmap(entitys.NewEventmap(defines.EventCapacity)); err != nil {
-		wrong = fmt.Errorf("bind: %w", err)
+	if err = entity.SetEventmap(entitys.NewEventmap(defines.EventCapacity)); err != nil {
+		err = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
-	if err := entity.SetProcess(procs.NewProto().Base64(true).DesCBC(true, this.key, this.key)); err != nil {
-		wrong = fmt.Errorf("bind: %w", err)
+	if err = entity.SetProcess(process); err != nil {
+		err = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
-	if err := entity.SetSession(session); err != nil {
-		wrong = fmt.Errorf("bind: %w", err)
+	if err = entity.SetSession(session); err != nil {
+		err = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
-	if err := entity.AddModule(modules.NewProto()); err != nil {
-		wrong = fmt.Errorf("bind: %w", err)
+	if err = entity.AddModule(modules.NewProto()); err != nil {
+		err = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
-	if err := entity.Initialize(this.bindWrong); err != nil {
-		wrong = fmt.Errorf("bind: %w", err)
+	if err = entity.Initialize(this.wrong); err != nil {
+		err = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
 	session.SetOwner(entity)
 	features.LogSystem.Get().Info("proto").Message("bind").Caller(0).EndFlush()
-	return entity.Bundle()
+	return true
 
 Error:
 	if entity != nil {
@@ -91,8 +98,8 @@ Error:
 	} // if
 
 	session.Stop()
-	features.LogSystem.Get().Error("proto").Caller(0).Error(wrong).EndFlush()
-	return nil
+	features.LogSystem.Get().Error("proto").Caller(0).Error(err).EndFlush()
+	return false
 }
 
 // unbind 解綁處理
@@ -103,14 +110,9 @@ func (this *Proto) unbind(session nets.Sessioner) {
 	} // if
 }
 
-// listenWrong 監聽錯誤處理
-func (this *Proto) listenWrong(err error) {
+// wrong 錯誤處理
+func (this *Proto) wrong(err error) {
 	features.LogSystem.Get().Error("proto").Caller(1).Error(err).EndFlush()
-}
-
-// bindWrong 綁定錯誤處理
-func (this *Proto) bindWrong(err error) {
-	features.LogSystem.Get().Warn("proto").Caller(1).Error(err).EndFlush()
 }
 
 var proto = &Proto{} // Proto入口
