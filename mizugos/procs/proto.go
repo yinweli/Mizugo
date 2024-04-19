@@ -18,8 +18,6 @@ func NewProto() *Proto {
 
 // Proto proto處理器, 封包結構使用ProtoMsg
 //   - 訊息定義: support/proto/mizugo/protomsg.proto
-//   - 封包編碼: protobuf編碼成位元陣列
-//   - 封包解碼: protobuf解碼成訊息結構
 type Proto struct {
 	*Procmgr // 管理器
 }
