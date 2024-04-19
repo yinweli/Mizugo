@@ -33,6 +33,7 @@
   ```
 
 # 範例程式
+下面是一個簡化的伺服器程式範例, 如果您想查看更詳細的範例, 請造訪 support/test-server/ 目錄
 ```go
 func main() {
     defer func() {
