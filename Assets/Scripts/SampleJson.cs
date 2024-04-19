@@ -1,10 +1,12 @@
 using System;
 using System.Diagnostics;
+using System.Security.Cryptography;
 using Mizugo;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 /// <summary>
-/// 客戶端組件範例, 使用json訊息處理器
+/// 客戶端組件範例, 使用json訊息處理器, 編碼/解碼流程採用jsonProc, desCBC以及base64
 /// 程式會在Awake時初始化內部組件, 在Start時連線到伺服器, 在Update時更新客戶端組件
 /// 連線成功後, 在OnConnect時傳送MJsonQ訊息到伺服器, 等待伺服器的回應
 /// 當伺服器回應MJsonA訊息時, 在ProcMJsonA處理它並顯示訊息, 訊息顯示完畢後就斷線
@@ -14,7 +16,13 @@ public class SampleJson : MonoBehaviour
 {
     private void Awake()
     {
-        client = new TCPClient(new Eventmgr(), new JsonProc().SetBase64(true).SetDesCBC(true, key, key));
+        var eventmgr = new Eventmgr();
+        var process = new JsonProc();
+
+        client = new TCPClient();
+        client.SetEvent(eventmgr);
+        client.SetProc(process);
+        client.SetCodec(process, new DesCBC(PaddingMode.PKCS7, key, key), new Base64());
         client.AddEvent(EventID.Connect, OnConnect);
         client.AddEvent(EventID.Disconnect, OnDisconnect);
         client.AddEvent(EventID.Recv, OnRecv);
