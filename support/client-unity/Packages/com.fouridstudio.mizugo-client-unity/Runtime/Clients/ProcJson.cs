@@ -14,7 +14,7 @@ namespace Mizugo
     /// 訊息定義: support/proto/mizugo/msg-go/msgs-json/jsonmsg.go
     /// 訊息定義: support/proto/mizugo/msg-cs/msgs-json/Jsonmsg.cs
     /// </summary>
-    public partial class JsonProc : Procmgr, ICodec
+    public partial class ProcJson : Procmgr, ICodec
     {
         public object Encode(object input)
         {
@@ -55,7 +55,7 @@ namespace Mizugo
         }
     }
 
-    public partial class JsonProc
+    public partial class ProcJson
     {
         /// <summary>
         /// json訊息序列化

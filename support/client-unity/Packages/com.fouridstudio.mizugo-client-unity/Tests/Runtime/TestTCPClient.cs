@@ -16,7 +16,7 @@ namespace Mizugo
         {
             var target = new TCPClient();
             var eventmgr = new Eventmgr();
-            var process = new JsonProc();
+            var process = new ProcJson();
 
             target.SetEvent(eventmgr);
             target.SetProc(process);
@@ -65,7 +65,7 @@ namespace Mizugo
         {
             var target = new TCPClient();
             var eventmgr = new Eventmgr();
-            var process = new JsonProc();
+            var process = new ProcJson();
 
             target.SetEvent(eventmgr);
             target.SetProc(process);
@@ -133,7 +133,7 @@ namespace Mizugo
         public void Process(MessageID messageID)
         {
             var target = new TCPClient();
-            var process = new JsonProc();
+            var process = new ProcJson();
 
             target.SetProc(process);
             target.AddProcess(messageID, (object _) => { });
@@ -146,7 +146,7 @@ namespace Mizugo
         {
             var target = new TCPClient();
             var eventmgr = new Eventmgr();
-            var process = new JsonProc();
+            var process = new ProcJson();
 
             target.SetEvent(eventmgr);
             target.SetProc(process);
@@ -171,7 +171,7 @@ namespace Mizugo
         {
             var target = new TCPClient();
             var eventmgr = new Eventmgr();
-            var process = new JsonProc();
+            var process = new ProcJson();
 
             target.SetEvent(eventmgr);
             target.SetProc(process);
@@ -184,7 +184,7 @@ namespace Mizugo
                 EventID.Connect,
                 (object _) =>
                 {
-                    target.Send(JsonProc.Marshal((int)MsgID.JsonQ, new MJsonQ { Time = stopwatch.ElapsedMilliseconds }));
+                    target.Send(ProcJson.Marshal((int)MsgID.JsonQ, new MJsonQ { Time = stopwatch.ElapsedMilliseconds }));
                     actual++;
                 }
             );
@@ -193,13 +193,13 @@ namespace Mizugo
                 (int)MsgID.JsonA,
                 (object param) =>
                 {
-                    JsonProc.Unmarshal<MJsonA>(param, out var messageID, out var message);
+                    ProcJson.Unmarshal<MJsonA>(param, out var messageID, out var message);
                     TestUtil.Log("duration: " + (stopwatch.ElapsedMilliseconds - message.From.Time));
                     TestUtil.Log("count: " + message.Count);
 
                     if (actual < count)
                     {
-                        target.Send(JsonProc.Marshal((int)MsgID.JsonQ, new MJsonQ { Time = stopwatch.ElapsedMilliseconds }));
+                        target.Send(ProcJson.Marshal((int)MsgID.JsonQ, new MJsonQ { Time = stopwatch.ElapsedMilliseconds }));
                         actual++;
                     }
                     else
@@ -229,7 +229,7 @@ namespace Mizugo
         {
             var target = new TCPClient();
             var eventmgr = new Eventmgr();
-            var process = new JsonProc();
+            var process = new ProcJson();
 
             target.SetEvent(eventmgr);
             target.SetProc(process);
@@ -283,7 +283,7 @@ namespace Mizugo
                 (int)MsgID.JsonA,
                 (object param) =>
                 {
-                    JsonProc.Unmarshal<MJsonA>(param, out var messageID, out var message);
+                    ProcJson.Unmarshal<MJsonA>(param, out var messageID, out var message);
                     TestUtil.Log("duration: " + (stopwatch.ElapsedMilliseconds - message.From.Time));
                     TestUtil.Log("count: " + message.Count);
                     validMessage = true;
@@ -293,7 +293,7 @@ namespace Mizugo
             stopwatch.Start();
             target.Connect(host, port);
             TestUtil.Sleep();
-            target.Send(JsonProc.Marshal((int)MsgID.JsonQ, new MJsonQ { Time = stopwatch.ElapsedMilliseconds }));
+            target.Send(ProcJson.Marshal((int)MsgID.JsonQ, new MJsonQ { Time = stopwatch.ElapsedMilliseconds }));
             TestUtil.Sleep();
 
             while (target.IsUpdate)
@@ -318,7 +318,7 @@ namespace Mizugo
         {
             var target = new TCPClient();
             var eventmgr = new Eventmgr();
-            var process = new ProtoProc();
+            var process = new ProcProto();
 
             target.SetEvent(eventmgr);
             target.SetProc(process);
@@ -372,7 +372,7 @@ namespace Mizugo
                 (int)MsgID.ProtoA,
                 (object param) =>
                 {
-                    ProtoProc.Unmarshal<MProtoA>(param, out var messageID, out var message);
+                    ProcProto.Unmarshal<MProtoA>(param, out var messageID, out var message);
                     TestUtil.Log("duration: " + (stopwatch.ElapsedMilliseconds - message.From.Time));
                     TestUtil.Log("count: " + message.Count);
                     validMessage = true;
@@ -382,7 +382,7 @@ namespace Mizugo
             stopwatch.Start();
             target.Connect(host, port);
             TestUtil.Sleep();
-            target.Send(ProtoProc.Marshal((int)MsgID.ProtoQ, new MProtoQ { Time = stopwatch.ElapsedMilliseconds }));
+            target.Send(ProcProto.Marshal((int)MsgID.ProtoQ, new MProtoQ { Time = stopwatch.ElapsedMilliseconds }));
             TestUtil.Sleep();
 
             while (target.IsUpdate)

@@ -63,11 +63,11 @@
   ```cs
   var client = new TCPClient();
   var eventmgr = new Eventmgr();
-  var process = new JsonProc();
+  var process = new ProcJson();
   
   client.SetEvent(eventmgr);
   client.SetProc(process);
-  client.SetCodec(process, new DesCBC(PaddingMode.PKCS7, key, iv), new Base64()); // 設定編碼/解碼流程, 這裡設定了依序做jsonProc, desCBC, base64的編碼/解碼
+  client.SetCodec(process, new DesCBC(PaddingMode.PKCS7, key, iv), new Base64()); // 設定編碼/解碼流程, 這裡設定了依序做ProcJson, desCBC, base64的編碼/解碼
   
   client.AddEvent(...);   // 註冊事件處理
   client.AddProcess(...); // 註冊訊息處理
@@ -84,8 +84,8 @@
 ## 訊息處理組件
 負責訊息的實際處理, 不同的組件使用的封包結構不同, 因此訊息處理函式無法混用  
 目前有下列訊息處理組件可選  
-- JsonProc, 使用JsonMsg結構通訊, 訊息定義在 support/proto/mizugo/msg-go/msgs-json/jsonmsg.go, support/proto/mizugo/msg-cs/msgs-json/Jsonmsg.cs
-- ProtoProc, 使用ProtoMsg結構通訊, 訊息定義在 support/proto/mizugo/protomsg.proto
+- ProcJson, 使用JsonMsg結構通訊, 訊息定義在 support/proto/mizugo/msg-go/msgs-json/jsonmsg.go, support/proto/mizugo/msg-cs/msgs-json/Jsonmsg.cs
+- ProcProto, 使用ProtoMsg結構通訊, 訊息定義在 support/proto/mizugo/protomsg.proto
 
 ## 編碼/解碼流程
 定義訊息傳送和接收的編碼及解碼過程, 應與伺服器的設定一致
@@ -125,12 +125,10 @@ SocketErrorCode是個列舉, 內容可以參考[socket-error-enum]或是[socket-
 # 專案目錄說明
 | 目錄               | 說明                   |
 |:-------------------|:-----------------------|
+| Runtime/Clients    | 網路相關組件           |
 | Runtime/Cryptos    | 加密/解密相關組件      |
 | Runtime/Exceptions | 異常組件               |
 | Runtime/Msgs       | 訊息組件               |
-| Runtime/Nets       | 網路組件               |
-| Runtime/Procs      | 訊息處理器組件         |
-| Runtime/Tools      | 工具組件               |
 | Tests/Runtime      | 單元測試               |
 | Tests/Runtime/Msgs | 單元測試使用的測試訊息 |
 

@@ -14,7 +14,7 @@ namespace Mizugo
         [TestCase(3, null)]
         public void Add(MessageID messageID, object param)
         {
-            var target = new EmptyProc();
+            var target = new ProcEmpty();
             var expected = param;
             var valid = false;
 
@@ -38,14 +38,14 @@ namespace Mizugo
         [TestCase(2)]
         public void Del(MessageID messageID)
         {
-            var target = new EmptyProc();
+            var target = new ProcEmpty();
 
             target.Add(messageID, (object param) => { });
             target.Del(messageID);
             Assert.IsNull(target.Get(messageID));
         }
 
-        private class EmptyProc : Procmgr
+        private class ProcEmpty : Procmgr
         {
             public override void Process(object message)
             {
