@@ -13,7 +13,7 @@ namespace Mizugo
     /// proto處理器, 封包結構使用ProtoMsg
     /// 訊息定義: support/proto/mizugo/protomsg.proto
     /// </summary>
-    public partial class ProtoProc : Procmgr, ICodec
+    public partial class ProcProto : Procmgr, ICodec
     {
         public object Encode(object input)
         {
@@ -54,7 +54,7 @@ namespace Mizugo
         }
     }
 
-    public partial class ProtoProc
+    public partial class ProcProto
     {
         /// <summary>
         /// proto訊息序列化

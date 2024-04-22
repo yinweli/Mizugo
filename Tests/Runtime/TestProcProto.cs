@@ -1,22 +1,22 @@
 using System;
 using System.Collections;
-using System.Text;
 using NUnit.Framework;
 
 namespace Mizugo
 {
+    using static UnityEngine.GraphicsBuffer;
     /// <summary>
     /// 訊息編號, 設置為int32以跟proto的列舉類型統一
     /// </summary>
     using MessageID = Int32;
 
-    internal class TestJsonProc
+    internal class TestProcProto
     {
         [Test]
         [TestCaseSource("EncodeCases")]
-        public void EncodeDecode(JsonMsg message)
+        public void EncodeDecode(ProtoMsg message)
         {
-            var target = new JsonProc();
+            var target = new ProcProto();
             var encode = target.Encode(message);
             var decode = target.Decode(encode);
 
@@ -26,22 +26,22 @@ namespace Mizugo
         [Test]
         public void EncodeFailed()
         {
-            var target = new JsonProc();
+            var proc = new ProcProto();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                target.Encode(null);
+                proc.Encode(null);
             });
             Assert.Throws<ArgumentException>(() =>
             {
-                target.Encode(new object());
+                proc.Encode(new object());
             });
         }
 
         [Test]
         public void DecodeFailed()
         {
-            var target = new JsonProc();
+            var target = new ProcProto();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
@@ -55,9 +55,9 @@ namespace Mizugo
 
         [Test]
         [TestCaseSource("ProcessCases")]
-        public void Process(JsonMsg message)
+        public void Process(ProtoMsg message)
         {
-            var target = new JsonProc();
+            var target = new ProcProto();
             var valid = false;
 
             target.Add(
@@ -74,7 +74,7 @@ namespace Mizugo
         [Test]
         public void ProcessFailed()
         {
-            var target = new JsonProc();
+            var target = new ProcProto();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
@@ -86,17 +86,17 @@ namespace Mizugo
             });
             Assert.Throws<UnprocessException>(() =>
             {
-                target.Process(new JsonMsg { MessageID = 1 });
+                target.Process(new ProtoMsg { MessageID = 1 });
             });
         }
 
         [Test]
         [TestCaseSource("MarshalCases")]
-        public void Marshal(MessageID messageID, JsonTest message)
+        public void Marshal(MessageID messageID, ProtoTest message)
         {
-            var marshal = JsonProc.Marshal(messageID, message);
+            var marshal = ProcProto.Marshal(messageID, message);
 
-            JsonProc.Unmarshal<JsonTest>(marshal, out var resultID, out var result);
+            ProcProto.Unmarshal<ProtoTest>(marshal, out var resultID, out var result);
             Assert.AreEqual(messageID, resultID);
             Assert.IsTrue(TestUtil.EqualsByJson(message, result));
         }
@@ -106,7 +106,7 @@ namespace Mizugo
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                JsonProc.Marshal(1, null);
+                ProcProto.Marshal(1, null);
             });
         }
 
@@ -115,11 +115,11 @@ namespace Mizugo
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                JsonProc.Unmarshal<JsonTest>(null, out var _, out var _);
+                ProcJson.Unmarshal<ProtoTest>(null, out var _, out var _);
             });
             Assert.Throws<ArgumentException>(() =>
             {
-                JsonProc.Unmarshal<JsonTest>(new object(), out var _, out var _);
+                ProcJson.Unmarshal<ProtoTest>(new object(), out var _, out var _);
             });
         }
 
@@ -127,8 +127,8 @@ namespace Mizugo
         {
             get
             {
-                yield return new TestCaseData(JsonProc.Marshal(1, Encoding.UTF8.GetBytes("test")));
-                yield return new TestCaseData(JsonProc.Marshal(2, new byte[] { 0, 1, 2, }));
+                yield return new TestCaseData(ProcProto.Marshal(1, new ProtoTest { Data = "test1" }));
+                yield return new TestCaseData(ProcProto.Marshal(2, new ProtoTest { Data = "test2" }));
             }
         }
 
@@ -136,8 +136,8 @@ namespace Mizugo
         {
             get
             {
-                yield return new TestCaseData(JsonProc.Marshal(1, Encoding.UTF8.GetBytes("test")));
-                yield return new TestCaseData(JsonProc.Marshal(2, new byte[] { 0, 1, 2, }));
+                yield return new TestCaseData(ProcProto.Marshal(1, new ProtoTest { Data = "test1" }));
+                yield return new TestCaseData(ProcProto.Marshal(2, new ProtoTest { Data = "test2" }));
             }
         }
 
@@ -145,8 +145,8 @@ namespace Mizugo
         {
             get
             {
-                yield return new TestCaseData(1, new JsonTest { Data = "test1" });
-                yield return new TestCaseData(2, new JsonTest { Data = "test2" });
+                yield return new TestCaseData(1, new ProtoTest { Data = "test1" });
+                yield return new TestCaseData(2, new ProtoTest { Data = "test2" });
             }
         }
     }
