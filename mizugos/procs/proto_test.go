@@ -29,79 +29,84 @@ func (this *SuiteProto) TearDownSuite() {
 	trials.Restore(this.Catalog)
 }
 
-func (this *SuiteProto) TestEncode() {
-	messageID := MessageID(1)
-	message := &msgs.ProtoTest{
-		Data: "proto test",
-	}
+func (this *SuiteProto) TestProto() {
 	target := NewProto()
 	assert.NotNil(this.T(), target)
-	input, _ := ProtoMarshal(messageID, message)
-
-	encode, err := target.Encode(input)
+	output, _ := ProtoMarshal(MessageID(1), &msgs.ProtoTest{})
+	encode, err := target.Encode(output)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), encode)
-
 	_, err = target.Encode(nil)
 	assert.NotNil(this.T(), err)
-
 	_, err = target.Encode("!?")
 	assert.NotNil(this.T(), err)
+}
 
+func (this *SuiteProto) TestDecode() {
+	target := NewProto()
+	output, _ := ProtoMarshal(MessageID(1), &msgs.ProtoTest{})
+	encode, _ := target.Encode(output)
 	decode, err := target.Decode(encode)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), decode)
-	assert.True(this.T(), proto.Equal(input, decode.(*msgs.ProtoMsg)))
-
+	assert.True(this.T(), proto.Equal(output, decode.(*msgs.ProtoMsg)))
 	_, err = target.Decode(nil)
 	assert.NotNil(this.T(), err)
-
-	_, err = target.Decode([]byte("unknown encode"))
+	_, err = target.Decode(testdata.Unknown)
+	assert.NotNil(this.T(), err)
+	_, err = target.Decode([]byte(testdata.Unknown))
 	assert.NotNil(this.T(), err)
 }
 
 func (this *SuiteProto) TestProcess() {
-	messageID := MessageID(1)
-	message := &msgs.ProtoTest{
-		Data: "proto test",
-	}
 	target := NewProto()
-	input, _ := ProtoMarshal(messageID, message)
-
+	output, _ := ProtoMarshal(MessageID(1), &msgs.ProtoTest{})
 	valid := false
-	target.Add(messageID, func(message any) {
-		valid = proto.Equal(input, message.(*msgs.ProtoMsg))
+	target.Add(MessageID(1), func(message any) {
+		valid = proto.Equal(output, message.(*msgs.ProtoMsg))
 	})
-	assert.Nil(this.T(), target.Process(input))
+	assert.Nil(this.T(), target.Process(output))
 	assert.True(this.T(), valid)
-
-	input, _ = ProtoMarshal(0, message)
-	assert.NotNil(this.T(), target.Process(input))
-
+	output2, _ := ProtoMarshal(MessageID(2), &msgs.ProtoTest{})
+	assert.NotNil(this.T(), target.Process(output2))
 	assert.NotNil(this.T(), target.Process(nil))
+	assert.NotNil(this.T(), target.Process(testdata.Unknown))
 }
 
 func (this *SuiteProto) TestMarshal() {
-	messageID := MessageID(1)
-	message := &msgs.ProtoTest{
-		Data: "proto test",
-	}
-	output1, err := ProtoMarshal(messageID, message)
+	output, err := ProtoMarshal(MessageID(1), &msgs.ProtoTest{})
 	assert.Nil(this.T(), err)
-	assert.NotNil(this.T(), output1)
-
-	_, err = ProtoMarshal(messageID, nil)
+	assert.NotNil(this.T(), output)
+	_, err = ProtoMarshal(MessageID(1), nil)
 	assert.NotNil(this.T(), err)
+}
 
+func (this *SuiteProto) TestUnmarshal() {
+	message := &msgs.ProtoTest{
+		Data: testdata.Unknown,
+	}
+	output1, _ := ProtoMarshal(MessageID(1), message)
 	messageID, output2, err := ProtoUnmarshal[msgs.ProtoTest](output1)
 	assert.Nil(this.T(), err)
-	assert.Equal(this.T(), messageID, messageID)
+	assert.Equal(this.T(), MessageID(1), messageID)
 	assert.True(this.T(), proto.Equal(message, output2))
-
 	_, _, err = ProtoUnmarshal[msgs.ProtoTest](nil)
 	assert.NotNil(this.T(), err)
+	_, _, err = ProtoUnmarshal[int](output1)
+	assert.NotNil(this.T(), err)
+}
 
-	_, _, err = ProtoUnmarshal[msgs.ProtoTest]("!?")
+func (this *SuiteProto) TestAny() {
+	message := &msgs.ProtoTest{
+		Data: testdata.Unknown,
+	}
+	output1, _ := ProtoMarshal(MessageID(1), message)
+	output2, err := ProtoAny[msgs.ProtoTest](output1.Message)
+	assert.Nil(this.T(), err)
+	assert.True(this.T(), proto.Equal(message, output2))
+	_, err = ProtoAny[msgs.ProtoTest](nil)
+	assert.NotNil(this.T(), err)
+	_, err = ProtoAny[int](output1.Message)
 	assert.NotNil(this.T(), err)
 }
 

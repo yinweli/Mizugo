@@ -116,17 +116,30 @@ func ProtoUnmarshal[T any](input any) (messageID MessageID, output *T, err error
 		return 0, nil, fmt.Errorf("proto unmarshal: input type")
 	} // if
 
-	temp, err := message.Message.UnmarshalNew()
-
-	if err != nil {
-		return 0, nil, fmt.Errorf("proto unmarshal: %w", err)
-	} // if
-
-	output, ok = temp.(any).(*T)
-
-	if ok == false {
-		return 0, nil, fmt.Errorf("proto unmarshal: cast failed")
+	if output, err = ProtoAny[T](message.Message); err != nil {
+		return 0, nil, fmt.Errorf("proto unmarshal: message: %w", err)
 	} // if
 
 	return message.MessageID, output, nil
+}
+
+// ProtoAny 將proto的any轉換為指定物件
+func ProtoAny[T any](input *anypb.Any) (output *T, err error) {
+	if input == nil {
+		return nil, fmt.Errorf("proto any: input nil")
+	} // if
+
+	temp, err := input.UnmarshalNew()
+
+	if err != nil {
+		return nil, fmt.Errorf("proto any: %w", err)
+	} // if
+
+	output, ok := any(temp).(*T)
+
+	if ok == false {
+		return nil, fmt.Errorf("proto any: input type")
+	} // if
+
+	return output, nil
 }
