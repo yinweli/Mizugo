@@ -5,7 +5,7 @@ using Mizugo;
 using UnityEngine;
 
 /// <summary>
-/// 客戶端組件範例, 使用proto訊息處理器, 編碼/解碼流程採用protoProc, desCBC以及base64
+/// 客戶端組件範例, 使用proto訊息處理器, 編碼/解碼流程採用ProcProto, desCBC以及base64
 /// 程式會在Awake時初始化內部組件, 在Start時連線到伺服器, 在Update時更新客戶端組件
 /// 連線成功後, 在OnConnect時傳送MProtoQ訊息到伺服器, 等待伺服器的回應
 /// 當伺服器回應MProtoA訊息時, 在ProcMProtoA處理它並顯示訊息, 訊息顯示完畢後就斷線
@@ -16,7 +16,7 @@ public class SampleProto : MonoBehaviour
     private void Awake()
     {
         var eventmgr = new Eventmgr();
-        var process = new ProtoProc();
+        var process = new ProcProto();
 
         client = new TCPClient();
         client.SetEvent(eventmgr);
@@ -93,13 +93,13 @@ public class SampleProto : MonoBehaviour
     /// <summary>
     /// 訊息處理: MProtoA
     /// 處理訊息時, 首要就是要把param物件轉換為訊息結構
-    /// 當使用proto訊息處理器時, 可以通過ProtoProc.Unmarshal函式來幫助轉換為訊息結構
+    /// 當使用proto訊息處理器時, 可以通過ProcProto.Unmarshal函式來幫助轉換為訊息結構
     /// 由於一個訊息處理函式只針對一個訊息處理, 因此可以確定要轉換的訊息結構類型
-    /// 如果ProtoProc.Unmarshal或是訊息處理函式拋出異常, 會由客戶端組件負責捕獲, 並用事件通知使用者, 此範例中由OnError函式負責顯示錯誤內容
+    /// 如果ProcProto.Unmarshal或是訊息處理函式拋出異常, 會由客戶端組件負責捕獲, 並用事件通知使用者, 此範例中由OnError函式負責顯示錯誤內容
     /// </summary>
     private void ProcMProtoA(object param)
     {
-        ProtoProc.Unmarshal<MProtoA>(param, out var messageID, out var message);
+        ProcProto.Unmarshal<MProtoA>(param, out var messageID, out var message);
         var duration = stopwatch.ElapsedMilliseconds - message.From.Time;
         var count = message.Count;
         var errID = message.ErrID;
@@ -111,14 +111,14 @@ public class SampleProto : MonoBehaviour
     /// <summary>
     /// 訊息傳送: MProtoQ
     /// 傳送訊息時, 首要就是要建立訊息結構並填寫好各個欄位
-    /// 當使用proto訊息處理器時, 可以通過ProtoProc.Marshal函式來幫助建立訊息結構
-    /// ProtoProc.Marshal函式需要填寫訊息編號以及訊息物件來建立訊息結構
+    /// 當使用proto訊息處理器時, 可以通過ProcProto.Marshal函式來幫助建立訊息結構
+    /// ProcProto.Marshal函式需要填寫訊息編號以及訊息物件來建立訊息結構
     /// 這個範例函式專門用來傳送MProtoQ訊息, 訊息中只有一個Time欄位用來填寫當前時間的毫秒
     /// 最後用客戶端組件把訊息傳送出去
     /// </summary>
     private void SendMProtoQ()
     {
-        var message = ProtoProc.Marshal((int)MsgID.ProtoQ, new MProtoQ { Time = stopwatch.ElapsedMilliseconds });
+        var message = ProcProto.Marshal((int)MsgID.ProtoQ, new MProtoQ { Time = stopwatch.ElapsedMilliseconds });
 
         client.Send(message);
     }
