@@ -65,7 +65,7 @@ func (this *Proto) procMProtoA(message any) {
 	features.MeterProto.Add(duration)
 
 	if this.disconnect {
-		this.Entity().GetSession().Stop()
+		this.Entity().Stop()
 	} else {
 		this.sendMProtoQ()
 	} // if

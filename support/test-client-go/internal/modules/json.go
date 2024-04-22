@@ -65,7 +65,7 @@ func (this *Json) procMJsonA(message any) {
 	features.MeterJson.Add(duration)
 
 	if this.disconnect {
-		this.Entity().GetSession().Stop()
+		this.Entity().Stop()
 	} else {
 		this.sendMJsonQ()
 	} // if

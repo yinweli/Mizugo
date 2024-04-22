@@ -47,26 +47,6 @@ func (this *tester) Bind(session Sessioner) bool {
 
 	this.bindCount++
 	this.session = session
-	session.SetPublish(func(name string, param any) {
-		this.lock.Lock()
-		defer this.lock.Unlock()
-
-		switch name {
-		case EventStart:
-			this.startCount++
-
-		case EventStop:
-			this.stopCount++
-
-		case EventRecv:
-			this.recvCount++
-			this.message = param
-
-		case EventSend:
-			this.sendCount++
-		} // switch
-	})
-	session.SetWrong(this.Wrong)
 	session.SetCodec(&testerCodec{
 		encode: func(input any) (output any, err error) {
 			this.lock.Lock()
@@ -91,6 +71,26 @@ func (this *tester) Bind(session Sessioner) bool {
 			} // if
 		},
 	})
+	session.SetPublish(func(name string, param any) {
+		this.lock.Lock()
+		defer this.lock.Unlock()
+
+		switch name {
+		case EventStart:
+			this.startCount++
+
+		case EventStop:
+			this.stopCount++
+
+		case EventRecv:
+			this.recvCount++
+			this.message = param
+
+		case EventSend:
+			this.sendCount++
+		} // switch
+	})
+	session.SetWrong(this.Wrong)
 	return true
 }
 
@@ -235,13 +235,13 @@ func (this *emptySession) Stop() {
 func (this *emptySession) StopWait() {
 }
 
+func (this *emptySession) SetCodec(_ ...Codec) {
+}
+
 func (this *emptySession) SetPublish(_ ...Publish) {
 }
 
 func (this *emptySession) SetWrong(_ ...Wrong) {
-}
-
-func (this *emptySession) SetCodec(_ ...Codec) {
 }
 
 func (this *emptySession) SetOwner(_ any) {

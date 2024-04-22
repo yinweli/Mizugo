@@ -8,7 +8,6 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/features"
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/modules"
 )
@@ -57,22 +56,8 @@ func (this *Auth) bind(session nets.Sessioner) bool {
 	entity := mizugos.Entity.Add()
 	process := procs.NewJson()
 
-	session.SetPublish(entity.PublishOnce)
-	session.SetWrong(this.wrong)
-	session.SetCodec(process)
-
 	if entity == nil {
 		err = fmt.Errorf("bind: entity nil")
-		goto Error
-	} // if
-
-	if err = entity.SetModulemap(entitys.NewModulemap()); err != nil {
-		err = fmt.Errorf("bind: %w", err)
-		goto Error
-	} // if
-
-	if err = entity.SetEventmap(entitys.NewEventmap(defines.EventCapacity)); err != nil {
-		err = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
@@ -96,6 +81,9 @@ func (this *Auth) bind(session nets.Sessioner) bool {
 		goto Error
 	} // if
 
+	session.SetCodec(process)
+	session.SetPublish(entity.PublishOnce)
+	session.SetWrong(this.wrong)
 	session.SetOwner(entity)
 	features.MeterConnect.Add(1)
 	features.LogSystem.Get().Info("auth").Message("bind").Caller(0).EndFlush()

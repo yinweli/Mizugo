@@ -29,7 +29,7 @@ func (this *SuiteEventmap) TearDownSuite() {
 }
 
 func (this *SuiteEventmap) TestEventmap() {
-	target := NewEventmap(100)
+	target := NewEventmap()
 	assert.NotNil(this.T(), target)
 	target.Finalize() // 初始化前執行, 這次應該不執行
 	assert.Nil(this.T(), target.Initialize())
@@ -39,7 +39,7 @@ func (this *SuiteEventmap) TestEventmap() {
 }
 
 func (this *SuiteEventmap) TestPubOnce() {
-	target := NewEventmap(100)
+	target := NewEventmap()
 	assert.Nil(this.T(), target.Initialize())
 
 	value := "value once"
@@ -60,7 +60,7 @@ func (this *SuiteEventmap) TestPubOnce() {
 }
 
 func (this *SuiteEventmap) TestPubDelay() {
-	target := NewEventmap(100)
+	target := NewEventmap()
 	assert.Nil(this.T(), target.Initialize())
 
 	value := "value delay"
@@ -81,7 +81,7 @@ func (this *SuiteEventmap) TestPubDelay() {
 }
 
 func (this *SuiteEventmap) TestPubFixed() {
-	target := NewEventmap(100)
+	target := NewEventmap()
 	assert.Nil(this.T(), target.Initialize())
 
 	value := "value fixed"
