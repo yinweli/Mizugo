@@ -32,8 +32,8 @@
   go get github.com/yinweli/Mizugo
   ```
 
-# 範例程式
-下面是一個簡化的伺服器程式範例, 如果您想查看更詳細的範例, 請造訪`support/test-server/`目錄
+# 伺服器組件
+下面是一個簡化的伺服器程式範例, 如果需要更詳細的範例, 請造訪`support/test-server/`目錄
 ```go
 func main() {
     defer func() {
@@ -58,6 +58,10 @@ func main() {
 }
 ```
 
+# 客戶端組件
+請參閱[客戶端組件說明](support/client-unity/Packages/com.fouridstudio.mizugo-client-unity/README.md)  
+請參閱[proto組件說明](support/client-unity/Packages/com.fouridstudio.mizugo-proto-unity/README.md)
+
 # 管理器
 [mizugo]擁有多種功能, 這些功能透過不同的管理器提供, 使用者可以根據自己的需求選擇使用這些管理器  
 以下提供了各管理器的基本資訊, 包括它們的軟體包與類別名稱, 以及管理器所在的位置
@@ -73,10 +77,6 @@ func main() {
 | 標籤管理器     | labels.Labelmgr     | mizugos.Label   |
 | 執行緒池管理器 | pools.Poolmgr       | mizugos.Pool    |
 | 信號調度管理器 | triggers.Triggermgr | mizugos.Trigger |
-
-# 如何使用客戶端組件
-請參閱[客戶端組件說明](support/client-unity/Packages/com.fouridstudio.mizugo-client-unity/README.md)  
-請參閱[proto組件說明](support/client-unity/Packages/com.fouridstudio.mizugo-proto-unity/README.md)
 
 # 專案目錄說明
 | 目錄                   | 說明                            |
@@ -94,15 +94,14 @@ func main() {
 | mizugos/msgs           | 封包結構                        |
 | mizugos/nets           | 網路組件                        |
 | mizugos/pools          | 執行緒池組件                    |
-| mizugos/procs          | 處理器組件                      |
+| mizugos/procs          | 訊息處理器組件                  |
 | mizugos/redmos         | 雙層式資料庫組件(redis + mongo) |
 | mizugos/trials         | 單元測試組件                    |
 | mizugos/triggers       | 信號調度組件                    |
 | support                | 支援專案                        |
 | support/client-unity   | unity客戶端組件                 |
-| support/proto          | proto定義檔                     |
-| support/proto/mizugo   | 內部proto定義檔                 |
-| support/proto/test     | 測試proto定義檔                 |
+| support/proto-mizugo   | 內部proto定義                   |
+| support/proto-test     | 測試proto定義                   |
 | support/test-client-cs | unity測試客戶端                 |
 | support/test-client-go | go測試客戶端                    |
 | support/test-server    | 測試伺服器                      |
@@ -129,8 +128,8 @@ func main() {
 | 組件層   | mizugos/redmos   |
 | 組件層   | mizugos/triggers |
 
-下面的軟體包可以引用上面的軟體包  
-上面的軟體包不能引用下面的軟體包  
+下面階層的軟體包可以引用上面階層的軟體包  
+上面階層的軟體包不能引用下面階層的軟體包  
 相同階層的不能互相引用
 
 # Task命令說明
