@@ -6,7 +6,7 @@ using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
 /// <summary>
-/// 客戶端組件範例, 使用json訊息處理器, 編碼/解碼流程採用jsonProc, desCBC以及base64
+/// 客戶端組件範例, 使用json訊息處理器, 編碼/解碼流程採用ProcJson, desCBC以及base64
 /// 程式會在Awake時初始化內部組件, 在Start時連線到伺服器, 在Update時更新客戶端組件
 /// 連線成功後, 在OnConnect時傳送MJsonQ訊息到伺服器, 等待伺服器的回應
 /// 當伺服器回應MJsonA訊息時, 在ProcMJsonA處理它並顯示訊息, 訊息顯示完畢後就斷線
@@ -17,7 +17,7 @@ public class SampleJson : MonoBehaviour
     private void Awake()
     {
         var eventmgr = new Eventmgr();
-        var process = new JsonProc();
+        var process = new ProcJson();
 
         client = new TCPClient();
         client.SetEvent(eventmgr);
@@ -94,13 +94,13 @@ public class SampleJson : MonoBehaviour
     /// <summary>
     /// 訊息處理: MJsonA
     /// 處理訊息時, 首要就是要把param物件轉換為訊息結構
-    /// 當使用json訊息處理器時, 可以通過JsonProc.Unmarshal函式來幫助轉換為訊息結構
+    /// 當使用json訊息處理器時, 可以通過ProcJson.Unmarshal函式來幫助轉換為訊息結構
     /// 由於一個訊息處理函式只針對一個訊息處理, 因此可以確定要轉換的訊息結構類型
-    /// 如果JsonProc.Unmarshal或是訊息處理函式拋出異常, 會由客戶端組件負責捕獲, 並用事件通知使用者, 此範例中由OnError函式負責顯示錯誤內容
+    /// 如果ProcJson.Unmarshal或是訊息處理函式拋出異常, 會由客戶端組件負責捕獲, 並用事件通知使用者, 此範例中由OnError函式負責顯示錯誤內容
     /// </summary>
     private void ProcMJsonA(object param)
     {
-        JsonProc.Unmarshal<MJsonA>(param, out var messageID, out var message);
+        ProcJson.Unmarshal<MJsonA>(param, out var messageID, out var message);
         var duration = stopwatch.ElapsedMilliseconds - message.From.Time;
         var count = message.Count;
         var errID = message.ErrID;
@@ -112,14 +112,14 @@ public class SampleJson : MonoBehaviour
     /// <summary>
     /// 訊息傳送: MJsonQ
     /// 傳送訊息時, 首要就是要建立訊息結構並填寫好各個欄位
-    /// 當使用json訊息處理器時, 可以通過JsonProc.Marshal函式來幫助建立訊息結構
-    /// JsonProc.Marshal函式需要填寫訊息編號以及訊息物件來建立訊息結構
+    /// 當使用json訊息處理器時, 可以通過ProcJson.Marshal函式來幫助建立訊息結構
+    /// ProcJson.Marshal函式需要填寫訊息編號以及訊息物件來建立訊息結構
     /// 這個範例函式專門用來傳送MJsonQ訊息, 訊息中只有一個Time欄位用來填寫當前時間的毫秒
     /// 最後用客戶端組件把訊息傳送出去
     /// </summary>
     private void SendMJsonQ()
     {
-        var message = JsonProc.Marshal((int)MsgID.JsonQ, new MJsonQ { Time = stopwatch.ElapsedMilliseconds });
+        var message = ProcJson.Marshal((int)MsgID.JsonQ, new MJsonQ { Time = stopwatch.ElapsedMilliseconds });
 
         client.Send(message);
     }

@@ -5,7 +5,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "0011f7b874d40db955cc04812ba1eeb6e5e23817"
+      "hash": "06edf6fe7c20fdc4f042bf95ddab6c837a59716d"
     },
     "com.fouridstudio.mizugo-proto-unity": {
       "version": "https://github.com/yinweli/Mizugo.git#proto-unity",
