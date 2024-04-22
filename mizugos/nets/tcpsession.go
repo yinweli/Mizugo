@@ -24,10 +24,10 @@ type TCPSession struct {
 	conn    net.Conn       // 連接物件
 	message chan any       // 訊息通道
 	signal  sync.WaitGroup // 通知信號
-	publish []Publish      // 發布事件處理
-	wrong   []Wrong        // 錯誤處理
 	codec   []Codec        // 編碼/解碼
 	codecr  []Codec        // 編碼/解碼(反序)
+	publish []Publish      // 發布事件處理
+	wrong   []Wrong        // 錯誤處理
 	owner   any            // 擁有者
 }
 
@@ -61,16 +61,6 @@ func (this *TCPSession) StopWait() {
 	this.signal.Wait()
 }
 
-// SetPublish 設定發布事件處理
-func (this *TCPSession) SetPublish(publish ...Publish) {
-	this.publish = publish
-}
-
-// SetWrong 設定錯誤處理
-func (this *TCPSession) SetWrong(wrong ...Wrong) {
-	this.wrong = wrong
-}
-
 // SetCodec 設定編碼/解碼
 func (this *TCPSession) SetCodec(codec ...Codec) {
 	this.codec = codec
@@ -79,6 +69,16 @@ func (this *TCPSession) SetCodec(codec ...Codec) {
 	for i := len(codec) - 1; i >= 0; i-- {
 		this.codecr = append(this.codecr, codec[i])
 	} // for
+}
+
+// SetPublish 設定發布事件處理
+func (this *TCPSession) SetPublish(publish ...Publish) {
+	this.publish = publish
+}
+
+// SetWrong 設定錯誤處理
+func (this *TCPSession) SetWrong(wrong ...Wrong) {
+	this.wrong = wrong
 }
 
 // SetOwner 設定擁有者

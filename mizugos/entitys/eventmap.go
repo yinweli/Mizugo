@@ -13,13 +13,11 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/pools"
 )
 
-const separateSubID = "@" // 訂閱索引分隔字串
-
 // NewEventmap 建立事件列表
-func NewEventmap(capacity int) *Eventmap {
+func NewEventmap() *Eventmap {
 	return &Eventmap{
 		ctx:    ctxs.Get().WithCancel(),
-		notify: make(chan notify, capacity),
+		notify: make(chan notify, EventCapacity),
 		pubsub: newPubsub(),
 	}
 }
@@ -250,14 +248,14 @@ func (this *pubsub) pub(name string, param any) {
 func subIDEncode(name string, serial int64) string {
 	builder := strings.Builder{}
 	builder.WriteString(name)
-	builder.WriteString(separateSubID)
+	builder.WriteString("@")
 	builder.WriteString(strconv.FormatInt(serial, 10))
 	return builder.String()
 }
 
 // subIDDecode 解碼訂閱索引
 func subIDDecode(subID string) (name string, serial int64, ok bool) {
-	if before, after, ok := strings.Cut(subID, separateSubID); ok {
+	if before, after, ok := strings.Cut(subID, "@"); ok {
 		if serial, err := strconv.ParseInt(after, 10, 64); err == nil {
 			return before, serial, true
 		} // if

@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [0.3.1] - 2024-04-22
+### Changed
+- JsonProc更名為ProcJson
+- ProtoProc更名為ProcProto
+
 ## [0.3.0] - 2024-04-19
 ### Changed
 - 更新說明文件

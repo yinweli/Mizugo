@@ -8,7 +8,6 @@ import (
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/nets"
 	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
 	"github.com/yinweli/Mizugo/support/test-server/internal/features"
 	"github.com/yinweli/Mizugo/support/test-server/internal/modules"
 )
@@ -45,25 +44,9 @@ func (this *Proto) bind(session nets.Sessioner) bool {
 	err := error(nil)
 	entity := mizugos.Entity.Add()
 	process := procs.NewProto()
-	desCBC := cryptos.NewDesCBC(cryptos.PaddingPKCS7, this.key, this.key)
-	base64 := cryptos.NewBase64()
-
-	session.SetPublish(entity.PublishOnce)
-	session.SetWrong(this.wrong)
-	session.SetCodec(process, desCBC, base64)
 
 	if entity == nil {
 		err = fmt.Errorf("bind: entity nil")
-		goto Error
-	} // if
-
-	if err = entity.SetModulemap(entitys.NewModulemap()); err != nil {
-		err = fmt.Errorf("bind: %w", err)
-		goto Error
-	} // if
-
-	if err = entity.SetEventmap(entitys.NewEventmap(defines.EventCapacity)); err != nil {
-		err = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
 
@@ -87,6 +70,9 @@ func (this *Proto) bind(session nets.Sessioner) bool {
 		goto Error
 	} // if
 
+	session.SetCodec(process, cryptos.NewDesCBC(cryptos.PaddingPKCS7, this.key, this.key), cryptos.NewBase64())
+	session.SetPublish(entity.PublishOnce)
+	session.SetWrong(this.wrong)
 	session.SetOwner(entity)
 	features.LogSystem.Get().Info("proto").Message("bind").Caller(0).EndFlush()
 	return true
