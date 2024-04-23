@@ -57,12 +57,6 @@ namespace Mizugo
 
     public partial class ProcJson
     {
-        /// <summary>
-        /// json訊息序列化
-        /// </summary>
-        /// <param name="messageID">訊息編號</param>
-        /// <param name="message">訊息物件</param>
-        /// <returns>訊息物件</returns>
         public static JsonMsg Marshal(MessageID messageID, object message)
         {
             if (message == null)
@@ -73,13 +67,6 @@ namespace Mizugo
             return new JsonMsg { MessageID = messageID, Message = jsonBytes };
         }
 
-        /// <summary>
-        /// json訊息反序列化
-        /// </summary>
-        /// <typeparam name="T">訊息類型</typeparam>
-        /// <param name="input">輸入物件</param>
-        /// <param name="messageID">訊息編號</param>
-        /// <param name="message">訊息物件</param>
         public static void Unmarshal<T>(object input, out MessageID messageID, out T message)
         {
             if (input == null)
