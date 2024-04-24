@@ -53,3 +53,8 @@ proto:
   ip:
   port: 9002
   key: key-####
+
+protoRaven:
+  ip:
+  port: 9003
+  key: key-####

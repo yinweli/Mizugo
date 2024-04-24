@@ -22,12 +22,13 @@ public static partial class MsgidReflection {
   static MsgidReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "Cgttc2dpZC5wcm90byp0CgVNc2dJRBILCgdVbmtub3duEAASCQoFSnNvblEQ",
-          "ARIJCgVKc29uQRACEgoKBlByb3RvURADEgoKBlByb3RvQRAEEgoKBkxvZ2lu",
-          "URAHEgoKBkxvZ2luQRAIEgsKB1VwZGF0ZVEQCRILCgdVcGRhdGVBEAoqYAoF",
-          "RXJySUQSCwoHU3VjY2VzcxAAEhEKDUpzb25Vbm1hcnNoYWwQARISCg5Qcm90",
-          "b1VubWFyc2hhbBACEhAKDFN1Ym1pdEZhaWxlZBADEhEKDVRva2VuTm90TWF0",
-          "Y2gQBEIMWgovbXNnczttc2dzYgZwcm90bzM="));
+          "Cgttc2dpZC5wcm90byqWAQoFTXNnSUQSCwoHVW5rbm93bhAAEgkKBUpzb25R",
+          "EAESCQoFSnNvbkEQAhIKCgZQcm90b1EQAxIKCgZQcm90b0EQBBIPCgtQcm90",
+          "b1JhdmVuURAFEg8KC1Byb3RvUmF2ZW5BEAYSCgoGTG9naW5REAcSCgoGTG9n",
+          "aW5BEAgSCwoHVXBkYXRlURAJEgsKB1VwZGF0ZUEQCip5CgVFcnJJRBILCgdT",
+          "dWNjZXNzEAASEQoNSnNvblVubWFyc2hhbBABEhIKDlByb3RvVW5tYXJzaGFs",
+          "EAISFwoTUHJvdG9SYXZlblVubWFyc2hhbBADEhAKDFN1Ym1pdEZhaWxlZBAE",
+          "EhEKDVRva2VuTm90TWF0Y2gQBUIMWgovbXNnczttc2dzYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(new[] {typeof(global::MsgID), typeof(global::ErrID), }, null, null));
@@ -61,6 +62,14 @@ public enum MsgID {
   /// </summary>
   [pbr::OriginalName("ProtoA")] ProtoA = 4,
   /// <summary>
+  /// 要求ProtoRaven
+  /// </summary>
+  [pbr::OriginalName("ProtoRavenQ")] ProtoRavenQ = 5,
+  /// <summary>
+  /// 回應ProtoRaven
+  /// </summary>
+  [pbr::OriginalName("ProtoRavenA")] ProtoRavenA = 6,
+  /// <summary>
   /// 要求登入(使用Json處理器)
   /// </summary>
   [pbr::OriginalName("LoginQ")] LoginQ = 7,
@@ -87,21 +96,25 @@ public enum ErrID {
   /// </summary>
   [pbr::OriginalName("Success")] Success = 0,
   /// <summary>
-  /// json反序列化失敗
+  /// Json反序列化失敗
   /// </summary>
   [pbr::OriginalName("JsonUnmarshal")] JsonUnmarshal = 1,
   /// <summary>
-  /// proto反序列化失敗
+  /// Proto反序列化失敗
   /// </summary>
   [pbr::OriginalName("ProtoUnmarshal")] ProtoUnmarshal = 2,
   /// <summary>
+  /// ProtoRaven反序列化失敗
+  /// </summary>
+  [pbr::OriginalName("ProtoRavenUnmarshal")] ProtoRavenUnmarshal = 3,
+  /// <summary>
   /// 資料庫執行失敗
   /// </summary>
-  [pbr::OriginalName("SubmitFailed")] SubmitFailed = 3,
+  [pbr::OriginalName("SubmitFailed")] SubmitFailed = 4,
   /// <summary>
-  /// token不匹配
+  /// Token不匹配
   /// </summary>
-  [pbr::OriginalName("TokenNotMatch")] TokenNotMatch = 4,
+  [pbr::OriginalName("TokenNotMatch")] TokenNotMatch = 5,
 }
 
 #endregion

@@ -63,14 +63,13 @@ func (this *Json) procMJsonA(message any) {
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
 	features.MeterJson.Add(duration)
+	features.LogSystem.Get().Info(this.name).KV("count", msg.Count).KV("duration", duration).Caller(0).EndFlush()
 
 	if this.disconnect {
 		this.Entity().Stop()
 	} else {
 		this.sendMJsonQ()
 	} // if
-
-	features.LogSystem.Get().Info(this.name).KV("duration", duration).KV("count", msg.Count).Caller(0).EndFlush()
 }
 
 // sendMJsonQ 傳送要求Json

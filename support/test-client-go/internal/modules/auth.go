@@ -67,7 +67,7 @@ func (this *Auth) procMLoginA(message any) {
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
 	features.MeterAuth.Add(duration)
-	features.LogSystem.Get().Info(this.name).KV("duration", duration).KV("token", msg.Token).Caller(0).EndFlush()
+	features.LogSystem.Get().Info(this.name).KV("token", msg.Token).KV("duration", duration).Caller(0).EndFlush()
 
 	this.token = msg.Token
 	this.sendMUpdateQ()
