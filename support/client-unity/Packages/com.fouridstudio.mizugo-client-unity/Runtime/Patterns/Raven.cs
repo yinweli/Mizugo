@@ -111,7 +111,7 @@ namespace Mizugo
         public Q request; // 要求資料
         public Any[] respond; // 回應列表
 
-        public IMessage GetRespond<T>()
+        public T GetRespond<T>()
             where T : IMessage, new()
         {
             foreach (var itor in respond)
@@ -120,16 +120,16 @@ namespace Mizugo
                     return result;
             } // for
 
-            return null;
+            return default;
         }
 
-        public IMessage GetRespondAt<T>(int index)
+        public T GetRespondAt<T>(int index)
             where T : IMessage, new()
         {
             if (index < respond.Length)
                 return respond[index].Unpack<T>();
 
-            return null;
+            return default;
         }
 
         public string Detail()

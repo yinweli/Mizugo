@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [0.4.1] - 2024-04-24
+### Changed
+- 改進Raven組件取得回應物件的使用方式
+
 ## [0.4.0] - 2024-04-24
 ### Added
 - 新增訊息樣式組件Raven
