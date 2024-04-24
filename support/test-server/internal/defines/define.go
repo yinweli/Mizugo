@@ -19,4 +19,5 @@ const ( // 模組編號
 	ModuleIDAuth entitys.ModuleID = iota + 1
 	ModuleIDJson
 	ModuleIDProto
+	ModuleIDProtoRaven
 )
