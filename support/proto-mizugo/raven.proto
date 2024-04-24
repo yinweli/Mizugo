@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+
+option go_package = "/msgs;msgs";
+
+// Raven要求訊息資料
+message RavenQ {
+  google.protobuf.Any header = 1; // 標頭資料
+  google.protobuf.Any request = 2; // 要求資料
+}
+
+// Raven回應訊息資料
+message RavenA {
+  int32 errID = 1; // 錯誤編號, 設置為int32以跟proto的列舉類型統一
+  google.protobuf.Any header = 2; // 標頭資料
+  google.protobuf.Any request = 3; // 要求資料
+  repeated google.protobuf.Any respond = 4; // 回應列表
+}
+
+// Raven訊息測試資料
+message RavenTest {
+  string Data = 1; // 測試字串
+}

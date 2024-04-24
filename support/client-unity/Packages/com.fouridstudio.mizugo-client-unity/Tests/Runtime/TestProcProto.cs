@@ -4,17 +4,13 @@ using NUnit.Framework;
 
 namespace Mizugo
 {
-    using static UnityEngine.GraphicsBuffer;
-    /// <summary>
-    /// 訊息編號, 設置為int32以跟proto的列舉類型統一
-    /// </summary>
     using MessageID = Int32;
 
     internal class TestProcProto
     {
         [Test]
         [TestCaseSource("EncodeCases")]
-        public void EncodeDecode(ProtoMsg message)
+        public void Encode(ProtoMsg message)
         {
             var target = new ProcProto();
             var encode = target.Encode(message);

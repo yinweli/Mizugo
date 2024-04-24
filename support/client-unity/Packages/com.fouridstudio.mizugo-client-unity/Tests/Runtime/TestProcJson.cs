@@ -5,9 +5,6 @@ using NUnit.Framework;
 
 namespace Mizugo
 {
-    /// <summary>
-    /// 訊息編號, 設置為int32以跟proto的列舉類型統一
-    /// </summary>
     using MessageID = Int32;
 
     internal class TestProcJson
