@@ -129,6 +129,7 @@ SocketErrorCode是個列舉, 內容可以參考[socket-error-enum]或是[socket-
 | Runtime/Cryptos    | 加密/解密相關組件      |
 | Runtime/Exceptions | 異常組件               |
 | Runtime/Msgs       | 訊息組件               |
+| Runtime/Patterns   | 訊息樣式組件           |
 | Tests/Runtime      | 單元測試               |
 | Tests/Runtime/Msgs | 單元測試使用的測試訊息 |
 
