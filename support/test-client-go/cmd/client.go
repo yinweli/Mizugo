@@ -56,6 +56,11 @@ func main() {
 		return
 	} // if
 
+	if err = entrys.ProtoRavenInitialize(); err != nil {
+		fmt.Println(err)
+		return
+	} // if
+
 	fmt.Println("test-client running")
 	ctx := ctxs.Get().WithCancel()
 
