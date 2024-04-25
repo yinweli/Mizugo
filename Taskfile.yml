@@ -9,7 +9,8 @@ tasks:
       - task: fmt-mizugo
       - task: fmt-client-unity
       - task: fmt-client-unity-sample
-      - task: fmt-proto
+      - task: fmt-proto-mizugo
+      - task: fmt-proto-test
       - task: lint-mizugo
 
   fmt-mizugo:
@@ -26,8 +27,14 @@ tasks:
     cmds:
       - dotnet csharpier .
 
-  fmt-proto:
-    dir: support/proto
+  fmt-proto-mizugo:
+    dir: support/proto-mizugo
+    cmds:
+      - buf format -w .
+      - dotnet csharpier .
+
+  fmt-proto-test:
+    dir: support/proto-test
     cmds:
       - buf format -w .
       - dotnet csharpier .
