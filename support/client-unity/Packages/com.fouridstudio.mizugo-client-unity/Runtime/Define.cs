@@ -1,12 +1,5 @@
-using System;
-
 namespace Mizugo
 {
-    /// <summary>
-    /// 訊息編號, 設置為int32以跟proto的列舉類型統一
-    /// </summary>
-    using MessageID = Int32;
-
     /// <summary>
     /// 事件編號
     /// </summary>
@@ -117,12 +110,12 @@ namespace Mizugo
         /// <summary>
         /// 新增訊息處理
         /// </summary>
-        public void AddProcess(MessageID messageID, OnTrigger onProcess);
+        public void AddProcess(int messageID, OnTrigger onProcess);
 
         /// <summary>
         /// 刪除訊息處理
         /// </summary>
-        public void DelProcess(MessageID messageID);
+        public void DelProcess(int messageID);
 
         /// <summary>
         /// 設定編碼/解碼
@@ -174,17 +167,17 @@ namespace Mizugo
         /// <summary>
         /// 新增訊息處理
         /// </summary>
-        public void Add(MessageID messageID, OnTrigger onProcess);
+        public void Add(int messageID, OnTrigger onProcess);
 
         /// <summary>
         /// 刪除訊息處理
         /// </summary>
-        public void Del(MessageID messageID);
+        public void Del(int messageID);
 
         /// <summary>
         /// 取得訊息處理
         /// </summary>
-        public OnTrigger Get(MessageID messageID);
+        public OnTrigger Get(int messageID);
     }
 
     /// <summary>

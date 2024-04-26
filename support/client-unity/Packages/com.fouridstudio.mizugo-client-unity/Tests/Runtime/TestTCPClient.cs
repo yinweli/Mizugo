@@ -6,8 +6,6 @@ using NUnit.Framework;
 
 namespace Mizugo
 {
-    using MessageID = Int32;
-
     internal class TestTCPClient
     {
         [Test]
@@ -130,7 +128,7 @@ namespace Mizugo
         [Test]
         [TestCase(1)]
         [TestCase(2)]
-        public void Process(MessageID messageID)
+        public void Process(int messageID)
         {
             var target = new TCPClient();
             var process = new ProcJson();

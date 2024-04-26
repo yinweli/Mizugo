@@ -1,7 +1,7 @@
 /// <summary>
 /// json訊息資料
 /// </summary>
-public class JsonMsg
+public class Json
 {
     /// <summary>
     /// 訊息編號

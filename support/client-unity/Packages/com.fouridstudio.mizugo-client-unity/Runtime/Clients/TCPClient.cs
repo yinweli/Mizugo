@@ -9,11 +9,6 @@ using System.Threading;
 namespace Mizugo
 {
     /// <summary>
-    /// 訊息編號, 設置為int32以跟proto的列舉類型統一
-    /// </summary>
-    using MessageID = Int32;
-
-    /// <summary>
     /// TCP客戶端組件
     /// </summary>
     public class TCPClient : IClient
@@ -139,12 +134,12 @@ namespace Mizugo
             this.procmgr = procmgr;
         }
 
-        public void AddProcess(MessageID messageID, OnTrigger onProcess)
+        public void AddProcess(int messageID, OnTrigger onProcess)
         {
             procmgr?.Add(messageID, onProcess);
         }
 
-        public void DelProcess(MessageID messageID)
+        public void DelProcess(int messageID)
         {
             procmgr?.Del(messageID);
         }

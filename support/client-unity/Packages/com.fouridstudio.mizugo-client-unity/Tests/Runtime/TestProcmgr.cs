@@ -4,15 +4,13 @@ using NUnit.Framework;
 
 namespace Mizugo
 {
-    using MessageID = Int32;
-
     internal class TestProcmgr
     {
         [Test]
         [TestCase(1, 9999)]
         [TestCase(2, "9999")]
         [TestCase(3, null)]
-        public void Add(MessageID messageID, object param)
+        public void Add(int messageID, object param)
         {
             var target = new ProcEmpty();
             var expected = param;
@@ -36,7 +34,7 @@ namespace Mizugo
         [Test]
         [TestCase(1)]
         [TestCase(2)]
-        public void Del(MessageID messageID)
+        public void Del(int messageID)
         {
             var target = new ProcEmpty();
 

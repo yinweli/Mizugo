@@ -1,40 +1,35 @@
 using System;
 using System.Collections;
+using Google.Protobuf;
 using NUnit.Framework;
 
 namespace Mizugo
 {
-    using static UnityEngine.GraphicsBuffer;
-    /// <summary>
-    /// 訊息編號, 設置為int32以跟proto的列舉類型統一
-    /// </summary>
-    using MessageID = Int32;
-
     internal class TestProcProto
     {
         [Test]
         [TestCaseSource("EncodeCases")]
-        public void EncodeDecode(ProtoMsg message)
+        public void Encode(Proto input)
         {
             var target = new ProcProto();
-            var encode = target.Encode(message);
+            var encode = target.Encode(input);
             var decode = target.Decode(encode);
 
-            Assert.IsTrue(TestUtil.EqualsByJson(message, decode));
+            Assert.IsTrue(TestUtil.EqualsByJson(input, decode));
         }
 
         [Test]
         public void EncodeFailed()
         {
-            var proc = new ProcProto();
+            var target = new ProcProto();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                proc.Encode(null);
+                target.Encode(null);
             });
             Assert.Throws<ArgumentException>(() =>
             {
-                proc.Encode(new object());
+                target.Encode(new object());
             });
         }
 
@@ -55,19 +50,19 @@ namespace Mizugo
 
         [Test]
         [TestCaseSource("ProcessCases")]
-        public void Process(ProtoMsg message)
+        public void Process(Proto input)
         {
             var target = new ProcProto();
             var valid = false;
 
             target.Add(
-                message.MessageID,
+                input.MessageID,
                 (object param) =>
                 {
-                    valid = TestUtil.EqualsByJson(message, param);
+                    valid = TestUtil.EqualsByJson(input, param);
                 }
             );
-            target.Process(message);
+            target.Process(input);
             Assert.IsTrue(valid);
         }
 
@@ -86,13 +81,13 @@ namespace Mizugo
             });
             Assert.Throws<UnprocessException>(() =>
             {
-                target.Process(new ProtoMsg { MessageID = 1 });
+                target.Process(new Proto { MessageID = 1 });
             });
         }
 
         [Test]
         [TestCaseSource("MarshalCases")]
-        public void Marshal(MessageID messageID, ProtoTest message)
+        public void Marshal(int messageID, IMessage message)
         {
             var marshal = ProcProto.Marshal(messageID, message);
 
