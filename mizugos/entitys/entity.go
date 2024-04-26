@@ -185,12 +185,12 @@ func (this *Entity) SetProcess(process procs.Processor) error {
 }
 
 // AddMessage 新增訊息處理
-func (this *Entity) AddMessage(messageID procs.MessageID, process procs.Process) {
+func (this *Entity) AddMessage(messageID int32, process procs.Process) {
 	this.process.Get().Add(messageID, process)
 }
 
 // DelMessage 刪除訊息處理
-func (this *Entity) DelMessage(messageID procs.MessageID) {
+func (this *Entity) DelMessage(messageID int32) {
 	this.process.Get().Del(messageID)
 }
 

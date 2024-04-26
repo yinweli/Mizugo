@@ -15,3 +15,18 @@ message MProtoA {
   ErrID errID = 2; // 錯誤編號
   int64 count = 3; // 封包計數
 }
+
+// 標頭Proto-Raven
+message HProtoRaven {
+  string token = 1; // token
+}
+
+// 要求Proto-Raven
+message MProtoRavenQ {
+  int64 time = 1; // 傳送時間
+}
+
+// 回應Proto-Raven
+message MProtoRavenA {
+  int64 count = 1; // 封包計數
+}

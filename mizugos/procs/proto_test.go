@@ -30,98 +30,97 @@ func (this *SuiteProto) TearDownSuite() {
 }
 
 func (this *SuiteProto) TestEncode() {
-	messageID := MessageID(1)
-	message := &msgs.ProtoTest{
-		Data: "proto test",
-	}
+	output, _ := ProtoMarshal(1, &msgs.ProtoTest{
+		Data: testdata.Unknown,
+	})
 	target := NewProto()
 	assert.NotNil(this.T(), target)
-	input, _ := ProtoMarshal(messageID, message)
-
-	encode, err := target.Encode(input)
+	encode, err := target.Encode(output)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), encode)
-
 	_, err = target.Encode(nil)
 	assert.NotNil(this.T(), err)
-
-	_, err = target.Encode("!?")
+	_, err = target.Encode(testdata.Unknown)
 	assert.NotNil(this.T(), err)
+}
 
+func (this *SuiteProto) TestDecode() {
+	output, _ := ProtoMarshal(1, &msgs.ProtoTest{
+		Data: testdata.Unknown,
+	})
+	target := NewProto()
+	encode, _ := target.Encode(output)
 	decode, err := target.Decode(encode)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), decode)
-	assert.True(this.T(), proto.Equal(input, decode.(*msgs.ProtoMsg)))
-
+	assert.True(this.T(), proto.Equal(output, decode.(*msgs.Proto)))
 	_, err = target.Decode(nil)
 	assert.NotNil(this.T(), err)
-
-	_, err = target.Decode([]byte("unknown encode"))
+	_, err = target.Decode(testdata.Unknown)
+	assert.NotNil(this.T(), err)
+	_, err = target.Decode([]byte(testdata.Unknown))
 	assert.NotNil(this.T(), err)
 }
 
 func (this *SuiteProto) TestProcess() {
-	messageID := MessageID(1)
-	message := &msgs.ProtoTest{
-		Data: "proto test",
-	}
-	target := NewProto()
-	input, _ := ProtoMarshal(messageID, message)
-
-	valid := false
-	target.Add(messageID, func(message any) {
-		valid = proto.Equal(input, message.(*msgs.ProtoMsg))
+	output, _ := ProtoMarshal(1, &msgs.ProtoTest{
+		Data: testdata.Unknown,
 	})
-	assert.Nil(this.T(), target.Process(input))
+	valid := false
+	target := NewProto()
+	target.Add(1, func(message any) {
+		valid = proto.Equal(output, message.(*msgs.Proto))
+	})
+	assert.Nil(this.T(), target.Process(output))
 	assert.True(this.T(), valid)
-
-	input, _ = ProtoMarshal(0, message)
-	assert.NotNil(this.T(), target.Process(input))
-
+	output, _ = ProtoMarshal(2, &msgs.ProtoTest{})
+	assert.NotNil(this.T(), target.Process(output))
 	assert.NotNil(this.T(), target.Process(nil))
+	assert.NotNil(this.T(), target.Process(testdata.Unknown))
 }
 
 func (this *SuiteProto) TestMarshal() {
-	messageID := MessageID(1)
-	message := &msgs.ProtoTest{
-		Data: "proto test",
-	}
-	output1, err := ProtoMarshal(messageID, message)
+	output, err := ProtoMarshal(1, &msgs.ProtoTest{
+		Data: testdata.Unknown,
+	})
 	assert.Nil(this.T(), err)
-	assert.NotNil(this.T(), output1)
-
-	_, err = ProtoMarshal(messageID, nil)
+	assert.NotNil(this.T(), output)
+	_, err = ProtoMarshal(1, nil)
 	assert.NotNil(this.T(), err)
+}
 
+func (this *SuiteProto) TestUnmarshal() {
+	object := &msgs.ProtoTest{
+		Data: testdata.Unknown,
+	}
+	output1, _ := ProtoMarshal(1, object)
 	messageID, output2, err := ProtoUnmarshal[msgs.ProtoTest](output1)
 	assert.Nil(this.T(), err)
-	assert.Equal(this.T(), messageID, messageID)
-	assert.True(this.T(), proto.Equal(message, output2))
-
+	assert.Equal(this.T(), int32(1), messageID)
+	assert.True(this.T(), proto.Equal(object, output2))
 	_, _, err = ProtoUnmarshal[msgs.ProtoTest](nil)
 	assert.NotNil(this.T(), err)
-
-	_, _, err = ProtoUnmarshal[msgs.ProtoTest]("!?")
+	_, _, err = ProtoUnmarshal[int](output1)
 	assert.NotNil(this.T(), err)
 }
 
 func BenchmarkProtoEncode(b *testing.B) {
-	target := NewProto()
-	input, _ := ProtoMarshal(1, &msgs.ProtoTest{
-		Data: "benchmark encode",
+	output, _ := ProtoMarshal(1, &msgs.ProtoTest{
+		Data: testdata.Unknown,
 	})
+	target := NewProto()
 
 	for i := 0; i < b.N; i++ {
-		_, _ = target.Encode(input)
+		_, _ = target.Encode(output)
 	} // for
 }
 
 func BenchmarkProtoDecode(b *testing.B) {
-	target := NewProto()
-	input, _ := ProtoMarshal(1, &msgs.ProtoTest{
-		Data: "benchmark decode",
+	output, _ := ProtoMarshal(1, &msgs.ProtoTest{
+		Data: testdata.Unknown,
 	})
-	encode, _ := target.Encode(input)
+	target := NewProto()
+	encode, _ := target.Encode(output)
 
 	for i := 0; i < b.N; i++ {
 		_, _ = target.Decode(encode)
@@ -129,21 +128,21 @@ func BenchmarkProtoDecode(b *testing.B) {
 }
 
 func BenchmarkProtoMarshal(b *testing.B) {
-	input := &msgs.ProtoTest{
-		Data: "benchmark marshal",
+	object := &msgs.ProtoTest{
+		Data: testdata.Unknown,
 	}
 
 	for i := 0; i < b.N; i++ {
-		_, _ = ProtoMarshal(1, input)
+		_, _ = ProtoMarshal(1, object)
 	} // for
 }
 
 func BenchmarkProtoUnmarshal(b *testing.B) {
-	input, _ := ProtoMarshal(1, &msgs.ProtoTest{
-		Data: "benchmark unmarshal",
+	output, _ := ProtoMarshal(1, &msgs.ProtoTest{
+		Data: testdata.Unknown,
 	})
 
 	for i := 0; i < b.N; i++ {
-		_, _, _ = ProtoUnmarshal[msgs.ProtoTest](input)
+		_, _, _ = ProtoUnmarshal[msgs.ProtoTest](output)
 	} // for
 }

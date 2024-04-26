@@ -6,6 +6,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 
+	"github.com/yinweli/Mizugo/mizugos/helps"
 	"github.com/yinweli/Mizugo/mizugos/msgs"
 )
 
@@ -16,22 +17,18 @@ func NewProto() *Proto {
 	}
 }
 
-// Proto proto處理器, 封包結構使用ProtoMsg
-//   - 訊息定義: support/proto/mizugo/protomsg.proto
+// Proto proto處理器, 封包結構使用msgs.Proto
+//   - 訊息定義: support/proto/mizugo/proto.proto
 type Proto struct {
 	*Procmgr // 管理器
 }
 
 // Encode 封包編碼
 func (this *Proto) Encode(input any) (output any, err error) {
-	if input == nil {
-		return nil, fmt.Errorf("proto encode: input nil")
-	} // if
-
-	temp, ok := input.(*msgs.ProtoMsg)
+	temp, ok := input.(*msgs.Proto)
 
 	if ok == false {
-		return nil, fmt.Errorf("proto encode: input type")
+		return nil, fmt.Errorf("proto encode: input")
 	} // if
 
 	output, err = proto.Marshal(temp)
@@ -45,17 +42,13 @@ func (this *Proto) Encode(input any) (output any, err error) {
 
 // Decode 封包解碼
 func (this *Proto) Decode(input any) (output any, err error) {
-	if input == nil {
-		return nil, fmt.Errorf("proto decode: input nil")
-	} // if
-
 	temp, ok := input.([]byte)
 
 	if ok == false {
-		return nil, fmt.Errorf("proto decode: input type")
+		return nil, fmt.Errorf("proto decode: input")
 	} // if
 
-	message := &msgs.ProtoMsg{}
+	message := &msgs.Proto{}
 
 	if err = proto.Unmarshal(temp, message); err != nil {
 		return nil, fmt.Errorf("proto decode: %w", err)
@@ -66,14 +59,10 @@ func (this *Proto) Decode(input any) (output any, err error) {
 
 // Process 訊息處理
 func (this *Proto) Process(input any) error {
-	if input == nil {
-		return fmt.Errorf("proto process: input nil")
-	} // if
-
-	message, ok := input.(*msgs.ProtoMsg)
+	message, ok := input.(*msgs.Proto)
 
 	if ok == false {
-		return fmt.Errorf("proto process: input type")
+		return fmt.Errorf("proto process: input")
 	} // if
 
 	process := this.Get(message.MessageID)
@@ -87,45 +76,29 @@ func (this *Proto) Process(input any) error {
 }
 
 // ProtoMarshal 序列化proto訊息
-func ProtoMarshal(messageID MessageID, input proto.Message) (output *msgs.ProtoMsg, err error) {
-	if input == nil {
-		return nil, fmt.Errorf("proto marshal: input nil")
-	} // if
-
+func ProtoMarshal(messageID int32, input proto.Message) (output *msgs.Proto, err error) {
 	message, err := anypb.New(input)
 
 	if err != nil {
 		return nil, fmt.Errorf("proto marshal: %w", err)
 	} // if
 
-	return &msgs.ProtoMsg{
+	return &msgs.Proto{
 		MessageID: messageID,
 		Message:   message,
 	}, nil
 }
 
 // ProtoUnmarshal 反序列化proto訊息
-func ProtoUnmarshal[T any](input any) (messageID MessageID, output *T, err error) {
-	if input == nil {
-		return 0, nil, fmt.Errorf("proto unmarshal: input nil")
-	} // if
-
-	message, ok := input.(*msgs.ProtoMsg)
+func ProtoUnmarshal[T any](input any) (messageID int32, output *T, err error) {
+	message, ok := input.(*msgs.Proto)
 
 	if ok == false {
-		return 0, nil, fmt.Errorf("proto unmarshal: input type")
+		return 0, nil, fmt.Errorf("proto unmarshal: input")
 	} // if
 
-	temp, err := message.Message.UnmarshalNew()
-
-	if err != nil {
-		return 0, nil, fmt.Errorf("proto unmarshal: %w", err)
-	} // if
-
-	output, ok = temp.(any).(*T)
-
-	if ok == false {
-		return 0, nil, fmt.Errorf("proto unmarshal: cast failed")
+	if output, err = helps.ProtoAny[T](message.Message); err != nil {
+		return 0, nil, fmt.Errorf("proto unmarshal: message: %w", err)
 	} // if
 
 	return message.MessageID, output, nil

@@ -30,9 +30,8 @@ func (this *SuiteProcmgr) TearDownSuite() {
 func (this *SuiteProcmgr) TestNewProcmgr() {
 	target := NewProcmgr()
 	assert.NotNil(this.T(), target)
-	messageID := MessageID(1)
-	target.Add(messageID, func(_ any) {})
-	assert.NotNil(this.T(), target.Get(messageID))
-	target.Del(messageID)
-	assert.Nil(this.T(), target.Get(messageID))
+	target.Add(1, func(_ any) {})
+	assert.NotNil(this.T(), target.Get(1))
+	target.Del(1)
+	assert.Nil(this.T(), target.Get(1))
 }

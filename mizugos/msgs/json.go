@@ -1,7 +1,7 @@
 package msgs
 
-// JsonMsg json訊息資料
-type JsonMsg struct {
+// Json json訊息資料
+type Json struct {
 	MessageID int32  `json:"messageID"` // 訊息編號
 	Message   []byte `json:"message"`   // 訊息資料
 }

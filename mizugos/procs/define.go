@@ -7,12 +7,12 @@ package procs
 //   - 管理訊息處理函式: 在 Add, Del 中實現
 //
 // 如果想要建立新的處理結構, 需要遵循以下流程
-//   - 定義訊息結構, 訊息結構必須包含 MessageID
-//   - 訊息結構如果要使用protobuf, 可以把定義檔放在support/proto/mizugo中
+//   - 定義訊息結構, 訊息結構必須包含 messageID, 類型為 int32
+//   - 訊息結構如果要使用protobuf, 可以把定義檔放在 support/proto-mizugo 中
 //   - 定義處理結構, 處理結構需要繼承 Processor 介面, 並實現所有函式;
 //     在處理結構中包含 Procmgr 結構來實現訊息處理功能, 這樣只要實作 Encode, Decode, Process 三個函式就可以了
 //
-// mizugo提供的預設處理器有 Json, Proto
+// mizugo提供的預設處理器有 Json, Proto, Raven
 type Processor interface {
 	// Encode 封包編碼
 	Encode(input any) (output any, err error)
@@ -24,14 +24,11 @@ type Processor interface {
 	Process(input any) error
 
 	// Add 新增訊息處理
-	Add(messageID MessageID, process Process)
+	Add(messageID int32, process Process)
 
 	// Del 刪除訊息處理
-	Del(messageID MessageID)
+	Del(messageID int32)
 }
 
 // Process 訊息處理函式類型
 type Process func(message any)
-
-// MessageID 訊息編號, 設置為int32以跟proto的列舉類型統一
-type MessageID = int32
