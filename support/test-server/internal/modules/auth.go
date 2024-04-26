@@ -31,8 +31,8 @@ type Auth struct {
 
 // Awake 喚醒處理
 func (this *Auth) Awake() error {
-	this.Entity().AddMessage(procs.MessageID(msgs.MsgID_LoginQ), this.procMLoginQ)
-	this.Entity().AddMessage(procs.MessageID(msgs.MsgID_UpdateQ), this.procMUpdateQ)
+	this.Entity().AddMessage(int32(msgs.MsgID_LoginQ), this.procMLoginQ)
+	this.Entity().AddMessage(int32(msgs.MsgID_UpdateQ), this.procMUpdateQ)
 	return nil
 }
 
@@ -72,7 +72,7 @@ func (this *Auth) procMLoginQ(message any) {
 
 // sendMLoginA 傳送回應登入
 func (this *Auth) sendMLoginA(from *msgs.MLoginQ, errID msgs.ErrID, token string) {
-	msg, err := procs.JsonMarshal(procs.MessageID(msgs.MsgID_LoginA), &msgs.MLoginA{
+	msg, err := procs.JsonMarshal(int32(msgs.MsgID_LoginA), &msgs.MLoginA{
 		From:  from,
 		ErrID: int(errID),
 		Token: token,
@@ -128,7 +128,7 @@ func (this *Auth) procMUpdateQ(message any) {
 
 // sendMUpdateA 傳送回應登入
 func (this *Auth) sendMUpdateA(from *msgs.MUpdateQ, errID msgs.ErrID, token string) {
-	msg, err := procs.JsonMarshal(procs.MessageID(msgs.MsgID_UpdateA), &msgs.MUpdateA{
+	msg, err := procs.JsonMarshal(int32(msgs.MsgID_UpdateA), &msgs.MUpdateA{
 		From:  from,
 		ErrID: int(errID),
 		Token: token,

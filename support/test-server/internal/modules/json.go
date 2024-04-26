@@ -26,7 +26,7 @@ type Json struct {
 
 // Awake 喚醒處理
 func (this *Json) Awake() error {
-	this.Entity().AddMessage(procs.MessageID(msgs.MsgID_JsonQ), this.procMJsonQ)
+	this.Entity().AddMessage(int32(msgs.MsgID_JsonQ), this.procMJsonQ)
 	return nil
 }
 
@@ -49,7 +49,7 @@ func (this *Json) procMJsonQ(message any) {
 
 // sendMJsonA 傳送回應Json
 func (this *Json) sendMJsonA(from *msgs.MJsonQ, errID msgs.ErrID, count int64) {
-	msg, err := procs.JsonMarshal(procs.MessageID(msgs.MsgID_JsonA), &msgs.MJsonA{
+	msg, err := procs.JsonMarshal(int32(msgs.MsgID_JsonA), &msgs.MJsonA{
 		From:  from,
 		ErrID: int(errID),
 		Count: count,

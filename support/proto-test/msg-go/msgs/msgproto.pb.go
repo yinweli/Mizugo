@@ -132,150 +132,6 @@ func (x *MProtoA) GetCount() int64 {
 	return 0
 }
 
-// 標頭Proto-Raven
-type HProtoRaven struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Token string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"` // token
-}
-
-func (x *HProtoRaven) Reset() {
-	*x = HProtoRaven{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_msgproto_proto_msgTypes[2]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *HProtoRaven) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*HProtoRaven) ProtoMessage() {}
-
-func (x *HProtoRaven) ProtoReflect() protoreflect.Message {
-	mi := &file_msgproto_proto_msgTypes[2]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use HProtoRaven.ProtoReflect.Descriptor instead.
-func (*HProtoRaven) Descriptor() ([]byte, []int) {
-	return file_msgproto_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *HProtoRaven) GetToken() string {
-	if x != nil {
-		return x.Token
-	}
-	return ""
-}
-
-// 要求Proto-Raven
-type MProtoRavenQ struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Time int64 `protobuf:"varint,1,opt,name=time,proto3" json:"time,omitempty"` // 傳送時間
-}
-
-func (x *MProtoRavenQ) Reset() {
-	*x = MProtoRavenQ{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_msgproto_proto_msgTypes[3]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *MProtoRavenQ) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*MProtoRavenQ) ProtoMessage() {}
-
-func (x *MProtoRavenQ) ProtoReflect() protoreflect.Message {
-	mi := &file_msgproto_proto_msgTypes[3]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use MProtoRavenQ.ProtoReflect.Descriptor instead.
-func (*MProtoRavenQ) Descriptor() ([]byte, []int) {
-	return file_msgproto_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *MProtoRavenQ) GetTime() int64 {
-	if x != nil {
-		return x.Time
-	}
-	return 0
-}
-
-// 回應Proto-Raven
-type MProtoRavenA struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Count int64 `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"` // 封包計數
-}
-
-func (x *MProtoRavenA) Reset() {
-	*x = MProtoRavenA{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_msgproto_proto_msgTypes[4]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *MProtoRavenA) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*MProtoRavenA) ProtoMessage() {}
-
-func (x *MProtoRavenA) ProtoReflect() protoreflect.Message {
-	mi := &file_msgproto_proto_msgTypes[4]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use MProtoRavenA.ProtoReflect.Descriptor instead.
-func (*MProtoRavenA) Descriptor() ([]byte, []int) {
-	return file_msgproto_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *MProtoRavenA) GetCount() int64 {
-	if x != nil {
-		return x.Count
-	}
-	return 0
-}
-
 var File_msgproto_proto protoreflect.FileDescriptor
 
 var file_msgproto_proto_rawDesc = []byte{
@@ -288,15 +144,8 @@ var file_msgproto_proto_rawDesc = []byte{
 	0x04, 0x66, 0x72, 0x6f, 0x6d, 0x12, 0x1c, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x49, 0x44, 0x18, 0x02,
 	0x20, 0x01, 0x28, 0x0e, 0x32, 0x06, 0x2e, 0x45, 0x72, 0x72, 0x49, 0x44, 0x52, 0x05, 0x65, 0x72,
 	0x72, 0x49, 0x44, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x03, 0x20, 0x01,
-	0x28, 0x03, 0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x22, 0x23, 0x0a, 0x0b, 0x48, 0x50, 0x72,
-	0x6f, 0x74, 0x6f, 0x52, 0x61, 0x76, 0x65, 0x6e, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65,
-	0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x22, 0x22,
-	0x0a, 0x0c, 0x4d, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x52, 0x61, 0x76, 0x65, 0x6e, 0x51, 0x12, 0x12,
-	0x0a, 0x04, 0x74, 0x69, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x04, 0x74, 0x69,
-	0x6d, 0x65, 0x22, 0x24, 0x0a, 0x0c, 0x4d, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x52, 0x61, 0x76, 0x65,
-	0x6e, 0x41, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x03, 0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x42, 0x0c, 0x5a, 0x0a, 0x2f, 0x6d, 0x73, 0x67,
-	0x73, 0x3b, 0x6d, 0x73, 0x67, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x28, 0x03, 0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x42, 0x0c, 0x5a, 0x0a, 0x2f, 0x6d, 0x73,
+	0x67, 0x73, 0x3b, 0x6d, 0x73, 0x67, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -311,18 +160,15 @@ func file_msgproto_proto_rawDescGZIP() []byte {
 	return file_msgproto_proto_rawDescData
 }
 
-var file_msgproto_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_msgproto_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_msgproto_proto_goTypes = []interface{}{
-	(*MProtoQ)(nil),      // 0: MProtoQ
-	(*MProtoA)(nil),      // 1: MProtoA
-	(*HProtoRaven)(nil),  // 2: HProtoRaven
-	(*MProtoRavenQ)(nil), // 3: MProtoRavenQ
-	(*MProtoRavenA)(nil), // 4: MProtoRavenA
-	(ErrID)(0),           // 5: ErrID
+	(*MProtoQ)(nil), // 0: MProtoQ
+	(*MProtoA)(nil), // 1: MProtoA
+	(ErrID)(0),      // 2: ErrID
 }
 var file_msgproto_proto_depIdxs = []int32{
 	0, // 0: MProtoA.from:type_name -> MProtoQ
-	5, // 1: MProtoA.errID:type_name -> ErrID
+	2, // 1: MProtoA.errID:type_name -> ErrID
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -361,42 +207,6 @@ func file_msgproto_proto_init() {
 				return nil
 			}
 		}
-		file_msgproto_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*HProtoRaven); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_msgproto_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MProtoRavenQ); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_msgproto_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MProtoRavenA); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -404,7 +214,7 @@ func file_msgproto_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_msgproto_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

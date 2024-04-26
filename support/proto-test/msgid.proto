@@ -9,8 +9,8 @@ enum MsgID {
   JsonA = 2; // 回應Json
   ProtoQ = 3; // 要求Proto
   ProtoA = 4; // 回應Proto
-  ProtoRavenQ = 5; // 要求ProtoRaven
-  ProtoRavenA = 6; // 回應ProtoRaven
+  RavenQ = 5; // 要求Raven
+  RavenA = 6; // 回應Raven
   LoginQ = 7; // 要求登入(使用Json處理器)
   LoginA = 8; // 回應登入(使用Json處理器)
   UpdateQ = 9; // 要求更新(使用Json處理器)
@@ -22,7 +22,7 @@ enum ErrID {
   Success = 0; // 成功
   JsonUnmarshal = 1; // Json反序列化失敗
   ProtoUnmarshal = 2; // Proto反序列化失敗
-  ProtoRavenUnmarshal = 3; // ProtoRaven反序列化失敗
+  RavenUnmarshal = 3; // Raven反序列化失敗
   SubmitFailed = 4; // 資料庫執行失敗
   TokenNotMatch = 5; // Token不匹配
 }

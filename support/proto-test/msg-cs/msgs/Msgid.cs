@@ -22,13 +22,13 @@ public static partial class MsgidReflection {
   static MsgidReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "Cgttc2dpZC5wcm90byqWAQoFTXNnSUQSCwoHVW5rbm93bhAAEgkKBUpzb25R",
-          "EAESCQoFSnNvbkEQAhIKCgZQcm90b1EQAxIKCgZQcm90b0EQBBIPCgtQcm90",
-          "b1JhdmVuURAFEg8KC1Byb3RvUmF2ZW5BEAYSCgoGTG9naW5REAcSCgoGTG9n",
-          "aW5BEAgSCwoHVXBkYXRlURAJEgsKB1VwZGF0ZUEQCip5CgVFcnJJRBILCgdT",
-          "dWNjZXNzEAASEQoNSnNvblVubWFyc2hhbBABEhIKDlByb3RvVW5tYXJzaGFs",
-          "EAISFwoTUHJvdG9SYXZlblVubWFyc2hhbBADEhAKDFN1Ym1pdEZhaWxlZBAE",
-          "EhEKDVRva2VuTm90TWF0Y2gQBUIMWgovbXNnczttc2dzYgZwcm90bzM="));
+          "Cgttc2dpZC5wcm90byqMAQoFTXNnSUQSCwoHVW5rbm93bhAAEgkKBUpzb25R",
+          "EAESCQoFSnNvbkEQAhIKCgZQcm90b1EQAxIKCgZQcm90b0EQBBIKCgZSYXZl",
+          "blEQBRIKCgZSYXZlbkEQBhIKCgZMb2dpblEQBxIKCgZMb2dpbkEQCBILCgdV",
+          "cGRhdGVREAkSCwoHVXBkYXRlQRAKKnQKBUVycklEEgsKB1N1Y2Nlc3MQABIR",
+          "Cg1Kc29uVW5tYXJzaGFsEAESEgoOUHJvdG9Vbm1hcnNoYWwQAhISCg5SYXZl",
+          "blVubWFyc2hhbBADEhAKDFN1Ym1pdEZhaWxlZBAEEhEKDVRva2VuTm90TWF0",
+          "Y2gQBUIMWgovbXNnczttc2dzYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(new[] {typeof(global::MsgID), typeof(global::ErrID), }, null, null));
@@ -62,13 +62,13 @@ public enum MsgID {
   /// </summary>
   [pbr::OriginalName("ProtoA")] ProtoA = 4,
   /// <summary>
-  /// 要求ProtoRaven
+  /// 要求Raven
   /// </summary>
-  [pbr::OriginalName("ProtoRavenQ")] ProtoRavenQ = 5,
+  [pbr::OriginalName("RavenQ")] RavenQ = 5,
   /// <summary>
-  /// 回應ProtoRaven
+  /// 回應Raven
   /// </summary>
-  [pbr::OriginalName("ProtoRavenA")] ProtoRavenA = 6,
+  [pbr::OriginalName("RavenA")] RavenA = 6,
   /// <summary>
   /// 要求登入(使用Json處理器)
   /// </summary>
@@ -104,9 +104,9 @@ public enum ErrID {
   /// </summary>
   [pbr::OriginalName("ProtoUnmarshal")] ProtoUnmarshal = 2,
   /// <summary>
-  /// ProtoRaven反序列化失敗
+  /// Raven反序列化失敗
   /// </summary>
-  [pbr::OriginalName("ProtoRavenUnmarshal")] ProtoRavenUnmarshal = 3,
+  [pbr::OriginalName("RavenUnmarshal")] RavenUnmarshal = 3,
   /// <summary>
   /// 資料庫執行失敗
   /// </summary>

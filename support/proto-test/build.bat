@@ -9,6 +9,7 @@ set targetc=..\..\support\test-client-go\msgs
 rm -r %source%\msgs
 protoc --go_out=%source% msgid.proto
 protoc --go_out=%source% msgproto.proto
+protoc --go_out=%source% msgraven.proto
 
 rm -r %targets%
 mkdir %targets%
@@ -29,6 +30,7 @@ rm -r %source%\msgs
 mkdir %source%\msgs
 protoc --csharp_out=%source%\msgs msgid.proto
 protoc --csharp_out=%source%\msgs msgproto.proto
+protoc --csharp_out=%source%\msgs msgraven.proto
 
 rm -r %targetc%
 mkdir %targetc%
