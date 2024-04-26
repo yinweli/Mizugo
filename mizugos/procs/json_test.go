@@ -29,98 +29,97 @@ func (this *SuiteJson) TearDownSuite() {
 }
 
 func (this *SuiteJson) TestEncode() {
-	messageID := MessageID(1)
-	message := &msgs.JsonTest{
-		Data: "json test",
-	}
+	output, _ := JsonMarshal(1, &msgs.JsonTest{
+		Data: testdata.Unknown,
+	})
 	target := NewJson()
 	assert.NotNil(this.T(), target)
-	input, _ := JsonMarshal(messageID, message)
-
-	encode, err := target.Encode(input)
+	encode, err := target.Encode(output)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), encode)
-
 	_, err = target.Encode(nil)
 	assert.NotNil(this.T(), err)
-
-	_, err = target.Encode("!?")
+	_, err = target.Encode(testdata.Unknown)
 	assert.NotNil(this.T(), err)
+}
 
+func (this *SuiteJson) TestDecode() {
+	output, _ := JsonMarshal(1, &msgs.JsonTest{
+		Data: testdata.Unknown,
+	})
+	target := NewJson()
+	encode, _ := target.Encode(output)
 	decode, err := target.Decode(encode)
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), decode)
-	assert.Equal(this.T(), input, decode)
-
+	assert.Equal(this.T(), output, decode)
 	_, err = target.Decode(nil)
 	assert.NotNil(this.T(), err)
-
-	_, err = target.Decode([]byte("unknown encode"))
+	_, err = target.Decode(testdata.Unknown)
+	assert.NotNil(this.T(), err)
+	_, err = target.Decode([]byte(testdata.Unknown))
 	assert.NotNil(this.T(), err)
 }
 
 func (this *SuiteJson) TestProcess() {
-	messageID := MessageID(1)
-	message := &msgs.JsonTest{
-		Data: "json test",
-	}
-	target := NewJson()
-	input, _ := JsonMarshal(messageID, message)
-
-	valid := false
-	target.Add(messageID, func(message any) {
-		valid = assert.Equal(this.T(), input, message)
+	output, _ := JsonMarshal(1, &msgs.JsonTest{
+		Data: testdata.Unknown,
 	})
-	assert.Nil(this.T(), target.Process(input))
+	valid := false
+	target := NewJson()
+	target.Add(1, func(message any) {
+		valid = assert.Equal(this.T(), output, message)
+	})
+	assert.Nil(this.T(), target.Process(output))
 	assert.True(this.T(), valid)
-
-	input, _ = JsonMarshal(0, message)
-	assert.NotNil(this.T(), target.Process(input))
-
+	output, _ = JsonMarshal(0, &msgs.JsonTest{})
+	assert.NotNil(this.T(), target.Process(output))
 	assert.NotNil(this.T(), target.Process(nil))
+	assert.NotNil(this.T(), target.Process(testdata.Unknown))
 }
 
 func (this *SuiteJson) TestMarshal() {
-	messageID := MessageID(1)
-	message := &msgs.JsonTest{
-		Data: "json test",
-	}
-	output1, err := JsonMarshal(messageID, message)
+	output, err := JsonMarshal(1, &msgs.JsonTest{
+		Data: testdata.Unknown,
+	})
 	assert.Nil(this.T(), err)
-	assert.NotNil(this.T(), output1)
-
-	_, err = JsonMarshal(messageID, nil)
+	assert.NotNil(this.T(), output)
+	_, err = JsonMarshal(1, nil)
 	assert.NotNil(this.T(), err)
+}
 
+func (this *SuiteJson) TestUnmarshal() {
+	object := &msgs.JsonTest{
+		Data: testdata.Unknown,
+	}
+	output1, _ := JsonMarshal(1, object)
 	messageID, output2, err := JsonUnmarshal[msgs.JsonTest](output1)
 	assert.Nil(this.T(), err)
-	assert.Equal(this.T(), messageID, messageID)
-	assert.Equal(this.T(), message, output2)
-
+	assert.Equal(this.T(), int32(1), messageID)
+	assert.Equal(this.T(), object, output2)
 	_, _, err = JsonUnmarshal[msgs.JsonTest](nil)
 	assert.NotNil(this.T(), err)
-
-	_, _, err = JsonUnmarshal[msgs.JsonTest]("!?")
+	_, _, err = JsonUnmarshal[int](output1)
 	assert.NotNil(this.T(), err)
 }
 
 func BenchmarkJsonEncode(b *testing.B) {
-	target := NewJson()
-	input, _ := JsonMarshal(1, &msgs.JsonTest{
-		Data: "benchmark encode",
+	output, _ := JsonMarshal(1, &msgs.JsonTest{
+		Data: testdata.Unknown,
 	})
+	target := NewJson()
 
 	for i := 0; i < b.N; i++ {
-		_, _ = target.Encode(input)
+		_, _ = target.Encode(output)
 	} // for
 }
 
 func BenchmarkJsonDecode(b *testing.B) {
-	target := NewJson()
-	input, _ := JsonMarshal(1, &msgs.JsonTest{
-		Data: "benchmark decode",
+	output, _ := JsonMarshal(1, &msgs.JsonTest{
+		Data: testdata.Unknown,
 	})
-	encode, _ := target.Encode(input)
+	target := NewJson()
+	encode, _ := target.Encode(output)
 
 	for i := 0; i < b.N; i++ {
 		_, _ = target.Decode(encode)
@@ -128,21 +127,21 @@ func BenchmarkJsonDecode(b *testing.B) {
 }
 
 func BenchmarkJsonMarshal(b *testing.B) {
-	input := &msgs.JsonTest{
-		Data: "benchmark marshal",
+	object := &msgs.JsonTest{
+		Data: testdata.Unknown,
 	}
 
 	for i := 0; i < b.N; i++ {
-		_, _ = JsonMarshal(1, input)
+		_, _ = JsonMarshal(1, object)
 	} // for
 }
 
 func BenchmarkJsonUnmarshal(b *testing.B) {
-	input, _ := JsonMarshal(1, &msgs.JsonTest{
-		Data: "benchmark unmarshal",
+	output, _ := JsonMarshal(1, &msgs.JsonTest{
+		Data: testdata.Unknown,
 	})
 
 	for i := 0; i < b.N; i++ {
-		_, _, _ = JsonUnmarshal[msgs.JsonTest](input)
+		_, _, _ = JsonUnmarshal[msgs.JsonTest](output)
 	} // for
 }

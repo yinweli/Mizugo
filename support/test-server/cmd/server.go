@@ -61,6 +61,11 @@ func main() {
 		return
 	} // if
 
+	if err = entrys.RavenInitialize(); err != nil {
+		fmt.Println(err)
+		return
+	} // if
+
 	fmt.Println("test-server running")
 	ctx := ctxs.Get().WithCancel()
 

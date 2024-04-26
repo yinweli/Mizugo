@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+import "msgid.proto";
+
+option go_package = "/msgs;msgs";
+
+// 標頭Raven
+message HRaven {
+  string token = 1; // token
+}
+
+// 要求Raven
+message MRavenQ {
+  int64 time = 1; // 傳送時間
+}
+
+// 回應Raven
+message MRavenA {
+  int64 count = 1; // 封包計數
+}

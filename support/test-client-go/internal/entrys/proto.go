@@ -49,7 +49,7 @@ type ProtoConfig struct {
 	IP         string        `yaml:"ip"`         // 位址
 	Port       string        `yaml:"port"`       // 埠號
 	Key        string        `yaml:"key"`        // 密鑰
-	Timeout    time.Duration `yaml:"timeout"`    // 超期時間
+	Timeout    time.Duration `yaml:"timeout"`    // 超時時間
 	Interval   time.Duration `yaml:"interval"`   // 間隔時間
 	Count      int           `yaml:"count"`      // 總連線數
 	Batch      int           `yaml:"batch"`      // 批次連線數

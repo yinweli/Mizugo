@@ -26,7 +26,7 @@ type Proto struct {
 
 // Awake 喚醒處理
 func (this *Proto) Awake() error {
-	this.Entity().AddMessage(procs.MessageID(msgs.MsgID_ProtoQ), this.procMProtoQ)
+	this.Entity().AddMessage(int32(msgs.MsgID_ProtoQ), this.procMProtoQ)
 	return nil
 }
 
@@ -49,7 +49,7 @@ func (this *Proto) procMProtoQ(message any) {
 
 // sendMProtoA 傳送回應Proto
 func (this *Proto) sendMProtoA(from *msgs.MProtoQ, errID msgs.ErrID, count int64) {
-	msg, err := procs.ProtoMarshal(procs.MessageID(msgs.MsgID_ProtoA), &msgs.MProtoA{
+	msg, err := procs.ProtoMarshal(int32(msgs.MsgID_ProtoA), &msgs.MProtoA{
 		From:  from,
 		ErrID: errID,
 		Count: count,

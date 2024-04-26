@@ -23,6 +23,7 @@ func MetricsInitialize() error {
 	MeterUpdate = mizugos.Metrics.NewRuntime("update")
 	MeterJson = mizugos.Metrics.NewRuntime("json")
 	MeterProto = mizugos.Metrics.NewRuntime("proto")
+	MeterRaven = mizugos.Metrics.NewRuntime("raven")
 	LogSystem.Get().Info("metrics").Message("initialize").EndFlush()
 	return nil
 }
@@ -36,3 +37,4 @@ var MeterLogin *metrics.Runtime  // Login訊息度量物件
 var MeterUpdate *metrics.Runtime // Update訊息度量物件
 var MeterJson *metrics.Runtime   // Json訊息度量物件
 var MeterProto *metrics.Runtime  // Proto訊息度量物件
+var MeterRaven *metrics.Runtime  // Raven訊息度量物件
