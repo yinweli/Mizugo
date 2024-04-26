@@ -3,21 +3,20 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using Mizugo;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 /// <summary>
-/// 客戶端組件範例, 使用Json訊息處理器, 編碼/解碼流程採用ProcJson, DesCBC以及Base64
+/// 客戶端組件範例, 使用Raven訊息處理器, 編碼/解碼流程採用ProcRaven, DesCBC以及Base64
 /// 程式會在Awake時初始化內部組件, 在Start時連線到伺服器, 在Update時更新客戶端組件
-/// 連線成功後, 在OnConnect時傳送MJsonQ訊息到伺服器, 等待伺服器的回應
-/// 當伺服器回應MJsonA訊息時, 在ProcMJsonA處理它並顯示訊息, 訊息顯示完畢後就斷線
+/// 連線成功後, 在OnConnect時傳送MRavenQ訊息到伺服器, 等待伺服器的回應
+/// 當伺服器回應MRavenA訊息時, 在ProcMRavenA處理它並顯示訊息, 訊息顯示完畢後就斷線
 /// 此範例需要配合Mizugo專案的測試伺服器才能正常運作
 /// </summary>
-public class SampleJson : MonoBehaviour
+public class SampleRaven : MonoBehaviour
 {
     private void Awake()
     {
         var eventmgr = new Eventmgr();
-        var process = new ProcJson();
+        var process = new ProcRaven();
 
         client = new TCPClient();
         client.SetEvent(eventmgr);
@@ -28,7 +27,7 @@ public class SampleJson : MonoBehaviour
         client.AddEvent(EventID.Recv, OnRecv);
         client.AddEvent(EventID.Send, OnSend);
         client.AddEvent(EventID.Error, OnError);
-        client.AddProcess((int)MsgID.JsonA, ProcMJsonA);
+        client.AddProcess((int)MsgID.RavenA, ProcMRavenA);
         stopwatch = new Stopwatch();
     }
 
@@ -56,7 +55,7 @@ public class SampleJson : MonoBehaviour
     {
         Log("connect to " + host + ":" + port + " success");
         stopwatch?.Start();
-        SendMJsonQ();
+        SendMRavenQ();
     }
 
     /// <summary>
@@ -92,34 +91,37 @@ public class SampleJson : MonoBehaviour
     }
 
     /// <summary>
-    /// 訊息處理: MJsonA
+    /// 訊息處理: MRavenA
     /// 處理訊息時, 首要就是要把param物件轉換為訊息結構
-    /// 當使用Json訊息處理器時, 可以通過ProcJson.Unmarshal函式來幫助轉換為訊息結構
+    /// 這裡使用Raven組件來進行這項工作(伺服器也得使用Raven組件)
     /// 由於一個訊息處理函式只針對一個訊息處理, 因此可以確定要轉換的訊息結構類型
-    /// 如果ProcJson.Unmarshal或是訊息處理函式拋出異常, 會由客戶端組件負責捕獲
+    /// 如果Raven組件拋出異常, 會由客戶端組件負責捕獲
     /// </summary>
-    private void ProcMJsonA(object param)
+    private void ProcMRavenA(object param)
     {
-        ProcJson.Unmarshal<MJsonA>(param, out var messageID, out var message);
-        var duration = stopwatch.ElapsedMilliseconds - message.From.Time;
-        var count = message.Count;
-        var errID = message.ErrID;
+        ProcRaven.Unmarshal<HRaven, MRavenQ>(param, out var message);
+        var duration = stopwatch.ElapsedMilliseconds - message.request.Time;
+        var count = message.GetRespond<MRavenA>().Count;
+        var errID = (ErrID)message.errID;
 
         Log(">>> duration: " + duration + ", count: " + count + ", errID: " + errID);
         client.Disconnect();
     }
 
     /// <summary>
-    /// 訊息傳送: MJsonQ
+    /// 訊息傳送: MRavenQ
     /// 傳送訊息時, 首要就是要建立訊息結構並填寫好各個欄位
-    /// 當使用Json訊息處理器時, 可以通過ProcJson.Marshal函式來幫助建立訊息結構
-    /// ProcJson.Marshal函式需要填寫訊息編號以及訊息物件來建立訊息結構
-    /// 這個範例函式專門用來傳送MJsonQ訊息, 訊息中只有一個Time欄位用來填寫當前時間的毫秒
+    /// 這裡使用Raven組件來進行這項工作(伺服器也得使用Raven組件)
+    /// 這個範例函式專門用來傳送MRavenQ訊息, 訊息中只有一個Time欄位用來填寫當前時間的毫秒
     /// 最後用客戶端組件把訊息傳送出去
     /// </summary>
-    private void SendMJsonQ()
+    private void SendMRavenQ()
     {
-        var message = ProcJson.Marshal((int)MsgID.JsonQ, new MJsonQ { Time = stopwatch.ElapsedMilliseconds });
+        var message = ProcRaven.Marshal(
+            (int)MsgID.RavenQ,
+            new HRaven() { Token = "raven" },
+            new MRavenQ { Time = stopwatch.ElapsedMilliseconds }
+        );
 
         client.Send(message);
     }
@@ -129,7 +131,7 @@ public class SampleJson : MonoBehaviour
     /// </summary>
     private void Log(object message)
     {
-        UnityEngine.Debug.Log("sample json: " + message);
+        UnityEngine.Debug.Log("sample raven: " + message);
     }
 
     /// <summary>
@@ -142,13 +144,13 @@ public class SampleJson : MonoBehaviour
     /// 伺服器埠號
     /// </summary>
     [SerializeField]
-    private int port = 9001;
+    private int port = 9002;
 
     /// <summary>
     /// 密鑰
     /// </summary>
     [SerializeField]
-    private string key = "key-@@@@";
+    private string key = "key-####";
 
     /// <summary>
     /// 客戶端組件
