@@ -19,10 +19,11 @@ func MetricsInitialize() error {
 		return fmt.Errorf("metrics initialize: %w", err)
 	} // if
 
+	MeterConnect = mizugos.Metrics.NewInt("connect")
 	MeterAuth = mizugos.Metrics.NewRuntime("login")
 	MeterJson = mizugos.Metrics.NewRuntime("json")
 	MeterProto = mizugos.Metrics.NewRuntime("proto")
-	MeterConnect = mizugos.Metrics.NewInt("connect")
+	MeterRaven = mizugos.Metrics.NewRuntime("protoRaven")
 	LogSystem.Get().Info("metrics").Message("initialize").EndFlush()
 	return nil
 }
@@ -32,7 +33,8 @@ type MetricsConfig struct {
 	Port int `yaml:"port"` // 埠號
 }
 
-var MeterAuth *metrics.Runtime  // auth訊息度量物件
-var MeterJson *metrics.Runtime  // json訊息度量物件
-var MeterProto *metrics.Runtime // proto訊息度量物件
 var MeterConnect *metrics.Int   // 連線度量物件
+var MeterAuth *metrics.Runtime  // Auth訊息度量物件
+var MeterJson *metrics.Runtime  // Json訊息度量物件
+var MeterProto *metrics.Runtime // Proto訊息度量物件
+var MeterRaven *metrics.Runtime // Raven訊息度量物件

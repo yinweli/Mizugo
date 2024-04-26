@@ -32,7 +32,7 @@ type Proto struct {
 // Awake 喚醒處理
 func (this *Proto) Awake() error {
 	this.Entity().Subscribe(defines.EventBegin, this.eventBegin)
-	this.Entity().AddMessage(procs.MessageID(msgs.MsgID_ProtoA), this.procMProtoA)
+	this.Entity().AddMessage(int32(msgs.MsgID_ProtoA), this.procMProtoA)
 	return nil
 }
 
@@ -63,19 +63,18 @@ func (this *Proto) procMProtoA(message any) {
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
 	features.MeterProto.Add(duration)
+	features.LogSystem.Get().Info(this.name).KV("count", msg.Count).KV("duration", duration).Caller(0).EndFlush()
 
 	if this.disconnect {
 		this.Entity().Stop()
 	} else {
 		this.sendMProtoQ()
 	} // if
-
-	features.LogSystem.Get().Info(this.name).KV("duration", duration).KV("count", msg.Count).Caller(0).EndFlush()
 }
 
 // sendMProtoQ 傳送要求Proto
 func (this *Proto) sendMProtoQ() {
-	msg, err := procs.ProtoMarshal(procs.MessageID(msgs.MsgID_ProtoQ), &msgs.MProtoQ{
+	msg, err := procs.ProtoMarshal(int32(msgs.MsgID_ProtoQ), &msgs.MProtoQ{
 		Time: time.Now().UnixNano(),
 	})
 

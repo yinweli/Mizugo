@@ -35,8 +35,8 @@ type Auth struct {
 // Awake 喚醒處理
 func (this *Auth) Awake() error {
 	this.Entity().Subscribe(defines.EventBegin, this.eventBegin)
-	this.Entity().AddMessage(procs.MessageID(msgs.MsgID_LoginA), this.procMLoginA)
-	this.Entity().AddMessage(procs.MessageID(msgs.MsgID_UpdateA), this.procMUpdateA)
+	this.Entity().AddMessage(int32(msgs.MsgID_LoginA), this.procMLoginA)
+	this.Entity().AddMessage(int32(msgs.MsgID_UpdateA), this.procMUpdateA)
 	return nil
 }
 
@@ -67,7 +67,7 @@ func (this *Auth) procMLoginA(message any) {
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
 	features.MeterAuth.Add(duration)
-	features.LogSystem.Get().Info(this.name).KV("duration", duration).KV("token", msg.Token).Caller(0).EndFlush()
+	features.LogSystem.Get().Info(this.name).KV("token", msg.Token).KV("duration", duration).Caller(0).EndFlush()
 
 	this.token = msg.Token
 	this.sendMUpdateQ()
@@ -75,7 +75,7 @@ func (this *Auth) procMLoginA(message any) {
 
 // sendMLoginQ 傳送要求登入
 func (this *Auth) sendMLoginQ() {
-	msg, err := procs.JsonMarshal(procs.MessageID(msgs.MsgID_LoginQ), &msgs.MLoginQ{
+	msg, err := procs.JsonMarshal(int32(msgs.MsgID_LoginQ), &msgs.MLoginQ{
 		Account: this.account,
 		Time:    time.Now().UnixNano(),
 	})
@@ -104,7 +104,7 @@ func (this *Auth) procMUpdateA(message any) {
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
 	features.MeterAuth.Add(duration)
-	features.LogSystem.Get().Info(this.name).KV("duration", duration).KV("token", msg.Token).Caller(0).EndFlush()
+	features.LogSystem.Get().Info(this.name).KV("token", msg.Token).KV("duration", duration).Caller(0).EndFlush()
 
 	this.token = msg.Token
 	this.sendMUpdateQ()
@@ -117,7 +117,7 @@ func (this *Auth) sendMUpdateQ() {
 	} // if
 
 	this.update--
-	msg, err := procs.JsonMarshal(procs.MessageID(msgs.MsgID_UpdateQ), &msgs.MUpdateQ{
+	msg, err := procs.JsonMarshal(int32(msgs.MsgID_UpdateQ), &msgs.MUpdateQ{
 		Account: this.account,
 		Token:   this.token,
 		Time:    time.Now().UnixNano(),

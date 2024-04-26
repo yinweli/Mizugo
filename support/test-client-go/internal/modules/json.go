@@ -32,7 +32,7 @@ type Json struct {
 // Awake 喚醒處理
 func (this *Json) Awake() error {
 	this.Entity().Subscribe(defines.EventBegin, this.eventBegin)
-	this.Entity().AddMessage(procs.MessageID(msgs.MsgID_JsonA), this.procMJsonA)
+	this.Entity().AddMessage(int32(msgs.MsgID_JsonA), this.procMJsonA)
 	return nil
 }
 
@@ -63,19 +63,18 @@ func (this *Json) procMJsonA(message any) {
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
 	features.MeterJson.Add(duration)
+	features.LogSystem.Get().Info(this.name).KV("count", msg.Count).KV("duration", duration).Caller(0).EndFlush()
 
 	if this.disconnect {
 		this.Entity().Stop()
 	} else {
 		this.sendMJsonQ()
 	} // if
-
-	features.LogSystem.Get().Info(this.name).KV("duration", duration).KV("count", msg.Count).Caller(0).EndFlush()
 }
 
 // sendMJsonQ 傳送要求Json
 func (this *Json) sendMJsonQ() {
-	msg, err := procs.JsonMarshal(procs.MessageID(msgs.MsgID_JsonQ), &msgs.MJsonQ{
+	msg, err := procs.JsonMarshal(int32(msgs.MsgID_JsonQ), &msgs.MJsonQ{
 		Time: time.Now().UnixNano(),
 	})
 

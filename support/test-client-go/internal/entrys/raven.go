@@ -14,37 +14,37 @@ import (
 	"github.com/yinweli/Mizugo/support/test-client-go/internal/modules"
 )
 
-// ProtoInitialize 初始化Proto入口
-func ProtoInitialize() (err error) {
-	config := &ProtoConfig{}
+// RavenInitialize 初始化Raven入口
+func RavenInitialize() (err error) {
+	config := &RavenConfig{}
 
-	if err = mizugos.Config.Unmarshal("proto", config); err != nil {
-		return fmt.Errorf("proto initialize: %w", err)
+	if err = mizugos.Config.Unmarshal("raven", config); err != nil {
+		return fmt.Errorf("raven initialize: %w", err)
 	} // if
 
-	proto.key = config.Key
-	proto.delay = config.Delay
-	proto.disconnect = config.Disconnect
+	raven.key = config.Key
+	raven.delay = config.Delay
+	raven.disconnect = config.Disconnect
 
 	if config.Enable {
 		miscs.GenerateConnection(config.Interval, config.Count, config.Batch, func() {
-			mizugos.Network.AddConnectTCP(config.IP, config.Port, config.Timeout, proto.bind, proto.unbind, proto.wrong)
+			mizugos.Network.AddConnectTCP(config.IP, config.Port, config.Timeout, raven.bind, raven.unbind, raven.wrong)
 		})
 	} // if
 
-	features.LogSystem.Get().Info("proto").Message("initialize").EndFlush()
+	features.LogSystem.Get().Info("raven").Message("initialize").EndFlush()
 	return nil
 }
 
-// Proto Proto入口
-type Proto struct {
+// Raven Raven入口
+type Raven struct {
 	key        string        // 密鑰
 	delay      time.Duration // 延遲時間
 	disconnect bool          // 斷線旗標
 }
 
-// ProtoConfig 配置資料
-type ProtoConfig struct {
+// RavenConfig 配置資料
+type RavenConfig struct {
 	Enable     bool          `yaml:"enable"`     // 啟用旗標
 	IP         string        `yaml:"ip"`         // 位址
 	Port       string        `yaml:"port"`       // 埠號
@@ -58,10 +58,10 @@ type ProtoConfig struct {
 }
 
 // bind 綁定處理
-func (this *Proto) bind(session nets.Sessioner) bool {
+func (this *Raven) bind(session nets.Sessioner) bool {
 	err := error(nil)
 	entity := mizugos.Entity.Add()
-	process := procs.NewProto()
+	process := procs.NewRavenClient()
 
 	if entity == nil {
 		err = fmt.Errorf("bind: entity nil")
@@ -78,7 +78,7 @@ func (this *Proto) bind(session nets.Sessioner) bool {
 		goto Error
 	} // if
 
-	if err = entity.AddModule(modules.NewProto(this.delay, this.disconnect)); err != nil {
+	if err = entity.AddModule(modules.NewRaven(this.delay, this.disconnect)); err != nil {
 		err = fmt.Errorf("bind: %w", err)
 		goto Error
 	} // if
@@ -93,7 +93,7 @@ func (this *Proto) bind(session nets.Sessioner) bool {
 	session.SetWrong(this.wrong)
 	session.SetOwner(entity)
 	features.MeterConnect.Add(1)
-	features.LogSystem.Get().Info("proto").Message("bind").Caller(0).EndFlush()
+	features.LogSystem.Get().Info("raven").Message("bind").Caller(0).EndFlush()
 	return true
 
 Error:
@@ -103,12 +103,12 @@ Error:
 	} // if
 
 	session.Stop()
-	features.LogSystem.Get().Error("proto").Caller(0).Error(err).EndFlush()
+	features.LogSystem.Get().Error("raven").Caller(0).Error(err).EndFlush()
 	return false
 }
 
 // unbind 解綁處理
-func (this *Proto) unbind(session nets.Sessioner) {
+func (this *Raven) unbind(session nets.Sessioner) {
 	if entity, ok := session.GetOwner().(*entitys.Entity); ok {
 		entity.Finalize()
 		mizugos.Entity.Del(entity.EntityID())
@@ -117,8 +117,8 @@ func (this *Proto) unbind(session nets.Sessioner) {
 }
 
 // wrong 錯誤處理
-func (this *Proto) wrong(err error) {
-	features.LogSystem.Get().Error("proto").Caller(1).Error(err).EndFlush()
+func (this *Raven) wrong(err error) {
+	features.LogSystem.Get().Error("raven").Caller(1).Error(err).EndFlush()
 }
 
-var proto = &Proto{} // Proto入口
+var raven = &Raven{} // Raven入口

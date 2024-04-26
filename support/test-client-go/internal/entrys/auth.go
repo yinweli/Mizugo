@@ -44,7 +44,7 @@ type AuthConfig struct {
 	Enable  bool          `yaml:"enable"`  // 啟用旗標
 	IP      string        `yaml:"ip"`      // 位址
 	Port    string        `yaml:"port"`    // 埠號
-	Timeout time.Duration `yaml:"timeout"` // 超期時間
+	Timeout time.Duration `yaml:"timeout"` // 超時時間
 	Delay   time.Duration `yaml:"delay"`   // 延遲時間
 	Account string        `yaml:"account"` // 帳號
 	Update  int           `yaml:"update"`  // 更新次數
