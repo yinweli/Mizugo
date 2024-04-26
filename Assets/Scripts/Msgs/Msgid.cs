@@ -22,12 +22,13 @@ public static partial class MsgidReflection {
   static MsgidReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "Cgttc2dpZC5wcm90byp0CgVNc2dJRBILCgdVbmtub3duEAASCQoFSnNvblEQ",
-          "ARIJCgVKc29uQRACEgoKBlByb3RvURADEgoKBlByb3RvQRAEEgoKBkxvZ2lu",
-          "URAHEgoKBkxvZ2luQRAIEgsKB1VwZGF0ZVEQCRILCgdVcGRhdGVBEAoqYAoF",
-          "RXJySUQSCwoHU3VjY2VzcxAAEhEKDUpzb25Vbm1hcnNoYWwQARISCg5Qcm90",
-          "b1VubWFyc2hhbBACEhAKDFN1Ym1pdEZhaWxlZBADEhEKDVRva2VuTm90TWF0",
-          "Y2gQBEIMWgovbXNnczttc2dzYgZwcm90bzM="));
+          "Cgttc2dpZC5wcm90byqMAQoFTXNnSUQSCwoHVW5rbm93bhAAEgkKBUpzb25R",
+          "EAESCQoFSnNvbkEQAhIKCgZQcm90b1EQAxIKCgZQcm90b0EQBBIKCgZSYXZl",
+          "blEQBRIKCgZSYXZlbkEQBhIKCgZMb2dpblEQBxIKCgZMb2dpbkEQCBILCgdV",
+          "cGRhdGVREAkSCwoHVXBkYXRlQRAKKnQKBUVycklEEgsKB1N1Y2Nlc3MQABIR",
+          "Cg1Kc29uVW5tYXJzaGFsEAESEgoOUHJvdG9Vbm1hcnNoYWwQAhISCg5SYXZl",
+          "blVubWFyc2hhbBADEhAKDFN1Ym1pdEZhaWxlZBAEEhEKDVRva2VuTm90TWF0",
+          "Y2gQBUIMWgovbXNnczttc2dzYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(new[] {typeof(global::MsgID), typeof(global::ErrID), }, null, null));
@@ -61,6 +62,14 @@ public enum MsgID {
   /// </summary>
   [pbr::OriginalName("ProtoA")] ProtoA = 4,
   /// <summary>
+  /// 要求Raven
+  /// </summary>
+  [pbr::OriginalName("RavenQ")] RavenQ = 5,
+  /// <summary>
+  /// 回應Raven
+  /// </summary>
+  [pbr::OriginalName("RavenA")] RavenA = 6,
+  /// <summary>
   /// 要求登入(使用Json處理器)
   /// </summary>
   [pbr::OriginalName("LoginQ")] LoginQ = 7,
@@ -87,21 +96,25 @@ public enum ErrID {
   /// </summary>
   [pbr::OriginalName("Success")] Success = 0,
   /// <summary>
-  /// json反序列化失敗
+  /// Json反序列化失敗
   /// </summary>
   [pbr::OriginalName("JsonUnmarshal")] JsonUnmarshal = 1,
   /// <summary>
-  /// proto反序列化失敗
+  /// Proto反序列化失敗
   /// </summary>
   [pbr::OriginalName("ProtoUnmarshal")] ProtoUnmarshal = 2,
   /// <summary>
+  /// Raven反序列化失敗
+  /// </summary>
+  [pbr::OriginalName("RavenUnmarshal")] RavenUnmarshal = 3,
+  /// <summary>
   /// 資料庫執行失敗
   /// </summary>
-  [pbr::OriginalName("SubmitFailed")] SubmitFailed = 3,
+  [pbr::OriginalName("SubmitFailed")] SubmitFailed = 4,
   /// <summary>
-  /// token不匹配
+  /// Token不匹配
   /// </summary>
-  [pbr::OriginalName("TokenNotMatch")] TokenNotMatch = 4,
+  [pbr::OriginalName("TokenNotMatch")] TokenNotMatch = 5,
 }
 
 #endregion
