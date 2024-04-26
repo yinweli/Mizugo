@@ -84,8 +84,13 @@
 ## 訊息處理組件
 負責訊息的實際處理, 不同的組件使用的封包結構不同, 因此訊息處理函式無法混用  
 目前有下列訊息處理組件可選  
-- ProcJson, 使用JsonMsg結構通訊, 訊息定義在 support/proto/mizugo/msg-go/msgs-json/jsonmsg.go, support/proto/mizugo/msg-cs/msgs-json/Jsonmsg.cs
-- ProcProto, 使用ProtoMsg結構通訊, 訊息定義在 support/proto/mizugo/protomsg.proto
+- ProcJson, 使用Json結構通訊  
+  訊息定義在 support/proto-mizugo/msg-go/msgs-json/json.go  
+             support/proto-mizugo/msg-cs/msgs-json/Json.cs
+- ProcProto, 使用Proto結構通訊  
+  訊息定義在 support/proto-mizugo/proto.proto
+- ProcRaven, 使用RavenS/RavenC結構通訊  
+  訊息定義在 support/proto-mizugo/raven.proto
 
 ## 編碼/解碼流程
 定義訊息傳送和接收的編碼及解碼過程, 應與伺服器的設定一致

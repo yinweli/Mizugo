@@ -5,22 +5,17 @@ using NUnit.Framework;
 
 namespace Mizugo
 {
-    /// <summary>
-    /// 訊息編號, 設置為int32以跟proto的列舉類型統一
-    /// </summary>
-    using MessageID = Int32;
-
     internal class TestProcJson
     {
         [Test]
         [TestCaseSource("EncodeCases")]
-        public void EncodeDecode(JsonMsg message)
+        public void Encode(Json input)
         {
             var target = new ProcJson();
-            var encode = target.Encode(message);
+            var encode = target.Encode(input);
             var decode = target.Decode(encode);
 
-            Assert.IsTrue(TestUtil.EqualsByJson(message, decode));
+            Assert.IsTrue(TestUtil.EqualsByJson(input, decode));
         }
 
         [Test]
@@ -55,19 +50,19 @@ namespace Mizugo
 
         [Test]
         [TestCaseSource("ProcessCases")]
-        public void Process(JsonMsg message)
+        public void Process(Json input)
         {
             var target = new ProcJson();
             var valid = false;
 
             target.Add(
-                message.MessageID,
+                input.MessageID,
                 (object param) =>
                 {
-                    valid = TestUtil.EqualsByJson(message, param);
+                    valid = TestUtil.EqualsByJson(input, param);
                 }
             );
-            target.Process(message);
+            target.Process(input);
             Assert.IsTrue(valid);
         }
 
@@ -86,13 +81,13 @@ namespace Mizugo
             });
             Assert.Throws<UnprocessException>(() =>
             {
-                target.Process(new JsonMsg { MessageID = 1 });
+                target.Process(new Json { MessageID = 1 });
             });
         }
 
         [Test]
         [TestCaseSource("MarshalCases")]
-        public void Marshal(MessageID messageID, JsonTest message)
+        public void Marshal(int messageID, object message)
         {
             var marshal = ProcJson.Marshal(messageID, message);
 

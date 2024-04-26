@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [0.4.0] - 2024-04-26
+### Added
+- 新增訊息處理組件Raven
+
 ## [0.3.1] - 2024-04-22
 ### Changed
 - JsonProc更名為ProcJson
