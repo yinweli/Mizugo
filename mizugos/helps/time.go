@@ -60,6 +60,36 @@ func Date(year int, month time.Month, day, hour, min, sec, nsec int) time.Time {
 	return time.Date(year, month, day, hour, min, sec, nsec, GetTimeZone())
 }
 
+// Beforef 檢查 t1 是否在 t2 之前, 當 t1 為空時, 會回傳預設值, 時間字串按照 layout 來解析
+func Beforef(layout, t1 string, t2 time.Time, preset bool) bool {
+	if t1 == "" {
+		return preset
+	} // if
+
+	t, err := time.ParseInLocation(layout, t1, GetTimeZone())
+
+	if err != nil {
+		return false
+	} // if
+
+	return t.Before(t2)
+}
+
+// Afterf 檢查 t1 是否在 t2 之後, 當 t1 為空時, 會回傳預設值, 時間字串按照 layout 來解析
+func Afterf(layout, t1 string, t2 time.Time, preset bool) bool {
+	if t1 == "" {
+		return preset
+	} // if
+
+	t, err := time.ParseInLocation(layout, t1, GetTimeZone())
+
+	if err != nil {
+		return false
+	} // if
+
+	return t.After(t2)
+}
+
 // Between 檢查時間是否在開始與結束時間之間, 當開始與結束時間為空時, 會回傳預設值
 func Between(start, end, now time.Time, preset bool) bool {
 	switch {
