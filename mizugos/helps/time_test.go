@@ -52,6 +52,28 @@ func (this *SuiteTime) TestDate() {
 	fmt.Println(t)
 }
 
+func (this *SuiteTime) TestBeforef() {
+	now := Time()
+	t1 := now.Format(LayoutSecond)
+	t2 := now.Add(TimeMinute)
+	assert.True(this.T(), Beforef(LayoutSecond, t1, t2, true))
+	assert.False(this.T(), Beforef(LayoutSecond, t1, t2.Add(-TimeHour), true))
+	assert.True(this.T(), Beforef(LayoutSecond, "", t2, true))
+	assert.False(this.T(), Beforef(LayoutSecond, "", t2, false))
+	assert.False(this.T(), Beforef(LayoutSecond, testdata.Unknown, t2, true))
+}
+
+func (this *SuiteTime) TestAfterf() {
+	now := Time()
+	t1 := now.Format(LayoutSecond)
+	t2 := now.Add(-TimeMinute)
+	assert.True(this.T(), Afterf(LayoutSecond, t1, t2, true))
+	assert.False(this.T(), Afterf(LayoutSecond, t1, t2.Add(TimeHour), true))
+	assert.True(this.T(), Afterf(LayoutSecond, "", t2, true))
+	assert.False(this.T(), Afterf(LayoutSecond, "", t2, false))
+	assert.False(this.T(), Afterf(LayoutSecond, testdata.Unknown, t2, true))
+}
+
 func (this *SuiteTime) TestBetween() {
 	now := Time()
 	start := now.Add(-TimeMinute)
