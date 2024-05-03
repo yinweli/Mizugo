@@ -29,7 +29,7 @@ func (this *SuiteProto) TearDownSuite() {
 	trials.Restore(this.Catalog)
 }
 
-func (this *SuiteProto) TestToProto() {
+func (this *SuiteProto) TestToProtoAny() {
 	result, err := ToProtoAny(&msgs.ProtoTest{}, &msgs.ProtoTest{}, &msgs.ProtoTest{})
 	assert.Nil(this.T(), err)
 	assert.Len(this.T(), result, 3)

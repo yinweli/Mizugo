@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.3] - 2024-05-03
+### Fixed
+- 修正每月到期計算錯誤
+
 ## [1.1.2] - 2024-05-03
 ### Added
 - 新增JsonString函式
