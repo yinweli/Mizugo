@@ -8,7 +8,7 @@ import (
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
-// ToProtoAny 轉換為proto的any
+// ToProtoAny 將proto轉換為any
 func ToProtoAny(input ...proto.Message) (output []*anypb.Any, err error) {
 	output = []*anypb.Any{}
 	opt := proto.MarshalOptions{}
@@ -26,7 +26,7 @@ func ToProtoAny(input ...proto.Message) (output []*anypb.Any, err error) {
 	return output, nil
 }
 
-// FromProtoAny 將proto的any轉換為指定物件
+// FromProtoAny 將any轉換為指定物件
 func FromProtoAny[T any](input *anypb.Any) (output *T, err error) {
 	if input == nil {
 		return nil, fmt.Errorf("proto any: input nil")

@@ -28,6 +28,6 @@ func (this *SuiteJson) TearDownSuite() {
 }
 
 func (this *SuiteJson) TestJsonString() {
-	assert.NotNil(this.T(), JsonString(JsonString(struct{ Data int }{Data: 100})))
+	assert.NotNil(this.T(), JsonString(struct{ Data int }{Data: 100}))
 	assert.NotNil(this.T(), JsonString(nil))
 }

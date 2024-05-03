@@ -190,7 +190,7 @@ func Monthly(now, last time.Time, mday, hour int) bool {
 
 // MonthlyPrev 取得上次的每月時間, mday是month-day
 func MonthlyPrev(now time.Time, mday, hour int) time.Time {
-	prev := time.Date(now.Year(), now.Month(), now.Day(), hour, 0, 0, 0, now.Location())
+	prev := time.Date(now.Year(), now.Month(), mday, hour, 0, 0, 0, now.Location())
 
 	if now.Before(prev) || now.Hour() < hour { // 如果還沒到時間，就設定為上個月
 		prev = prev.AddDate(0, -1, 0)
@@ -206,7 +206,7 @@ func MonthlyPrev(now time.Time, mday, hour int) time.Time {
 
 // MonthlyNext 取得下次的每月時間, mday是month-day
 func MonthlyNext(now time.Time, mday, hour int) time.Time {
-	next := time.Date(now.Year(), now.Month(), now.Day(), hour, 0, 0, 0, now.Location())
+	next := time.Date(now.Year(), now.Month(), mday, hour, 0, 0, 0, now.Location())
 
 	if now.Equal(next) || now.After(next) { // 如果已經經過時間, 就設定為下個月
 		next = next.AddDate(0, 1, 0)
