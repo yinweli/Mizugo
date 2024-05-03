@@ -97,7 +97,7 @@ func ProtoUnmarshal[T any](input any) (messageID int32, output *T, err error) {
 		return 0, nil, fmt.Errorf("proto unmarshal: input")
 	} // if
 
-	if output, err = helps.ProtoAny[T](message.Message); err != nil {
+	if output, err = helps.FromProtoAny[T](message.Message); err != nil {
 		return 0, nil, fmt.Errorf("proto unmarshal: message: %w", err)
 	} // if
 
