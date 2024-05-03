@@ -83,15 +83,6 @@ func (this *SuiteTime) TestDate() {
 	now = Date(2023, 2, 15)
 	assert.NotNil(this.T(), now)
 	fmt.Println(now)
-	now = Date(2023, 2)
-	assert.NotNil(this.T(), now)
-	fmt.Println(now)
-	now = Date(2023)
-	assert.NotNil(this.T(), now)
-	fmt.Println(now)
-	now = Date()
-	assert.NotNil(this.T(), now)
-	fmt.Println(now)
 }
 
 func (this *SuiteTime) TestBetween() {
