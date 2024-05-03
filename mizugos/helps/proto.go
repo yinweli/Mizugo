@@ -8,8 +8,26 @@ import (
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
-// ProtoAny 將proto的any轉換為指定物件
-func ProtoAny[T any](input *anypb.Any) (output *T, err error) {
+// ToProtoAny 轉換為proto的any
+func ToProtoAny(input ...proto.Message) (output []*anypb.Any, err error) {
+	output = []*anypb.Any{}
+	opt := proto.MarshalOptions{}
+
+	for _, itor := range input {
+		temp := &anypb.Any{}
+
+		if err = anypb.MarshalFrom(temp, itor, opt); err != nil {
+			return nil, Err(err)
+		} // if
+
+		output = append(output, temp)
+	} // for
+
+	return output, nil
+}
+
+// FromProtoAny 將proto的any轉換為指定物件
+func FromProtoAny[T any](input *anypb.Any) (output *T, err error) {
 	if input == nil {
 		return nil, fmt.Errorf("proto any: input nil")
 	} // if
@@ -29,8 +47,8 @@ func ProtoAny[T any](input *anypb.Any) (output *T, err error) {
 	return output, nil
 }
 
-// ProtoJson 將proto轉為json字串
-func ProtoJson(input proto.Message) string {
+// ProtoString 將proto轉為字串
+func ProtoString(input proto.Message) string {
 	result, _ := protojson.Marshal(input)
 	return string(result)
 }

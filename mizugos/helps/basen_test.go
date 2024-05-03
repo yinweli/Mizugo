@@ -55,6 +55,9 @@ func (this *SuiteBasen) TestBase58() {
 	for i := uint64(0); i < testdata.TestCount; i++ {
 		assert.NotContains(this.T(), ToBase58(i), "oOlI")
 	} // for
+
+	_, err := FromBase58("{}")
+	assert.NotNil(this.T(), err)
 }
 
 func (this *SuiteBasen) TestBase80() {
@@ -81,4 +84,33 @@ func (this *SuiteBasen) TestBase80() {
 		assert.Nil(this.T(), err)
 		assert.Equal(this.T(), k, result)
 	} // for
+
+	_, err := FromBase80("{}")
+	assert.NotNil(this.T(), err)
+}
+
+func (this *SuiteBasen) TestBaseN() {
+	model := "0123456789"
+	testcase := map[uint64]string{
+		0:         "0",
+		1:         "1",
+		22:        "22",
+		333:       "333",
+		4444:      "4444",
+		55555:     "55555",
+		666666:    "666666",
+		7777777:   "7777777",
+		88888888:  "88888888",
+		999999999: "999999999",
+	}
+
+	for k, v := range testcase {
+		assert.Equal(this.T(), v, ToBaseN(model, k))
+		result, err := FromBaseN(model, v)
+		assert.Nil(this.T(), err)
+		assert.Equal(this.T(), k, result)
+	} // for
+
+	_, err := FromBaseN(model, "{}")
+	assert.NotNil(this.T(), err)
 }

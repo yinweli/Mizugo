@@ -26,6 +26,8 @@ const (
 //   - trials.Err(字串, 錯誤編號)
 //   - trials.Err(error, 錯誤編號)
 //   - trials.Err(錯誤編號)
+//
+// 在制定錯誤編號時, 請加入以下三個預設的錯誤編號 Success, ErrUnknown, ErrUnwrap
 func Err(a ...any) error {
 	builder := strings.Builder{}
 	errorID := ErrUnknown

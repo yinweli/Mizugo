@@ -29,23 +29,29 @@ func (this *SuiteProto) TearDownSuite() {
 	trials.Restore(this.Catalog)
 }
 
-func (this *SuiteProto) TestProtoAny() {
-	temp, _ := anypb.New(&msgs.ProtoTest{
-		Data: testdata.Unknown,
-	})
-	output, err := ProtoAny[msgs.ProtoTest](temp)
+func (this *SuiteProto) TestToProto() {
+	result, err := ToProtoAny(&msgs.ProtoTest{}, &msgs.ProtoTest{}, &msgs.ProtoTest{})
 	assert.Nil(this.T(), err)
-	assert.NotNil(this.T(), output)
-	assert.Equal(this.T(), testdata.Unknown, output.Data)
-	_, err = ProtoAny[msgs.ProtoTest](nil)
-	assert.NotNil(this.T(), err)
-	_, err = ProtoAny[int](temp)
+	assert.Len(this.T(), result, 3)
+	_, err = ToProtoAny(nil)
 	assert.NotNil(this.T(), err)
 }
 
-func (this *SuiteProto) TestProtoJson() {
-	assert.NotNil(this.T(), ProtoJson(&msgs.ProtoTest{
+func (this *SuiteProto) TestFromProtoAny() {
+	input, _ := anypb.New(&msgs.ProtoTest{
 		Data: testdata.Unknown,
-	}))
-	assert.NotNil(this.T(), ProtoJson(nil))
+	})
+	output, err := FromProtoAny[msgs.ProtoTest](input)
+	assert.Nil(this.T(), err)
+	assert.NotNil(this.T(), output)
+	assert.Equal(this.T(), testdata.Unknown, output.Data)
+	_, err = FromProtoAny[msgs.ProtoTest](nil)
+	assert.NotNil(this.T(), err)
+	_, err = FromProtoAny[int](input)
+	assert.NotNil(this.T(), err)
+}
+
+func (this *SuiteProto) TestProtoString() {
+	assert.NotNil(this.T(), ProtoString(&msgs.ProtoTest{}))
+	assert.NotNil(this.T(), ProtoString(nil))
 }

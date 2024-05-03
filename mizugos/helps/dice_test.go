@@ -50,8 +50,8 @@ func (this *SuiteDice) TestDice() {
 	assert.Nil(this.T(), target.Randn(10))
 }
 
-func (this *SuiteDice) TestDetect() {
-	target := Dice{}
+func (this *SuiteDice) TestValid() {
+	target := NewDice()
 	_ = target.Fill([]any{true, false}, []int64{10000, 0})
 
 	detect := NewDiceDetect()
@@ -63,7 +63,7 @@ func (this *SuiteDice) TestDetect() {
 	assert.True(this.T(), detect.Check(true, testdata.TestCount, 1, 1))
 	assert.True(this.T(), detect.Check(false, testdata.TestCount, 0, 0))
 
-	target = Dice{}
+	target = NewDice()
 	_ = target.Fill([]any{true, false}, []int64{0, 10000})
 
 	detect = NewDiceDetect()
@@ -75,7 +75,7 @@ func (this *SuiteDice) TestDetect() {
 	assert.True(this.T(), detect.Check(true, testdata.TestCount, 0, 0))
 	assert.True(this.T(), detect.Check(false, testdata.TestCount, 1, 1))
 
-	target = Dice{}
+	target = NewDice()
 	_ = target.Fill([]any{1, 2, 3, 4, 5}, []int64{500, 1000, 1500, 2000, 2500})
 	_ = target.Complete(0, 10000)
 	detect = NewDiceDetect()

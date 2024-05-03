@@ -31,277 +31,253 @@ func (this *SuiteTime) TearDownSuite() {
 
 func (this *SuiteTime) TestTimeZone() {
 	assert.Equal(this.T(), time.UTC, GetTimeZone())
+	SetTimeZoneUTC()
+	assert.Equal(this.T(), time.UTC, GetTimeZone())
+	SetTimeZoneLocal()
+	assert.Equal(this.T(), time.Local, GetTimeZone())
 	assert.Nil(this.T(), SetTimeZone("Asia/Taipei"))
 	assert.NotNil(this.T(), GetTimeZone())
 	assert.NotNil(this.T(), SetTimeZone(testdata.Unknown))
-	SetTimeZoneUTC()
-	assert.NotNil(this.T(), GetTimeZone())
-	SetTimeZoneLocal()
-	assert.NotNil(this.T(), GetTimeZone())
 }
 
 func (this *SuiteTime) TestTime() {
-	t := Time()
-	assert.NotNil(this.T(), t)
-	fmt.Println(t)
+	now := Time()
+	assert.NotNil(this.T(), now)
+	fmt.Println(now)
+}
+
+func (this *SuiteTime) TestTimef() {
+	now, err := Timef(LayoutSecond, "2023-02-15 01:02:03")
+	assert.Nil(this.T(), err)
+	assert.NotNil(this.T(), now)
+	fmt.Println(now)
+	now, err = Timef(LayoutMinute, "2023-02-15 01:02")
+	assert.Nil(this.T(), err)
+	assert.NotNil(this.T(), now)
+	fmt.Println(now)
+	now, err = Timef(LayoutDay, "2023-02-15")
+	assert.Nil(this.T(), err)
+	assert.NotNil(this.T(), now)
+	fmt.Println(now)
+	now, err = Timef(LayoutDay, "")
+	assert.Nil(this.T(), err)
+	assert.NotNil(this.T(), now)
+	fmt.Println(now)
+	_, err = Timef(testdata.Unknown, "2023-02-15")
+	assert.NotNil(this.T(), err)
 }
 
 func (this *SuiteTime) TestDate() {
-	t := Date(2023, 1, 1, 0, 0, 0, 0)
-	assert.NotNil(this.T(), t)
-	fmt.Println(t)
-}
-
-func (this *SuiteTime) TestBeforef() {
-	now := Time()
-	t1 := now.Format(LayoutSecond)
-	t2 := now.Add(TimeMinute)
-	assert.True(this.T(), Beforef(LayoutSecond, t1, t2, true))
-	assert.False(this.T(), Beforef(LayoutSecond, t1, t2.Add(-TimeHour), true))
-	assert.True(this.T(), Beforef(LayoutSecond, "", t2, true))
-	assert.False(this.T(), Beforef(LayoutSecond, "", t2, false))
-	assert.False(this.T(), Beforef(LayoutSecond, testdata.Unknown, t2, true))
-}
-
-func (this *SuiteTime) TestAfterf() {
-	now := Time()
-	t1 := now.Format(LayoutSecond)
-	t2 := now.Add(-TimeMinute)
-	assert.True(this.T(), Afterf(LayoutSecond, t1, t2, true))
-	assert.False(this.T(), Afterf(LayoutSecond, t1, t2.Add(TimeHour), true))
-	assert.True(this.T(), Afterf(LayoutSecond, "", t2, true))
-	assert.False(this.T(), Afterf(LayoutSecond, "", t2, false))
-	assert.False(this.T(), Afterf(LayoutSecond, testdata.Unknown, t2, true))
+	now := Date(2023, 2, 15, 1, 2, 3, 4)
+	assert.NotNil(this.T(), now)
+	fmt.Println(now)
+	now = Date(2023, 2, 15, 1, 2, 3)
+	assert.NotNil(this.T(), now)
+	fmt.Println(now)
+	now = Date(2023, 2, 15, 1, 2)
+	assert.NotNil(this.T(), now)
+	fmt.Println(now)
+	now = Date(2023, 2, 15, 1)
+	assert.NotNil(this.T(), now)
+	fmt.Println(now)
+	now = Date(2023, 2, 15)
+	assert.NotNil(this.T(), now)
+	fmt.Println(now)
+	now = Date(2023, 2)
+	assert.NotNil(this.T(), now)
+	fmt.Println(now)
+	now = Date(2023)
+	assert.NotNil(this.T(), now)
+	fmt.Println(now)
+	now = Date()
+	assert.NotNil(this.T(), now)
+	fmt.Println(now)
 }
 
 func (this *SuiteTime) TestBetween() {
 	now := Time()
 	start := now.Add(-TimeMinute)
 	end := now.Add(TimeMinute)
-	assert.True(this.T(), Between(start, end, now, true))
-	assert.True(this.T(), Between(start, time.Time{}, now, true))
-	assert.True(this.T(), Between(time.Time{}, end, now, true))
-	assert.False(this.T(), Between(start, end, now.Add(TimeHour), true))
-	assert.True(this.T(), Between(time.Time{}, time.Time{}, now, true))
-	assert.False(this.T(), Between(time.Time{}, time.Time{}, now, false))
-}
-
-func (this *SuiteTime) TestBetweenf() {
-	now := Time()
-	start := now.Add(-TimeMinute).Format(LayoutSecond)
-	end := now.Add(TimeMinute).Format(LayoutSecond)
-	assert.True(this.T(), Betweenf(LayoutSecond, start, end, now, true))
-	assert.True(this.T(), Betweenf(LayoutSecond, start, "", now, true))
-	assert.True(this.T(), Betweenf(LayoutSecond, "", end, now, true))
-	assert.False(this.T(), Betweenf(LayoutSecond, start, end, now.Add(TimeHour), true))
-	assert.True(this.T(), Betweenf(LayoutSecond, "", "", now, true))
-	assert.False(this.T(), Betweenf(LayoutSecond, "", "", now, false))
-	assert.False(this.T(), Betweenf(testdata.Unknown, start, end, now, true))
-	assert.False(this.T(), Betweenf(LayoutSecond, start, testdata.Unknown, now.Add(TimeHour), true))
-	assert.False(this.T(), Betweenf(LayoutSecond, testdata.Unknown, end, now.Add(TimeHour), true))
+	assert.True(this.T(), Between(start, end, now))
+	assert.True(this.T(), Between(start, time.Time{}, now))
+	assert.True(this.T(), Between(time.Time{}, end, now))
+	assert.False(this.T(), Between(start, end, now.Add(TimeHour)))
+	assert.True(this.T(), Between(time.Time{}, time.Time{}, now))
 }
 
 func (this *SuiteTime) TestOverlap() {
 	assert.True(this.T(), Overlap(
-		Date(2023, 6, 1, 0, 0, 0, 0),
-		Date(2023, 6, 10, 0, 0, 0, 0),
-		Date(2023, 6, 5, 0, 0, 0, 0),
-		Date(2023, 6, 15, 0, 0, 0, 0)))
+		Date(2023, 6, 1), Date(2023, 6, 10),
+		Date(2023, 6, 5), Date(2023, 6, 15)))
 	assert.False(this.T(), Overlap(
-		Date(2023, 6, 1, 0, 0, 0, 0),
-		Date(2023, 6, 10, 0, 0, 0, 0),
-		Date(2023, 7, 5, 0, 0, 0, 0),
-		Date(2023, 7, 15, 0, 0, 0, 0)))
-}
-
-func (this *SuiteTime) TestSameDay() {
-	assert.True(this.T(), SameDay(
-		Date(2023, 6, 1, 0, 0, 0, 0),
-		Date(2023, 6, 1, 0, 0, 0, 0)))
-	assert.True(this.T(), SameDay(
-		Date(2023, 6, 1, 0, 0, 0, 0),
-		Date(2023, 6, 1, 1, 0, 0, 0)))
-	assert.True(this.T(), SameDay(
-		Date(2023, 6, 1, 0, 0, 0, 0),
-		Date(2023, 6, 1, 0, 1, 0, 0)))
-	assert.True(this.T(), SameDay(
-		Date(2023, 6, 1, 0, 0, 0, 0),
-		Date(2023, 6, 1, 0, 0, 1, 0)))
-	assert.False(this.T(), SameDay(
-		Date(2023, 6, 1, 0, 0, 0, 0),
-		Date(2023, 6, 2, 0, 0, 0, 0)))
-	assert.False(this.T(), SameDay(
-		Date(2023, 6, 1, 0, 0, 0, 0),
-		Date(2024, 7, 1, 0, 0, 0, 0)))
-	assert.False(this.T(), SameDay(
-		Date(2023, 6, 1, 0, 0, 0, 0),
-		Date(2024, 6, 1, 0, 0, 0, 0)))
+		Date(2023, 6, 1), Date(2023, 6, 10),
+		Date(2023, 7, 1), Date(2023, 7, 10)))
 }
 
 func (this *SuiteTime) TestDaily() {
 	assert.True(this.T(), Daily(
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		Date(2023, 1, 1, 12, 0, 0, 0), 12))
+		Date(2023, 2, 1, 12),
+		Date(2023, 1, 1, 12), 12))
 	assert.False(this.T(), Daily(
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		Date(2023, 3, 1, 12, 0, 0, 0), 12))
+		Date(2023, 2, 1, 12),
+		Date(2023, 3, 1, 12), 12))
 	assert.False(this.T(), Daily(
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		Date(2023, 2, 1, 12, 0, 0, 0), 12))
+		Date(2023, 2, 1, 12),
+		Date(2023, 2, 1, 12), 12))
 	assert.True(this.T(), Daily(
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		Date(2023, 2, 1, 11, 0, 0, 0), 12))
+		Date(2023, 2, 1, 12),
+		Date(2023, 2, 1, 11), 12))
 	assert.Equal(this.T(),
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		DailyPrev(Date(2023, 2, 1, 12, 0, 0, 0), 12))
+		Date(2023, 2, 1, 12),
+		DailyPrev(Date(2023, 2, 1, 12), 12))
 	assert.Equal(this.T(),
-		Date(2023, 1, 31, 12, 0, 0, 0),
-		DailyPrev(Date(2023, 2, 1, 11, 0, 0, 0), 12))
+		Date(2023, 1, 31, 12),
+		DailyPrev(Date(2023, 2, 1, 11), 12))
 	assert.Equal(this.T(),
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		DailyPrev(Date(2023, 2, 1, 13, 0, 0, 0), 12))
+		Date(2023, 2, 1, 12),
+		DailyPrev(Date(2023, 2, 1, 13), 12))
 	assert.Equal(this.T(),
-		Date(2023, 2, 2, 12, 0, 0, 0),
-		DailyNext(Date(2023, 2, 1, 12, 0, 0, 0), 12))
+		Date(2023, 2, 2, 12),
+		DailyNext(Date(2023, 2, 1, 12), 12))
 	assert.Equal(this.T(),
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		DailyNext(Date(2023, 2, 1, 11, 0, 0, 0), 12))
+		Date(2023, 2, 1, 12),
+		DailyNext(Date(2023, 2, 1, 11), 12))
 	assert.Equal(this.T(),
-		Date(2023, 2, 2, 12, 0, 0, 0),
-		DailyNext(Date(2023, 2, 1, 13, 0, 0, 0), 12))
+		Date(2023, 2, 2, 12),
+		DailyNext(Date(2023, 2, 1, 13), 12))
 }
 
 func (this *SuiteTime) TestWeekly() {
 	assert.True(this.T(), Weekly(
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		Date(2023, 1, 1, 12, 0, 0, 0), 3, 12))
+		Date(2023, 2, 1, 12),
+		Date(2023, 1, 1, 12), 3, 12))
 	assert.False(this.T(), Weekly(
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		Date(2023, 3, 1, 12, 0, 0, 0), 3, 12))
+		Date(2023, 2, 1, 12),
+		Date(2023, 3, 1, 12), 3, 12))
 	assert.False(this.T(), Weekly(
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		Date(2023, 2, 1, 12, 0, 0, 0), 3, 12))
+		Date(2023, 2, 1, 12),
+		Date(2023, 2, 1, 12), 3, 12))
 	assert.True(this.T(), Weekly(
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		Date(2023, 2, 1, 11, 0, 0, 0), 3, 12))
+		Date(2023, 2, 1, 12),
+		Date(2023, 2, 1, 11), 3, 12))
 	assert.Equal(this.T(),
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		WeeklyPrev(Date(2023, 2, 1, 12, 0, 0, 0), 3, 12))
+		Date(2023, 2, 1, 12),
+		WeeklyPrev(Date(2023, 2, 1, 12), 3, 12))
 	assert.Equal(this.T(),
-		Date(2023, 1, 25, 12, 0, 0, 0),
-		WeeklyPrev(Date(2023, 2, 1, 11, 0, 0, 0), 3, 12))
+		Date(2023, 1, 25, 12),
+		WeeklyPrev(Date(2023, 2, 1, 11), 3, 12))
 	assert.Equal(this.T(),
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		WeeklyPrev(Date(2023, 2, 1, 13, 0, 0, 0), 3, 12))
+		Date(2023, 2, 1, 12),
+		WeeklyPrev(Date(2023, 2, 1, 13), 3, 12))
 	assert.Equal(this.T(),
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		WeeklyPrev(Date(2023, 2, 2, 12, 0, 0, 0), 3, 12))
+		Date(2023, 2, 1, 12),
+		WeeklyPrev(Date(2023, 2, 2, 12), 3, 12))
 	assert.Equal(this.T(),
-		Date(2023, 1, 25, 12, 0, 0, 0),
-		WeeklyPrev(Date(2023, 1, 31, 12, 0, 0, 0), 3, 12))
+		Date(2023, 1, 25, 12),
+		WeeklyPrev(Date(2023, 1, 31, 12), 3, 12))
 	assert.Equal(this.T(),
-		Date(2023, 2, 8, 12, 0, 0, 0),
-		WeeklyNext(Date(2023, 2, 1, 12, 0, 0, 0), 3, 12))
+		Date(2023, 2, 8, 12),
+		WeeklyNext(Date(2023, 2, 1, 12), 3, 12))
 	assert.Equal(this.T(),
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		WeeklyNext(Date(2023, 2, 1, 11, 0, 0, 0), 3, 12))
+		Date(2023, 2, 1, 12),
+		WeeklyNext(Date(2023, 2, 1, 11), 3, 12))
 	assert.Equal(this.T(),
-		Date(2023, 2, 8, 12, 0, 0, 0),
-		WeeklyNext(Date(2023, 2, 1, 13, 0, 0, 0), 3, 12))
+		Date(2023, 2, 8, 12),
+		WeeklyNext(Date(2023, 2, 1, 13), 3, 12))
 	assert.Equal(this.T(),
-		Date(2023, 2, 8, 12, 0, 0, 0),
-		WeeklyNext(Date(2023, 2, 2, 12, 0, 0, 0), 3, 12))
+		Date(2023, 2, 8, 12),
+		WeeklyNext(Date(2023, 2, 2, 12), 3, 12))
 }
 
 func (this *SuiteTime) TestMonthly() {
 	assert.True(this.T(), Monthly(
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		Date(2023, 1, 1, 12, 0, 0, 0), 1, 12))
+		Date(2023, 2, 1, 12),
+		Date(2023, 1, 1, 12), 1, 12))
 	assert.False(this.T(), Monthly(
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		Date(2023, 3, 1, 12, 0, 0, 0), 1, 12))
+		Date(2023, 2, 1, 12),
+		Date(2023, 3, 1, 12), 1, 12))
 	assert.False(this.T(), Monthly(
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		Date(2023, 2, 1, 12, 0, 0, 0), 1, 12))
+		Date(2023, 2, 1, 12),
+		Date(2023, 2, 1, 12), 1, 12))
 	assert.True(this.T(), Monthly(
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		Date(2023, 2, 1, 11, 0, 0, 0), 1, 12))
+		Date(2023, 2, 1, 12),
+		Date(2023, 2, 1, 11), 1, 12))
 	assert.Equal(this.T(),
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		MonthlyPrev(Date(2023, 2, 1, 12, 0, 0, 0), 1, 12))
+		Date(2023, 2, 1, 12),
+		MonthlyPrev(Date(2023, 2, 1, 12), 1, 12))
 	assert.Equal(this.T(),
-		Date(2023, 1, 1, 12, 0, 0, 0),
-		MonthlyPrev(Date(2023, 2, 1, 11, 0, 0, 0), 1, 12))
+		Date(2023, 1, 1, 12),
+		MonthlyPrev(Date(2023, 2, 1, 11), 1, 12))
 	assert.Equal(this.T(),
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		MonthlyPrev(Date(2023, 2, 1, 13, 0, 0, 0), 1, 12))
+		Date(2023, 2, 1, 12),
+		MonthlyPrev(Date(2023, 2, 1, 13), 1, 12))
 	assert.Equal(this.T(),
-		Date(2023, 2, 28, 12, 0, 0, 0),
-		MonthlyPrev(Date(2023, 3, 1, 13, 0, 0, 0), 31, 12))
+		Date(2023, 2, 28, 12),
+		MonthlyPrev(Date(2023, 3, 1, 13), 31, 12))
 	assert.Equal(this.T(),
-		Date(2023, 3, 31, 12, 0, 0, 0),
-		MonthlyPrev(Date(2023, 4, 1, 13, 0, 0, 0), 31, 12))
+		Date(2023, 3, 31, 12),
+		MonthlyPrev(Date(2023, 4, 1, 13), 31, 12))
 	assert.Equal(this.T(),
-		Date(2023, 3, 1, 12, 0, 0, 0),
-		MonthlyNext(Date(2023, 2, 1, 12, 0, 0, 0), 1, 12))
+		Date(2023, 3, 1, 12),
+		MonthlyNext(Date(2023, 2, 1, 12), 1, 12))
 	assert.Equal(this.T(),
-		Date(2023, 2, 1, 12, 0, 0, 0),
-		MonthlyNext(Date(2023, 2, 1, 11, 0, 0, 0), 1, 12))
+		Date(2023, 2, 1, 12),
+		MonthlyNext(Date(2023, 2, 1, 11), 1, 12))
 	assert.Equal(this.T(),
-		Date(2023, 3, 1, 12, 0, 0, 0),
-		MonthlyNext(Date(2023, 2, 1, 13, 0, 0, 0), 1, 12))
+		Date(2023, 3, 1, 12),
+		MonthlyNext(Date(2023, 2, 1, 13), 1, 12))
 }
 
 func (this *SuiteTime) TestFixedPrev() {
 	assert.Equal(this.T(),
-		Date(1970, 1, 1, 0, 0, 0, 0),
+		Date(1970, 1, 1),
 		FixedPrev(time.Time{}, time.Time{}, TimeHour))
 	assert.Equal(this.T(),
-		Date(2023, 1, 1, 8, 0, 0, 0),
-		FixedPrev(time.Time{}, Date(2023, 1, 1, 8, 0, 0, 0), TimeHour))
+		Date(2023, 1, 1, 8),
+		FixedPrev(time.Time{}, Date(2023, 1, 1, 8), TimeHour))
 	assert.Equal(this.T(),
-		Date(2023, 1, 1, 8, 0, 0, 0),
-		FixedPrev(Date(1970, 1, 1, 8, 0, 0, 0), Date(2023, 1, 1, 8, 0, 0, 0), TimeHour))
+		Date(2023, 1, 1, 8),
+		FixedPrev(Date(1970, 1, 1, 8), Date(2023, 1, 1, 8), TimeHour))
 	assert.Equal(this.T(),
-		Date(2023, 1, 1, 8, 0, 0, 0),
-		FixedPrev(Date(1970, 1, 1, 8, 0, 0, 0), Date(2023, 1, 1, 8, 10, 0, 0), TimeHour))
+		Date(2023, 1, 1, 8),
+		FixedPrev(Date(1970, 1, 1, 8), Date(2023, 1, 1, 8, 10), TimeHour))
 	assert.Equal(this.T(),
-		Date(2023, 1, 1, 8, 0, 0, 0),
-		FixedPrev(Date(1970, 1, 1, 8, 0, 0, 0), Date(2023, 1, 1, 8, 50, 0, 0), TimeHour))
+		Date(2023, 1, 1, 8),
+		FixedPrev(Date(1970, 1, 1, 8), Date(2023, 1, 1, 8, 50), TimeHour))
 	assert.Equal(this.T(),
-		Date(2023, 1, 1, 7, 0, 0, 0),
-		FixedPrev(Date(1970, 1, 1, 1, 0, 0, 0), Date(2023, 1, 1, 8, 1, 0, 0), TimeHour*3))
+		Date(2023, 1, 1, 7),
+		FixedPrev(Date(1970, 1, 1, 1), Date(2023, 1, 1, 8, 1, 0, 0), TimeHour*3))
 	assert.Equal(this.T(),
-		Date(2023, 1, 1, 8, 0, 0, 0),
-		FixedPrev(Date(1970, 1, 1, 2, 0, 0, 0), Date(2023, 1, 1, 8, 1, 0, 0), TimeHour*3))
+		Date(2023, 1, 1, 8),
+		FixedPrev(Date(1970, 1, 1, 2), Date(2023, 1, 1, 8, 1, 0, 0), TimeHour*3))
 	assert.Equal(this.T(),
-		Date(2023, 1, 1, 6, 30, 0, 0),
-		FixedPrev(Date(1970, 1, 1, 3, 30, 0, 0), Date(2023, 1, 1, 8, 1, 0, 0), TimeHour*3))
+		Date(2023, 1, 1, 6, 30),
+		FixedPrev(Date(1970, 1, 1, 3, 30), Date(2023, 1, 1, 8, 1, 0, 0), TimeHour*3))
 }
 
 func (this *SuiteTime) TestFixedNext() {
 	assert.Equal(this.T(),
-		Date(1970, 1, 1, 1, 0, 0, 0),
+		Date(1970, 1, 1, 1),
 		FixedNext(time.Time{}, time.Time{}, TimeHour))
 	assert.Equal(this.T(),
-		Date(2023, 1, 1, 9, 0, 0, 0),
-		FixedNext(time.Time{}, Date(2023, 1, 1, 8, 0, 0, 0), TimeHour))
+		Date(2023, 1, 1, 9),
+		FixedNext(time.Time{}, Date(2023, 1, 1, 8), TimeHour))
 	assert.Equal(this.T(),
-		Date(2023, 1, 1, 9, 0, 0, 0),
-		FixedNext(Date(1970, 1, 1, 8, 0, 0, 0), Date(2023, 1, 1, 8, 0, 0, 0), TimeHour))
+		Date(2023, 1, 1, 9),
+		FixedNext(Date(1970, 1, 1, 8), Date(2023, 1, 1, 8), TimeHour))
 	assert.Equal(this.T(),
-		Date(2023, 1, 1, 9, 0, 0, 0),
-		FixedNext(Date(1970, 1, 1, 8, 0, 0, 0), Date(2023, 1, 1, 8, 10, 0, 0), TimeHour))
+		Date(2023, 1, 1, 9),
+		FixedNext(Date(1970, 1, 1, 8), Date(2023, 1, 1, 8, 10), TimeHour))
 	assert.Equal(this.T(),
-		Date(2023, 1, 1, 9, 0, 0, 0),
-		FixedNext(Date(1970, 1, 1, 8, 0, 0, 0), Date(2023, 1, 1, 8, 50, 0, 0), TimeHour))
+		Date(2023, 1, 1, 9),
+		FixedNext(Date(1970, 1, 1, 8), Date(2023, 1, 1, 8, 50), TimeHour))
 	assert.Equal(this.T(),
-		Date(2023, 1, 1, 10, 0, 0, 0),
-		FixedNext(Date(1970, 1, 1, 1, 0, 0, 0), Date(2023, 1, 1, 8, 1, 0, 0), TimeHour*3))
+		Date(2023, 1, 1, 10),
+		FixedNext(Date(1970, 1, 1, 1), Date(2023, 1, 1, 8, 1, 0, 0), TimeHour*3))
 	assert.Equal(this.T(),
-		Date(2023, 1, 1, 11, 0, 0, 0),
-		FixedNext(Date(1970, 1, 1, 2, 0, 0, 0), Date(2023, 1, 1, 8, 1, 0, 0), TimeHour*3))
+		Date(2023, 1, 1, 11),
+		FixedNext(Date(1970, 1, 1, 2), Date(2023, 1, 1, 8, 1, 0, 0), TimeHour*3))
 	assert.Equal(this.T(),
-		Date(2023, 1, 1, 9, 30, 0, 0),
-		FixedNext(Date(1970, 1, 1, 3, 30, 0, 0), Date(2023, 1, 1, 8, 1, 0, 0), TimeHour*3))
+		Date(2023, 1, 1, 9, 30),
+		FixedNext(Date(1970, 1, 1, 3, 30), Date(2023, 1, 1, 8, 1, 0, 0), TimeHour*3))
 }

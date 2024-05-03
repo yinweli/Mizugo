@@ -170,11 +170,11 @@ func RavenSParser[H, Q any](input any) (output *RavenSData[H, Q], err error) {
 	output = &RavenSData[H, Q]{}
 	output.MessageID = message.MessageID
 
-	if output.Header, err = helps.ProtoAny[H](message.Header); err != nil {
+	if output.Header, err = helps.FromProtoAny[H](message.Header); err != nil {
 		return nil, fmt.Errorf("ravenSParser: header: %w", err)
 	} // if
 
-	if output.Request, err = helps.ProtoAny[Q](message.Request); err != nil {
+	if output.Request, err = helps.FromProtoAny[Q](message.Request); err != nil {
 		return nil, fmt.Errorf("ravenSParser: request: %w", err)
 	} // if
 
@@ -218,11 +218,11 @@ func RavenCParser[H, Q any](input any) (output *RavenCData[H, Q], err error) {
 	output.MessageID = message.MessageID
 	output.ErrID = message.ErrID
 
-	if output.Header, err = helps.ProtoAny[H](message.Header); err != nil {
+	if output.Header, err = helps.FromProtoAny[H](message.Header); err != nil {
 		return nil, fmt.Errorf("ravenCParser: header: %w", err)
 	} // if
 
-	if output.Request, err = helps.ProtoAny[Q](message.Request); err != nil {
+	if output.Request, err = helps.FromProtoAny[Q](message.Request); err != nil {
 		return nil, fmt.Errorf("ravenCParser: request: %w", err)
 	} // if
 
@@ -256,8 +256,8 @@ func (this *RavenSData[H, Q]) Size() int {
 func (this *RavenSData[H, Q]) Detail() string {
 	builder := &strings.Builder{}
 	_, _ = fmt.Fprintf(builder, "messageID: %v\n", this.MessageID)
-	_, _ = fmt.Fprintf(builder, "header: %v\n", helps.ProtoJson(any(this.Header).(proto.Message)))
-	_, _ = fmt.Fprintf(builder, "request: %v\n", helps.ProtoJson(any(this.Request).(proto.Message)))
+	_, _ = fmt.Fprintf(builder, "header: %v\n", helps.ProtoString(any(this.Header).(proto.Message)))
+	_, _ = fmt.Fprintf(builder, "request: %v\n", helps.ProtoString(any(this.Request).(proto.Message)))
 	return builder.String()
 }
 
@@ -288,11 +288,11 @@ func (this *RavenCData[H, Q]) Detail() string {
 	builder := &strings.Builder{}
 	_, _ = fmt.Fprintf(builder, "messageID: %v\n", this.MessageID)
 	_, _ = fmt.Fprintf(builder, "errID: %v\n", this.ErrID)
-	_, _ = fmt.Fprintf(builder, "header: %v\n", helps.ProtoJson(any(this.Header).(proto.Message)))
-	_, _ = fmt.Fprintf(builder, "request: %v\n", helps.ProtoJson(any(this.Request).(proto.Message)))
+	_, _ = fmt.Fprintf(builder, "header: %v\n", helps.ProtoString(any(this.Header).(proto.Message)))
+	_, _ = fmt.Fprintf(builder, "request: %v\n", helps.ProtoString(any(this.Request).(proto.Message)))
 
 	for i, itor := range this.Respond {
-		_, _ = fmt.Fprintf(builder, "respond[%v]: %v\n", i, helps.ProtoJson(itor))
+		_, _ = fmt.Fprintf(builder, "respond[%v]: %v\n", i, helps.ProtoString(itor))
 	} // for
 
 	return builder.String()
