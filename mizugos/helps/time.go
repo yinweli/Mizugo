@@ -72,25 +72,19 @@ func Timef(layout, v string) (time.Time, error) {
 }
 
 // Date 取得指定時間, 會轉換為 SetTimeZone 設定的時區時間;
-// 輸入參數依序是 年, 月, 日, 時, 分, 秒, 毫秒; 若未輸入則自動填0;
+// 輸入參數依序是 年, 月, 日, 時, 分, 秒, 毫秒; 若時, 分, 秒, 毫秒未輸入則自動填0;
 // 例如 Date(2023, 2, 15) 會得到 2023/02/15 00:00:00 的時間
-func Date(v ...int) time.Time {
-	if s := len(v); s >= 7 { //nolint:gomnd
-		return time.Date(v[0], time.Month(v[1]), v[2], v[3], v[4], v[5], v[6], GetTimeZone())
-	} else if s >= 6 { //nolint:gomnd
-		return time.Date(v[0], time.Month(v[1]), v[2], v[3], v[4], v[5], 0, GetTimeZone())
-	} else if s >= 5 { //nolint:gomnd
-		return time.Date(v[0], time.Month(v[1]), v[2], v[3], v[4], 0, 0, GetTimeZone())
-	} else if s >= 4 { //nolint:gomnd
-		return time.Date(v[0], time.Month(v[1]), v[2], v[3], 0, 0, 0, GetTimeZone())
-	} else if s >= 3 {
-		return time.Date(v[0], time.Month(v[1]), v[2], 0, 0, 0, 0, GetTimeZone())
-	} else if s >= 2 {
-		return time.Date(v[0], time.Month(v[1]), 1, 0, 0, 0, 0, GetTimeZone())
-	} else if s >= 1 {
-		return time.Date(v[0], 1, 1, 0, 0, 0, 0, GetTimeZone())
+func Date(year int, month time.Month, day int, v ...int) time.Time {
+	if s := len(v); s > 3 {
+		return time.Date(year, month, day, v[0], v[1], v[2], v[3], GetTimeZone())
+	} else if s > 2 {
+		return time.Date(year, month, day, v[0], v[1], v[2], 0, GetTimeZone())
+	} else if s > 1 {
+		return time.Date(year, month, day, v[0], v[1], 0, 0, GetTimeZone())
+	} else if s > 0 {
+		return time.Date(year, month, day, v[0], 0, 0, 0, GetTimeZone())
 	} else {
-		return time.Time{}
+		return time.Date(year, month, day, 0, 0, 0, 0, GetTimeZone())
 	} // if
 }
 

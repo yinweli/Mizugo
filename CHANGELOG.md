@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.4] - 2024-05-03
+### Changed
+- 保留Date函式的年/月/日參數, 只有時/分/秒/毫秒可以被省略
+
 ## [1.1.3] - 2024-05-03
 ### Fixed
 - 修正每月到期計算錯誤
