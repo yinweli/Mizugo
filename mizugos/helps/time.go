@@ -56,13 +56,13 @@ func Time() time.Time {
 	return time.Now().In(GetTimeZone())
 }
 
-// Timef 取得格式時間, 會轉換為 SetTimeZone 設定的時區時間, 時間字串按照 layout 來解析
-func Timef(layout, v string) (time.Time, error) {
-	if v == "" {
+// Timef 取得格式時間, 會轉換為 SetTimeZone 設定的時區時間, value 按照 layout 來解析
+func Timef(layout, value string) (time.Time, error) {
+	if value == "" {
 		return time.Time{}, nil
 	} // if
 
-	u, err := time.ParseInLocation(layout, v, GetTimeZone())
+	u, err := time.ParseInLocation(layout, value, GetTimeZone())
 
 	if err != nil {
 		return time.Time{}, fmt.Errorf("timef: %w", err)
@@ -74,40 +74,199 @@ func Timef(layout, v string) (time.Time, error) {
 // Date 取得指定時間, 會轉換為 SetTimeZone 設定的時區時間;
 // 輸入參數依序是 年, 月, 日, 時, 分, 秒, 毫秒; 若時, 分, 秒, 毫秒未輸入則自動填0;
 // 例如 Date(2023, 2, 15) 會得到 2023/02/15 00:00:00 的時間
-func Date(year int, month time.Month, day int, v ...int) time.Time {
-	if s := len(v); s > 3 {
-		return time.Date(year, month, day, v[0], v[1], v[2], v[3], GetTimeZone())
+func Date(year int, month time.Month, day int, value ...int) time.Time {
+	if s := len(value); s > 3 {
+		return time.Date(year, month, day, value[0], value[1], value[2], value[3], GetTimeZone())
 	} else if s > 2 {
-		return time.Date(year, month, day, v[0], v[1], v[2], 0, GetTimeZone())
+		return time.Date(year, month, day, value[0], value[1], value[2], 0, GetTimeZone())
 	} else if s > 1 {
-		return time.Date(year, month, day, v[0], v[1], 0, 0, GetTimeZone())
+		return time.Date(year, month, day, value[0], value[1], 0, 0, GetTimeZone())
 	} else if s > 0 {
-		return time.Date(year, month, day, v[0], 0, 0, 0, GetTimeZone())
+		return time.Date(year, month, day, value[0], 0, 0, 0, GetTimeZone())
 	} else {
 		return time.Date(year, month, day, 0, 0, 0, 0, GetTimeZone())
 	} // if
 }
 
-// Between 檢查 u 是否在 s 與 e 之間, 當 s 與 e 為空時, 回傳true
-func Between(s, e, u time.Time) bool {
-	if s.IsZero() && e.IsZero() {
-		return true
+// Before 檢查 u 是否在 t 之前
+func Before(u, t time.Time) bool {
+	return u.Before(t)
+}
+
+// Beforef 檢查 u 是否在 t 之前, u 按照 layout 來解析
+func Beforef(layout, u string, t time.Time) bool {
+	uf, err := Timef(layout, u)
+
+	if err != nil {
+		return false
 	} // if
 
-	if s.IsZero() {
-		return u.Before(e)
+	return uf.Before(t)
+}
+
+// Beforefx 檢查 u 是否在 t 之前, u 與 t 按照 layout 來解析
+func Beforefx(layout, u, t string) bool {
+	uf, err := Timef(layout, u)
+
+	if err != nil {
+		return false
 	} // if
 
-	if e.IsZero() {
-		return u.After(s)
+	tf, err := Timef(layout, t)
+
+	if err != nil {
+		return false
 	} // if
 
-	return u.After(s) && u.Before(e)
+	return uf.Before(tf)
+}
+
+// After 檢查 u 是否在 t 之後
+func After(u, t time.Time) bool {
+	return u.After(t)
+}
+
+// Afterf 檢查 u 是否在 t 之後, u 按照 layout 來解析
+func Afterf(layout, u string, t time.Time) bool {
+	uf, err := Timef(layout, u)
+
+	if err != nil {
+		return false
+	} // if
+
+	return uf.After(t)
+}
+
+// Afterfx 檢查 u 是否在 t 之後, u 與 t 按照 layout 來解析
+func Afterfx(layout, u, t string) bool {
+	uf, err := Timef(layout, u)
+
+	if err != nil {
+		return false
+	} // if
+
+	tf, err := Timef(layout, t)
+
+	if err != nil {
+		return false
+	} // if
+
+	return uf.After(tf)
+}
+
+// Between 檢查 u 是否在 start 與 end 之間;
+// 當 start 與 end 為空時, 回傳 zero, zero 預設為true
+func Between(start, end, u time.Time, zero ...bool) bool {
+	if start.IsZero() && end.IsZero() {
+		if len(zero) > 0 {
+			return zero[0]
+		} else {
+			return true
+		} // if
+	} // if
+
+	if start.IsZero() {
+		return u.Before(end)
+	} // if
+
+	if end.IsZero() {
+		return u.After(start)
+	} // if
+
+	return u.After(start) && u.Before(end)
+}
+
+// Betweenf 檢查 u 是否在 start 與 end 之間, start 與 end 按照 layout 來解析;
+// 當 start 與 end 為空時, 回傳 zero, zero 預設為true
+func Betweenf(layout, start, end string, u time.Time, zero ...bool) bool {
+	startf, err := Timef(layout, start)
+
+	if err != nil {
+		return false
+	} // if
+
+	endf, err := Timef(layout, end)
+
+	if err != nil {
+		return false
+	} // if
+
+	return Between(startf, endf, u, zero...)
+}
+
+// Betweenfx 檢查 u 是否在 start 與 end 之間, start 與 end 與 u 按照 layout 來解析;
+// 當 start 與 end 為空時, 回傳 zero, zero 預設為true
+func Betweenfx(layout, start, end, u string, zero ...bool) bool {
+	startf, err := Timef(layout, start)
+
+	if err != nil {
+		return false
+	} // if
+
+	endf, err := Timef(layout, end)
+
+	if err != nil {
+		return false
+	} // if
+
+	uf, err := Timef(layout, u)
+
+	if err != nil {
+		return false
+	} // if
+
+	return Between(startf, endf, uf, zero...)
 }
 
 // Overlap 檢查兩個時間段是否有重疊
-func Overlap(s1, e1, s2, e2 time.Time) bool {
-	return e1.After(s2) && e2.After(s1)
+func Overlap(start1, end1, start2, end2 time.Time) bool {
+	return end1.After(start2) && end2.After(start1)
+}
+
+// Overlapf 檢查兩個時間段是否有重疊, start1 與 end1 按照 layout 來解析
+func Overlapf(layout, start1, end1 string, start2, end2 time.Time) bool {
+	start1f, err := Timef(layout, start1)
+
+	if err != nil {
+		return false
+	} // if
+
+	end1f, err := Timef(layout, end1)
+
+	if err != nil {
+		return false
+	} // if
+
+	return Overlap(start1f, end1f, start2, end2)
+}
+
+// Overlapfx 檢查兩個時間段是否有重疊, start1 與 end1 與 start2 與 end2 按照 layout 來解析
+func Overlapfx(layout, start1, end1, start2, end2 string) bool {
+	start1f, err := Timef(layout, start1)
+
+	if err != nil {
+		return false
+	} // if
+
+	end1f, err := Timef(layout, end1)
+
+	if err != nil {
+		return false
+	} // if
+
+	start2f, err := Timef(layout, start2)
+
+	if err != nil {
+		return false
+	} // if
+
+	end2f, err := Timef(layout, end2)
+
+	if err != nil {
+		return false
+	} // if
+
+	return Overlap(start1f, end1f, start2f, end2f)
 }
 
 // Daily 檢查每日是否到期

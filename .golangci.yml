@@ -25,7 +25,7 @@ linters-settings:
     min-complexity: 50
   goimports:
     local-prefixes: github.com/golangci/golangci-lint
-  gomnd:
+  mnd:
     # don't include the "operation" and "assign"
     checks:
       - argument
@@ -48,7 +48,7 @@ linters-settings:
   gosimple:
     checks: [ "all", "-S1002" ]
   govet:
-    check-shadowing: true
+    shadow: true
   lll:
     line-length: 200
   misspell:
@@ -107,7 +107,7 @@ linters:
     - gocyclo
     - gofmt
     - goimports
-    - gomnd
+    - mnd
     - goprintffuncname
     - gosec
     - gosimple
@@ -153,16 +153,14 @@ issues:
   exclude-rules:
     - path: (.+)_test.go
       linters:
-        - gomnd
+        - mnd
         - dupl
-
     - path: pkg/golinters/errcheck.go
       text: "SA1019: errCfg.Exclude is deprecated: use ExcludeFunctions instead"
     - path: pkg/commands/run.go
       text: "SA1019: lsc.Errcheck.Exclude is deprecated: use ExcludeFunctions instead"
     - path: pkg/commands/run.go
       text: "SA1019: e.cfg.Run.Deadline is deprecated: Deadline exists for historical compatibility and should not be used."
-
     - path: pkg/golinters/gofumpt.go
       text: "SA1019: settings.LangVersion is deprecated: use the global `run.go` instead."
     - path: pkg/golinters/staticcheck_common.go

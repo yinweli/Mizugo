@@ -25,8 +25,8 @@ func RandInt() int {
 }
 
 // RandIntn 取得範圍內偽隨機數值
-func RandIntn(min, max int) int {
-	return min + rand.Intn(max-min+1) //nolint:gosec
+func RandIntn(minimum, maximum int) int {
+	return minimum + rand.Intn(maximum-minimum+1) //nolint:gosec
 }
 
 // RandInt32 取得偽隨機數值, 不會有負值
@@ -35,8 +35,8 @@ func RandInt32() int32 {
 }
 
 // RandInt32n 取得範圍內偽隨機數值
-func RandInt32n(min, max int32) int32 {
-	return min + rand.Int31n(max-min+1) //nolint:gosec
+func RandInt32n(minimum, maximum int32) int32 {
+	return minimum + rand.Int31n(maximum-minimum+1) //nolint:gosec
 }
 
 // RandInt64 取得偽隨機數值, 不會有負值
@@ -45,8 +45,8 @@ func RandInt64() int64 {
 }
 
 // RandInt64n 取得範圍內偽隨機數值
-func RandInt64n(min, max int64) int64 {
-	return min + rand.Int63n(max-min+1) //nolint:gosec
+func RandInt64n(minimum, maximum int64) int64 {
+	return minimum + rand.Int63n(maximum-minimum+1) //nolint:gosec
 }
 
 // RandReal64 取得真隨機數值, 不需要事先設定隨機種子, 但是速度大約比偽隨機慢10倍
@@ -56,9 +56,9 @@ func RandReal64() int64 {
 }
 
 // RandReal64n 取得範圍內真隨機數值, 不需要事先設定隨機種子, 但是速度大約比偽隨機慢10倍
-func RandReal64n(min, max int64) int64 {
-	value, _ := randr.Int(randr.Reader, big.NewInt(max-min+1))
-	return min + value.Int64()
+func RandReal64n(minimum, maximum int64) int64 {
+	value, _ := randr.Int(randr.Reader, big.NewInt(maximum-minimum+1))
+	return minimum + value.Int64()
 }
 
 // RandString 取得指定位數的隨機字串
