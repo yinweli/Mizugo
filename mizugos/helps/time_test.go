@@ -47,15 +47,15 @@ func (this *SuiteTime) TestTime() {
 }
 
 func (this *SuiteTime) TestTimef() {
-	now, err := Timef(LayoutSecond, "2023-02-15 01:02:03")
+	now, err := Timef(LayoutSecond, "2023-02-05 01:02:03")
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), now)
 	fmt.Println(now)
-	now, err = Timef(LayoutMinute, "2023-02-15 01:02")
+	now, err = Timef(LayoutMinute, "2023-02-05 01:02")
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), now)
 	fmt.Println(now)
-	now, err = Timef(LayoutDay, "2023-02-15")
+	now, err = Timef(LayoutDay, "2023-02-05")
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), now)
 	fmt.Println(now)
@@ -63,46 +63,129 @@ func (this *SuiteTime) TestTimef() {
 	assert.Nil(this.T(), err)
 	assert.NotNil(this.T(), now)
 	fmt.Println(now)
-	_, err = Timef(testdata.Unknown, "2023-02-15")
+	_, err = Timef(testdata.Unknown, "2023-02-05")
 	assert.NotNil(this.T(), err)
 }
 
 func (this *SuiteTime) TestDate() {
-	now := Date(2023, 2, 15, 1, 2, 3, 4)
+	now := Date(2023, 2, 5, 1, 2, 3, 4)
 	assert.NotNil(this.T(), now)
 	fmt.Println(now)
-	now = Date(2023, 2, 15, 1, 2, 3)
+	now = Date(2023, 2, 5, 1, 2, 3)
 	assert.NotNil(this.T(), now)
 	fmt.Println(now)
-	now = Date(2023, 2, 15, 1, 2)
+	now = Date(2023, 2, 5, 1, 2)
 	assert.NotNil(this.T(), now)
 	fmt.Println(now)
-	now = Date(2023, 2, 15, 1)
+	now = Date(2023, 2, 5, 1)
 	assert.NotNil(this.T(), now)
 	fmt.Println(now)
-	now = Date(2023, 2, 15)
+	now = Date(2023, 2, 5)
 	assert.NotNil(this.T(), now)
 	fmt.Println(now)
 }
 
+func (this *SuiteTime) TestBefore() {
+	assert.True(this.T(), Before(Date(2023, 2, 1), Date(2023, 2, 5)))
+	assert.False(this.T(), Before(Date(2023, 2, 10), Date(2023, 2, 5)))
+
+	assert.True(this.T(), Beforef(LayoutDay, "2023-02-01", Date(2023, 2, 5)))
+	assert.False(this.T(), Beforef(LayoutDay, "2023-02-10", Date(2023, 2, 5)))
+	assert.False(this.T(), Beforef(LayoutDay, testdata.Unknown, Date(2023, 2, 5)))
+
+	assert.True(this.T(), Beforefx(LayoutDay, "2023-02-01", "2023-02-05"))
+	assert.False(this.T(), Beforefx(LayoutDay, "2023-02-10", "2023-02-05"))
+	assert.False(this.T(), Beforefx(LayoutDay, testdata.Unknown, "2023-02-05"))
+	assert.False(this.T(), Beforefx(LayoutDay, "2023-02-10", testdata.Unknown))
+}
+
+func (this *SuiteTime) TestAfter() {
+	assert.True(this.T(), After(Date(2023, 2, 10), Date(2023, 2, 5)))
+	assert.False(this.T(), After(Date(2023, 2, 1), Date(2023, 2, 5)))
+
+	assert.True(this.T(), Afterf(LayoutDay, "2023-02-10", Date(2023, 2, 5)))
+	assert.False(this.T(), Afterf(LayoutDay, "2023-02-1", Date(2023, 2, 5)))
+	assert.False(this.T(), Afterf(LayoutDay, testdata.Unknown, Date(2023, 2, 5)))
+
+	assert.True(this.T(), Afterfx(LayoutDay, "2023-02-10", "2023-02-05"))
+	assert.False(this.T(), Afterfx(LayoutDay, "2023-02-01", "2023-02-05"))
+	assert.False(this.T(), Afterfx(LayoutDay, testdata.Unknown, "2023-02-05"))
+	assert.False(this.T(), Afterfx(LayoutDay, "2023-02-10", testdata.Unknown))
+}
+
 func (this *SuiteTime) TestBetween() {
-	now := Time()
-	start := now.Add(-TimeMinute)
-	end := now.Add(TimeMinute)
-	assert.True(this.T(), Between(start, end, now))
-	assert.True(this.T(), Between(start, time.Time{}, now))
-	assert.True(this.T(), Between(time.Time{}, end, now))
-	assert.False(this.T(), Between(start, end, now.Add(TimeHour)))
-	assert.True(this.T(), Between(time.Time{}, time.Time{}, now))
+	assert.True(this.T(), Between(Date(2023, 2, 5), Date(2023, 2, 15), Date(2023, 2, 10)))
+	assert.False(this.T(), Between(Date(2023, 2, 5), Date(2023, 2, 15), Date(2023, 2, 20)))
+	assert.True(this.T(), Between(time.Time{}, time.Time{}, Date(2023, 2, 10)))
+	assert.False(this.T(), Between(time.Time{}, time.Time{}, Date(2023, 2, 10), false))
+	assert.True(this.T(), Between(time.Time{}, Date(2023, 2, 15), Date(2023, 2, 10)))
+	assert.False(this.T(), Between(time.Time{}, Date(2023, 2, 15), Date(2023, 2, 20)))
+	assert.True(this.T(), Between(Date(2023, 2, 5), time.Time{}, Date(2023, 2, 10)))
+	assert.False(this.T(), Between(Date(2023, 2, 5), time.Time{}, Date(2023, 2, 1)))
+
+	assert.True(this.T(), Betweenf(LayoutDay, "2023-02-05", "2023-02-15", Date(2023, 2, 10)))
+	assert.False(this.T(), Betweenf(LayoutDay, "2023-02-05", "2023-02-15", Date(2023, 2, 20)))
+	assert.False(this.T(), Betweenf(LayoutDay, testdata.Unknown, "2023-02-15", Date(2023, 2, 10)))
+	assert.False(this.T(), Betweenf(LayoutDay, "2023-02-05", testdata.Unknown, Date(2023, 2, 10)))
+	assert.True(this.T(), Betweenf(LayoutDay, "", "", Date(2023, 2, 10)))
+	assert.False(this.T(), Betweenf(LayoutDay, "", "", Date(2023, 2, 10), false))
+	assert.True(this.T(), Betweenf(LayoutDay, "", "2023-02-15", Date(2023, 2, 10)))
+	assert.False(this.T(), Betweenf(LayoutDay, "", "2023-02-15", Date(2023, 2, 20)))
+	assert.True(this.T(), Betweenf(LayoutDay, "2023-02-05", "", Date(2023, 2, 10)))
+	assert.False(this.T(), Betweenf(LayoutDay, "2023-02-05", "", Date(2023, 2, 1)))
+
+	assert.True(this.T(), Betweenfx(LayoutDay, "2023-02-05", "2023-02-15", "2023-02-10"))
+	assert.False(this.T(), Betweenfx(LayoutDay, "2023-02-05", "2023-02-15", "2023-02-20"))
+	assert.False(this.T(), Betweenfx(LayoutDay, testdata.Unknown, "2023-02-15", "2023-02-10"))
+	assert.False(this.T(), Betweenfx(LayoutDay, "2023-02-05", testdata.Unknown, "2023-02-10"))
+	assert.False(this.T(), Betweenfx(LayoutDay, "2023-02-05", "2023-02-15", testdata.Unknown))
+	assert.True(this.T(), Betweenfx(LayoutDay, "", "", "2023-02-10"))
+	assert.False(this.T(), Betweenfx(LayoutDay, "", "", "2023-02-10", false))
+	assert.True(this.T(), Betweenfx(LayoutDay, "", "2023-02-15", "2023-02-10"))
+	assert.False(this.T(), Betweenfx(LayoutDay, "", "2023-02-15", "2023-02-20"))
+	assert.True(this.T(), Betweenfx(LayoutDay, "2023-02-05", "", "2023-02-10"))
+	assert.False(this.T(), Betweenfx(LayoutDay, "2023-02-05", "", "2023-02-01"))
 }
 
 func (this *SuiteTime) TestOverlap() {
 	assert.True(this.T(), Overlap(
-		Date(2023, 6, 1), Date(2023, 6, 10),
-		Date(2023, 6, 5), Date(2023, 6, 15)))
+		Date(2023, 2, 1), Date(2023, 2, 10),
+		Date(2023, 2, 5), Date(2023, 2, 15)))
 	assert.False(this.T(), Overlap(
-		Date(2023, 6, 1), Date(2023, 6, 10),
-		Date(2023, 7, 1), Date(2023, 7, 10)))
+		Date(2023, 2, 1), Date(2023, 2, 10),
+		Date(2023, 2, 15), Date(2023, 2, 20)))
+
+	assert.True(this.T(), Overlapf(LayoutDay,
+		"2023-02-01", "2023-02-10",
+		Date(2023, 2, 5), Date(2023, 2, 15)))
+	assert.False(this.T(), Overlapf(LayoutDay,
+		"2023-02-01", "2023-02-10",
+		Date(2023, 2, 15), Date(2023, 2, 20)))
+	assert.False(this.T(), Overlapf(LayoutDay,
+		testdata.Unknown, "2023-02-10",
+		Date(2023, 2, 15), Date(2023, 2, 20)))
+	assert.False(this.T(), Overlapf(LayoutDay,
+		"2023-02-01", testdata.Unknown,
+		Date(2023, 2, 15), Date(2023, 2, 20)))
+
+	assert.True(this.T(), Overlapfx(LayoutDay,
+		"2023-02-01", "2023-02-10",
+		"2023-02-05", "2023-02-15"))
+	assert.False(this.T(), Overlapfx(LayoutDay,
+		"2023-02-01", "2023-02-10",
+		"2023-02-15", "2023-02-20"))
+	assert.False(this.T(), Overlapfx(LayoutDay,
+		testdata.Unknown, "2023-02-10",
+		"2023-02-15", "2023-02-20"))
+	assert.False(this.T(), Overlapfx(LayoutDay,
+		"2023-02-01", testdata.Unknown,
+		"2023-02-15", "2023-02-20"))
+	assert.False(this.T(), Overlapfx(LayoutDay,
+		"2023-02-01", "2023-02-10",
+		testdata.Unknown, "2023-02-20"))
+	assert.False(this.T(), Overlapfx(LayoutDay,
+		"2023-02-01", "2023-02-10",
+		"2023-02-15", testdata.Unknown))
 }
 
 func (this *SuiteTime) TestDaily() {

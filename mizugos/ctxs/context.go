@@ -59,7 +59,7 @@ func (this Ctx) WithDeadline(deadline time.Time) Ctx {
 	return result
 }
 
-func init() { //nolint:gochecknoinits
+func init() { //nolint:init
 	Set(context.Background())
 }
 

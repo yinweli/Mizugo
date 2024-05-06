@@ -11,8 +11,8 @@ func NewDice() *Dice {
 
 // Dice 骰子資料
 type Dice struct {
-	dice []dice // 骰子元素列表
-	max  int64  // 最大值
+	dice    []dice // 骰子元素列表
+	maximum int64  // 最大值
 }
 
 // dice 骰子元素資料
@@ -24,7 +24,7 @@ type dice struct {
 // Clear 清除資料
 func (this *Dice) Clear() {
 	this.dice = []dice{}
-	this.max = 0
+	this.maximum = 0
 }
 
 // One 填入一筆資料
@@ -37,10 +37,10 @@ func (this *Dice) One(payload any, weight int64) error {
 		return nil
 	} // if
 
-	this.max += weight
+	this.maximum += weight
 	this.dice = append(this.dice, dice{
 		payload: payload,
-		offset:  this.max,
+		offset:  this.maximum,
 	})
 	return nil
 }
@@ -61,8 +61,8 @@ func (this *Dice) Fill(payload []any, weight []int64) error {
 }
 
 // Complete 填入最後資料
-func (this *Dice) Complete(payload any, max int64) error {
-	weight := max - this.max
+func (this *Dice) Complete(payload any, maximum int64) error {
+	weight := maximum - this.maximum
 
 	if weight <= 0 {
 		return nil
@@ -77,16 +77,16 @@ func (this *Dice) Complete(payload any, max int64) error {
 
 // Rand 擲骰, 最大值用內部設置
 func (this *Dice) Rand() any {
-	return this.Randn(this.max)
+	return this.Randn(this.maximum)
 }
 
 // Randn 擲骰, 最大值用外部設置
-func (this *Dice) Randn(max int64) any {
-	if max <= 0 {
+func (this *Dice) Randn(maximum int64) any {
+	if maximum <= 0 {
 		return nil
 	} // if
 
-	num := RandInt64n(0, max)
+	num := RandInt64n(0, maximum)
 
 	for _, itor := range this.dice {
 		if itor.offset >= num {
@@ -99,12 +99,12 @@ func (this *Dice) Randn(max int64) any {
 
 // Valid 取得骰子是否有效, 如果骰子內沒有元素, 或是所有元素的權重都是0, 則此骰子無效
 func (this *Dice) Valid() bool {
-	return this.max > 0
+	return this.maximum > 0
 }
 
 // Max 取得最大值
 func (this *Dice) Max() int64 {
-	return this.max
+	return this.maximum
 }
 
 // NewDiceDetect 建立骰子檢測資料
@@ -130,7 +130,7 @@ func (this *DiceDetect) Ratio(key any, total int) float64 {
 }
 
 // Check 檢測比例是否正確, 比對的方式為檢測比例是否在min與max之間
-func (this *DiceDetect) Check(key any, total int, min, max float64) bool {
+func (this *DiceDetect) Check(key any, total int, minimum, maximum float64) bool {
 	ratio := this.Ratio(key, total)
-	return ratio >= min && ratio <= max
+	return ratio >= minimum && ratio <= maximum
 }

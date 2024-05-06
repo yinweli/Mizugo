@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.5] - 2024-05-06
+### Added
+- 新增Before, Beforef, Beforefx函式
+- 新增After, Afterf, Afterfx函式
+- 新增Betweenf, Betweenfx函式
+- 新增Overlapff, Overlapffx函式
+
 ## [1.1.4] - 2024-05-03
 ### Changed
 - 保留Date函式的年/月/日參數, 只有時/分/秒/毫秒可以被省略
