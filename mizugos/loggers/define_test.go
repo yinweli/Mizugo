@@ -72,7 +72,7 @@ func (this *streamTester) KV(_ string, _ any) Stream {
 	return this
 }
 
-func (this *streamTester) Caller(_ int) Stream {
+func (this *streamTester) Caller(_ int, _ ...bool) Stream {
 	return this
 }
 

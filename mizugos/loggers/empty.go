@@ -68,7 +68,7 @@ func (this *EmptyStream) KV(_ string, _ any) Stream {
 }
 
 // Caller 記錄呼叫位置
-func (this *EmptyStream) Caller(_ int) Stream {
+func (this *EmptyStream) Caller(_ int, _ ...bool) Stream {
 	return this
 }
 

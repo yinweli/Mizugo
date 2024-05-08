@@ -49,7 +49,7 @@ type Stream interface {
 	KV(key string, value any) Stream
 
 	// Caller 記錄呼叫位置
-	Caller(skip int) Stream
+	Caller(skip int, simple ...bool) Stream
 
 	// Error 記錄錯誤
 	Error(err error) Stream

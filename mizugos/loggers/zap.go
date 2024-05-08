@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/natefinch/lumberjack"
@@ -264,9 +265,20 @@ func (this *ZapStream) KV(key string, value any) Stream {
 }
 
 // Caller 記錄呼叫位置
-func (this *ZapStream) Caller(skip int) Stream {
+func (this *ZapStream) Caller(skip int, simple ...bool) Stream {
 	if pc, _, _, ok := runtime.Caller(skip + 1); ok { // 這裡把skip+1的原因是為了多跳過現在這層, 這樣外部使用時就可以指定0為呼叫起點, 比較直覺
-		this.field = append(this.field, zap.String("caller", filepath.Base(runtime.FuncForPC(pc).Name())))
+		caller := filepath.Base(runtime.FuncForPC(pc).Name())
+
+		if len(simple) > 0 && simple[0] {
+			if last := strings.Index(caller, "."); last != -1 && last+1 < len(caller) {
+				caller = caller[last+1:]
+				caller = strings.Replace(caller, "(", "", 1)
+				caller = strings.Replace(caller, "*", "", 1)
+				caller = strings.Replace(caller, ")", "", 1)
+			} // if
+		} // if
+
+		this.field = append(this.field, zap.String("caller", caller))
 	} // if
 
 	return this
