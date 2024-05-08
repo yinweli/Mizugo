@@ -103,6 +103,8 @@ func (this *SuiteZap) TestZapStream() {
 	assert.Equal(this.T(), target, target.Message("message"))
 	assert.Equal(this.T(), target, target.KV("key", "value"))
 	assert.Equal(this.T(), target, target.Caller(0))
+	assert.Equal(this.T(), target, target.Caller(0, true))
+	assert.Equal(this.T(), target, target.Caller(0, false))
 	assert.Equal(this.T(), target, target.Error(fmt.Errorf("error")))
 	assert.Equal(this.T(), retain, target.End())
 	target.EndFlush()

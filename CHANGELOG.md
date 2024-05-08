@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.6] - 2024-05-08
+### Changed
+- 日誌的Caller函式新增可選的紀錄簡單函式名稱功能
+
 ## [1.1.5] - 2024-05-06
 ### Added
 - 新增Before, Beforef, Beforefx函式
