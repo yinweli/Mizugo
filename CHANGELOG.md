@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.8] - 2024-05-13
+### Added
+- 新增WriteFile函式
+
+### Changed
+- 將WriteTemplate改為TemplateBuild, 並且只負責將新增部分添加到字串尾端
+
 ## [1.1.7] - 2024-05-13
 ### Added
 - 新增WriteTemplate函式
