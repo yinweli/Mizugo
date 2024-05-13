@@ -1,7 +1,7 @@
 package helps
 
 import (
-	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -29,11 +29,11 @@ func (this *SuiteTemplate) TearDownSuite() {
 }
 
 func (this *SuiteTemplate) TestWriteTmpl() {
-	path := filepath.Join("test", "test.tmpl")
-	blueprintReal := "{{$.Value}}"
-	blueprintFake := "{{{$.Value}}"
-	assert.Nil(this.T(), WriteTemplate(path, blueprintReal, map[string]string{"Value": "Value"}))
-	assert.True(this.T(), trials.FileCompare(path, []byte("Value")))
-	assert.NotNil(this.T(), WriteTemplate(path, blueprintFake, nil))
-	assert.NotNil(this.T(), WriteTemplate(path, blueprintReal, "nothing!"))
+	blueprint1 := "{{$.Value}}"
+	blueprint2 := "{{{$.Value}}"
+	builder := &strings.Builder{}
+	assert.Nil(this.T(), TemplateBuild(blueprint1, builder, map[string]string{"Value": "Value"}))
+	assert.Equal(this.T(), "Value", builder.String())
+	assert.NotNil(this.T(), TemplateBuild(blueprint1, builder, "nothing!"))
+	assert.NotNil(this.T(), TemplateBuild(blueprint2, builder, nil))
 }
