@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.9] - 2024-05-13
+### Added
+- 新增ReflectFieldValue函式
+
 ## [1.1.8] - 2024-05-13
 ### Added
 - 新增WriteFile函式
