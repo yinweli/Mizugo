@@ -322,42 +322,84 @@ func RavenRespondAt[T any](respond []proto.Message, index int) *T {
 
 // RavenTestMessageID 測試訊息編號是否相符, input必須是msgs.RavenC, 並且訊息編號與expected相符才會傳回true, 否則為false
 func RavenTestMessageID(input any, expected int32) bool {
-	if actual, ok := input.(*msgs.RavenC); ok {
-		return expected == actual.MessageID
+	actual, ok := input.(*msgs.RavenC)
+
+	if ok == false {
+		fmt.Printf("messageID: invalid input\n")
+		return false
 	} // if
 
-	return false
+	if expected != actual.MessageID {
+		fmt.Printf("messageID: expected {%v} but actual {%v}\n", expected, actual.MessageID)
+		return false
+	} // if
+
+	return true
 }
 
 // RavenTestErrID 測試錯誤編號是否相符, input必須是msgs.RavenC, 並且錯誤編號與expected相符才會傳回true, 否則為false
 func RavenTestErrID(input any, expected int32) bool {
-	if actual, ok := input.(*msgs.RavenC); ok {
-		return expected == actual.ErrID
+	actual, ok := input.(*msgs.RavenC)
+
+	if ok == false {
+		fmt.Printf("errID: invalid input\n")
+		return false
 	} // if
 
-	return false
+	if expected != actual.ErrID {
+		fmt.Printf("errID: expected {%v} but actual {%v}\n", expected, actual.ErrID)
+		return false
+	} // if
+
+	return true
 }
 
 // RavenTestHeader 測試標頭資料是否相符, input必須是msgs.RavenC, 並且標頭資料與expected相符才會傳回true, 否則為false
 func RavenTestHeader(input any, expected proto.Message) bool {
-	if actual, ok := input.(*msgs.RavenC); ok {
-		if header, err := actual.Header.UnmarshalNew(); err == nil {
-			return proto.Equal(expected, header)
-		} // if
+	actual, ok := input.(*msgs.RavenC)
+
+	if ok == false {
+		fmt.Printf("header: invalid input\n")
+		return false
 	} // if
 
-	return false
+	header, err := actual.Header.UnmarshalNew()
+
+	if err != nil {
+		fmt.Printf("header: unmarshal failed\n")
+		return false
+	} // if
+
+	if proto.Equal(expected, header) == false {
+		fmt.Printf("header: expected {%v} but actual {%v}\n", expected, header)
+		return false
+	} // if
+
+	return true
 }
 
 // RavenTestRequest 測試要求資料是否相符, input必須是msgs.RavenC, 並且要求資料與expected相符才會傳回true, 否則為false
 func RavenTestRequest(input any, expected proto.Message) bool {
-	if actual, ok := input.(*msgs.RavenC); ok {
-		if request, err := actual.Request.UnmarshalNew(); err == nil {
-			return proto.Equal(expected, request)
-		} // if
+	actual, ok := input.(*msgs.RavenC)
+
+	if ok == false {
+		fmt.Printf("request: invalid input\n")
+		return false
 	} // if
 
-	return false
+	request, err := actual.Request.UnmarshalNew()
+
+	if err != nil {
+		fmt.Printf("request: unmarshal failed\n")
+		return false
+	} // if
+
+	if proto.Equal(expected, request) == false {
+		fmt.Printf("request: expected {%v} but actual {%v}\n", expected, request)
+		return false
+	} // if
+
+	return true
 }
 
 // RavenTestRespond 測試回應列表資料是否相符, input必須是msgs.RavenC, 並且expected列表的每一項元素都有與之相符的回應資料才會傳回true, 否則為false;
@@ -366,32 +408,42 @@ func RavenTestRespond(input any, expected ...proto.Message) bool {
 	actual, ok := input.(*msgs.RavenC)
 
 	if ok == false {
+		fmt.Printf("respond: invalid input\n")
 		return false
 	} // if
 
 	result := true
-	matchsz := func(b bool) string {
-		if b {
-			return "match"
-		} else {
-			return "mismatch"
-		} // if
-	}
+	report := &strings.Builder{}
+	report.WriteString("respond:\n")
 
 	for i, itor := range expected {
-		match := false
-
-		if i < len(actual.Respond) {
-			if respond, err := actual.Respond[i].UnmarshalNew(); err == nil {
-				match = proto.Equal(itor, respond)
-			} // if
+		if i >= len(actual.Respond) {
+			result = false
+			_, _ = fmt.Fprintf(report, "    %v not found\n", i)
+			continue
 		} // if
 
-		result = result && match
-		fmt.Printf("[%v] %v\n", i, matchsz(match))
+		respond, err := actual.Respond[i].UnmarshalNew()
+
+		if err != nil {
+			result = false
+			_, _ = fmt.Fprintf(report, "    %v unmarshal failed\n", i)
+			continue
+		} // if
+
+		if proto.Equal(itor, respond) == false {
+			result = false
+			_, _ = fmt.Fprintf(report, "    %v expected {%v} but actual {%v}\n", i, itor, respond)
+			continue
+		} // if
 	} // for
 
-	return result
+	if result == false {
+		fmt.Print(report.String())
+		return false
+	} // if
+
+	return true
 }
 
 // RavenTestRespondType 測試回應列表類型是否相符, input必須是msgs.RavenC, 並且expected列表的每一項元素都有與之相符的回應類型才會傳回true, 否則為false;
@@ -400,42 +452,60 @@ func RavenTestRespondType(input any, expected ...proto.Message) bool {
 	actual, ok := input.(*msgs.RavenC)
 
 	if ok == false {
+		fmt.Printf("respond type: invalid input\n")
 		return false
 	} // if
 
 	result := true
-	matchsz := func(b bool) string {
-		if b {
-			return "=="
-		} else {
-			return "!="
-		} // if
-	}
+	report := &strings.Builder{}
+	report.WriteString("respond type:\n")
 
 	for i, itor := range expected {
-		expectedType := reflect.TypeOf(itor).String()
-		actualType := "unknown"
-		match := false
-
-		if i < len(actual.Respond) {
-			if respond, err := actual.Respond[i].UnmarshalNew(); err == nil {
-				actualType = reflect.TypeOf(respond).String()
-				match = expectedType == actualType
-			} // if
+		if i >= len(actual.Respond) {
+			result = false
+			_, _ = fmt.Fprintf(report, "    %v not found\n", i)
+			continue
 		} // if
 
-		result = result && match
-		fmt.Printf("[%v] %v %v %v\n", i, expectedType, matchsz(match), actualType)
+		respond, err := actual.Respond[i].UnmarshalNew()
+
+		if err != nil {
+			result = false
+			_, _ = fmt.Fprintf(report, "    %v unmarshal failed\n", i)
+			continue
+		} // if
+
+		expectedType := reflect.TypeOf(itor).String()
+		actualType := reflect.TypeOf(respond).String()
+
+		if expectedType != actualType {
+			result = false
+			_, _ = fmt.Fprintf(report, "    %v expected {%v} but actual {%v}\n", i, expectedType, actualType)
+			continue
+		} // if
 	} // for
 
-	return result
+	if result == false {
+		fmt.Print(report.String())
+		return false
+	} // if
+
+	return true
 }
 
 // RavenTestRespondLength 測試回應列表長度是否相符, input必須是msgs.RavenC, 並且回應列表長度必須相符才會傳回true, 否則為false
 func RavenTestRespondLength(input any, expected int) bool {
-	if actual, ok := input.(*msgs.RavenC); ok {
-		return expected == len(actual.Respond)
+	actual, ok := input.(*msgs.RavenC)
+
+	if ok == false {
+		fmt.Printf("length: invalid input\n")
+		return false
 	} // if
 
-	return false
+	if length := len(actual.Respond); expected != length {
+		fmt.Printf("length: expected {%v} but actual {%v}\n", expected, length)
+		return false
+	} // if
+
+	return true
 }

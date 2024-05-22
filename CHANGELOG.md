@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.10] - 2024-05-22
+### Changed
+- 讓Raven的測試系列函式會印出錯誤內容
+
 ## [1.1.9] - 2024-05-13
 ### Added
 - 新增ReflectFieldValue函式
