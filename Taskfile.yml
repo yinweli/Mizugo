@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 tasks:
   # 進行程式碼檢查
@@ -11,6 +11,7 @@ tasks:
       - task: fmt-client-unity-sample
       - task: fmt-proto-mizugo
       - task: fmt-proto-test
+      - task: fmt-yaml
       - task: lint-mizugo
 
   fmt-mizugo:
@@ -38,6 +39,10 @@ tasks:
     cmds:
       - buf format -w .
       - dotnet csharpier .
+
+  fmt-yaml:
+    cmds:
+      - npx prettier --write "*.yaml" "*.yml" "**/*.yaml" "**/*.yml"
 
   lint-mizugo:
     cmds:
@@ -106,6 +111,7 @@ tasks:
   install:
     ignore_error: true
     cmds:
-      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest # 安裝lint
       - dotnet tool install csharpier -g # 安裝cs格式化工具
       - go install github.com/bufbuild/buf/cmd/buf@latest # 安裝proto格式化工具
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest # 安裝lint
+      - npm install -g prettier # 安裝yaml格式化工具
