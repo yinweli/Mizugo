@@ -14,30 +14,30 @@ jobs:
         go: [1.20.x]
         proto: [3.x]
         redis: [6]
-        mongo: ['6.0']
+        mongo: ["6.0"]
     name: ${{ matrix.os }} | go ${{ matrix.go }} | proto ${{ matrix.proto }} | redis ${{ matrix.redis }} | mongo ${{ matrix.mongo }}
     runs-on: ${{ matrix.os }}
     steps:
-    - name: checkout
-      uses: actions/checkout@v4
-    - name: setup go ${{ matrix.go }}
-      uses: actions/setup-go@v4
-      with:
-        go-version: ${{ matrix.go }}
-    - name: setup protoc
-      uses: arduino/setup-protoc@v1
-      with:
-        version: ${{ matrix.proto }}
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-    - name: setup protoc-go
-      run: go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-    - name: setup redis
-      uses: supercharge/redis-github-action@1.8.0
-      with:
-        redis-version: ${{ matrix.redis }}
-    - name: setup mongo
-      uses: supercharge/mongodb-github-action@1.10.0
-      with:
-        mongodb-version: ${{ matrix.mongo }}
-    - name: test
-      run: go test -race ./...
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: setup go ${{ matrix.go }}
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go }}
+      - name: setup protoc
+        uses: arduino/setup-protoc@v1
+        with:
+          version: ${{ matrix.proto }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: setup protoc-go
+        run: go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+      - name: setup redis
+        uses: supercharge/redis-github-action@1.8.0
+        with:
+          redis-version: ${{ matrix.redis }}
+      - name: setup mongo
+        uses: supercharge/mongodb-github-action@1.10.0
+        with:
+          mongodb-version: ${{ matrix.mongo }}
+      - name: test
+        run: go test -race ./...

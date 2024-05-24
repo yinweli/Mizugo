@@ -1,7 +1,7 @@
-version: '3'
+version: "3"
 
 tasks:
   # 進行程式碼檢查
   lint:
     cmds:
-      - dotnet csharpier . # 程式碼格式化 
+      - dotnet csharpier . # 程式碼格式化
