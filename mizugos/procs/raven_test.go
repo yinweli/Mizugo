@@ -188,6 +188,8 @@ func (this *SuiteRaven) TestRavenC() {
 	assert.Equal(this.T(), int32(1), output2.ErrID)
 	assert.True(this.T(), proto.Equal(object, output2.Header))
 	assert.True(this.T(), proto.Equal(object, output2.Request))
+	assert.True(this.T(), proto.Equal(object, output2.Respond[0]))
+	assert.True(this.T(), proto.Equal(object, output2.Respond[1]))
 	assert.True(this.T(), proto.Equal(object, RavenRespond[msgs.RavenTest](output2.Respond)))
 	assert.Nil(this.T(), RavenRespond[msgs.RavenTest](nil))
 	assert.Nil(this.T(), RavenRespond[int](output2.Respond))
@@ -240,6 +242,15 @@ func (this *SuiteRaven) TestRavenTest() {
 	assert.False(this.T(), RavenTestRespondLength(output, 3))
 	assert.False(this.T(), RavenTestRespondLength(nil, 2))
 	assert.False(this.T(), RavenTestRespondLength(testdata.Unknown, 2))
+	assert.NotNil(this.T(), RavenTestRespondAt[msgs.RavenTest](output, 0))
+	assert.Nil(this.T(), RavenTestRespondAt[msgs.RavenTest](output, 10))
+	assert.Nil(this.T(), RavenTestRespondAt[int](output, 0))
+	assert.Nil(this.T(), RavenTestRespondAt[int](nil, 0))
+	assert.Nil(this.T(), RavenTestRespondAt[int](testdata.Unknown, 0))
+	assert.NotNil(this.T(), RavenTestRespondFind[msgs.RavenTest](output))
+	assert.Nil(this.T(), RavenTestRespondFind[int](output))
+	assert.Nil(this.T(), RavenTestRespondFind[int](nil))
+	assert.Nil(this.T(), RavenTestRespondFind[int](testdata.Unknown))
 }
 
 func BenchmarkRavenEncode(b *testing.B) {
