@@ -320,95 +320,95 @@ func RavenRespondAt[T any](respond []proto.Message, index int) *T {
 	return nil
 }
 
-// RavenTestMessageID 測試訊息編號是否相符, input必須是msgs.RavenC, 並且訊息編號與expected相符才會傳回true, 否則為false
+// RavenTestMessageID 測試訊息編號, input必須是msgs.RavenC, 並且訊息編號與expected相符才會傳回true, 否則為false
 func RavenTestMessageID(input any, expected int32) bool {
-	actual, ok := input.(*msgs.RavenC)
+	message, ok := input.(*msgs.RavenC)
 
 	if ok == false {
-		fmt.Printf("messageID: invalid input\n")
+		fmt.Printf("ravenTest: messageID: invalid input\n")
 		return false
 	} // if
 
-	if expected != actual.MessageID {
-		fmt.Printf("messageID: expected {%v} but actual {%v}\n", expected, actual.MessageID)
+	if expected != message.MessageID {
+		fmt.Printf("ravenTest: messageID: expected {%v} but actual {%v}\n", expected, message.MessageID)
 		return false
 	} // if
 
 	return true
 }
 
-// RavenTestErrID 測試錯誤編號是否相符, input必須是msgs.RavenC, 並且錯誤編號與expected相符才會傳回true, 否則為false
+// RavenTestErrID 測試錯誤編號, input必須是msgs.RavenC, 並且錯誤編號與expected相符才會傳回true, 否則為false
 func RavenTestErrID(input any, expected int32) bool {
-	actual, ok := input.(*msgs.RavenC)
+	message, ok := input.(*msgs.RavenC)
 
 	if ok == false {
-		fmt.Printf("errID: invalid input\n")
+		fmt.Printf("ravenTest: errID: invalid input\n")
 		return false
 	} // if
 
-	if expected != actual.ErrID {
-		fmt.Printf("errID: expected {%v} but actual {%v}\n", expected, actual.ErrID)
+	if expected != message.ErrID {
+		fmt.Printf("ravenTest: errID: expected {%v} but actual {%v}\n", expected, message.ErrID)
 		return false
 	} // if
 
 	return true
 }
 
-// RavenTestHeader 測試標頭資料是否相符, input必須是msgs.RavenC, 並且標頭資料與expected相符才會傳回true, 否則為false
+// RavenTestHeader 測試標頭資料, input必須是msgs.RavenC, 並且標頭資料與expected相符才會傳回true, 否則為false
 func RavenTestHeader(input any, expected proto.Message) bool {
-	actual, ok := input.(*msgs.RavenC)
+	message, ok := input.(*msgs.RavenC)
 
 	if ok == false {
-		fmt.Printf("header: invalid input\n")
+		fmt.Printf("ravenTest: header: invalid input\n")
 		return false
 	} // if
 
-	header, err := actual.Header.UnmarshalNew()
+	header, err := message.Header.UnmarshalNew()
 
 	if err != nil {
-		fmt.Printf("header: unmarshal failed\n")
+		fmt.Printf("ravenTest: header: unmarshal failed\n")
 		return false
 	} // if
 
 	if proto.Equal(expected, header) == false {
-		fmt.Printf("header: expected {%v} but actual {%v}\n", expected, header)
+		fmt.Printf("ravenTest: header: expected {%v} but actual {%v}\n", expected, header)
 		return false
 	} // if
 
 	return true
 }
 
-// RavenTestRequest 測試要求資料是否相符, input必須是msgs.RavenC, 並且要求資料與expected相符才會傳回true, 否則為false
+// RavenTestRequest 測試要求資料, input必須是msgs.RavenC, 並且要求資料與expected相符才會傳回true, 否則為false
 func RavenTestRequest(input any, expected proto.Message) bool {
-	actual, ok := input.(*msgs.RavenC)
+	message, ok := input.(*msgs.RavenC)
 
 	if ok == false {
-		fmt.Printf("request: invalid input\n")
+		fmt.Printf("ravenTest: request: invalid input\n")
 		return false
 	} // if
 
-	request, err := actual.Request.UnmarshalNew()
+	request, err := message.Request.UnmarshalNew()
 
 	if err != nil {
-		fmt.Printf("request: unmarshal failed\n")
+		fmt.Printf("ravenTest: request: unmarshal failed\n")
 		return false
 	} // if
 
 	if proto.Equal(expected, request) == false {
-		fmt.Printf("request: expected {%v} but actual {%v}\n", expected, request)
+		fmt.Printf("ravenTest: request: expected {%v} but actual {%v}\n", expected, request)
 		return false
 	} // if
 
 	return true
 }
 
-// RavenTestRespond 測試回應列表資料是否相符, input必須是msgs.RavenC, 並且expected列表的每一項元素都有與之相符的回應資料才會傳回true, 否則為false;
-// 但是這並不代表expected列表與回應列表完全一致, 例如有只出現於回應列表, 但不在expected列表中的資料, 就無法通過此函式檢測出來
+// RavenTestRespond 測試回應列表, input必須是msgs.RavenC, 並且expected列表中的每一個元素都在回應列表中找到並且相符才會傳回true, 否則為false
+// 但是這並不代表expected列表與回應列表完全一致, 例如有只出現於回應列表, 但不在expected列表中的資料, 就無法通過此方式檢測出來
 func RavenTestRespond(input any, expected ...proto.Message) bool {
-	actual, ok := input.(*msgs.RavenC)
+	message, ok := input.(*msgs.RavenC)
 
 	if ok == false {
-		fmt.Printf("respond: invalid input\n")
+		fmt.Printf("ravenTest: respond: invalid input\n")
 		return false
 	} // if
 
@@ -417,23 +417,23 @@ func RavenTestRespond(input any, expected ...proto.Message) bool {
 	report.WriteString("respond:\n")
 
 	for i, itor := range expected {
-		if i >= len(actual.Respond) {
+		if i >= len(message.Respond) {
 			result = false
-			_, _ = fmt.Fprintf(report, "    %v not found\n", i)
+			_, _ = fmt.Fprintf(report, "    [%v] not found\n", i)
 			continue
 		} // if
 
-		respond, err := actual.Respond[i].UnmarshalNew()
+		respond, err := message.Respond[i].UnmarshalNew()
 
 		if err != nil {
 			result = false
-			_, _ = fmt.Fprintf(report, "    %v unmarshal failed\n", i)
+			_, _ = fmt.Fprintf(report, "    [%v] unmarshal failed\n", i)
 			continue
 		} // if
 
 		if proto.Equal(itor, respond) == false {
 			result = false
-			_, _ = fmt.Fprintf(report, "    %v expected {%v} but actual {%v}\n", i, itor, respond)
+			_, _ = fmt.Fprintf(report, "    [%v] expected {%v} but actual {%v}\n", i, itor, respond)
 			continue
 		} // if
 	} // for
@@ -446,13 +446,13 @@ func RavenTestRespond(input any, expected ...proto.Message) bool {
 	return true
 }
 
-// RavenTestRespondType 測試回應列表類型是否相符, input必須是msgs.RavenC, 並且expected列表的每一項元素都有與之相符的回應類型才會傳回true, 否則為false;
-// 但是這並不代表expected列表與回應列表完全一致, 例如有只出現於回應列表, 但不在expected列表中的類型, 就無法通過此函式檢測出來
+// RavenTestRespondType 測試回應類型, input必須是msgs.RavenC, 並且expected列表中的每一個元素類型都在回應列表中找到才會傳回true, 否則為false;
+// 但是這並不代表expected列表與回應列表完全一致, 例如有只出現於回應列表, 但不在expected列表中的類型, 就無法通過此方式檢測出來
 func RavenTestRespondType(input any, expected ...proto.Message) bool {
-	actual, ok := input.(*msgs.RavenC)
+	message, ok := input.(*msgs.RavenC)
 
 	if ok == false {
-		fmt.Printf("respond type: invalid input\n")
+		fmt.Printf("ravenTest: respond type: invalid input\n")
 		return false
 	} // if
 
@@ -461,17 +461,17 @@ func RavenTestRespondType(input any, expected ...proto.Message) bool {
 	report.WriteString("respond type:\n")
 
 	for i, itor := range expected {
-		if i >= len(actual.Respond) {
+		if i >= len(message.Respond) {
 			result = false
-			_, _ = fmt.Fprintf(report, "    %v not found\n", i)
+			_, _ = fmt.Fprintf(report, "    [%v] not found\n", i)
 			continue
 		} // if
 
-		respond, err := actual.Respond[i].UnmarshalNew()
+		respond, err := message.Respond[i].UnmarshalNew()
 
 		if err != nil {
 			result = false
-			_, _ = fmt.Fprintf(report, "    %v unmarshal failed\n", i)
+			_, _ = fmt.Fprintf(report, "    [%v] unmarshal failed\n", i)
 			continue
 		} // if
 
@@ -480,7 +480,7 @@ func RavenTestRespondType(input any, expected ...proto.Message) bool {
 
 		if expectedType != actualType {
 			result = false
-			_, _ = fmt.Fprintf(report, "    %v expected {%v} but actual {%v}\n", i, expectedType, actualType)
+			_, _ = fmt.Fprintf(report, "    [%v] expected {%v} but actual {%v}\n", i, expectedType, actualType)
 			continue
 		} // if
 	} // for
@@ -493,19 +493,57 @@ func RavenTestRespondType(input any, expected ...proto.Message) bool {
 	return true
 }
 
-// RavenTestRespondLength 測試回應列表長度是否相符, input必須是msgs.RavenC, 並且回應列表長度必須相符才會傳回true, 否則為false
+// RavenTestRespondLength 測試回應長度, input必須是msgs.RavenC, 並且回應列表長度必須相符才會傳回true, 否則為false
 func RavenTestRespondLength(input any, expected int) bool {
-	actual, ok := input.(*msgs.RavenC)
+	message, ok := input.(*msgs.RavenC)
 
 	if ok == false {
-		fmt.Printf("length: invalid input\n")
+		fmt.Printf("ravenTest: length: invalid input\n")
 		return false
 	} // if
 
-	if length := len(actual.Respond); expected != length {
-		fmt.Printf("length: expected {%v} but actual {%v}\n", expected, length)
+	if length := len(message.Respond); expected != length {
+		fmt.Printf("ravenTest: length: expected {%v} but actual {%v}\n", expected, length)
 		return false
 	} // if
 
 	return true
+}
+
+// RavenTestRespondAt 取得回應列表中指定位置的資料, input必須是msgs.RavenC
+func RavenTestRespondAt[T any](input any, index int) *T {
+	message, ok := input.(*msgs.RavenC)
+
+	if ok == false {
+		return nil
+	} // if
+
+	if index < len(message.Respond) {
+		if temp, err := message.Respond[index].UnmarshalNew(); err == nil {
+			if respond, ok := any(temp).(*T); ok {
+				return respond
+			} // if
+		} // if
+	} // if
+
+	return nil
+}
+
+// RavenTestRespondFind 取得回應列表中首個符合指定類型的資料, input必須是msgs.RavenC
+func RavenTestRespondFind[T any](input any) *T {
+	message, ok := input.(*msgs.RavenC)
+
+	if ok == false {
+		return nil
+	} // if
+
+	for _, itor := range message.Respond {
+		if temp, err := itor.UnmarshalNew(); err == nil {
+			if respond, ok := any(temp).(*T); ok {
+				return respond
+			} // if
+		} // if
+	} // for
+
+	return nil
 }
