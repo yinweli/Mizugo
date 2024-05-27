@@ -298,24 +298,36 @@ func (this *RavenCData[H, Q]) Detail() string {
 	return builder.String()
 }
 
-// RavenRespond 取得回應列表中首個符合指定類型的資料
-func RavenRespond[T any](respond []proto.Message) *T {
-	for _, itor := range respond {
-		if obj, ok := any(itor).(*T); ok {
-			return obj
+// RavenRespondAt 取得回應列表中指定位置的資料
+func RavenRespondAt(input any, index int) proto.Message {
+	message, ok := input.(*msgs.RavenC)
+
+	if ok == false {
+		return nil
+	} // if
+
+	if index >= 0 && index < len(message.Respond) {
+		if respond, err := message.Respond[index].UnmarshalNew(); err == nil {
+			return respond
 		} // if
-	} // for
+	} // if
 
 	return nil
 }
 
-// RavenRespondAt 取得回應列表中指定位置的資料
-func RavenRespondAt[T any](respond []proto.Message, index int) *T {
-	if index < len(respond) {
-		if obj, ok := any(respond[index]).(*T); ok {
-			return obj
-		} // if
+// RavenRespondFind 取得回應列表中首個符合指定類型的資料
+func RavenRespondFind(input, respondType any) proto.Message {
+	message, ok := input.(*msgs.RavenC)
+
+	if ok == false {
+		return nil
 	} // if
+
+	for _, itor := range message.Respond {
+		if respond, err := itor.UnmarshalNew(); err == nil && reflect.TypeOf(respond) == reflect.TypeOf(respondType) {
+			return respond
+		} // if
+	} // for
 
 	return nil
 }
@@ -508,42 +520,4 @@ func RavenTestRespondLength(input any, expected int) bool {
 	} // if
 
 	return true
-}
-
-// RavenTestRespondAt 取得回應列表中指定位置的資料, input必須是msgs.RavenC
-func RavenTestRespondAt[T any](input any, index int) *T {
-	message, ok := input.(*msgs.RavenC)
-
-	if ok == false {
-		return nil
-	} // if
-
-	if index < len(message.Respond) {
-		if temp, err := message.Respond[index].UnmarshalNew(); err == nil {
-			if respond, ok := any(temp).(*T); ok {
-				return respond
-			} // if
-		} // if
-	} // if
-
-	return nil
-}
-
-// RavenTestRespondFind 取得回應列表中首個符合指定類型的資料, input必須是msgs.RavenC
-func RavenTestRespondFind[T any](input any) *T {
-	message, ok := input.(*msgs.RavenC)
-
-	if ok == false {
-		return nil
-	} // if
-
-	for _, itor := range message.Respond {
-		if temp, err := itor.UnmarshalNew(); err == nil {
-			if respond, ok := any(temp).(*T); ok {
-				return respond
-			} // if
-		} // if
-	} // for
-
-	return nil
 }

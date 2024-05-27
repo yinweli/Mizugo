@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.13] - 2024-05-27
+### Changed
+- 變更取得回應列表的方式
+
 ## [1.1.12] - 2024-05-27
 ### Added
 - 新增取得回應列表的方式
