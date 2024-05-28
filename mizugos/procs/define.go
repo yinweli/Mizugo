@@ -28,6 +28,9 @@ type Processor interface {
 
 	// Del 刪除訊息處理
 	Del(messageID int32)
+
+	// Get 取得訊息處理
+	Get(messageID int32) Process
 }
 
 // Process 訊息處理函式類型
