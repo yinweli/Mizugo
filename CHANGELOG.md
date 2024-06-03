@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.15] - 2024-06-03
+### Added
+- 新增OneStore的IAP組件
+
 ## [1.1.14] - 2024-05-28
 ### Changed
 - 處理介面新增取得訊息處理功能

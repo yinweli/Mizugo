@@ -9,14 +9,14 @@ import (
 	"github.com/awa/go-iap/playstore"
 )
 
-// NewIAPGoogle 建立google驗證器
+// NewIAPGoogle 建立Google驗證器
 func NewIAPGoogle(config *IAPGoogleConfig) *IAPGoogle {
 	return &IAPGoogle{
 		config: config,
 	}
 }
 
-// IAPGoogle google驗證器
+// IAPGoogle Google驗證器
 type IAPGoogle struct {
 	config *IAPGoogleConfig  // 驗證設定
 	client *playstore.Client // 驗證客戶端
@@ -24,7 +24,7 @@ type IAPGoogle struct {
 	signal sync.WaitGroup    // 通知信號
 }
 
-// IAPGoogleConfig google驗證設定資料
+// IAPGoogleConfig Google驗證設定資料
 type IAPGoogleConfig struct {
 	Key      string        `yaml:"key"`      // 密鑰字串
 	Bundle   string        `yaml:"bundle"`   // 軟體包名稱
@@ -32,7 +32,7 @@ type IAPGoogleConfig struct {
 	Capacity int           `yaml:"capacity"` // 通道容量
 }
 
-// iapGoogle google驗證資料
+// iapGoogle Google驗證資料
 type iapGoogle struct {
 	productID   string     // 產品編號
 	certificate string     // 購買憑證
@@ -44,11 +44,11 @@ func (this *IAPGoogle) Initialize() error {
 	client, err := playstore.New([]byte(this.config.Key))
 
 	if err != nil {
-		return fmt.Errorf("iapApple initialize: %w", err)
+		return fmt.Errorf("iapGoogle initialize: %w", err)
 	} // if
 
 	this.client = client
-	this.verify = make(chan *iapGoogle, this.config.Capacity)
+	this.verify = make(chan *iapGoogle, this.config.Capacity+1) // 避免使用者將通道容量設為0導致卡住
 	this.signal.Add(1)
 	go this.execute(this.verify)
 	return nil
@@ -79,7 +79,8 @@ func (this *IAPGoogle) Verify(productID, certificate string) error {
 // execute 執行驗證
 func (this *IAPGoogle) execute(verify chan *iapGoogle) {
 	for itor := range verify {
-		time.Sleep(this.config.WaitTime) // 由於驗證api有速率限制, 所以需要等待後才能繼續下一個驗證
+		// 由於驗證api有速率限制, 所以需要等待後才能繼續下一個驗證
+		time.Sleep(this.config.WaitTime)
 
 		// 由於測試時 ctxs.Get() 常會被奇怪的關閉, 所以這裡使用正常的ctx
 		_, err := this.client.VerifyProduct(context.Background(), this.config.Bundle, itor.productID, itor.certificate)

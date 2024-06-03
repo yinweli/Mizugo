@@ -10,26 +10,26 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestIAPApple(t *testing.T) {
-	suite.Run(t, new(SuiteIAPApple))
+func TestIAPOneStore(t *testing.T) {
+	suite.Run(t, new(SuiteIAPOneStore))
 }
 
-type SuiteIAPApple struct {
+type SuiteIAPOneStore struct {
 	suite.Suite
 	trials.Catalog
 }
 
-func (this *SuiteIAPApple) SetupSuite() {
-	this.Catalog = trials.Prepare(testdata.PathWork("test-helps-iapApple"))
+func (this *SuiteIAPOneStore) SetupSuite() {
+	this.Catalog = trials.Prepare(testdata.PathWork("test-helps-iapOneStore"))
 }
 
-func (this *SuiteIAPApple) TearDownSuite() {
+func (this *SuiteIAPOneStore) TearDownSuite() {
 	trials.Restore(this.Catalog)
 }
 
-func (this *SuiteIAPApple) TestIAPApple() {
+func (this *SuiteIAPOneStore) TestIAPOneStore() {
 	// 由於需要金鑰與憑證, 因此無法測試細節
-	target := NewIAPApple(&IAPAppleConfig{})
+	target := NewIAPOneStore(&IAPOneStoreConfig{})
 	assert.NotNil(this.T(), target)
 	assert.Nil(this.T(), target.Initialize())
 	assert.NotNil(this.T(), target.Verify(testdata.Unknown, testdata.Unknown))
