@@ -28,6 +28,12 @@ func (this *SuiteIAPGoogle) TearDownSuite() {
 }
 
 func (this *SuiteIAPGoogle) TestIAPGoogle() {
+	// 由於需要金鑰與憑證, 因此無法測試細節
 	target := NewIAPGoogle(&IAPGoogleConfig{})
-	assert.NotNil(this.T(), target) // 由於iap需要金鑰與憑證, 因此無法測試細節
+	assert.NotNil(this.T(), target)
+	assert.NotNil(this.T(), target.Initialize())
+	assert.NotNil(this.T(), target.Verify(testdata.Unknown, testdata.Unknown))
+	assert.Panics(this.T(), func() {
+		target.Finalize()
+	})
 }

@@ -9,14 +9,14 @@ import (
 	"github.com/awa/go-iap/appstore/api"
 )
 
-// NewIAPApple 建立apple驗證器
+// NewIAPApple 建立Apple驗證器
 func NewIAPApple(config *IAPAppleConfig) *IAPApple {
 	return &IAPApple{
 		config: config,
 	}
 }
 
-// IAPApple apple驗證器
+// IAPApple Apple驗證器
 type IAPApple struct {
 	config *IAPAppleConfig  // 驗證設定
 	client *api.StoreClient // 驗證客戶端
@@ -24,7 +24,7 @@ type IAPApple struct {
 	signal sync.WaitGroup   // 通知信號
 }
 
-// IAPAppleConfig apple驗證設定資料
+// IAPAppleConfig Apple驗證設定資料
 type IAPAppleConfig struct {
 	Key      string        `yaml:"key"`      // 密鑰字串
 	KeyID    string        `yaml:"keyID"`    // 密鑰ID
@@ -36,7 +36,7 @@ type IAPAppleConfig struct {
 	Retry    int           `yaml:"retry"`    // 重試次數
 }
 
-// iapApple apple驗證資料
+// iapApple Apple驗證資料
 type iapApple struct {
 	productID   string     // 產品編號
 	certificate string     // 購買憑證
@@ -54,7 +54,7 @@ func (this *IAPApple) Initialize() error {
 		Issuer:     this.config.Issuer,
 		Sandbox:    this.config.Sandbox,
 	})
-	this.verify = make(chan *iapApple, this.config.Capacity)
+	this.verify = make(chan *iapApple, this.config.Capacity+1) // 避免使用者將通道容量設為0導致卡住
 	this.signal.Add(1)
 	go this.execute(this.verify)
 	return nil
@@ -85,9 +85,11 @@ func (this *IAPApple) Verify(productID, certificate string) error {
 // execute 執行驗證
 func (this *IAPApple) execute(verify chan *iapApple) {
 	for itor := range verify {
-		time.Sleep(this.config.WaitTime) // 由於驗證api有速率限制, 所以需要等待後才能繼續下一個驗證
+		// 由於驗證api有速率限制, 所以需要等待後才能繼續下一個驗證
+		time.Sleep(this.config.WaitTime)
 
-		if itor.retry >= this.config.Retry { // 如果重試超過限制, 還是只能當作錯誤
+		// 如果重試超過限制, 還是只能當作錯誤
+		if itor.retry > 0 && itor.retry >= this.config.Retry {
 			itor.result <- itor.retryErr
 			continue
 		} // if
@@ -95,7 +97,8 @@ func (this *IAPApple) execute(verify chan *iapApple) {
 		// 由於測試時 ctxs.Get() 常會被奇怪的關閉, 所以這裡使用正常的ctx
 		respond, err := this.client.GetTransactionInfo(context.Background(), itor.certificate)
 
-		if err != nil { // 由於偶爾會出現驗證資料都填寫正確, 但是驗證api卻回應錯誤, 所以只好在這裡重複嘗試
+		// 由於偶爾會出現驗證資料都填寫正確, 但是驗證api卻回應錯誤, 所以只好在這裡重複嘗試
+		if err != nil {
 			itor.retry++
 			itor.retryErr = fmt.Errorf("iapApple execute: %w", err)
 			verify <- itor
