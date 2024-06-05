@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.16] - 2024-06-05
+### Fixed
+- 修正OneStore的IAP驗證錯誤
+
 ## [1.1.15] - 2024-06-03
 ### Added
 - 新增OneStore的IAP組件
