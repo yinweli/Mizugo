@@ -232,10 +232,6 @@ func (this *IAPOneStore) executePurchase(productID, certificate string) error {
 			return fmt.Errorf("purchase: %w", err)
 		} // if
 
-		if result.AcknowledgeState == 0 && result.ConsumptionState == 0 {
-			return fmt.Errorf("purchase: unacknowledged or unconsumed")
-		} // if
-
 		if result.PurchaseState != 0 {
 			return fmt.Errorf("purchase: unpurchased")
 		} // if
