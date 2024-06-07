@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Planning]
 
 ## [Unrelease]
+### Changed
+- 更新Fit組件說明
 
 ## [1.1.17] - 2024-06-06
 ### Fixed

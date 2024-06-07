@@ -15,9 +15,10 @@ type Fit[T int | int32 | int64] struct {
 }
 
 // Check 數值檢測
+//   - 輸入值 = source + sum(modify...)
 //   - 當輸入值在範圍時: result = 輸入值, remain = 0
-//   - 當輸入值大於上限時: result = 上限值, remain = 溢出值(正值)
-//   - 當輸入值小於下限時: result = 下限值, remain = 溢出值(負值)
+//   - 當輸入值大於上限時: result = 上限值, remain = 溢出值(正值), added = 增加值
+//   - 當輸入值小於下限時: result = 下限值, remain = 溢出值(負值), added = 增加值
 func (this *Fit[T]) Check(source T, modify ...T) (result, remain, added T) {
 	fin := int64(source)
 
