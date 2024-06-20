@@ -7,8 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Planning]
 
 ## [Unrelease]
+
+## [1.1.18] - 2024-06-20
 ### Changed
 - 更新Fit組件說明
+- StdColor新增失敗旗標機制
+- StdColor新增Out, Err函式
 
 ## [1.1.17] - 2024-06-06
 ### Fixed

@@ -31,12 +31,15 @@ func (this *SuiteStdColor) TearDownSuite() {
 func (this *SuiteStdColor) TestStdColor() {
 	target := NewStdColor(os.Stdout, os.Stderr)
 	assert.NotNil(this.T(), target)
+	assert.NotNil(this.T(), target.Out("test out %v\n", 100))
 	assert.NotNil(this.T(), target.Outf("test outf %v\n", 100))
 	assert.NotNil(this.T(), target.Outln("test outln"))
+	assert.NotNil(this.T(), target.Err("test err %v\n", 100))
 	assert.NotNil(this.T(), target.Errf("test errf %v\n", 100))
 	assert.NotNil(this.T(), target.Errln("test errln"))
 	assert.NotNil(this.T(), target.GetStdout())
 	assert.NotNil(this.T(), target.GetStderr())
+	assert.True(this.T(), target.Failed())
 	_, _ = target.GetStdout().Write([]byte("test stdout\n"))
 	_, _ = target.GetStderr().Write([]byte("test stderr\n"))
 }
