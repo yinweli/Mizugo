@@ -5,7 +5,6 @@ tasks:
   lint:
     ignore_error: true
     cmds:
-      - task: install
       - task: fmt-mizugo
       - task: fmt-client-unity
       - task: fmt-client-unity-sample
