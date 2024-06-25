@@ -35,6 +35,7 @@ func (this *SuiteFlagsz) TestFlagsz() {
 	assert.False(this.T(), FlagszNone(target))
 	assert.Equal(this.T(), int32(9), FlagszCount(target, true))
 	assert.Equal(this.T(), int32(0), FlagszCount(target, false))
+
 	target = FlagszInit(9, false)
 	assert.Len(this.T(), target, 9)
 	assert.False(this.T(), FlagszAny(target))
@@ -42,10 +43,19 @@ func (this *SuiteFlagsz) TestFlagsz() {
 	assert.True(this.T(), FlagszNone(target))
 	assert.Equal(this.T(), int32(0), FlagszCount(target, true))
 	assert.Equal(this.T(), int32(9), FlagszCount(target, false))
+
 	target = FlagszAdd(target, true)
 	assert.Len(this.T(), target, 10)
 	assert.True(this.T(), FlagszGet(target, 9))
+
 	target = FlagszSet(target, 10, false)
 	assert.Len(this.T(), target, 11)
 	assert.False(this.T(), FlagszGet(target, 10))
+
+	assert.Equal(this.T(), "1000", FlagszAND("1100", "1010"))
+	assert.Equal(this.T(), "1000", FlagszAND("110", "1010"))
+	assert.Equal(this.T(), "1110", FlagszOR("1100", "1010"))
+	assert.Equal(this.T(), "1110", FlagszOR("110", "1010"))
+	assert.Equal(this.T(), "0110", FlagszXOR("1100", "1010"))
+	assert.Equal(this.T(), "0110", FlagszXOR("110", "1010"))
 }
