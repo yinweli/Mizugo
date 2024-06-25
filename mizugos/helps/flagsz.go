@@ -36,6 +36,66 @@ func FlagszAdd(input string, flag bool) string {
 	return input + flagsz(flag)
 }
 
+// FlagszAND 對旗標字串做AND運算
+func FlagszAND(input, other string) string {
+	result := strings.Builder{}
+	inputLen := len(input)
+	otherLen := len(other)
+	maxLen := inputLen
+
+	if otherLen > inputLen {
+		maxLen = otherLen
+	} // if
+
+	for i := 0; i < maxLen; i++ {
+		a := FlagszGet(input, int32(i))
+		b := FlagszGet(other, int32(i))
+		result.WriteString(flagsz(a && b))
+	} // for
+
+	return result.String()
+}
+
+// FlagszOR 對旗標字串做OR運算
+func FlagszOR(input, other string) string {
+	result := strings.Builder{}
+	inputLen := len(input)
+	otherLen := len(other)
+	maxLen := inputLen
+
+	if otherLen > inputLen {
+		maxLen = otherLen
+	} // if
+
+	for i := 0; i < maxLen; i++ {
+		a := FlagszGet(input, int32(i))
+		b := FlagszGet(other, int32(i))
+		result.WriteString(flagsz(a || b))
+	} // for
+
+	return result.String()
+}
+
+// FlagszXOR 對旗標字串做XOR運算
+func FlagszXOR(input, other string) string {
+	result := strings.Builder{}
+	inputLen := len(input)
+	otherLen := len(other)
+	maxLen := inputLen
+
+	if otherLen > inputLen {
+		maxLen = otherLen
+	} // if
+
+	for i := 0; i < maxLen; i++ {
+		a := FlagszGet(input, int32(i))
+		b := FlagszGet(other, int32(i))
+		result.WriteString(flagsz(a != b))
+	} // for
+
+	return result.String()
+}
+
 // FlagszGet 取得旗標
 func FlagszGet(input string, index int32) bool {
 	return index < int32(len(input)) && input[index] == FlagszOnRune

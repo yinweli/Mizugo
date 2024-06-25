@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.19] - 2024-06-25
+### Added
+- 新增FlagszAND, FlagszOR, FlagszXOR函式
+
 ## [1.1.18] - 2024-06-20
 ### Changed
 - 更新Fit組件說明
