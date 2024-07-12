@@ -38,12 +38,11 @@ func (this *SuiteMixed) TearDownSuite() {
 }
 
 func (this *SuiteMixed) TestMixed() {
-	assert.NotNil(this.T(), newMixed(this.major, this.minor))
-}
-
-func (this *SuiteMixed) TestSubmit() {
 	target := newMixed(this.major, this.minor)
+	assert.NotNil(this.T(), target)
 	assert.NotNil(this.T(), target.Submit(ctxs.Get().Ctx()))
+	assert.Equal(this.T(), this.major, target.Major())
+	assert.Equal(this.T(), this.minor, target.Minor())
 }
 
 func (this *SuiteMixed) TestExec() {

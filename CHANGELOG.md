@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.22] - 2024-07-12
+### Added
+- 混合資料庫新增取得主要資料庫與次要資料庫
+
 ## [1.1.21] - 2024-07-12
 ### Changed
 - 更新IAP組件, 讓外部有更多的重試與逾時參數可用
