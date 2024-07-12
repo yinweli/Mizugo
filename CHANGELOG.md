@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.21] - 2024-07-12
+### Changed
+- 更新IAP組件, 讓外部有更多的重試與逾時參數可用
+
 ## [1.1.20] - 2024-07-10
 ### Added
 - 新增ProtoEqual, MapToArray函式

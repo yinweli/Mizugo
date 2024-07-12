@@ -31,9 +31,10 @@ type IAPAppleConfig struct {
 	Bundle   string        `yaml:"bundle"`   // 軟體包名稱
 	Issuer   string        `yaml:"issuer"`   // 發行人名稱
 	Sandbox  bool          `yaml:"sandbox"`  // 沙盒旗標
-	WaitTime time.Duration `yaml:"waitTime"` // 等待時間
 	Capacity int           `yaml:"capacity"` // 通道容量
 	Retry    int           `yaml:"retry"`    // 重試次數
+	Timeout  time.Duration `yaml:"timeout"`  // 驗證逾時時間
+	Interval time.Duration `yaml:"interval"` // 驗證間隔時間
 }
 
 // iapApple Apple驗證資料
@@ -86,7 +87,7 @@ func (this *IAPApple) Verify(productID, certificate string) error {
 func (this *IAPApple) execute(verify chan *iapApple) {
 	for itor := range verify {
 		// 由於驗證api有速率限制, 所以需要等待後才能繼續下一個驗證
-		time.Sleep(this.config.WaitTime)
+		time.Sleep(this.config.Interval)
 
 		// 如果重試超過限制, 還是只能當作錯誤
 		if itor.retry > 0 && itor.retry >= this.config.Retry {
@@ -94,8 +95,9 @@ func (this *IAPApple) execute(verify chan *iapApple) {
 			continue
 		} // if
 
-		// 由於測試時 ctxs.Get() 常會被奇怪的關閉, 所以這裡使用正常的ctx
-		respond, err := this.client.GetTransactionInfo(context.Background(), itor.certificate)
+		ctx, cancel := context.WithTimeout(context.Background(), this.config.Timeout)
+		respond, err := this.client.GetTransactionInfo(ctx, itor.certificate)
+		cancel() // 避免cancel洩漏
 
 		// 由於偶爾會出現驗證資料都填寫正確, 但是驗證api卻回應錯誤, 所以只好在這裡重複嘗試
 		if err != nil {
