@@ -29,6 +29,16 @@ func (this *Mixed) Submit(ctx context.Context) *Submit {
 	}
 }
 
+// Major 取得主要資料庫物件
+func (this *Mixed) Major() *Major {
+	return this.major
+}
+
+// Minor 次要資料庫物件
+func (this *Mixed) Minor() *Minor {
+	return this.minor
+}
+
 // Submit 混合資料庫執行器, 執行命令時需要遵循以下流程
 //   - 定義包含了 Behave 的行為結構 / 定義繼承了 Behavior 的行為結構
 //   - 建立行為資料, 並且填寫內容(例如索引值, 資料內容, 結果成員等)
