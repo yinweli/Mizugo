@@ -37,9 +37,10 @@ type IAPOneStoreConfig struct {
 	ClientID     string        `yaml:"clientID"`     // ClientID, 同時也就是 PackageName
 	ClientSecret string        `yaml:"clientSecret"` // ClientSecret
 	Sandbox      bool          `yaml:"sandbox"`      // 沙盒旗標
-	WaitTime     time.Duration `yaml:"waitTime"`     // 等待時間
 	Capacity     int           `yaml:"capacity"`     // 通道容量
 	Retry        int           `yaml:"retry"`        // 重試次數
+	Timeout      time.Duration `yaml:"timeout"`      // 驗證逾時時間
+	Interval     time.Duration `yaml:"interval"`     // 驗證間隔時間
 }
 
 // iapOneStore OneStore驗證資料
@@ -111,7 +112,7 @@ func (this *IAPOneStore) Verify(productID, certificate string) error {
 func (this *IAPOneStore) execute(verify chan *iapOneStore) {
 	for itor := range verify {
 		// 由於驗證api有速率限制, 所以需要等待後才能繼續下一個驗證
-		time.Sleep(this.config.WaitTime)
+		time.Sleep(this.config.Interval)
 
 		// 如果重試超過限制, 還是只能當作錯誤
 		if itor.retry > 0 && itor.retry >= this.config.Retry {
@@ -119,14 +120,22 @@ func (this *IAPOneStore) execute(verify chan *iapOneStore) {
 			continue
 		} // if
 
-		if err := this.executeToken(); err != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), this.config.Timeout)
+		err := this.executeToken(ctx)
+		cancel() // 避免cancel洩漏
+
+		if err != nil {
 			itor.retry++
 			itor.retryErr = fmt.Errorf("iapOneStore execute: %w", err)
 			verify <- itor
 			continue
 		} // if
 
-		if err := this.executePurchase(itor.productID, itor.certificate); err != nil {
+		ctx, cancel = context.WithTimeout(context.Background(), this.config.Timeout)
+		err = this.executePurchase(ctx, itor.productID, itor.certificate)
+		cancel() // 避免cancel洩漏
+
+		if err != nil {
 			itor.result <- fmt.Errorf("iapOneStore execute: %w", err)
 			continue
 		} // if
@@ -138,7 +147,7 @@ func (this *IAPOneStore) execute(verify chan *iapOneStore) {
 }
 
 // executeToken 執行獲取權杖
-func (this *IAPOneStore) executeToken() error {
+func (this *IAPOneStore) executeToken(ctx context.Context) error {
 	now := helps.Time()
 
 	if this.token != "" && this.tokenExpire.After(now) {
@@ -150,7 +159,7 @@ func (this *IAPOneStore) executeToken() error {
 	post.Set("grant_type", "client_credentials")
 	post.Set("client_id", this.config.ClientID)
 	post.Set("client_secret", this.config.ClientSecret)
-	request, err := http.NewRequestWithContext(context.Background(), "POST", api, bytes.NewBufferString(post.Encode()))
+	request, err := http.NewRequestWithContext(ctx, "POST", api, bytes.NewBufferString(post.Encode()))
 
 	if err != nil {
 		return fmt.Errorf("token: %w", err)
@@ -198,9 +207,9 @@ func (this *IAPOneStore) executeToken() error {
 }
 
 // executePurchase 執行驗證查詢
-func (this *IAPOneStore) executePurchase(productID, certificate string) error {
+func (this *IAPOneStore) executePurchase(ctx context.Context, productID, certificate string) error {
 	api := this.getAPI(this.config.Sandbox) + fmt.Sprintf("/v7/apps/%v/purchases/inapp/products/%v/%v", this.config.ClientID, productID, certificate)
-	request, err := http.NewRequestWithContext(context.Background(), "GET", api, http.NoBody)
+	request, err := http.NewRequestWithContext(ctx, "GET", api, http.NoBody)
 
 	if err != nil {
 		return fmt.Errorf("purchase: %w", err)

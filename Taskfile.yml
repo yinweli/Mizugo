@@ -1,9 +1,8 @@
 version: "3"
 
 tasks:
-  # 進行程式碼檢查
+  # 程式碼格式化
   lint:
-    ignore_error: true
     cmds:
       - task: fmt-mizugo
       - task: fmt-client-unity
@@ -14,45 +13,52 @@ tasks:
       - task: lint-mizugo
 
   fmt-mizugo:
+    ignore_error: true
     cmds:
       - gofmt -s -w -l .
 
   fmt-client-unity:
+    ignore_error: true
     dir: support/client-unity/Packages/com.fouridstudio.mizugo-client-unity
     cmds:
       - dotnet csharpier .
 
   fmt-client-unity-sample:
+    ignore_error: true
     dir: support/test-client-cs/Assets/Scripts
     cmds:
       - dotnet csharpier .
 
   fmt-proto-mizugo:
+    ignore_error: true
     dir: support/proto-mizugo
     cmds:
       - buf format -w .
       - dotnet csharpier .
 
   fmt-proto-test:
+    ignore_error: true
     dir: support/proto-test
     cmds:
       - buf format -w .
       - dotnet csharpier .
 
   fmt-yaml:
+    ignore_error: true
     cmds:
       - npx prettier --write "*.yaml" "*.yml" "**/*.yaml" "**/*.yml"
 
   lint-mizugo:
+    ignore_error: true
     cmds:
       - golangci-lint -v run
 
-  # 進行單元測試
+  # 單元測試
   test:
     cmds:
       - go test ./... -cover
 
-  # 進行效能測試
+  # 效能測試
   bench:
     cmds:
       - go test ./... -bench=. -benchmem

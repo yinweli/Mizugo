@@ -28,8 +28,9 @@ type IAPGoogle struct {
 type IAPGoogleConfig struct {
 	Key      string        `yaml:"key"`      // 密鑰字串
 	Bundle   string        `yaml:"bundle"`   // 軟體包名稱
-	WaitTime time.Duration `yaml:"waitTime"` // 等待時間
 	Capacity int           `yaml:"capacity"` // 通道容量
+	Timeout  time.Duration `yaml:"timeout"`  // 驗證逾時時間
+	Interval time.Duration `yaml:"interval"` // 驗證間隔時間
 }
 
 // iapGoogle Google驗證資料
@@ -80,10 +81,11 @@ func (this *IAPGoogle) Verify(productID, certificate string) error {
 func (this *IAPGoogle) execute(verify chan *iapGoogle) {
 	for itor := range verify {
 		// 由於驗證api有速率限制, 所以需要等待後才能繼續下一個驗證
-		time.Sleep(this.config.WaitTime)
+		time.Sleep(this.config.Interval)
 
-		// 由於測試時 ctxs.Get() 常會被奇怪的關閉, 所以這裡使用正常的ctx
-		_, err := this.client.VerifyProduct(context.Background(), this.config.Bundle, itor.productID, itor.certificate)
+		ctx, cancel := context.WithTimeout(context.Background(), this.config.Timeout)
+		_, err := this.client.VerifyProduct(ctx, this.config.Bundle, itor.productID, itor.certificate)
+		cancel() // 避免cancel洩漏
 
 		if err != nil {
 			itor.result <- fmt.Errorf("iapGoogle execute: %w", err)
