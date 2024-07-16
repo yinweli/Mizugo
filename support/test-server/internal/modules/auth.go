@@ -1,12 +1,12 @@
 package modules
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/procs"
 	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
@@ -50,7 +50,7 @@ func (this *Auth) procMLoginQ(message any) {
 
 	auth := querys.NewAuth(msg.Account)
 
-	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Lock(msg.Account).Add(auth.NewGetter()).Exec(); err != nil {
+	if err = features.DBMixed.Submit(context.Background()).Lock(msg.Account).Add(auth.NewGetter()).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
 		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMLoginQ: %w", err)).EndFlush()
 		return
@@ -60,7 +60,7 @@ func (this *Auth) procMLoginQ(message any) {
 	auth.Time = time.Now()
 	auth.SetSave()
 
-	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Add(auth.NewSetter()).Unlock(msg.Account).Exec(); err != nil {
+	if err = features.DBMixed.Submit(context.Background()).Add(auth.NewSetter()).Unlock(msg.Account).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
 		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMLoginQ: %w", err)).EndFlush()
 		return
@@ -100,7 +100,7 @@ func (this *Auth) procMUpdateQ(message any) {
 
 	auth := querys.NewAuth(msg.Account)
 
-	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Lock(msg.Account).Add(auth.NewGetter()).Exec(); err != nil {
+	if err = features.DBMixed.Submit(context.Background()).Lock(msg.Account).Add(auth.NewGetter()).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
 		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMUpdateQ: %w", err)).EndFlush()
 		return
@@ -116,7 +116,7 @@ func (this *Auth) procMUpdateQ(message any) {
 	auth.Time = time.Now()
 	auth.SetSave()
 
-	if err = features.DBMixed.Submit(ctxs.Get().Ctx()).Add(auth.NewSetter()).Unlock(msg.Account).Exec(); err != nil {
+	if err = features.DBMixed.Submit(context.Background()).Add(auth.NewSetter()).Unlock(msg.Account).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
 		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMUpdateQ: %w", err)).EndFlush()
 		return

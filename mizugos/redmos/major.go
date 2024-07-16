@@ -1,16 +1,15 @@
 package redmos
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/redis/go-redis/v9"
-
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 )
 
 // newMajor 建立主要資料庫, 並且連線到 RedisURI 指定的資料庫
 func newMajor(uri RedisURI) (major *Major, err error) {
-	client, err := uri.Connect(ctxs.Get().Ctx())
+	client, err := uri.Connect(context.Background())
 
 	if err != nil {
 		return nil, fmt.Errorf("newMajor: %w", err)
@@ -50,7 +49,7 @@ func (this *Major) SwitchDB(dbID int) error {
 		return fmt.Errorf("major switch: client nil")
 	} // if
 
-	client, err := this.uri.add(fmt.Sprintf("dbid=%v", dbID)).Connect(ctxs.Get().Ctx())
+	client, err := this.uri.add(fmt.Sprintf("dbid=%v", dbID)).Connect(context.Background())
 
 	if err != nil {
 		return fmt.Errorf("major switch: %w", err)
@@ -63,7 +62,7 @@ func (this *Major) SwitchDB(dbID int) error {
 // DropDB 清除資料庫
 func (this *Major) DropDB() {
 	if this.client != nil {
-		this.client.FlushDB(ctxs.Get().Ctx())
+		this.client.FlushDB(context.Background())
 	} // if
 }
 

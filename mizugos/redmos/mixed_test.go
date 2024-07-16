@@ -1,13 +1,13 @@
 package redmos
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
@@ -40,7 +40,7 @@ func (this *SuiteMixed) TearDownSuite() {
 func (this *SuiteMixed) TestMixed() {
 	target := newMixed(this.major, this.minor)
 	assert.NotNil(this.T(), target)
-	assert.NotNil(this.T(), target.Submit(ctxs.Get().Ctx()))
+	assert.NotNil(this.T(), target.Submit(context.Background()))
 	assert.Equal(this.T(), this.major, target.Major())
 	assert.Equal(this.T(), this.minor, target.Minor())
 }
@@ -48,18 +48,18 @@ func (this *SuiteMixed) TestMixed() {
 func (this *SuiteMixed) TestExec() {
 	key := "mixed queue"
 	target := newMixed(this.major, this.minor)
-	assert.Nil(this.T(), target.Submit(ctxs.Get().Ctx()).Add(newBehaveTester(true, true)).Exec())
-	assert.Nil(this.T(), target.Submit(ctxs.Get().Ctx()).Add(newBehaveTester(true, true), newBehaveTester(true, true)).Exec())
-	assert.Nil(this.T(), target.Submit(ctxs.Get().Ctx()).Lock(key).Unlock(key).Exec())
-	assert.Nil(this.T(), target.Submit(ctxs.Get().Ctx()).LockIf(key, true).UnlockIf(key, true).Exec())
-	assert.Nil(this.T(), target.Submit(ctxs.Get().Ctx()).LockIf(key, false).UnlockIf(key, false).Exec())
-	assert.NotNil(this.T(), target.Submit(ctxs.Get().Ctx()).Add(newBehaveTester(false, true)).Exec())
-	assert.NotNil(this.T(), target.Submit(ctxs.Get().Ctx()).Add(newBehaveTester(true, false)).Exec())
+	assert.Nil(this.T(), target.Submit(context.Background()).Add(newBehaveTester(true, true)).Exec())
+	assert.Nil(this.T(), target.Submit(context.Background()).Add(newBehaveTester(true, true), newBehaveTester(true, true)).Exec())
+	assert.Nil(this.T(), target.Submit(context.Background()).Lock(key).Unlock(key).Exec())
+	assert.Nil(this.T(), target.Submit(context.Background()).LockIf(key, true).UnlockIf(key, true).Exec())
+	assert.Nil(this.T(), target.Submit(context.Background()).LockIf(key, false).UnlockIf(key, false).Exec())
+	assert.NotNil(this.T(), target.Submit(context.Background()).Add(newBehaveTester(false, true)).Exec())
+	assert.NotNil(this.T(), target.Submit(context.Background()).Add(newBehaveTester(true, false)).Exec())
 }
 
 func (this *SuiteMixed) TestBehave() {
 	target := Behave{
-		context: ctxs.Get().Ctx(),
+		context: context.Background(),
 		major:   this.major.Submit(),
 		minor:   this.minor.Submit(),
 	}

@@ -5,13 +5,11 @@ import (
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/mongo"
-
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 )
 
 // newMinor 建立次要資料庫, 並且連線到 MongoURI 指定的資料庫
 func newMinor(uri MongoURI, dbName string) (major *Minor, err error) {
-	client, err := uri.Connect(ctxs.Get().Ctx())
+	client, err := uri.Connect(context.Background())
 
 	if err != nil {
 		return nil, fmt.Errorf("newMinor: %w", err)
@@ -75,14 +73,14 @@ func (this *Minor) SwitchDB(dbName string) error {
 // DropDB 清除資料庫
 func (this *Minor) DropDB() {
 	if this.client != nil {
-		_ = this.database.Drop(ctxs.Get().Ctx())
+		_ = this.database.Drop(context.Background())
 	} // if
 }
 
 // stop 停止資料庫
 func (this *Minor) stop() {
 	if this.client != nil {
-		_ = this.client.Disconnect(ctxs.Get().Ctx())
+		_ = this.client.Disconnect(context.Background())
 		this.client = nil
 		this.database = nil
 	} // if

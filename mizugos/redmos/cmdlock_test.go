@@ -1,6 +1,7 @@
 package redmos
 
 import (
+	"context"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -9,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
@@ -44,20 +44,20 @@ func (this *SuiteCmdLock) TestLock() {
 	key := "lock"
 
 	lock := &Lock{Key: key, time: testdata.RedisTimeout}
-	lock.Initialize(ctxs.Get().Ctx(), majorSubmit, nil)
+	lock.Initialize(context.Background(), majorSubmit, nil)
 	unlock := &Unlock{Key: key}
-	unlock.Initialize(ctxs.Get().Ctx(), majorSubmit, nil)
+	unlock.Initialize(context.Background(), majorSubmit, nil)
 
 	assert.Nil(this.T(), lock.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), lock.Complete())
 
 	assert.Nil(this.T(), lock.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+	_, _ = majorSubmit.Exec(context.Background())
 	assert.NotNil(this.T(), lock.Complete())
 
 	assert.Nil(this.T(), unlock.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), unlock.Complete())
 
 	lock.Key = ""
@@ -78,9 +78,9 @@ func (this *SuiteCmdLock) TestDuplicate() {
 		defer waitGroup.Done()
 		majorSubmit := this.major.Submit()
 		lock := &Lock{Key: key, time: testdata.RedisTimeout}
-		lock.Initialize(ctxs.Get().Ctx(), majorSubmit, nil)
+		lock.Initialize(context.Background(), majorSubmit, nil)
 		_ = lock.Prepare()
-		_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+		_, _ = majorSubmit.Exec(context.Background())
 
 		if lock.Complete() != nil {
 			return
@@ -89,9 +89,9 @@ func (this *SuiteCmdLock) TestDuplicate() {
 		trials.WaitTimeout(time.Second)
 
 		unlock := &Unlock{Key: key}
-		unlock.Initialize(ctxs.Get().Ctx(), majorSubmit, nil)
+		unlock.Initialize(context.Background(), majorSubmit, nil)
 		_ = unlock.Prepare()
-		_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+		_, _ = majorSubmit.Exec(context.Background())
 		_ = unlock.Complete()
 	}()
 
@@ -103,9 +103,9 @@ func (this *SuiteCmdLock) TestDuplicate() {
 			for i := 0; i < 100; i++ {
 				majorSubmit := this.major.Submit()
 				lock := &Lock{Key: key, time: testdata.RedisTimeout}
-				lock.Initialize(ctxs.Get().Ctx(), majorSubmit, nil)
+				lock.Initialize(context.Background(), majorSubmit, nil)
 				_ = lock.Prepare()
-				_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+				_, _ = majorSubmit.Exec(context.Background())
 				_ = lock.Complete()
 
 				if lock.Complete() != nil {
@@ -115,9 +115,9 @@ func (this *SuiteCmdLock) TestDuplicate() {
 				total.Add(1)
 
 				unlock := &Unlock{Key: key}
-				unlock.Initialize(ctxs.Get().Ctx(), majorSubmit, nil)
+				unlock.Initialize(context.Background(), majorSubmit, nil)
 				_ = unlock.Prepare()
-				_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+				_, _ = majorSubmit.Exec(context.Background())
 				_ = unlock.Complete()
 			} // for
 		}()

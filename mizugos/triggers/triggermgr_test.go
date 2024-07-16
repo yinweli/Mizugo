@@ -1,6 +1,7 @@
 package triggers
 
 import (
+	"context"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -9,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
@@ -54,7 +54,7 @@ func (this *SuiteTriggermgr) TestWatch() {
 	client := newRedis()
 	target.Watch(client, name)
 	trials.WaitTimeout() // 多等一下讓監聽完成
-	client.Publish(ctxs.Get().Ctx(), name, name)
+	client.Publish(context.Background(), name, name)
 	trials.WaitTimeout() // 多等一下讓信號完成
 	assert.Equal(this.T(), int64(1), count.Load())
 	target.Finalize()

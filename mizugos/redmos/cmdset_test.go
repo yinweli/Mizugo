@@ -1,6 +1,7 @@
 package redmos
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -8,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/helps"
 	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
@@ -50,58 +50,58 @@ func (this *SuiteCmdSet) TestSet() {
 	dataMongo := &dataSet{Field: "mongo", Value: helps.RandStringDefault()}
 
 	target := &Set[dataSet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: dataAll}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), target.Complete())
-	_ = minorSubmit.Exec(ctxs.Get().Ctx())
+	_ = minorSubmit.Exec(context.Background())
 	assert.True(this.T(), trials.RedisCompare[dataSet](this.major.Client(), this.meta.MajorKey(dataAll.Field), dataAll))
 	assert.True(this.T(), trials.MongoCompare[dataSet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(dataAll.Field), dataAll))
 
 	target = &Set[dataSet]{Meta: &this.meta, MajorEnable: true, MinorEnable: false, Key: dataRedis.Field, Data: dataRedis}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), target.Complete())
-	_ = minorSubmit.Exec(ctxs.Get().Ctx())
+	_ = minorSubmit.Exec(context.Background())
 	assert.True(this.T(), trials.RedisCompare[dataSet](this.major.Client(), this.meta.MajorKey(dataRedis.Field), dataRedis))
 	assert.False(this.T(), trials.MongoCompare[dataSet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(dataRedis.Field), dataRedis))
 
 	target = &Set[dataSet]{Meta: &this.meta, MajorEnable: false, MinorEnable: true, Key: dataMongo.Field, Data: dataMongo}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), target.Complete())
-	_ = minorSubmit.Exec(ctxs.Get().Ctx())
+	_ = minorSubmit.Exec(context.Background())
 	assert.False(this.T(), trials.RedisCompare[dataSet](this.major.Client(), this.meta.MajorKey(dataMongo.Field), dataMongo))
 	assert.True(this.T(), trials.MongoCompare[dataSet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(dataMongo.Field), dataMongo))
 
 	target = &Set[dataSet]{Meta: nil, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: dataAll}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	target = &Set[dataSet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: "", Data: dataAll}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	target = &Set[dataSet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: nil}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	this.meta.table = false
 	this.meta.field = true
 	target = &Set[dataSet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: dataAll}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	this.meta.table = true
 	this.meta.field = false
 	target = &Set[dataSet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: dataAll}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	target = &Set[dataSet]{Meta: nil, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: dataAll}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Complete())
 }
 
@@ -115,21 +115,21 @@ func (this *SuiteCmdSet) TestSetSave() {
 
 	data.save = true
 	set := &Set[dataSetSave]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}
-	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	set.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), set.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), set.Complete())
-	_ = minorSubmit.Exec(ctxs.Get().Ctx())
+	_ = minorSubmit.Exec(context.Background())
 	assert.True(this.T(), trials.RedisCompare[dataSetSave](this.major.Client(), this.meta.MajorKey(data.Field), data, opt))
 	assert.True(this.T(), trials.MongoCompare[dataSetSave](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data, opt))
 
 	data.save = false
 	set = &Set[dataSetSave]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}
-	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	set.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), set.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), set.Complete())
-	_ = minorSubmit.Exec(ctxs.Get().Ctx())
+	_ = minorSubmit.Exec(context.Background())
 }
 
 type metaSet struct {

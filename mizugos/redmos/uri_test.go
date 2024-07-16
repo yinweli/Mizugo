@@ -1,13 +1,13 @@
 package redmos
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
@@ -30,13 +30,13 @@ func (this *SuiteURI) TearDownSuite() {
 }
 
 func (this *SuiteURI) TestRedisURIConnect() {
-	_, err := RedisURI(testdata.RedisURI).Connect(ctxs.Get().Ctx())
+	_, err := RedisURI(testdata.RedisURI).Connect(context.Background())
 	assert.Nil(this.T(), err)
 
-	_, err = RedisURI("unknown://").Connect(ctxs.Get().Ctx())
+	_, err = RedisURI("unknown://").Connect(context.Background())
 	assert.NotNil(this.T(), err)
 
-	_, err = RedisURI(testdata.RedisURIInvalid).Connect(ctxs.Get().Ctx())
+	_, err = RedisURI(testdata.RedisURIInvalid).Connect(context.Background())
 	assert.NotNil(this.T(), err)
 }
 
@@ -143,13 +143,13 @@ func (this *SuiteURI) TestRedisURIAdd() {
 }
 
 func (this *SuiteURI) TestMongoURIConnect() {
-	_, err := MongoURI(testdata.MongoURI).Connect(ctxs.Get().Ctx())
+	_, err := MongoURI(testdata.MongoURI).Connect(context.Background())
 	assert.Nil(this.T(), err)
 
-	_, err = MongoURI("unknown://").Connect(ctxs.Get().Ctx())
+	_, err = MongoURI("unknown://").Connect(context.Background())
 	assert.NotNil(this.T(), err)
 
-	_, err = MongoURI(testdata.MongoURIInvalid).Connect(ctxs.Get().Ctx())
+	_, err = MongoURI(testdata.MongoURIInvalid).Connect(context.Background())
 	assert.NotNil(this.T(), err)
 }
 

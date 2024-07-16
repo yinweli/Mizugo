@@ -2,7 +2,6 @@ package mizugos
 
 import (
 	"github.com/yinweli/Mizugo/mizugos/configs"
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/entitys"
 	"github.com/yinweli/Mizugo/mizugos/labels"
 	"github.com/yinweli/Mizugo/mizugos/loggers"
@@ -14,28 +13,24 @@ import (
 )
 
 // Start 啟動伺服器
-//
-// 範例:
-//
-//	defer func() {
-//	    if cause := recover(); cause != nil {
-//	        // 處理崩潰錯誤
-//	    } // if
-//	}()
-//
-//	mizugos.Start() // 啟動伺服器
-//	ctx := ctxs.Get().WithCancel()
-//
-//	// 使用者自訂的初始化程序
-//	// 如果有任何失敗, 執行 mizugos.Stop() 後退出
-//
-//	for range ctx.Done() { // 進入無限迴圈直到執行 ctx.Cancel()
-//	} // for
-//
-//	// 使用者自訂的結束程序
-//	// 如果有任何失敗, 執行 mizugos.Stop() 後退出
-//
-//	mizugos.Stop() // 關閉伺服器
+/*
+範例:
+	defer func() {
+	    if cause := recover(); cause != nil {
+	        // 處理崩潰錯誤
+	    } // if
+	}()
+	mizugos.Start() // 啟動伺服器
+	ctx, cancel := context.WithCancel(context.Background())
+	// 使用者自訂的初始化程序
+	// 如果有任何失敗, 執行 mizugos.Stop() 後退出
+	for range ctx.Done() { // 進入無限迴圈直到執行 ctx.Cancel()
+	} // for
+	// 使用者自訂的結束程序
+	// 如果有任何失敗, 執行 mizugos.Stop() 後退出
+    cancel()
+	mizugos.Stop() // 關閉伺服器
+*/
 func Start() {
 	Config = configs.NewConfigmgr()
 	Metrics = metrics.NewMetricsmgr()
@@ -92,8 +87,6 @@ func Stop() {
 		Trigger.Finalize()
 		Trigger = nil
 	} // if
-
-	ctxs.Get().Cancel() // 關閉由contexts.Ctx()衍生出來的執行緒, 避免goroutine洩漏
 }
 
 var Config *configs.Configmgr    // 配置管理器
