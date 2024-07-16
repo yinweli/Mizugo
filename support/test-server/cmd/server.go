@@ -1,11 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"runtime/debug"
 
 	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/support/test-server/internal/entrys"
 	"github.com/yinweli/Mizugo/support/test-server/internal/features"
 )
@@ -67,9 +67,8 @@ func main() {
 	} // if
 
 	fmt.Println("test-server running")
-	ctx := ctxs.Get().WithCancel()
 
-	for range ctx.Done() {
+	for range context.Background().Done() {
 		// do nothing...
 	} // for
 

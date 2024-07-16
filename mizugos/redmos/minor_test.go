@@ -1,13 +1,13 @@
 package redmos
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
@@ -39,7 +39,7 @@ func (this *SuiteMinor) TestMinor() {
 	assert.Nil(this.T(), target.SwitchDB("minor"))
 	assert.NotNil(this.T(), target.SwitchDB(""))
 	target.DropDB()
-	assert.Nil(this.T(), target.Client().Ping(ctxs.Get().Ctx(), nil))
+	assert.Nil(this.T(), target.Client().Ping(context.Background(), nil))
 	target.stop()
 	assert.Nil(this.T(), target.Submit())
 	assert.Nil(this.T(), target.Client())
@@ -61,5 +61,5 @@ func (this *SuiteMinor) TestMinorSubmit() {
 	assert.NotNil(this.T(), target.Collection("minor"))
 	assert.NotNil(this.T(), target.Operate("minor", mongo.NewReplaceOneModel()))
 	target = minor.Submit()
-	assert.Nil(this.T(), target.Exec(ctxs.Get().Ctx()))
+	assert.Nil(this.T(), target.Exec(context.Background()))
 }

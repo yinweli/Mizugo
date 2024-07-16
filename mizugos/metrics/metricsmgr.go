@@ -1,12 +1,12 @@
 package metrics
 
 import (
+	"context"
 	"expvar"
 	"fmt"
 	"net/http"
 	"net/http/pprof"
 
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/pools"
 )
 
@@ -39,8 +39,9 @@ func NewMetricsmgr() *Metricsmgr {
 //   - expvarmon -ports="http://localhost:8080" -i 1s
 //   - expvarmon -ports="http://localhost:8080" -vars="count:count,total:total,money:value" -i 1s
 type Metricsmgr struct {
-	ctx    ctxs.Ctx     // ctx物件
-	server *http.Server // http伺服器物件
+	ctx    context.Context    // ctx物件
+	cancel context.CancelFunc // 取消物件
+	server *http.Server       // http伺服器物件
 }
 
 // Initialize 初始化處理
@@ -57,7 +58,7 @@ func (this *Metricsmgr) Initialize(port int) error {
 	handler.HandleFunc("/debug/pprof/trace", pprof.Trace)
 	handler.Handle("/debug/vars", expvar.Handler())
 
-	this.ctx = ctxs.Get().WithCancel()
+	this.ctx, this.cancel = context.WithCancel(context.Background())
 	this.server = &http.Server{
 		Addr:              fmt.Sprintf(":%v", port),
 		ReadHeaderTimeout: timeout,
@@ -77,7 +78,9 @@ func (this *Metricsmgr) Finalize() {
 		this.server = nil
 	} // if
 
-	this.ctx.Cancel()
+	if this.cancel != nil {
+		this.cancel()
+	} // if
 }
 
 // NewInt 建立整數度量
@@ -103,7 +106,7 @@ func (this *Metricsmgr) NewMap(name string) *Map {
 // NewRuntime 建立執行度量
 func (this *Metricsmgr) NewRuntime(name string) *Runtime {
 	v := &Runtime{}
-	v.start(this.ctx.Ctx())
+	v.start(this.ctx)
 	expvar.Publish(name, v)
 	return v
 }

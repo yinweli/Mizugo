@@ -1,12 +1,12 @@
 package redmos
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
@@ -41,7 +41,7 @@ func (this *SuiteMajor) TestMajor() {
 	_, err = newMajor("")
 	assert.NotNil(this.T(), err)
 
-	ping, err := target.Client().Ping(ctxs.Get().Ctx()).Result()
+	ping, err := target.Client().Ping(context.Background()).Result()
 	assert.Nil(this.T(), err)
 	assert.Equal(this.T(), "PONG", ping)
 

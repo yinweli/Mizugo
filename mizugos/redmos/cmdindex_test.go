@@ -1,13 +1,13 @@
 package redmos
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
@@ -45,18 +45,18 @@ func (this *SuiteCmdIndex) TestIndex() {
 	minorSubmit := this.minor.Submit()
 
 	target := &Index{Meta: &this.meta, Name: "field", Order: 1}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), target.Complete())
-	_ = minorSubmit.Exec(ctxs.Get().Ctx())
+	_ = minorSubmit.Exec(context.Background())
 
 	target = &Index{Meta: &this.meta, Name: "field", Order: 1}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), target.Complete())
-	_ = minorSubmit.Exec(ctxs.Get().Ctx())
+	_ = minorSubmit.Exec(context.Background())
 
 	target = &Index{Meta: nil, Name: "field", Order: 1}
 	assert.NotNil(this.T(), target.Prepare())
@@ -70,13 +70,13 @@ func (this *SuiteCmdIndex) TestIndex() {
 	this.meta.table = false
 	this.meta.field = true
 	target = &Index{Meta: &this.meta, Name: "field", Order: 1}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	this.meta.table = true
 	this.meta.field = false
 	target = &Index{Meta: &this.meta, Name: "field", Order: 1}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 }
 

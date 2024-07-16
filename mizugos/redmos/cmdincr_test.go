@@ -1,6 +1,7 @@
 package redmos
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"sync/atomic"
@@ -9,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
 )
@@ -48,40 +48,40 @@ func (this *SuiteCmdIncr) TestIncr() {
 	data := &dataIncr{Field: "redis+mongo", Value: 1}
 
 	target := &Incr{Meta: &this.meta, MinorEnable: true, Key: data.Field, Data: &IncrData{Incr: 1, Value: 0}}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), target.Complete())
-	_ = minorSubmit.Exec(ctxs.Get().Ctx())
+	_ = minorSubmit.Exec(context.Background())
 	assert.Equal(this.T(), int64(1), target.Data.Value)
 	assert.True(this.T(), trials.MongoCompare[dataIncr](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data))
 
 	target = &Incr{Meta: nil, MinorEnable: true, Key: data.Field, Data: &IncrData{Incr: 1, Value: 0}}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	target = &Incr{Meta: &this.meta, MinorEnable: true, Key: "", Data: &IncrData{Incr: 1, Value: 0}}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	target = &Incr{Meta: &this.meta, MinorEnable: true, Key: data.Field, Data: nil}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	this.meta.table = false
 	this.meta.field = true
 	target = &Incr{Meta: &this.meta, MinorEnable: true, Key: data.Field, Data: &IncrData{Incr: 1, Value: 0}}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	this.meta.table = true
 	this.meta.field = false
 	target = &Incr{Meta: &this.meta, MinorEnable: true, Key: data.Field, Data: &IncrData{Incr: 1, Value: 0}}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	target = &Incr{Meta: nil, MinorEnable: true, Key: data.Field, Data: &IncrData{Incr: 1, Value: 0}}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Complete())
 }
 
@@ -103,9 +103,9 @@ func (this *SuiteCmdIncr) TestDuplicate() {
 				minorSubmit := this.minor.Submit()
 				data := &dataIncr{Field: "cmdincr+duplicate", Value: 0}
 				incr := &Incr{Meta: &this.meta, MinorEnable: true, Key: data.Field, Data: &IncrData{Incr: 1, Value: 0}}
-				incr.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+				incr.Initialize(context.Background(), majorSubmit, minorSubmit)
 				_ = incr.Prepare()
-				_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+				_, _ = majorSubmit.Exec(context.Background())
 				_ = incr.Complete()
 				total.Add(incr.Data.Value)
 			} // for

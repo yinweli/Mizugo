@@ -1,13 +1,13 @@
 package redmos
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/helps"
 	"github.com/yinweli/Mizugo/mizugos/trials"
 	"github.com/yinweli/Mizugo/testdata"
@@ -47,45 +47,45 @@ func (this *SuiteCmdDel) TestDel() {
 	data := &dataDel{Field: "redis+mongo", Value: helps.RandStringDefault()}
 
 	set := &Set[dataDel]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}
-	set.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	set.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), set.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), set.Complete())
-	_ = minorSubmit.Exec(ctxs.Get().Ctx())
+	_ = minorSubmit.Exec(context.Background())
 	assert.True(this.T(), trials.RedisCompare[dataDel](this.major.Client(), this.meta.MajorKey(data.Field), data))
 	assert.True(this.T(), trials.MongoCompare[dataDel](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data))
 
 	target := &Del{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
-	_, _ = majorSubmit.Exec(ctxs.Get().Ctx())
+	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), target.Complete())
-	_ = minorSubmit.Exec(ctxs.Get().Ctx())
+	_ = minorSubmit.Exec(context.Background())
 	assert.False(this.T(), trials.RedisExist(this.major.Client(), this.meta.MajorKey(data.Field)))
 	assert.False(this.T(), trials.MongoExist(this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field)))
 
 	target = &Del{Meta: nil, MajorEnable: true, MinorEnable: true, Key: data.Field}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	target = &Del{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: ""}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	this.meta.table = false
 	this.meta.field = true
 	target = &Del{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	this.meta.table = true
 	this.meta.field = false
 	target = &Del{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	target = &Del{Meta: nil, MajorEnable: true, MinorEnable: true, Key: data.Field}
-	target.Initialize(ctxs.Get().Ctx(), majorSubmit, minorSubmit)
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Complete())
 }
 

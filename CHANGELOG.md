@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.23] - 2024-07-16
+### Deleted
+- 移除ctxs組件
+
 ## [1.1.22] - 2024-07-12
 ### Added
 - 混合資料庫新增取得主要資料庫與次要資料庫

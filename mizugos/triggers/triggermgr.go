@@ -1,13 +1,12 @@
 package triggers
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"sync"
 
 	"github.com/redis/go-redis/v9"
-
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 )
 
 // NewTriggermgr 建立信號調度管理器
@@ -38,7 +37,7 @@ func (this *Triggermgr) Finalize() {
 // Watch 設定監聽redis的頻道, 當頻道出現信號名稱時, 就觸發該信號
 func (this *Triggermgr) Watch(client redis.UniversalClient, channelName string) {
 	go func() {
-		pubsub := client.Subscribe(ctxs.Get().Ctx(), channelName)
+		pubsub := client.Subscribe(context.Background(), channelName)
 		defer func() {
 			_ = pubsub.Close()
 		}()

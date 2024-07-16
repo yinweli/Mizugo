@@ -1,6 +1,7 @@
 package entitys
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -8,15 +9,16 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos/ctxs"
 	"github.com/yinweli/Mizugo/mizugos/helps"
 	"github.com/yinweli/Mizugo/mizugos/pools"
 )
 
 // NewEventmap 建立事件列表
 func NewEventmap() *Eventmap {
+	ctx, cancel := context.WithCancel(context.Background())
 	return &Eventmap{
-		ctx:    ctxs.Get().WithCancel(),
+		ctx:    ctx,
+		cancel: cancel,
 		notify: make(chan notify, EventCapacity),
 		pubsub: newPubsub(),
 	}
@@ -25,11 +27,12 @@ func NewEventmap() *Eventmap {
 // Eventmap 事件列表, 提供了事件訂閱/發布等功能, 事件列表本身是執行緒安全的,
 // 但是發布的事件會在單一的事件執行緒中被執行, 以此保證了事件有序執行
 type Eventmap struct {
-	ctx    ctxs.Ctx       // ctx物件
-	notify chan notify    // 通知通道
-	pubsub *pubsub        // 訂閱/發布資料
-	once   helps.SyncOnce // 單次執行物件
-	close  atomic.Bool    // 關閉旗標
+	ctx    context.Context    // ctx物件
+	cancel context.CancelFunc // 取消物件
+	notify chan notify        // 通知通道
+	pubsub *pubsub            // 訂閱/發布資料
+	once   helps.SyncOnce     // 單次執行物件
+	close  atomic.Bool        // 關閉旗標
 }
 
 // Initialize 初始化處理
@@ -75,7 +78,7 @@ func (this *Eventmap) Finalize() {
 	} // if
 
 	this.close.Store(true)
-	this.ctx.Cancel()
+	this.cancel()
 }
 
 // Sub 訂閱事件
