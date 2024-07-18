@@ -49,12 +49,12 @@ namespace Mizugo
         /// <summary>
         /// 標頭長度
         /// </summary>
-        public const int headerSize = 2;
+        public const int headerSize = 4;
 
         /// <summary>
         /// 封包長度
         /// </summary>
-        public const int packetSize = ushort.MaxValue;
+        public const int packetSize = 1 * 1024 * 1024;
 
         /// <summary>
         /// 緩衝區長度

@@ -5,8 +5,8 @@ import (
 )
 
 const ( // 網路定義
-	HeaderSize  = 2               // 標頭長度
-	PacketSize  = int(^uint16(0)) // 封包長度
+	HeaderSize  = 4               // 標頭長度
+	PacketSize  = 1 * 1024 * 1024 // 封包長度
 	ChannelSize = 1000            // 訊息通道大小設為1000, 避免因為爆滿而卡住
 )
 
