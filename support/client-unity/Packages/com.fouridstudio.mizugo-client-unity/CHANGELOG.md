@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [0.4.1] - 2024-07-19
+### Changed
+- 封包標頭長度改為4byte
+- 封包大小上限改為1MB
+
 ## [0.4.0] - 2024-04-26
 ### Added
 - 新增訊息處理組件Raven
