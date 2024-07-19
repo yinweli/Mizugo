@@ -5,8 +5,8 @@ import (
 )
 
 const ( // 網路定義
-	HeaderSize  = 4               // 標頭長度
-	PacketSize  = 1 * 1024 * 1024 // 封包長度
+	HeaderSize  = 2               // 標頭長度
+	PacketSize  = int(^uint16(0)) // 封包長度
 	ChannelSize = 1000            // 訊息通道大小設為1000, 避免因為爆滿而卡住
 )
 
@@ -60,6 +60,12 @@ type Sessioner interface {
 
 	// SetOwner 設定擁有者
 	SetOwner(owner any)
+
+	// SetHeaderSize 設定標頭長度
+	SetHeaderSize(size int)
+
+	// SetPacketSize 設定封包長度
+	SetPacketSize(size int)
 
 	// Send 傳送封包
 	Send(message any)

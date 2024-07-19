@@ -14,21 +14,25 @@ import (
 // NewTCPSession 建立TCP會話器
 func NewTCPSession(conn net.Conn) *TCPSession {
 	return &TCPSession{
-		conn:    conn,
-		message: make(chan any, ChannelSize),
+		conn:       conn,
+		message:    make(chan any, ChannelSize),
+		headerSize: HeaderSize,
+		packetSize: PacketSize,
 	}
 }
 
 // TCPSession TCP會話器, 負責傳送/接收訊息等相關的功能
 type TCPSession struct {
-	conn    net.Conn       // 連接物件
-	message chan any       // 訊息通道
-	signal  sync.WaitGroup // 通知信號
-	codec   []Codec        // 編碼/解碼
-	codecr  []Codec        // 編碼/解碼(反序)
-	publish []Publish      // 發布事件處理
-	wrong   []Wrong        // 錯誤處理
-	owner   any            // 擁有者
+	conn       net.Conn       // 連接物件
+	message    chan any       // 訊息通道
+	signal     sync.WaitGroup // 通知信號
+	codec      []Codec        // 編碼/解碼
+	codecr     []Codec        // 編碼/解碼(反序)
+	publish    []Publish      // 發布事件處理
+	wrong      []Wrong        // 錯誤處理
+	headerSize int            // 標頭長度
+	packetSize int            // 封包長度
+	owner      any            // 擁有者
 }
 
 // Start 啟動會話
@@ -79,6 +83,16 @@ func (this *TCPSession) SetPublish(publish ...Publish) {
 // SetWrong 設定錯誤處理
 func (this *TCPSession) SetWrong(wrong ...Wrong) {
 	this.wrong = wrong
+}
+
+// SetHeaderSize 設定標頭長度
+func (this *TCPSession) SetHeaderSize(size int) {
+	this.headerSize = size
+}
+
+// SetPacketSize 設定封包長度
+func (this *TCPSession) SetPacketSize(size int) {
+	this.packetSize = size
 }
 
 // SetOwner 設定擁有者
@@ -138,7 +152,7 @@ func (this *TCPSession) recvLoop() {
 
 // recvPacket 接收封包
 func (this *TCPSession) recvPacket(reader io.Reader) (packet []byte, err error) {
-	header := make([]byte, HeaderSize)
+	header := make([]byte, this.headerSize)
 
 	if _, err = io.ReadFull(reader, header); err != nil {
 		return nil, fmt.Errorf("tcp session recv packet: %w", err)
@@ -204,11 +218,11 @@ func (this *TCPSession) sendPacket(writer io.Writer, packet []byte) (err error) 
 		return nil
 	} // if
 
-	if size > PacketSize {
+	if size > this.packetSize {
 		return fmt.Errorf("tcp session send packet: packet too large")
 	} // if
 
-	header := make([]byte, HeaderSize)
+	header := make([]byte, this.headerSize)
 	binary.LittleEndian.PutUint16(header, uint16(size))
 
 	if _, err = writer.Write(header); err != nil {
