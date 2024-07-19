@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [0.4.3] - 2024-07-19
+### Fixed
+- 修正標頭類型錯誤
+
 ## [0.4.2] - 2024-07-19
 ### Changed
 - 把封包標頭長度與封包大小上限改為可由外部控制
