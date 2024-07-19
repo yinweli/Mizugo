@@ -49,17 +49,12 @@ namespace Mizugo
         /// <summary>
         /// 標頭長度
         /// </summary>
-        public const int headerSize = 4;
+        public const int headerSize = 2;
 
         /// <summary>
         /// 封包長度
         /// </summary>
-        public const int packetSize = 1 * 1024 * 1024;
-
-        /// <summary>
-        /// 緩衝區長度
-        /// </summary>
-        public const int bufferSize = (headerSize + packetSize) * 10;
+        public const int packetSize = ushort.MaxValue;
     }
 
     /// <summary>
@@ -121,6 +116,16 @@ namespace Mizugo
         /// 設定編碼/解碼
         /// </summary>
         public void SetCodec(params ICodec[] codec);
+
+        /// <summary>
+        /// 設定標頭長度, 連線後就無法變更
+        /// </summary>
+        public void SetHeaderSize(int size);
+
+        /// <summary>
+        /// 設定封包長度, 連線後就無法變更
+        /// </summary>
+        public void SetPacketSize(int size);
 
         /// <summary>
         /// 取得是否連線
