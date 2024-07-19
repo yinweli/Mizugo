@@ -246,13 +246,13 @@ func (this *emptySession) SetPublish(_ ...Publish) {
 func (this *emptySession) SetWrong(_ ...Wrong) {
 }
 
-func (this *emptySession) SetOwner(_ any) {
-}
-
 func (this *emptySession) SetHeaderSize(_ int) {
 }
 
 func (this *emptySession) SetPacketSize(_ int) {
+}
+
+func (this *emptySession) SetOwner(_ any) {
 }
 
 func (this *emptySession) Send(_ any) {
