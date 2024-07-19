@@ -68,6 +68,7 @@
   client.SetEvent(eventmgr);
   client.SetProc(process);
   client.SetCodec(process, new DesCBC(PaddingMode.PKCS7, key, iv), new Base64()); // 設定編碼/解碼流程, 這裡設定了依序做ProcJson, desCBC, base64的編碼/解碼
+  client.SetPacketSize(1 * 1024 * 1024) // 設定封包長度上限
   
   client.AddEvent(...);   // 註冊事件處理
   client.AddProcess(...); // 註冊訊息處理

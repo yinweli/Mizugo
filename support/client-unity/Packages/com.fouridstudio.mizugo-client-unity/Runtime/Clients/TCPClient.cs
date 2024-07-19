@@ -29,7 +29,7 @@ namespace Mizugo
                 if (client != null)
                     throw new AlreadyStartException("client");
 
-                var bufferSize = (headerSize + packetSize) * 10;
+                var bufferSize = (Define.headerSize + packetSize) * 10;
 
                 client = new TcpClient
                 {
@@ -51,9 +51,9 @@ namespace Mizugo
                             {
                                 stream = client.GetStream();
                                 sendHandler = new SendHandler();
-                                sendHandler.Start(headerSize, packetSize, queue, stream, codec);
+                                sendHandler.Start(packetSize, queue, stream, codec);
                                 recvHandler = new RecvHandler();
-                                recvHandler.Start(headerSize, packetSize, queue, stream, codec.Reverse());
+                                recvHandler.Start(packetSize, queue, stream, codec.Reverse());
                                 queue.Enqueue(EventID.Connect, null);
                             }
                             else
@@ -151,11 +151,6 @@ namespace Mizugo
             this.codec = codec;
         }
 
-        public void SetHeaderSize(int size)
-        {
-            this.headerSize = size;
-        }
-
         public void SetPacketSize(int size)
         {
             this.packetSize = size;
@@ -174,7 +169,6 @@ namespace Mizugo
         private IEventmgr eventmgr = null;
         private IProcmgr procmgr = null;
         private ICodec[] codec = null;
-        private int headerSize = Define.headerSize;
         private int packetSize = Define.packetSize;
         private Queue queue = new Queue(); // 必須在建立物件時就建立好, 不然會造成各種錯誤
         private TcpClient client = null;
@@ -188,7 +182,7 @@ namespace Mizugo
         /// </summary>
         private class SendHandler
         {
-            public void Start(int headerSize, int packetSize, Queue queue, NetworkStream stream, IEnumerable<ICodec> codec)
+            public void Start(int packetSize, Queue queue, NetworkStream stream, IEnumerable<ICodec> codec)
             {
                 if (thread != null)
                     throw new AlreadyStartException("send handler");
@@ -217,7 +211,7 @@ namespace Mizugo
                             if (packet.Length > packetSize)
                                 throw new PacketLimitException("send");
 
-                            var buffer = BitConverter.GetBytes((ushort)packet.Length);
+                            var buffer = BitConverter.GetBytes(packet.Length);
 
                             stream.Write(buffer, 0, buffer.Length);
                             stream.Write(packet, 0, packet.Length);
@@ -266,31 +260,31 @@ namespace Mizugo
         /// </summary>
         private class RecvHandler
         {
-            public void Start(int headerSize, int packetSize, Queue queue, NetworkStream stream, IEnumerable<ICodec> codec)
+            public void Start(int packetSize, Queue queue, NetworkStream stream, IEnumerable<ICodec> codec)
             {
                 if (thread != null)
                     throw new AlreadyStartException("recv handler");
 
                 thread = new Thread(() =>
                 {
-                    var header = new byte[headerSize];
+                    var header = new byte[Define.headerSize];
                     var packet = (byte[])null;
-                    var packetLen = (ushort)0;
-                    var read = (ushort)0;
+                    var packetLen = 0;
+                    var read = 0;
 
                     while (true)
                     {
                         try
                         {
-                            var headerLen = stream.Read(header, 0, headerSize);
+                            var headerLen = stream.Read(header, 0, Define.headerSize);
 
                             if (headerLen == 0)
                                 throw new DisconnectException();
 
-                            if (headerLen != headerSize)
+                            if (headerLen != Define.headerSize)
                                 throw new RecvHeaderException();
 
-                            packetLen = BitConverter.ToUInt16(header, 0);
+                            packetLen = BitConverter.ToInt32(header, 0);
 
                             if (packetLen <= 0)
                                 throw new PacketZeroException("recv");
@@ -302,12 +296,12 @@ namespace Mizugo
 
                             while (packetLen > read)
                             {
-                                var readnow = stream.Read(packet, read, packetLen - read);
+                                var cursor = stream.Read(packet, read, packetLen - read);
 
-                                if (readnow == 0)
+                                if (cursor == 0)
                                     break;
 
-                                read += (ushort)readnow;
+                                read += cursor;
                             } // while
 
                             if (packetLen != read)

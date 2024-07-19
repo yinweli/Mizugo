@@ -16,7 +16,6 @@ func NewTCPSession(conn net.Conn) *TCPSession {
 	return &TCPSession{
 		conn:       conn,
 		message:    make(chan any, ChannelSize),
-		headerSize: HeaderSize,
 		packetSize: PacketSize,
 	}
 }
@@ -30,7 +29,6 @@ type TCPSession struct {
 	codecr     []Codec        // 編碼/解碼(反序)
 	publish    []Publish      // 發布事件處理
 	wrong      []Wrong        // 錯誤處理
-	headerSize int            // 標頭長度
 	packetSize int            // 封包長度
 	owner      any            // 擁有者
 }
@@ -83,11 +81,6 @@ func (this *TCPSession) SetPublish(publish ...Publish) {
 // SetWrong 設定錯誤處理
 func (this *TCPSession) SetWrong(wrong ...Wrong) {
 	this.wrong = wrong
-}
-
-// SetHeaderSize 設定標頭長度
-func (this *TCPSession) SetHeaderSize(size int) {
-	this.headerSize = size
 }
 
 // SetPacketSize 設定封包長度
@@ -152,13 +145,13 @@ func (this *TCPSession) recvLoop() {
 
 // recvPacket 接收封包
 func (this *TCPSession) recvPacket(reader io.Reader) (packet []byte, err error) {
-	header := make([]byte, this.headerSize)
+	header := make([]byte, HeaderSize)
 
 	if _, err = io.ReadFull(reader, header); err != nil {
 		return nil, fmt.Errorf("tcp session recv packet: %w", err)
 	} // if
 
-	size := binary.LittleEndian.Uint16(header)
+	size := binary.LittleEndian.Uint32(header)
 
 	if size <= 0 {
 		return []byte{}, nil
@@ -222,8 +215,8 @@ func (this *TCPSession) sendPacket(writer io.Writer, packet []byte) (err error) 
 		return fmt.Errorf("tcp session send packet: packet too large")
 	} // if
 
-	header := make([]byte, this.headerSize)
-	binary.LittleEndian.PutUint16(header, uint16(size))
+	header := make([]byte, HeaderSize)
+	binary.LittleEndian.PutUint32(header, uint32(size))
 
 	if _, err = writer.Write(header); err != nil {
 		return fmt.Errorf("tcp session send packet: %w", err)

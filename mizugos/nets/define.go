@@ -2,12 +2,13 @@ package nets
 
 import (
 	"net"
+	"unsafe"
 )
 
 const ( // 網路定義
-	HeaderSize  = 2               // 標頭長度
-	PacketSize  = int(^uint16(0)) // 封包長度
-	ChannelSize = 1000            // 訊息通道大小設為1000, 避免因為爆滿而卡住
+	HeaderSize  = int(unsafe.Sizeof(uint32(0))) // 標頭長度
+	PacketSize  = int(^uint16(0))               // 封包長度
+	ChannelSize = 1000                          // 訊息通道大小設為1000, 避免因為爆滿而卡住
 )
 
 const ( // 網路事件名稱
@@ -60,9 +61,6 @@ type Sessioner interface {
 
 	// SetOwner 設定擁有者
 	SetOwner(owner any)
-
-	// SetHeaderSize 設定標頭長度
-	SetHeaderSize(size int)
 
 	// SetPacketSize 設定封包長度
 	SetPacketSize(size int)

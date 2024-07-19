@@ -91,7 +91,6 @@ func (this *tester) Bind(session Sessioner) bool {
 		} // switch
 	})
 	session.SetWrong(this.Wrong)
-	session.SetHeaderSize(HeaderSize)
 	session.SetPacketSize(PacketSize)
 	return true
 }
@@ -244,9 +243,6 @@ func (this *emptySession) SetPublish(_ ...Publish) {
 }
 
 func (this *emptySession) SetWrong(_ ...Wrong) {
-}
-
-func (this *emptySession) SetHeaderSize(_ int) {
 }
 
 func (this *emptySession) SetPacketSize(_ int) {

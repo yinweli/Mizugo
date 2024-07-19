@@ -1,3 +1,5 @@
+using System;
+
 namespace Mizugo
 {
     /// <summary>
@@ -49,7 +51,7 @@ namespace Mizugo
         /// <summary>
         /// 標頭長度
         /// </summary>
-        public const int headerSize = 2;
+        public const int headerSize = sizeof(int);
 
         /// <summary>
         /// 封包長度
@@ -116,11 +118,6 @@ namespace Mizugo
         /// 設定編碼/解碼
         /// </summary>
         public void SetCodec(params ICodec[] codec);
-
-        /// <summary>
-        /// 設定標頭長度, 連線後就無法變更
-        /// </summary>
-        public void SetHeaderSize(int size);
 
         /// <summary>
         /// 設定封包長度, 連線後就無法變更
