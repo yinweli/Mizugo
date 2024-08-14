@@ -43,7 +43,7 @@ func (this *StdColor) Outln(a ...any) *StdColor {
 
 // Err 輸出錯誤訊息, 會自動附加換行符號到字串尾端
 func (this *StdColor) Err(format string, a ...any) *StdColor {
-	color.New(color.FgRed).FprintlnFunc()(this.stdout, fmt.Sprintf(format, a...))
+	color.New(color.FgRed).FprintlnFunc()(this.stderr, fmt.Sprintf(format, a...))
 	this.failed = true
 	return this
 }
