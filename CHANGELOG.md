@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.27] - 2024-08-14
+### Fixed
+- 修正錯誤輸出
+
 ## [1.1.26] - 2024-07-19
 ### Fixed
 - 修正標頭類型錯誤
