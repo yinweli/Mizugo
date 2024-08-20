@@ -64,7 +64,7 @@ func (this *Get[T]) Complete() error {
 	if this.MajorEnable {
 		data, err := this.cmd.Result()
 
-		if err != nil && err != redis.Nil {
+		if err != nil && errors.Is(err, redis.Nil) == false {
 			return fmt.Errorf("get complete: %w: %v", err, this.Key)
 		} // if
 
