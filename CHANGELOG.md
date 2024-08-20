@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.28] - 2024-08-20
 ### Added
 - 新增主要資料庫搜尋行為
+- 新增次要資料庫搜尋行為
 
 ## [1.1.27] - 2024-08-14
 ### Fixed
