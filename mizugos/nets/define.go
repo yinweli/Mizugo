@@ -7,7 +7,7 @@ import (
 
 const ( // 網路定義
 	HeaderSize  = int(unsafe.Sizeof(uint32(0))) // 標頭長度
-	PacketSize  = int(^uint16(0))               // 封包長度
+	PacketSize  = int(^uint16(0))               // 預設封包長度限制
 	ChannelSize = 1000                          // 訊息通道大小設為1000, 避免因為爆滿而卡住
 )
 

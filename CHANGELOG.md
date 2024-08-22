@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.29] - 2024-08-22
+### Fixed
+- 接收訊息時加上長度上限檢查
+
 ## [1.1.28] - 2024-08-20
 ### Added
 - 新增主要資料庫搜尋行為

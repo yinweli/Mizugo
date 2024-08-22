@@ -151,10 +151,14 @@ func (this *TCPSession) recvPacket(reader io.Reader) (packet []byte, err error) 
 		return nil, fmt.Errorf("tcp session recv packet: %w", err)
 	} // if
 
-	size := binary.LittleEndian.Uint32(header)
+	size := int(binary.LittleEndian.Uint32(header))
 
 	if size <= 0 {
 		return []byte{}, nil
+	} // if
+
+	if size > this.packetSize {
+		return nil, fmt.Errorf("tcp session recv packet: packet size exceeds maximum")
 	} // if
 
 	packet = make([]byte, size)
@@ -216,7 +220,7 @@ func (this *TCPSession) sendPacket(writer io.Writer, packet []byte) (err error) 
 	} // if
 
 	header := make([]byte, HeaderSize)
-	binary.LittleEndian.PutUint32(header, uint32(size))
+	binary.LittleEndian.PutUint32(header, uint32(size)) //nolint:gosec
 
 	if _, err = writer.Write(header); err != nil {
 		return fmt.Errorf("tcp session send packet: %w", err)

@@ -123,7 +123,7 @@ namespace Mizugo
             get
             {
                 yield return new TestCaseData(ProcJson.Marshal(1, Encoding.UTF8.GetBytes("test")));
-                yield return new TestCaseData(ProcJson.Marshal(2, new byte[] { 0, 1, 2, }));
+                yield return new TestCaseData(ProcJson.Marshal(2, new byte[] { 0, 1, 2 }));
             }
         }
 
@@ -132,7 +132,7 @@ namespace Mizugo
             get
             {
                 yield return new TestCaseData(ProcJson.Marshal(1, Encoding.UTF8.GetBytes("test")));
-                yield return new TestCaseData(ProcJson.Marshal(2, new byte[] { 0, 1, 2, }));
+                yield return new TestCaseData(ProcJson.Marshal(2, new byte[] { 0, 1, 2 }));
             }
         }
 
