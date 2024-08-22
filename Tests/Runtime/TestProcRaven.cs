@@ -157,7 +157,7 @@ namespace Mizugo
                     {
                         MessageID = 1,
                         Header = Any.Pack(new RavenTest() { Data = "header1" }),
-                        Request = Any.Pack(new RavenTest() { Data = "reuest1" })
+                        Request = Any.Pack(new RavenTest() { Data = "reuest1" }),
                     }
                 );
                 yield return new TestCaseData(
@@ -165,7 +165,7 @@ namespace Mizugo
                     {
                         MessageID = 2,
                         Header = Any.Pack(new RavenTest() { Data = "header2" }),
-                        Request = Any.Pack(new RavenTest() { Data = "reuest2" })
+                        Request = Any.Pack(new RavenTest() { Data = "reuest2" }),
                     }
                 );
             }
@@ -182,7 +182,7 @@ namespace Mizugo
                         ErrID = 1,
                         Header = Any.Pack(new RavenTest() { Data = "header1" }),
                         Request = Any.Pack(new RavenTest() { Data = "reuest1" }),
-                        Respond = { Any.Pack(new RavenTest() { Data = "respond1" }), Any.Pack(new RavenTest() { Data = "respond2" }) }
+                        Respond = { Any.Pack(new RavenTest() { Data = "respond1" }), Any.Pack(new RavenTest() { Data = "respond2" }) },
                     }
                 );
                 yield return new TestCaseData(
@@ -192,7 +192,7 @@ namespace Mizugo
                         ErrID = 2,
                         Header = Any.Pack(new RavenTest() { Data = "header2" }),
                         Request = Any.Pack(new RavenTest() { Data = "reuest2" }),
-                        Respond = { Any.Pack(new RavenTest() { Data = "respond1" }), Any.Pack(new RavenTest() { Data = "respond2" }) }
+                        Respond = { Any.Pack(new RavenTest() { Data = "respond1" }), Any.Pack(new RavenTest() { Data = "respond2" }) },
                     }
                 );
             }
@@ -209,7 +209,7 @@ namespace Mizugo
                         ErrID = 1,
                         Header = Any.Pack(new RavenTest() { Data = "header1" }),
                         Request = Any.Pack(new RavenTest() { Data = "reuest1" }),
-                        Respond = { Any.Pack(new RavenTest() { Data = "respond1" }), Any.Pack(new RavenTest() { Data = "respond2" }) }
+                        Respond = { Any.Pack(new RavenTest() { Data = "respond1" }), Any.Pack(new RavenTest() { Data = "respond2" }) },
                     }
                 );
                 yield return new TestCaseData(
@@ -219,7 +219,7 @@ namespace Mizugo
                         ErrID = 2,
                         Header = Any.Pack(new RavenTest() { Data = "header2" }),
                         Request = Any.Pack(new RavenTest() { Data = "reuest2" }),
-                        Respond = { Any.Pack(new RavenTest() { Data = "respond1" }), Any.Pack(new RavenTest() { Data = "respond2" }) }
+                        Respond = { Any.Pack(new RavenTest() { Data = "respond1" }), Any.Pack(new RavenTest() { Data = "respond2" }) },
                     }
                 );
             }
@@ -245,7 +245,7 @@ namespace Mizugo
                         ErrID = 1,
                         Header = Any.Pack(new RavenTest() { Data = "header1" }),
                         Request = Any.Pack(new RavenTest() { Data = "reuest1" }),
-                        Respond = { Any.Pack(new RavenTest() { Data = "respond1" }), Any.Pack(new RavenTest() { Data = "respond2" }) }
+                        Respond = { Any.Pack(new RavenTest() { Data = "respond1" }), Any.Pack(new RavenTest() { Data = "respond2" }) },
                     }
                 );
                 yield return new TestCaseData(
@@ -255,7 +255,7 @@ namespace Mizugo
                         ErrID = 2,
                         Header = Any.Pack(new RavenTest() { Data = "header2" }),
                         Request = Any.Pack(new RavenTest() { Data = "reuest2" }),
-                        Respond = { Any.Pack(new RavenTest() { Data = "respond1" }), Any.Pack(new RavenTest() { Data = "respond2" }) }
+                        Respond = { Any.Pack(new RavenTest() { Data = "respond1" }), Any.Pack(new RavenTest() { Data = "respond2" }) },
                     }
                 );
             }

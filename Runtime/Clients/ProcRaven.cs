@@ -65,7 +65,7 @@ namespace Mizugo
             {
                 MessageID = messageID,
                 Header = Any.Pack(header),
-                Request = Any.Pack(request)
+                Request = Any.Pack(request),
             };
         }
 
@@ -85,7 +85,7 @@ namespace Mizugo
                 errID = temp.ErrID,
                 header = temp.Header.Unpack<H>(),
                 request = temp.Request.Unpack<Q>(),
-                respond = temp.Respond.ToArray()
+                respond = temp.Respond.ToArray(),
             };
         }
     }
