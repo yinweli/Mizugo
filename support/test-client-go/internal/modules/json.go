@@ -56,7 +56,7 @@ func (this *Json) procMJsonA(message any) {
 		return
 	} // if
 
-	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success {
+	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success { //nolint:gosec
 		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("json procMJsonA: %v", msg.ErrID)).EndFlush()
 		return
 	} // if

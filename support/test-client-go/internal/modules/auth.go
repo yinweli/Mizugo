@@ -60,7 +60,7 @@ func (this *Auth) procMLoginA(message any) {
 		return
 	} // if
 
-	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success {
+	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success { //nolint:gosec
 		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMLoginA: %v", msg.ErrID)).EndFlush()
 		return
 	} // if
@@ -97,7 +97,7 @@ func (this *Auth) procMUpdateA(message any) {
 		return
 	} // if
 
-	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success {
+	if msgs.ErrID(msg.ErrID) != msgs.ErrID_Success { //nolint:gosec
 		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMUpdateA: %v", msg.ErrID)).EndFlush()
 		return
 	} // if

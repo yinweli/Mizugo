@@ -46,7 +46,7 @@ func (this *DesCBC) Encode(input any) (output any, err error) {
 		return nil, fmt.Errorf("des-cbc encode: input empty")
 	} // if
 
-	block, err := des.NewCipher(this.key)
+	block, err := des.NewCipher(this.key) //nolint:gosec
 
 	if err != nil {
 		return nil, fmt.Errorf("des-cbc encode: %w", err)
@@ -89,7 +89,7 @@ func (this *DesCBC) Decode(input any) (output any, err error) {
 		return nil, fmt.Errorf("des-cbc decode: input empty")
 	} // if
 
-	block, err := des.NewCipher(this.key)
+	block, err := des.NewCipher(this.key) //nolint:gosec
 
 	if err != nil {
 		return nil, fmt.Errorf("des-cbc decode: %w", err)

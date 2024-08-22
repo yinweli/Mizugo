@@ -35,7 +35,7 @@ namespace Mizugo
                 {
                     NoDelay = true,
                     ReceiveBufferSize = bufferSize,
-                    SendBufferSize = bufferSize
+                    SendBufferSize = bufferSize,
                 };
                 connecting = true;
 

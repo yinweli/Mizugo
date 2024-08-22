@@ -75,17 +75,25 @@ func Timef(layout, value string) (time.Time, error) {
 // 輸入參數依序是 年, 月, 日, 時, 分, 秒, 毫秒; 若時, 分, 秒, 毫秒未輸入則自動填0;
 // 例如 Date(2023, 2, 15) 會得到 2023/02/15 00:00:00 的時間
 func Date(year int, month time.Month, day int, value ...int) time.Time {
-	if s := len(value); s > 3 {
-		return time.Date(year, month, day, value[0], value[1], value[2], value[3], GetTimeZone())
-	} else if s > 2 {
-		return time.Date(year, month, day, value[0], value[1], value[2], 0, GetTimeZone())
-	} else if s > 1 {
-		return time.Date(year, month, day, value[0], value[1], 0, 0, GetTimeZone())
-	} else if s > 0 {
-		return time.Date(year, month, day, value[0], 0, 0, 0, GetTimeZone())
-	} else {
-		return time.Date(year, month, day, 0, 0, 0, 0, GetTimeZone())
+	hour, minute, sec, nsec := 0, 0, 0, 0
+
+	if len(value) > 0 {
+		hour = value[0]
 	} // if
+
+	if len(value) > 1 {
+		minute = value[1]
+	} // if
+
+	if len(value) > 2 {
+		sec = value[2]
+	} // if
+
+	if len(value) > 3 {
+		nsec = value[3]
+	} // if
+
+	return time.Date(year, month, day, hour, minute, sec, nsec, GetTimeZone())
 }
 
 // Before 檢查 u 是否在 t 之前

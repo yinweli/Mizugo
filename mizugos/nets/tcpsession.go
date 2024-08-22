@@ -220,7 +220,7 @@ func (this *TCPSession) sendPacket(writer io.Writer, packet []byte) (err error) 
 	} // if
 
 	header := make([]byte, HeaderSize)
-	binary.LittleEndian.PutUint32(header, uint32(size))
+	binary.LittleEndian.PutUint32(header, uint32(size)) //nolint:gosec
 
 	if _, err = writer.Write(header); err != nil {
 		return fmt.Errorf("tcp session send packet: %w", err)
