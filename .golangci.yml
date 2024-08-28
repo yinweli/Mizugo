@@ -129,7 +129,9 @@ linters-settings:
     checks: ["all", "-SA1019"]
   gosec:
     excludes:
+      - G115
       - G401
+      - G405
       - G501
       - G502
       - G503

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Planning]
 
 ## [Unrelease]
+### Changed
+- 恢復lint配置
 
 ## [1.1.29] - 2024-08-22
 ### Fixed
