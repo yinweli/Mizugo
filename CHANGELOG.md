@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [0.4.4] - 2024-08-28
+### Fixed
+- 傳輸流內部的錯誤都算是斷線
+
 ## [0.4.3] - 2024-07-19
 ### Fixed
 - 修正標頭類型錯誤

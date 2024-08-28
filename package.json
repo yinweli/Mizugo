@@ -1,7 +1,7 @@
 {
   "name": "com.fouridstudio.mizugo-client-unity",
   "displayName": "Mizugo Client Unity",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "unity": "2021.3",
   "license": "MIT",
   "description": "Mizugo Client Unity"
