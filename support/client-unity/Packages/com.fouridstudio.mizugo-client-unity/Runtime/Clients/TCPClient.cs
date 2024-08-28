@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -317,6 +318,11 @@ namespace Mizugo
                             read = 0;
                         } // try
                         catch (DisconnectException)
+                        {
+                            queue.Enqueue(EventID.Disconnect, null);
+                            return;
+                        } // catch
+                        catch (IOException) // 傳輸流內部的錯誤都算是斷線
                         {
                             queue.Enqueue(EventID.Disconnect, null);
                             return;
