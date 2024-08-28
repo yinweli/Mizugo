@@ -107,7 +107,7 @@ func convertToInt(v reflect.Value) int {
 		return int(v.Int())
 
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		return int(v.Uint()) //nolint:gosec
+		return int(v.Uint())
 
 	default:
 		return ErrUnknown
