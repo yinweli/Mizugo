@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Planning]
 
 ## [Unrelease]
+
+## [1.1.30] - 2024-08-29
 ### Changed
-- 恢復lint配置
+- 更新lint配置
+- 更新redmos說明
 
 ## [1.1.29] - 2024-08-22
 ### Fixed
