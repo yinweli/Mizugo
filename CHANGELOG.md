@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.32] - 2024-09-03
+### Added
+- 新增timestamppb.Timestamp的比對選項
+
 ## [1.1.31] - 2024-09-03
 ### Changed
 - proto比對改用go-cmp, 並添加比對選項列表
