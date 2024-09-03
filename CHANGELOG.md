@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.33] - 2024-09-03
+### Changed
+- 把EquateApproxProtoTimestamp搬移到helps軟體包中
+
 ## [1.1.32] - 2024-09-03
 ### Added
 - 新增timestamppb.Timestamp的比對選項
