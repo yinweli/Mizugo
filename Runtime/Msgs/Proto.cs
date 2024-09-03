@@ -22,15 +22,17 @@ public static partial class ProtoReflection {
   static ProtoReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "Cgtwcm90by5wcm90bxoZZ29vZ2xlL3Byb3RvYnVmL2FueS5wcm90byJBCgVQ",
-          "cm90bxIRCgltZXNzYWdlSUQYASABKAUSJQoHbWVzc2FnZRgCIAEoCzIULmdv",
-          "b2dsZS5wcm90b2J1Zi5BbnkiGQoJUHJvdG9UZXN0EgwKBERhdGEYASABKAlC",
-          "DFoKL21zZ3M7bXNnc2IGcHJvdG8z"));
+          "Cgtwcm90by5wcm90bxoZZ29vZ2xlL3Byb3RvYnVmL2FueS5wcm90bxofZ29v",
+          "Z2xlL3Byb3RvYnVmL3RpbWVzdGFtcC5wcm90byJBCgVQcm90bxIRCgltZXNz",
+          "YWdlSUQYASABKAUSJQoHbWVzc2FnZRgCIAEoCzIULmdvb2dsZS5wcm90b2J1",
+          "Zi5BbnkiQwoJUHJvdG9UZXN0EgwKBGRhdGEYASABKAkSKAoEdGltZRgCIAEo",
+          "CzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBCDFoKL21zZ3M7bXNnc2IG",
+          "cHJvdG8z"));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-        new pbr::FileDescriptor[] { global::Google.Protobuf.WellKnownTypes.AnyReflection.Descriptor, },
+        new pbr::FileDescriptor[] { global::Google.Protobuf.WellKnownTypes.AnyReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.TimestampReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
           new pbr::GeneratedClrTypeInfo(typeof(global::Proto), global::Proto.Parser, new[]{ "MessageID", "Message" }, null, null, null, null),
-          new pbr::GeneratedClrTypeInfo(typeof(global::ProtoTest), global::ProtoTest.Parser, new[]{ "Data" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ProtoTest), global::ProtoTest.Parser, new[]{ "Data", "Time" }, null, null, null, null)
         }));
   }
   #endregion
@@ -319,6 +321,7 @@ public sealed partial class ProtoTest : pb::IMessage<ProtoTest>
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public ProtoTest(ProtoTest other) : this() {
     data_ = other.data_;
+    time_ = other.time_ != null ? other.time_.Clone() : null;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -328,7 +331,7 @@ public sealed partial class ProtoTest : pb::IMessage<ProtoTest>
     return new ProtoTest(this);
   }
 
-  /// <summary>Field number for the "Data" field.</summary>
+  /// <summary>Field number for the "data" field.</summary>
   public const int DataFieldNumber = 1;
   private string data_ = "";
   /// <summary>
@@ -340,6 +343,21 @@ public sealed partial class ProtoTest : pb::IMessage<ProtoTest>
     get { return data_; }
     set {
       data_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    }
+  }
+
+  /// <summary>Field number for the "time" field.</summary>
+  public const int TimeFieldNumber = 2;
+  private global::Google.Protobuf.WellKnownTypes.Timestamp time_;
+  /// <summary>
+  /// 測試時間
+  /// </summary>
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::Google.Protobuf.WellKnownTypes.Timestamp Time {
+    get { return time_; }
+    set {
+      time_ = value;
     }
   }
 
@@ -359,6 +377,7 @@ public sealed partial class ProtoTest : pb::IMessage<ProtoTest>
       return true;
     }
     if (Data != other.Data) return false;
+    if (!object.Equals(Time, other.Time)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -367,6 +386,7 @@ public sealed partial class ProtoTest : pb::IMessage<ProtoTest>
   public override int GetHashCode() {
     int hash = 1;
     if (Data.Length != 0) hash ^= Data.GetHashCode();
+    if (time_ != null) hash ^= Time.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -389,6 +409,10 @@ public sealed partial class ProtoTest : pb::IMessage<ProtoTest>
       output.WriteRawTag(10);
       output.WriteString(Data);
     }
+    if (time_ != null) {
+      output.WriteRawTag(18);
+      output.WriteMessage(Time);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -403,6 +427,10 @@ public sealed partial class ProtoTest : pb::IMessage<ProtoTest>
       output.WriteRawTag(10);
       output.WriteString(Data);
     }
+    if (time_ != null) {
+      output.WriteRawTag(18);
+      output.WriteMessage(Time);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -415,6 +443,9 @@ public sealed partial class ProtoTest : pb::IMessage<ProtoTest>
     int size = 0;
     if (Data.Length != 0) {
       size += 1 + pb::CodedOutputStream.ComputeStringSize(Data);
+    }
+    if (time_ != null) {
+      size += 1 + pb::CodedOutputStream.ComputeMessageSize(Time);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -430,6 +461,12 @@ public sealed partial class ProtoTest : pb::IMessage<ProtoTest>
     }
     if (other.Data.Length != 0) {
       Data = other.Data;
+    }
+    if (other.time_ != null) {
+      if (time_ == null) {
+        Time = new global::Google.Protobuf.WellKnownTypes.Timestamp();
+      }
+      Time.MergeFrom(other.Time);
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -450,6 +487,13 @@ public sealed partial class ProtoTest : pb::IMessage<ProtoTest>
           Data = input.ReadString();
           break;
         }
+        case 18: {
+          if (time_ == null) {
+            Time = new global::Google.Protobuf.WellKnownTypes.Timestamp();
+          }
+          input.ReadMessage(Time);
+          break;
+        }
       }
     }
   #endif
@@ -467,6 +511,13 @@ public sealed partial class ProtoTest : pb::IMessage<ProtoTest>
           break;
         case 10: {
           Data = input.ReadString();
+          break;
+        }
+        case 18: {
+          if (time_ == null) {
+            Time = new global::Google.Protobuf.WellKnownTypes.Timestamp();
+          }
+          input.ReadMessage(Time);
           break;
         }
       }
