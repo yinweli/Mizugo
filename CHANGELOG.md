@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.34] - 2024-09-06
+### Added
+- 在Redis Get的時候加上Expire Time，並且每次Get都會延長
+
 ## [1.1.33] - 2024-09-03
 ### Changed
 - 把EquateApproxProtoTimestamp搬移到helps軟體包中
