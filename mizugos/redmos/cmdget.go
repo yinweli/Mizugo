@@ -23,10 +23,10 @@ type Get[T any] struct {
 	MajorEnable bool             // 啟用主要資料庫
 	MinorEnable bool             // 啟用次要資料庫
 	Meta        Metaer           // 元資料
+	Expire      time.Duration    // 過期時間, 若為0表示不過期
 	Key         string           // 索引值
 	Data        *T               // 資料物件
 	cmd         *redis.StringCmd // 命令結果
-	Expire      time.Duration    // 過期時間, 若為0表示不過期
 }
 
 // Prepare 前置處理
