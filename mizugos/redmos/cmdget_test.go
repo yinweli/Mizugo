@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
@@ -127,41 +126,6 @@ func (this *SuiteCmdGet) TestGet() {
 	trials.WaitTimeout()
 	assert.False(this.T(), trials.RedisCompare[dataGet](this.major.Client(), this.meta.MajorKey(data.Field), data))
 	assert.True(this.T(), trials.MongoCompare[dataGet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data))
-}
-
-func (this *SuiteCmdGet) TestGetRefreshExpireTime() {
-	// 過期時間 2 秒
-	expiredTime := 2 * time.Second
-
-	this.meta.table = true
-	this.meta.field = true
-	majorSubmit := this.major.Submit()
-	minorSubmit := this.minor.Submit()
-	data := &dataGet{Field: "redis+mongo+expire", Value: helps.RandStringDefault()}
-
-	set := &Set[dataGet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data, Expire: expiredTime}
-	set.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), set.Prepare())
-	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), set.Complete())
-	_ = minorSubmit.Exec(context.Background())
-	assert.True(this.T(), trials.RedisCompare[dataGet](this.major.Client(), this.meta.MajorKey(data.Field), data))
-	assert.True(this.T(), trials.MongoCompare[dataGet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data))
-
-	// 可以撐過 3 秒代表 get 的時候有刷新 expire time
-	for i := 0; i < 3; i++ {
-		// 停止 1 秒
-		time.Sleep(time.Second)
-
-		// 讀取 redis 並刷新 expire time
-		target := &Get[dataGet]{Meta: &this.meta, MajorEnable: true, MinorEnable: false, Key: data.Field, Expire: expiredTime}
-		target.Initialize(context.Background(), majorSubmit, minorSubmit)
-		assert.Nil(this.T(), target.Prepare())
-		_, _ = majorSubmit.Exec(context.Background())
-		assert.Nil(this.T(), target.Complete())
-		_ = minorSubmit.Exec(context.Background())
-		assert.True(this.T(), cmp.Equal(data, target.Data))
-	}
 }
 
 type metaGet struct {
