@@ -111,21 +111,6 @@ func (this *SuiteCmdGet) TestGet() {
 	target = &Get[dataGet]{Meta: nil, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Complete())
-
-	this.meta.table = true
-	this.meta.field = true
-	target = &Get[dataGet]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Expire: trials.Timeout * 2}
-	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), target.Prepare())
-	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), target.Complete())
-	_ = minorSubmit.Exec(context.Background())
-	trials.WaitTimeout()
-	assert.True(this.T(), trials.RedisCompare[dataGet](this.major.Client(), this.meta.MajorKey(data.Field), data))
-	assert.True(this.T(), trials.MongoCompare[dataGet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data))
-	trials.WaitTimeout()
-	assert.False(this.T(), trials.RedisCompare[dataGet](this.major.Client(), this.meta.MajorKey(data.Field), data))
-	assert.True(this.T(), trials.MongoCompare[dataGet](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data))
 }
 
 type metaGet struct {

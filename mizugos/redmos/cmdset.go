@@ -3,20 +3,18 @@ package redmos
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// Set 設值行為, 以索引字串與資料到主要/次要資料庫中儲存資料, 使用上有以下幾點須注意
+// Set 設值行為, 以索引字串與資料到主要/次要資料庫中儲存資料, 不會影響主要資料庫中的資料的逾期時間, 使用上有以下幾點須注意
 //   - 需要事先建立好資料結構, 並填寫到泛型類型T中, 請不要填入指標類型
 //   - 資料結構如果包含 Save 結構或是符合 Saver 介面, 會套用儲存判斷機制, 減少不必要的儲存操作
 //   - 資料結構的成員都需要設定好`bson:xxxxx`屬性
 //   - 執行前設定好 MajorEnable, MinorEnable
 //   - 執行前設定好 Meta, 這需要事先建立好與 Metaer 介面符合的元資料結構
-//   - 執行前設定好 Expire, 若不設置或是設置為0表示不過期
 //   - 執行前設定好 Key 並且不能為空字串
 //   - 執行前設定好 Data 並且不能為nil
 type Set[T any] struct {
@@ -24,7 +22,6 @@ type Set[T any] struct {
 	MajorEnable bool             // 啟用主要資料庫
 	MinorEnable bool             // 啟用次要資料庫
 	Meta        Metaer           // 元資料
-	Expire      time.Duration    // 過期時間, 若為0表示不過期
 	Key         string           // 索引值
 	Data        *T               // 資料物件
 	cmd         *redis.StatusCmd // 命令結果
@@ -56,7 +53,7 @@ func (this *Set[T]) Prepare() error {
 			return fmt.Errorf("set prepare: %w: %v", err, this.Key)
 		} // if
 
-		this.cmd = this.Major().Set(this.Ctx(), key, data, this.Expire)
+		this.cmd = this.Major().Set(this.Ctx(), key, data, redis.KeepTTL)
 	} // if
 
 	if this.MinorEnable {
