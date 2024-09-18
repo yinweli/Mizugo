@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.35] - 2024-09-18
+### Added
+- 新增redmos.GetEx與redmos.SetEx命令
+### Changed
+- 移除redmos.Get與redmos.Set中的Expire Time
+
 ## [1.1.34] - 2024-09-06
 ### Added
 - 在Redis Get的時候加上Expire Time，並且每次Get都會重置

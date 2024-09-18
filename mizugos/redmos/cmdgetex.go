@@ -4,51 +4,54 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// Get 取值行為, 以索引字串到主要/次要資料庫中取得資料, 不會影響主要資料庫中的資料的逾期時間, 使用上有以下幾點須注意
+// GetEx 取值並設定逾期時間行為, 以索引字串到主要/次要資料庫中取得資料, 主要資料庫中的資料將會有逾期時間, 使用上有以下幾點須注意
 //   - 需要事先建立好資料結構, 並填寫到泛型類型T中, 請不要填入指標類型
 //   - 執行前設定好 MajorEnable, MinorEnable
 //   - 執行前設定好 Meta, 這需要事先建立好與 Metaer 介面符合的元資料結構
+//   - 執行前設定好 Expire, 若不設置或是設置為0表示不逾期, 如果設為-1或是 KeepTTL 則表示不更動逾期時間
 //   - 執行前設定好 Key 並且不能為空字串
 //   - 執行前設定好 Data, 如果為nil, 則內部程序會自己建立
 //   - 執行後可用 Data 來取得資料
-type Get[T any] struct {
+type GetEx[T any] struct {
 	Behave                       // 行為物件
 	MajorEnable bool             // 啟用主要資料庫
 	MinorEnable bool             // 啟用次要資料庫
 	Meta        Metaer           // 元資料
+	Expire      time.Duration    // 逾期時間, 若為0表示不逾期, 若為-1或是 KeepTTL 則表示不更動逾期時間
 	Key         string           // 索引值
 	Data        *T               // 資料物件
 	cmd         *redis.StringCmd // 命令結果
 }
 
 // Prepare 前置處理
-func (this *Get[T]) Prepare() error {
+func (this *GetEx[T]) Prepare() error {
 	if this.Meta == nil {
-		return fmt.Errorf("get prepare: meta nil")
+		return fmt.Errorf("getex prepare: meta nil")
 	} // if
 
 	if this.Key == "" {
-		return fmt.Errorf("get prepare: key empty")
+		return fmt.Errorf("getex prepare: key empty")
 	} // if
 
 	if this.MajorEnable {
 		key := this.Meta.MajorKey(this.Key)
-		this.cmd = this.Major().Get(this.Ctx(), key)
+		this.cmd = this.Major().GetEx(this.Ctx(), key, this.Expire)
 	} // if
 
 	if this.MinorEnable {
 		if this.Meta.MinorTable() == "" {
-			return fmt.Errorf("get prepare: table empty")
+			return fmt.Errorf("getex prepare: table empty")
 		} // if
 
 		if this.Meta.MinorField() == "" {
-			return fmt.Errorf("get prepare: field empty")
+			return fmt.Errorf("getex prepare: field empty")
 		} // if
 	} // if
 
@@ -56,16 +59,16 @@ func (this *Get[T]) Prepare() error {
 }
 
 // Complete 完成處理
-func (this *Get[T]) Complete() error {
+func (this *GetEx[T]) Complete() error {
 	if this.Meta == nil {
-		return fmt.Errorf("get complete: meta nil")
+		return fmt.Errorf("getex complete: meta nil")
 	} // if
 
 	if this.MajorEnable {
 		data, err := this.cmd.Result()
 
 		if err != nil && errors.Is(err, redis.Nil) == false {
-			return fmt.Errorf("get complete: %w: %v", err, this.Key)
+			return fmt.Errorf("getex complete: %w: %v", err, this.Key)
 		} // if
 
 		if data != RedisNil {
@@ -74,7 +77,7 @@ func (this *Get[T]) Complete() error {
 			} // if
 
 			if err = json.Unmarshal([]byte(data), this.Data); err != nil {
-				return fmt.Errorf("get complete: %w: %v", err, this.Key)
+				return fmt.Errorf("getex complete: %w: %v", err, this.Key)
 			} // if
 
 			return nil // 如果主要資料庫讀取成功, 就不必執行次要資料庫了
@@ -91,7 +94,7 @@ func (this *Get[T]) Complete() error {
 		empty := errors.Is(err, mongo.ErrNoDocuments)
 
 		if err != nil && empty == false {
-			return fmt.Errorf("get complete: %w: %v", err, this.Key)
+			return fmt.Errorf("getex complete: %w: %v", err, this.Key)
 		} // if
 
 		if empty == false {
@@ -100,7 +103,7 @@ func (this *Get[T]) Complete() error {
 			} // if
 
 			if err = result.Decode(this.Data); err != nil {
-				return fmt.Errorf("get complete: %w: %v", err, this.Key)
+				return fmt.Errorf("getex complete: %w: %v", err, this.Key)
 			} // if
 		} // if
 	} // if
