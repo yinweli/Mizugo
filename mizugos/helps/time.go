@@ -353,7 +353,7 @@ func Monthly(now, last time.Time, mday, hour int) bool {
 func MonthlyPrev(now time.Time, mday, hour int) time.Time {
 	prev := time.Date(now.Year(), now.Month(), mday, hour, 0, 0, 0, now.Location())
 
-	if now.Before(prev) || now.Hour() < hour { // 如果還沒到時間，就設定為上個月
+	if now.Before(prev) { // 如果還沒到時間，就設定為上個月
 		prev = prev.AddDate(0, -1, 0)
 	} // if
 
@@ -371,6 +371,39 @@ func MonthlyNext(now time.Time, mday, hour int) time.Time {
 
 	if now.Equal(next) || now.After(next) { // 如果已經經過時間, 就設定為下個月
 		next = next.AddDate(0, 1, 0)
+	} // if
+
+	return next
+}
+
+// Yearly 檢查每年是否到期, mday是month-day
+func Yearly(now, last time.Time, month, mday, hour int) bool {
+	next := YearlyNext(last, month, mday, hour)
+	return now.Equal(next) || now.After(next)
+}
+
+// YearlyPrev 取得上次的每年時間, mday是month-day
+func YearlyPrev(now time.Time, month, mday, hour int) time.Time {
+	prev := time.Date(now.Year(), time.Month(month), mday, hour, 0, 0, 0, now.Location())
+
+	// 當月份日數不同時, 例如輸入的日數為31, 但是當月日數最多只到28時, 就會將日期減1, 直到日期有效為止
+	for prev.Month() == now.Month() && prev.Day() != mday {
+		prev = prev.AddDate(0, 0, -1)
+	} // if
+
+	if now.Before(prev) { // 如果還沒到時間，就設定為去年
+		prev = prev.AddDate(-1, 0, 0)
+	} // if
+
+	return prev
+}
+
+// YearlyNext 取得下次的每年時間, mday是month-day
+func YearlyNext(now time.Time, month, mday, hour int) time.Time {
+	next := time.Date(now.Year(), time.Month(month), mday, hour, 0, 0, 0, now.Location())
+
+	if now.Equal(next) || now.After(next) { // 如果已經經過時間, 就設定為明年
+		next = next.AddDate(1, 0, 0)
 	} // if
 
 	return next
