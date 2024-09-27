@@ -192,30 +192,30 @@ func (this *SuiteTime) TestDaily() {
 	assert.True(this.T(), Daily(
 		Date(2023, 2, 1, 12),
 		Date(2023, 1, 1, 12), 12))
-	assert.False(this.T(), Daily(
-		Date(2023, 2, 1, 12),
-		Date(2023, 3, 1, 12), 12))
-	assert.False(this.T(), Daily(
-		Date(2023, 2, 1, 12),
-		Date(2023, 2, 1, 12), 12))
 	assert.True(this.T(), Daily(
 		Date(2023, 2, 1, 12),
 		Date(2023, 2, 1, 11), 12))
-	assert.Equal(this.T(),
+	assert.False(this.T(), Daily(
 		Date(2023, 2, 1, 12),
-		DailyPrev(Date(2023, 2, 1, 12), 12))
+		Date(2023, 2, 1, 12), 12))
+	assert.False(this.T(), Daily(
+		Date(2023, 2, 1, 12),
+		Date(2023, 3, 1, 12), 12))
 	assert.Equal(this.T(),
 		Date(2023, 1, 31, 12),
 		DailyPrev(Date(2023, 2, 1, 11), 12))
 	assert.Equal(this.T(),
 		Date(2023, 2, 1, 12),
-		DailyPrev(Date(2023, 2, 1, 13), 12))
+		DailyPrev(Date(2023, 2, 1, 12), 12))
 	assert.Equal(this.T(),
-		Date(2023, 2, 2, 12),
-		DailyNext(Date(2023, 2, 1, 12), 12))
+		Date(2023, 2, 1, 12),
+		DailyPrev(Date(2023, 2, 1, 13), 12))
 	assert.Equal(this.T(),
 		Date(2023, 2, 1, 12),
 		DailyNext(Date(2023, 2, 1, 11), 12))
+	assert.Equal(this.T(),
+		Date(2023, 2, 2, 12),
+		DailyNext(Date(2023, 2, 1, 12), 12))
 	assert.Equal(this.T(),
 		Date(2023, 2, 2, 12),
 		DailyNext(Date(2023, 2, 1, 13), 12))
@@ -225,21 +225,24 @@ func (this *SuiteTime) TestWeekly() {
 	assert.True(this.T(), Weekly(
 		Date(2023, 2, 1, 12),
 		Date(2023, 1, 1, 12), 3, 12))
-	assert.False(this.T(), Weekly(
-		Date(2023, 2, 1, 12),
-		Date(2023, 3, 1, 12), 3, 12))
-	assert.False(this.T(), Weekly(
-		Date(2023, 2, 1, 12),
-		Date(2023, 2, 1, 12), 3, 12))
 	assert.True(this.T(), Weekly(
 		Date(2023, 2, 1, 12),
 		Date(2023, 2, 1, 11), 3, 12))
-	assert.Equal(this.T(),
+	assert.False(this.T(), Weekly(
 		Date(2023, 2, 1, 12),
-		WeeklyPrev(Date(2023, 2, 1, 12), 3, 12))
+		Date(2023, 2, 1, 12), 3, 12))
+	assert.False(this.T(), Weekly(
+		Date(2023, 2, 1, 12),
+		Date(2023, 3, 1, 12), 3, 12))
+	assert.Equal(this.T(),
+		Date(2023, 1, 25, 12),
+		WeeklyPrev(Date(2023, 1, 31, 12), 3, 12))
 	assert.Equal(this.T(),
 		Date(2023, 1, 25, 12),
 		WeeklyPrev(Date(2023, 2, 1, 11), 3, 12))
+	assert.Equal(this.T(),
+		Date(2023, 2, 1, 12),
+		WeeklyPrev(Date(2023, 2, 1, 12), 3, 12))
 	assert.Equal(this.T(),
 		Date(2023, 2, 1, 12),
 		WeeklyPrev(Date(2023, 2, 1, 13), 3, 12))
@@ -247,14 +250,11 @@ func (this *SuiteTime) TestWeekly() {
 		Date(2023, 2, 1, 12),
 		WeeklyPrev(Date(2023, 2, 2, 12), 3, 12))
 	assert.Equal(this.T(),
-		Date(2023, 1, 25, 12),
-		WeeklyPrev(Date(2023, 1, 31, 12), 3, 12))
+		Date(2023, 2, 1, 12),
+		WeeklyNext(Date(2023, 2, 1, 11), 3, 12))
 	assert.Equal(this.T(),
 		Date(2023, 2, 8, 12),
 		WeeklyNext(Date(2023, 2, 1, 12), 3, 12))
-	assert.Equal(this.T(),
-		Date(2023, 2, 1, 12),
-		WeeklyNext(Date(2023, 2, 1, 11), 3, 12))
 	assert.Equal(this.T(),
 		Date(2023, 2, 8, 12),
 		WeeklyNext(Date(2023, 2, 1, 13), 3, 12))
@@ -267,21 +267,21 @@ func (this *SuiteTime) TestMonthly() {
 	assert.True(this.T(), Monthly(
 		Date(2023, 2, 1, 12),
 		Date(2023, 1, 1, 12), 1, 12))
-	assert.False(this.T(), Monthly(
-		Date(2023, 2, 1, 12),
-		Date(2023, 3, 1, 12), 1, 12))
-	assert.False(this.T(), Monthly(
-		Date(2023, 2, 1, 12),
-		Date(2023, 2, 1, 12), 1, 12))
 	assert.True(this.T(), Monthly(
 		Date(2023, 2, 1, 12),
 		Date(2023, 2, 1, 11), 1, 12))
-	assert.Equal(this.T(),
+	assert.False(this.T(), Monthly(
 		Date(2023, 2, 1, 12),
-		MonthlyPrev(Date(2023, 2, 1, 12), 1, 12))
+		Date(2023, 2, 1, 12), 1, 12))
+	assert.False(this.T(), Monthly(
+		Date(2023, 2, 1, 12),
+		Date(2023, 3, 1, 12), 1, 12))
 	assert.Equal(this.T(),
 		Date(2023, 1, 1, 12),
 		MonthlyPrev(Date(2023, 2, 1, 11), 1, 12))
+	assert.Equal(this.T(),
+		Date(2023, 2, 1, 12),
+		MonthlyPrev(Date(2023, 2, 1, 12), 1, 12))
 	assert.Equal(this.T(),
 		Date(2023, 2, 1, 12),
 		MonthlyPrev(Date(2023, 2, 1, 13), 1, 12))
@@ -292,14 +292,53 @@ func (this *SuiteTime) TestMonthly() {
 		Date(2023, 3, 31, 12),
 		MonthlyPrev(Date(2023, 4, 1, 13), 31, 12))
 	assert.Equal(this.T(),
-		Date(2023, 3, 1, 12),
-		MonthlyNext(Date(2023, 2, 1, 12), 1, 12))
-	assert.Equal(this.T(),
 		Date(2023, 2, 1, 12),
 		MonthlyNext(Date(2023, 2, 1, 11), 1, 12))
 	assert.Equal(this.T(),
 		Date(2023, 3, 1, 12),
+		MonthlyNext(Date(2023, 2, 1, 12), 1, 12))
+	assert.Equal(this.T(),
+		Date(2023, 3, 1, 12),
 		MonthlyNext(Date(2023, 2, 1, 13), 1, 12))
+}
+
+func (this *SuiteTime) TestYearly() {
+	assert.True(this.T(), Yearly(
+		Date(2024, 2, 1, 12),
+		Date(2023, 1, 1, 12), 2, 1, 12))
+	assert.True(this.T(), Yearly(
+		Date(2024, 2, 1, 12),
+		Date(2024, 2, 1, 11), 2, 1, 12))
+	assert.False(this.T(), Yearly(
+		Date(2024, 2, 1, 12),
+		Date(2024, 2, 1, 12), 2, 1, 12))
+	assert.False(this.T(), Yearly(
+		Date(2024, 2, 1, 12),
+		Date(2024, 3, 1, 12), 2, 1, 12))
+	assert.Equal(this.T(),
+		Date(2022, 2, 1, 12),
+		YearlyPrev(Date(2023, 2, 1, 11), 2, 1, 12))
+	assert.Equal(this.T(),
+		Date(2023, 2, 1, 12),
+		YearlyPrev(Date(2023, 2, 1, 12), 2, 1, 12))
+	assert.Equal(this.T(),
+		Date(2023, 2, 1, 12),
+		YearlyPrev(Date(2023, 2, 1, 13), 2, 1, 12))
+	assert.Equal(this.T(),
+		Date(2023, 2, 28, 12),
+		YearlyPrev(Date(2023, 3, 1, 13), 2, 31, 12))
+	assert.Equal(this.T(),
+		Date(2023, 3, 31, 12),
+		YearlyPrev(Date(2023, 4, 1, 13), 3, 31, 12))
+	assert.Equal(this.T(),
+		Date(2023, 2, 1, 12),
+		YearlyNext(Date(2023, 2, 1, 11), 2, 1, 12))
+	assert.Equal(this.T(),
+		Date(2024, 2, 1, 12),
+		YearlyNext(Date(2023, 2, 1, 12), 2, 1, 12))
+	assert.Equal(this.T(),
+		Date(2024, 2, 1, 12),
+		YearlyNext(Date(2023, 2, 1, 13), 2, 1, 12))
 }
 
 func (this *SuiteTime) TestFixedPrev() {
