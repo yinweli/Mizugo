@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.37] - 2024-10-15
+### Added
+- 新增DayHourMax, WeekdayMax常數
+
 ## [1.1.36] - 2024-09-27
 ### Added
 - 新增Yearly, YearlyPrev, YearlyNext函式
