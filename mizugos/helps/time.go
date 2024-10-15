@@ -10,10 +10,12 @@ const (
 	TimeSecond      = time.Second           // 1秒時間
 	TimeMinute      = time.Minute           // 1分鐘時間
 	TimeHour        = time.Hour             // 1小時時間
-	TimeDay         = TimeHour * 24         // 1日時間
-	TimeWeek        = TimeDay * 7           // 1週時間
+	TimeDay         = TimeHour * DayHourMax // 1日時間
+	TimeWeek        = TimeDay * WeekdayMax  // 1週時間
 	TimeMonth       = TimeWeek * 4          // 1月時間, 這個時間並不準確
 	TimeYear        = TimeDay * 365         // 1年時間, 這個時間並不準確
+	DayHourMax      = 24                    // 一天有幾小時
+	WeekdayMax      = 7                     // 1週有幾天
 	LayoutSecond    = "2006-01-02 15:04:05" // 時間字串格式, 使用年月日時分秒
 	LayoutMinute    = "2006-01-02 15:04"    // 時間字串格式, 使用年月日時分
 	LayoutDay       = "2006-01-02"          // 時間字串格式, 使用年月日
