@@ -57,6 +57,8 @@ type Sessioner interface {
 	SetWrong(wrong ...Wrong)
 
 	// SetCodec 設定編碼/解碼
+	// 在編碼過程中(伺服器傳送訊息), 組件會按照順序從前到後執行
+	// 在解碼過程中(伺服器接收訊息), 組件會按照順序從後到前執行
 	SetCodec(codec ...Codec)
 
 	// SetOwner 設定擁有者
