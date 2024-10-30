@@ -2,6 +2,7 @@ package trials
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -18,4 +19,15 @@ func ProtoEqual(expected, actual proto.Message, option ...cmp.Option) bool {
 	} // if
 
 	return true
+}
+
+// ProtoContains 訊息列表中是否有指定類型
+func ProtoContains(source []proto.Message, expected any) bool {
+	for _, itor := range source {
+		if reflect.TypeOf(itor) == reflect.TypeOf(expected) {
+			return true
+		} // if
+	} // for
+
+	return false
 }

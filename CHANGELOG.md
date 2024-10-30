@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.38] - 2024-10-30
+### Added
+- 新增ProtoContains函式
+
 ## [1.1.37] - 2024-10-15
 ### Added
 - 新增DayHourMax, WeekdayMax常數
