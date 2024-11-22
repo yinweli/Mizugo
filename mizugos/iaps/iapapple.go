@@ -37,13 +37,19 @@ type IAPAppleConfig struct {
 	Interval time.Duration `yaml:"interval"` // 驗證間隔時間
 }
 
+// IAPAppleResult Apple驗證結果資料
+type IAPAppleResult struct {
+	Err  error     // 驗證結果, 若為nil表示驗證成功, 否則失敗
+	Time time.Time // 購買時間
+}
+
 // iapApple Apple驗證資料
 type iapApple struct {
-	productID   string     // 產品編號
-	certificate string     // 購買憑證
-	retry       int        // 重試次數
-	retryErr    error      // 重試錯誤
-	result      chan error // 結果通道
+	productID   string              // 產品編號
+	certificate string              // 購買憑證
+	retry       int                 // 重試次數
+	retryErr    error               // 重試錯誤
+	result      chan IAPAppleResult // 結果通道
 }
 
 // Initialize 初始化處理
@@ -69,15 +75,15 @@ func (this *IAPApple) Finalize() {
 }
 
 // Verify 驗證憑證
-func (this *IAPApple) Verify(productID, certificate string) error {
+func (this *IAPApple) Verify(productID, certificate string) IAPAppleResult {
 	if this.verify == nil {
-		return fmt.Errorf("iapApple verify: close")
+		return this.fail(fmt.Errorf("iapApple verify: close"))
 	} // if
 
 	result := &iapApple{
 		productID:   productID,
 		certificate: certificate,
-		result:      make(chan error),
+		result:      make(chan IAPAppleResult),
 	}
 	this.verify <- result
 	return <-result.result
@@ -91,7 +97,7 @@ func (this *IAPApple) execute(verify chan *iapApple) {
 
 		// 如果重試超過限制, 還是只能當作錯誤
 		if itor.retry > 0 && itor.retry >= this.config.Retry {
-			itor.result <- itor.retryErr
+			itor.result <- this.fail(itor.retryErr)
 			continue
 		} // if
 
@@ -110,22 +116,38 @@ func (this *IAPApple) execute(verify chan *iapApple) {
 		result, err := this.client.ParseSignedTransaction(respond.SignedTransactionInfo)
 
 		if err != nil {
-			itor.result <- fmt.Errorf("iapApple execute: %w", err)
+			itor.result <- this.fail(fmt.Errorf("iapApple execute: %w", err))
 			continue
 		} // if
 
 		if result.ProductID != itor.productID {
-			itor.result <- fmt.Errorf("iapApple execute: productID")
+			itor.result <- this.fail(fmt.Errorf("iapApple execute: productID"))
 			continue
 		} // if
 
 		if result.TransactionID != itor.certificate {
-			itor.result <- fmt.Errorf("iapApple execute: certificate")
+			itor.result <- this.fail(fmt.Errorf("iapApple execute: certificate"))
 			continue
 		} // if
 
-		itor.result <- nil
+		itor.result <- this.succ(result.PurchaseDate)
 	} // for
 
 	this.signal.Done()
+}
+
+// succ 取得成功物件
+func (this *IAPApple) succ(millisecond int64) IAPAppleResult {
+	secs := millisecond / 1000
+	nano := (millisecond % 1000) * int64(time.Millisecond)
+	return IAPAppleResult{
+		Time: time.Unix(secs, nano),
+	}
+}
+
+// fail 取得失敗物件
+func (this *IAPApple) fail(err error) IAPAppleResult {
+	return IAPAppleResult{
+		Err: err,
+	}
 }

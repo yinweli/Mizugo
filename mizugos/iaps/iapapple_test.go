@@ -32,6 +32,6 @@ func (this *SuiteIAPApple) TestIAPApple() {
 	target := NewIAPApple(&IAPAppleConfig{})
 	assert.NotNil(this.T(), target)
 	assert.Nil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.Verify(testdata.Unknown, testdata.Unknown))
+	assert.NotNil(this.T(), target.Verify(testdata.Unknown, testdata.Unknown).Err)
 	target.Finalize()
 }

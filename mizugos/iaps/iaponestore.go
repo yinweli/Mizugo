@@ -43,13 +43,19 @@ type IAPOneStoreConfig struct {
 	Interval     time.Duration `yaml:"interval"`     // 驗證間隔時間
 }
 
+// IAPOneStoreResult OneStore驗證結果資料
+type IAPOneStoreResult struct {
+	Err  error     // 驗證結果, 若為nil表示驗證成功, 否則失敗
+	Time time.Time // 購買時間
+}
+
 // iapOneStore OneStore驗證資料
 type iapOneStore struct {
-	productID   string     // 產品編號
-	certificate string     // 購買憑證
-	retry       int        // 重試次數
-	retryErr    error      // 重試錯誤
-	result      chan error // 結果通道
+	productID   string                 // 產品編號
+	certificate string                 // 購買憑證
+	retry       int                    // 重試次數
+	retryErr    error                  // 重試錯誤
+	result      chan IAPOneStoreResult // 結果通道
 }
 
 // iapOneStoreError OneStore錯誤訊息資料
@@ -94,15 +100,15 @@ func (this *IAPOneStore) Finalize() {
 }
 
 // Verify 驗證憑證
-func (this *IAPOneStore) Verify(productID, certificate string) error {
+func (this *IAPOneStore) Verify(productID, certificate string) IAPOneStoreResult {
 	if this.verify == nil {
-		return fmt.Errorf("iapOneStore verify: close")
+		return this.fail(fmt.Errorf("iapOneStore verify: close"))
 	} // if
 
 	result := &iapOneStore{
 		productID:   productID,
 		certificate: certificate,
-		result:      make(chan error),
+		result:      make(chan IAPOneStoreResult),
 	}
 	this.verify <- result
 	return <-result.result
@@ -116,7 +122,7 @@ func (this *IAPOneStore) execute(verify chan *iapOneStore) {
 
 		// 如果重試超過限制, 還是只能當作錯誤
 		if itor.retry > 0 && itor.retry >= this.config.Retry {
-			itor.result <- itor.retryErr
+			itor.result <- this.fail(itor.retryErr)
 			continue
 		} // if
 
@@ -132,15 +138,9 @@ func (this *IAPOneStore) execute(verify chan *iapOneStore) {
 		} // if
 
 		ctx, cancel = context.WithTimeout(context.Background(), this.config.Timeout)
-		err = this.executePurchase(ctx, itor.productID, itor.certificate)
+		result := this.executePurchase(ctx, itor.productID, itor.certificate)
 		cancel() // 避免cancel洩漏
-
-		if err != nil {
-			itor.result <- fmt.Errorf("iapOneStore execute: %w", err)
-			continue
-		} // if
-
-		itor.result <- nil
+		itor.result <- result
 	} // for
 
 	this.signal.Done()
@@ -207,12 +207,12 @@ func (this *IAPOneStore) executeToken(ctx context.Context) error {
 }
 
 // executePurchase 執行驗證查詢
-func (this *IAPOneStore) executePurchase(ctx context.Context, productID, certificate string) error {
+func (this *IAPOneStore) executePurchase(ctx context.Context, productID, certificate string) IAPOneStoreResult {
 	api := this.getAPI(this.config.Sandbox) + fmt.Sprintf("/v7/apps/%v/purchases/inapp/products/%v/%v", this.config.ClientID, productID, certificate)
 	request, err := http.NewRequestWithContext(ctx, "GET", api, http.NoBody)
 
 	if err != nil {
-		return fmt.Errorf("purchase: %w", err)
+		return this.fail(fmt.Errorf("purchase: %w", err))
 	} // if
 
 	request.Header.Set("Authorization", "Bearer "+this.token)
@@ -221,7 +221,7 @@ func (this *IAPOneStore) executePurchase(ctx context.Context, productID, certifi
 	respond, err := this.client.Do(request)
 
 	if err != nil {
-		return fmt.Errorf("purchase: %w", err)
+		return this.fail(fmt.Errorf("purchase: %w", err))
 	} // if
 
 	defer func() {
@@ -231,30 +231,30 @@ func (this *IAPOneStore) executePurchase(ctx context.Context, productID, certifi
 	body, err := io.ReadAll(respond.Body)
 
 	if err != nil {
-		return fmt.Errorf("purchase: %w", err)
+		return this.fail(fmt.Errorf("purchase: %w", err))
 	} // if
 
-	if respond.StatusCode == http.StatusOK {
-		result := &iapOneStoreVerify{}
-
-		if err = json.Unmarshal(body, result); err != nil {
-			return fmt.Errorf("purchase: %w", err)
-		} // if
-
-		if result.PurchaseState != 0 {
-			return fmt.Errorf("purchase: unpurchased")
-		} // if
-
-		return nil
-	} else {
+	if respond.StatusCode != http.StatusOK {
 		result := &iapOneStoreError{}
 
 		if err = json.Unmarshal(body, result); err != nil {
-			return fmt.Errorf("purchase: %w", err)
+			return this.fail(fmt.Errorf("purchase: %w", err))
 		} // if
 
-		return fmt.Errorf("purchase: [%v] %v", result.Error.Code, result.Error.Message)
+		return this.fail(fmt.Errorf("purchase: [%v] %v", result.Error.Code, result.Error.Message))
 	} // if
+
+	result := &iapOneStoreVerify{}
+
+	if err = json.Unmarshal(body, result); err != nil {
+		return this.fail(fmt.Errorf("purchase: %w", err))
+	} // if
+
+	if result.PurchaseState != 0 {
+		return this.fail(fmt.Errorf("purchase: unpurchased"))
+	} // if
+
+	return this.succ(result.PurchaseTime)
 }
 
 // getAPI 取得API網址
@@ -279,4 +279,20 @@ func (this *IAPOneStore) getMKT(global bool) string {
 func (this *IAPOneStore) getExpire(now time.Time, expire int) time.Time {
 	const factor = 0.85 // 故意讓權杖預期時間短一些, 方便更新權杖
 	return now.Add(time.Duration(float64(expire)*factor) * helps.TimeSecond)
+}
+
+// succ 取得成功物件
+func (this *IAPOneStore) succ(millisecond int64) IAPOneStoreResult {
+	secs := millisecond / 1000
+	nano := (millisecond % 1000) * int64(time.Millisecond)
+	return IAPOneStoreResult{
+		Time: time.Unix(secs, nano),
+	}
+}
+
+// fail 取得失敗物件
+func (this *IAPOneStore) fail(err error) IAPOneStoreResult {
+	return IAPOneStoreResult{
+		Err: err,
+	}
 }

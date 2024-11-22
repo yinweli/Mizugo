@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.39] - 2024-11-22
+### Changed
+- 更新IAP組件, 讓外部可以獲取交易時間
+
 ## [1.1.38] - 2024-10-30
 ### Added
 - 新增ProtoContains函式
