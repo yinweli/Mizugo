@@ -32,6 +32,6 @@ func (this *SuiteIAPOneStore) TestIAPOneStore() {
 	target := NewIAPOneStore(&IAPOneStoreConfig{})
 	assert.NotNil(this.T(), target)
 	assert.Nil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.Verify(testdata.Unknown, testdata.Unknown))
+	assert.NotNil(this.T(), target.Verify(testdata.Unknown, testdata.Unknown).Err)
 	target.Finalize()
 }

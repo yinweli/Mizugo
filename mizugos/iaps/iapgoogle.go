@@ -33,11 +33,17 @@ type IAPGoogleConfig struct {
 	Interval time.Duration `yaml:"interval"` // 驗證間隔時間
 }
 
+// IAPGoogleResult Google驗證結果資料
+type IAPGoogleResult struct {
+	Err  error     // 驗證結果, 若為nil表示驗證成功, 否則失敗
+	Time time.Time // 購買時間
+}
+
 // iapGoogle Google驗證資料
 type iapGoogle struct {
-	productID   string     // 產品編號
-	certificate string     // 購買憑證
-	result      chan error // 結果通道
+	productID   string               // 產品編號
+	certificate string               // 購買憑證
+	result      chan IAPGoogleResult // 結果通道
 }
 
 // Initialize 初始化處理
@@ -63,15 +69,15 @@ func (this *IAPGoogle) Finalize() {
 }
 
 // Verify 驗證憑證
-func (this *IAPGoogle) Verify(productID, certificate string) error {
+func (this *IAPGoogle) Verify(productID, certificate string) IAPGoogleResult {
 	if this.verify == nil {
-		return fmt.Errorf("iapGoogle verify: close")
+		return this.fail(fmt.Errorf("iapGoogle verify: close"))
 	} // if
 
 	result := &iapGoogle{
 		productID:   productID,
 		certificate: certificate,
-		result:      make(chan error),
+		result:      make(chan IAPGoogleResult),
 	}
 	this.verify <- result
 	return <-result.result
@@ -84,16 +90,32 @@ func (this *IAPGoogle) execute(verify chan *iapGoogle) {
 		time.Sleep(this.config.Interval)
 
 		ctx, cancel := context.WithTimeout(context.Background(), this.config.Timeout)
-		_, err := this.client.VerifyProduct(ctx, this.config.Bundle, itor.productID, itor.certificate)
+		result, err := this.client.VerifyProduct(ctx, this.config.Bundle, itor.productID, itor.certificate)
 		cancel() // 避免cancel洩漏
 
 		if err != nil {
-			itor.result <- fmt.Errorf("iapGoogle execute: %w", err)
+			itor.result <- this.fail(fmt.Errorf("iapGoogle execute: %w", err))
 			continue
 		} // if
 
-		itor.result <- nil
+		itor.result <- this.succ(result.PurchaseTimeMillis)
 	} // for
 
 	this.signal.Done()
+}
+
+// succ 取得成功物件
+func (this *IAPGoogle) succ(millisecond int64) IAPGoogleResult {
+	secs := millisecond / 1000
+	nano := (millisecond % 1000) * int64(time.Millisecond)
+	return IAPGoogleResult{
+		Time: time.Unix(secs, nano),
+	}
+}
+
+// fail 取得失敗物件
+func (this *IAPGoogle) fail(err error) IAPGoogleResult {
+	return IAPGoogleResult{
+		Err: err,
+	}
 }

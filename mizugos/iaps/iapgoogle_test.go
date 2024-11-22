@@ -32,7 +32,7 @@ func (this *SuiteIAPGoogle) TestIAPGoogle() {
 	target := NewIAPGoogle(&IAPGoogleConfig{})
 	assert.NotNil(this.T(), target)
 	assert.NotNil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.Verify(testdata.Unknown, testdata.Unknown))
+	assert.NotNil(this.T(), target.Verify(testdata.Unknown, testdata.Unknown).Err)
 	assert.Panics(this.T(), func() {
 		target.Finalize()
 	})
