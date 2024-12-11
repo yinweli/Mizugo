@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.40] - 2024-12-11
+### Added
+- 新增ProtoTypeExist函式, 內容為原來的ProtoContains函式的功能
+### Changed
+- ProtoContains函式的功能改為檢查訊息列表是否有符合訊息
+
 ## [1.1.39] - 2024-11-22
 ### Changed
 - 更新IAP組件, 讓外部可以獲取交易時間

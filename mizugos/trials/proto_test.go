@@ -25,6 +25,23 @@ func (this *SuiteProto) TestProtoEqual() {
 }
 
 func (this *SuiteProto) TestProtoContains() {
-	assert.True(this.T(), ProtoContains([]proto.Message{&msgs.ProtoTest{}}, (*msgs.ProtoTest)(nil)))
-	assert.False(this.T(), ProtoContains([]proto.Message{&msgs.ProtoTest{}}, (*msgs.Proto)(nil)))
+	assert.True(this.T(), ProtoContains(&msgs.ProtoTest{Data: testdata.Unknown}, []*msgs.ProtoTest{
+		nil,
+		{Data: ""},
+		{Data: "12345"},
+		{Data: testdata.Unknown},
+	}))
+	assert.False(this.T(), ProtoContains(&msgs.ProtoTest{Data: testdata.Unknown}, []*msgs.ProtoTest{
+		nil,
+		{Data: ""},
+		{Data: "12345"},
+	}))
+	assert.False(this.T(), ProtoContains(&msgs.ProtoTest{Data: testdata.Unknown}, []string{
+		testdata.Unknown,
+	}))
+}
+
+func (this *SuiteProto) TestProtoTypeExist() {
+	assert.True(this.T(), ProtoTypeExist((*msgs.ProtoTest)(nil), []proto.Message{&msgs.ProtoTest{}}))
+	assert.False(this.T(), ProtoTypeExist((*msgs.Proto)(nil), []proto.Message{&msgs.ProtoTest{}}))
 }
