@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.41] - 2024-12-11
+### Changed
+- 重整Proto測試工具
+
 ## [1.1.40] - 2024-12-11
 ### Added
 - 新增ProtoTypeExist函式, 內容為原來的ProtoContains函式的功能
