@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.43] - 2024-12-23
+### Added
+- 新增MapKey, MapValue函式
+
 ## [1.1.42] - 2024-12-23
 ### Changed
 - 把MapToArray改為MapFlatten
