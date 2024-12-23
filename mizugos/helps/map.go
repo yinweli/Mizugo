@@ -1,11 +1,19 @@
 package helps
 
-// MapToArray 取得映射的索引與資料列表
-func MapToArray[K comparable, V any](input map[K]V) (rk []K, rv []V) {
+// MapFlatten 映射展平, 將映射的內容展平為列表
+func MapFlatten[K comparable, V any](input map[K]V) (result []MapFlattenData[K, V]) {
 	for k, v := range input {
-		rk = append(rk, k)
-		rv = append(rv, v)
+		result = append(result, MapFlattenData[K, V]{
+			K: k,
+			V: v,
+		})
 	} // for
 
-	return rk, rv
+	return result
+}
+
+// MapFlattenData 映射展平資料
+type MapFlattenData[K comparable, V any] struct {
+	K K // 索引
+	V V // 資料
 }

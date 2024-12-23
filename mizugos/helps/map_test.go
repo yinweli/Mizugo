@@ -28,18 +28,18 @@ func (this *SuiteMap) TearDownSuite() {
 	trials.Restore(this.Catalog)
 }
 
-func (this *SuiteMap) TestMapToArray() {
-	result1, result2 := MapToArray(map[int]int{
-		1: 4,
-		2: 5,
-		3: 6,
+func (this *SuiteMap) TestMapFlatten() {
+	target := MapFlatten(map[int]string{
+		1: "a",
+		2: "b",
+		3: "c",
 	})
-	sort.Slice(result1, func(l, r int) bool {
-		return result1[l] < result1[r]
+	sort.Slice(target, func(l, r int) bool {
+		return target[l].K < target[r].K
 	})
-	sort.Slice(result2, func(l, r int) bool {
-		return result2[l] < result2[r]
-	})
-	assert.Equal(this.T(), []int{1, 2, 3}, result1)
-	assert.Equal(this.T(), []int{4, 5, 6}, result2)
+	assert.Equal(this.T(), []MapFlattenData[int, string]{
+		{K: 1, V: "a"},
+		{K: 2, V: "b"},
+		{K: 3, V: "c"},
+	}, target)
 }
