@@ -467,8 +467,8 @@ func CalculateDays(t1, t2 time.Time) int {
 		return CalculateDays(t2, t1)
 	} // if
 
-	t1x := t1.Truncate(TimeDay)
-	t2x := t2.Truncate(TimeDay)
+	t1x := Date(t1.Year(), t1.Month(), t1.Day())
+	t2x := Date(t2.Year(), t2.Month(), t2.Day())
 	return int(t2x.Sub(t1x).Hours() / DayHourMax)
 }
 

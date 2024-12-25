@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.45] - 2024-12-25
+### Fixed
+- 修正CalculateDays的時區計算錯誤
+
 ## [1.1.44] - 2024-12-25
 ### Added
 - 新增CalculateDays, CalculateDaysWithBaseline函式
