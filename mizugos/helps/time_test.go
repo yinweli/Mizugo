@@ -394,3 +394,49 @@ func (this *SuiteTime) TestFixedNext() {
 		Date(2023, 1, 1, 9, 30),
 		FixedNext(Date(1970, 1, 1, 3, 30), Date(2023, 1, 1, 8, 1, 0, 0), TimeHour*3))
 }
+
+func (this *SuiteTime) TestCalculateDays() {
+	assert.Equal(this.T(), 1, CalculateDays(
+		Date(2023, 2, 10),
+		Date(2023, 2, 11)))
+	assert.Equal(this.T(), 1, CalculateDays(
+		Date(2023, 2, 10, 1),
+		Date(2023, 2, 11, 1)))
+	assert.Equal(this.T(), 2, CalculateDays(
+		Date(2023, 2, 10, 1),
+		Date(2023, 2, 12, 1)))
+	assert.Equal(this.T(), 3, CalculateDays(
+		Date(2023, 2, 10, 1),
+		Date(2023, 2, 13, 1)))
+	assert.Equal(this.T(), 1, CalculateDays(
+		Date(2023, 2, 11),
+		Date(2023, 2, 10)))
+	assert.Equal(this.T(), 1, CalculateDays(
+		Date(2023, 2, 11, 1),
+		Date(2023, 2, 10, 1)))
+	assert.Equal(this.T(), 2, CalculateDays(
+		Date(2023, 2, 12, 1),
+		Date(2023, 2, 10, 1)))
+	assert.Equal(this.T(), 3, CalculateDays(
+		Date(2023, 2, 13, 1),
+		Date(2023, 2, 10, 1)))
+}
+
+func (this *SuiteTime) TestCalculateDaysWithBaseline() {
+	assert.Equal(this.T(), 1, CalculateDaysWithBaseline(
+		Date(2023, 2, 10),
+		Date(2023, 2, 11),
+		TimeHour*5))
+	assert.Equal(this.T(), 1, CalculateDaysWithBaseline(
+		Date(2023, 2, 10, 1),
+		Date(2023, 2, 11, 1),
+		TimeHour*5))
+	assert.Equal(this.T(), 2, CalculateDaysWithBaseline(
+		Date(2023, 2, 10, 1),
+		Date(2023, 2, 12, 1),
+		TimeHour*5))
+	assert.Equal(this.T(), 3, CalculateDaysWithBaseline(
+		Date(2023, 2, 10, 1),
+		Date(2023, 2, 13, 1),
+		TimeHour*5))
+}
