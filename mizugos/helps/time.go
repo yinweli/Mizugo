@@ -461,4 +461,21 @@ func FixedNext(base, now time.Time, duration time.Duration) time.Time {
 	return base.Add(time.Duration(quotient*dsec) * time.Second)
 }
 
+// CalculateDays 計算兩個時間相差幾天
+func CalculateDays(t1, t2 time.Time) int {
+	if t2.Before(t1) {
+		return CalculateDays(t2, t1)
+	} // if
+
+	t1x := t1.Truncate(TimeDay)
+	t2x := t2.Truncate(TimeDay)
+	return int(t2x.Sub(t1x).Hours() / DayHourMax)
+}
+
+// CalculateDaysWithBaseline 計算兩個時間相差幾天, 但是以 base 指定的時間為日界
+// base 應該是個介於 0 ~ 23:59:59 的時間長度, 例如 base 為5小時的話, 表示以凌晨5點為日界
+func CalculateDaysWithBaseline(t1, t2 time.Time, base time.Duration) int {
+	return CalculateDays(t1.Add(-base), t2.Add(-base))
+}
+
 var zone *time.Location // 時區資料
