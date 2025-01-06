@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.46] - 2025-01-06
+### Changed
+- 更新第三方函式庫
+- 需要go 1.22以上
+
 ## [1.1.45] - 2024-12-25
 ### Fixed
 - 修正CalculateDays的時區計算錯誤
