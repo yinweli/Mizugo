@@ -17,7 +17,7 @@
 | proto-unity         | protobuf組件分支, 提供給[unity]的[package manager]安裝用 |
 
 # 系統需求
-- [go]1.19以上
+- [go]1.22以上
 - [proto]3以上
 
 # 如何安裝
