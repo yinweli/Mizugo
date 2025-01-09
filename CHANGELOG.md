@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.47] - 2025-01-09
+### Added
+- 新增Optsz組件
+### Fixed
+- 修正github workflow
+
 ## [1.1.46] - 2025-01-06
 ### Changed
 - 更新第三方函式庫
