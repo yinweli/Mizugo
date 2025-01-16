@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// Del 刪除行為, 以索引字串與資料到主要/次要資料庫中刪除資料, 使用上有以下幾點須注意
+// Del 刪除行為, 以索引值與資料到主要/次要資料庫中刪除資料, 使用上有以下幾點須注意
 //   - 執行前設定好 MajorEnable, MinorEnable
 //   - 執行前設定好 Meta, 這需要事先建立好與 Metaer 介面符合的元資料結構
 //   - 執行前設定好 Key 並且不能為空字串
