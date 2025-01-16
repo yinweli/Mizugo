@@ -35,3 +35,26 @@ func RedisCompare[T any](client redis.Cmdable, key string, expected *T, option .
 
 	return cmp.Equal(expected, actual, option...)
 }
+
+// RedisCompareList 在redis中比對列表是否相同
+func RedisCompareList[T any](client redis.Cmdable, key string, expected []*T, option ...cmp.Option) bool {
+	result, err := client.LRange(context.Background(), key, 0, int64(len(expected))).Result()
+
+	if err != nil {
+		return false
+	} // if
+
+	actual := []*T{}
+
+	for _, itor := range result {
+		a := new(T)
+
+		if json.Unmarshal([]byte(itor), a) != nil {
+			return false
+		} // if
+
+		actual = append(actual, a)
+	} // for
+
+	return cmp.Equal(expected, actual, option...)
+}

@@ -40,3 +40,35 @@ func MongoCompare[T any](database *mongo.Database, table, field, key string, exp
 
 	return cmp.Equal(expected, actual, option...)
 }
+
+// MongoCompareList 在mongo中比對列表是否相同, sort為排序欄位, asc = 1 為升序, -1為降序
+func MongoCompareList[T any](database *mongo.Database, table, sort string, asc int, expected []*T, option ...cmp.Option) bool {
+	collection := database.Collection(table)
+
+	if collection == nil {
+		return false
+	} // if
+
+	result, err := collection.Find(context.Background(), bson.D{}, options.Find().SetSort(bson.D{{Key: sort, Value: asc}}))
+
+	if err != nil {
+		return false
+	} // if
+
+	defer func() {
+		_ = result.Close(context.Background())
+	}()
+	actual := []*T{}
+
+	for result.Next(context.Background()) {
+		a := new(T)
+
+		if err = result.Decode(a); err != nil {
+			return false
+		} // if
+
+		actual = append(actual, a)
+	} // for
+
+	return cmp.Equal(expected, actual, option...)
+}
