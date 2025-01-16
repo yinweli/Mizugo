@@ -63,3 +63,26 @@ func (this *SuiteMinor) TestMinorSubmit() {
 	target = minor.Submit()
 	assert.Nil(this.T(), target.Exec(context.Background()))
 }
+
+func (this *SuiteMinor) TestMinorIndex() {
+	target := MinorIndex(&meta{})
+	assert.NotNil(this.T(), target)
+	assert.NotEmpty(this.T(), target.Name)
+	assert.NotEmpty(this.T(), target.Table)
+	assert.NotEmpty(this.T(), target.Field)
+}
+
+type meta struct {
+}
+
+func (this *meta) MajorKey(key any) string {
+	return ""
+}
+
+func (this *meta) MinorKey(key any) string {
+	return ""
+}
+
+func (this *meta) MinorTable() string {
+	return testdata.Unknown
+}

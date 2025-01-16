@@ -10,8 +10,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// Get 取值行為, 以索引字串到主要/次要資料庫中取得資料, 不會影響主要資料庫中的資料的逾期時間, 使用上有以下幾點須注意
-//   - 需要事先建立好資料結構, 並填寫到泛型類型T中, 請不要填入指標類型
+// Get 取值行為, 以索引值到主要/次要資料庫中取得資料, 不會影響主要資料庫中的資料的逾期時間, 使用上有以下幾點須注意
+//   - 泛型類型T必須是結構, 並且不能是指標
+//   - 資料結構的成員都需要設定好`bson:xxxxx`屬性
 //   - 執行前設定好 MajorEnable, MinorEnable
 //   - 執行前設定好 Meta, 這需要事先建立好與 Metaer 介面符合的元資料結構
 //   - 執行前設定好 Key 並且不能為空字串
@@ -42,14 +43,8 @@ func (this *Get[T]) Prepare() error {
 		this.cmd = this.Major().Get(this.Ctx(), key)
 	} // if
 
-	if this.MinorEnable {
-		if this.Meta.MinorTable() == "" {
-			return fmt.Errorf("get prepare: table empty")
-		} // if
-
-		if this.Meta.MinorField() == "" {
-			return fmt.Errorf("get prepare: field empty")
-		} // if
+	if this.MinorEnable && this.Meta.MinorTable() == "" {
+		return fmt.Errorf("get prepare: table empty")
 	} // if
 
 	return nil
@@ -57,10 +52,6 @@ func (this *Get[T]) Prepare() error {
 
 // Complete 完成處理
 func (this *Get[T]) Complete() error {
-	if this.Meta == nil {
-		return fmt.Errorf("get complete: meta nil")
-	} // if
-
 	if this.MajorEnable {
 		data, err := this.cmd.Result()
 
@@ -82,11 +73,9 @@ func (this *Get[T]) Complete() error {
 	} // if
 
 	if this.MinorEnable {
-		table := this.Meta.MinorTable()
-		field := this.Meta.MinorField()
 		key := this.Meta.MinorKey(this.Key)
-		filter := bson.D{{Key: field, Value: key}}
-		result := this.Minor().Collection(table).FindOne(this.Ctx(), filter)
+		table := this.Meta.MinorTable()
+		result := this.Minor().Collection(table).FindOne(this.Ctx(), bson.M{MongoKey: key})
 		err := result.Err()
 		empty := errors.Is(err, mongo.ErrNoDocuments)
 
@@ -99,7 +88,9 @@ func (this *Get[T]) Complete() error {
 				this.Data = new(T)
 			} // if
 
-			if err = result.Decode(this.Data); err != nil {
+			if err = result.Decode(&MinorData[T]{
+				D: this.Data,
+			}); err != nil {
 				return fmt.Errorf("get complete: %w: %v", err, this.Key)
 			} // if
 		} // if
