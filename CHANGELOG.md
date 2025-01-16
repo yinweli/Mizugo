@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.48] - 2025-01-16
+### Changed
+- 隨機工具改用 golang.org/x/exp/rand 來產生亂數
+### Added
+- 增加RandSource來取得隨機來源
+
 ## [1.1.47] - 2025-01-09
 ### Added
 - 新增Optsz組件
