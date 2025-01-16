@@ -31,6 +31,7 @@ func (this *SuiteRand) TearDownSuite() {
 func (this *SuiteRand) TestRand() {
 	RandSeed(0)
 	RandSeedTime()
+	assert.NotNil(this.T(), RandSource())
 	fmt.Println(RandInt())
 	value := RandIntn(-5, 5)
 	assert.True(this.T(), value >= -5 && value <= 5)
@@ -55,4 +56,46 @@ func (this *SuiteRand) TestRand() {
 	assert.NotNil(this.T(), values)
 	assert.Len(this.T(), values, 10)
 	fmt.Println(values)
+}
+
+func BenchmarkRandInt32(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		RandInt32()
+	} // for
+}
+
+func BenchmarkRandInt32n(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		RandInt32n(0, 10000)
+	} // for
+}
+
+func BenchmarkRandInt64(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		RandInt64()
+	} // for
+}
+
+func BenchmarkRandInt64n(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		RandInt64n(0, 10000)
+	} // for
+}
+
+func BenchmarkRandReal64(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		RandReal64()
+	} // for
+}
+
+func BenchmarkRandReal64n(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		RandReal64n(0, 10000)
+	} // for
+}
+
+func BenchmarkRandStringDefault(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_ = RandStringDefault()
+	} // for
 }
