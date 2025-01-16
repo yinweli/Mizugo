@@ -111,5 +111,6 @@ func (this *MinorSubmit) Exec(ctx context.Context) error {
 		} // if
 	} // for
 
+	this.operate = map[string][]mongo.WriteModel{}
 	return nil
 }
