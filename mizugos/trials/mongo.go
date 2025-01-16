@@ -17,7 +17,7 @@ func MongoExist(database *mongo.Database, table, field, key string) bool {
 		return false
 	} // if
 
-	if collection.FindOne(context.Background(), bson.D{{Key: field, Value: key}}, options.FindOne()).Err() != nil {
+	if collection.FindOne(context.Background(), bson.M{field: key}, options.FindOne()).Err() != nil {
 		return false
 	} // if
 
@@ -34,7 +34,7 @@ func MongoCompare[T any](database *mongo.Database, table, field, key string, exp
 
 	actual := new(T)
 
-	if collection.FindOne(context.Background(), bson.D{{Key: field, Value: key}}, options.FindOne()).Decode(actual) != nil {
+	if collection.FindOne(context.Background(), bson.M{field: key}, options.FindOne()).Decode(actual) != nil {
 		return false
 	} // if
 
