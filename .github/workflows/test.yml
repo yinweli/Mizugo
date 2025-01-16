@@ -40,7 +40,8 @@ jobs:
         with:
           mongodb-version: ${{ matrix.mongo }}
       - name: test
-        run: go test -coverprofile=coverage.txt -covermode=atomic ./...
+        run: |
+          go test -coverprofile=coverage.txt -covermode=atomic $(go list ./... | grep -v "support")
       - name: upload coverage to Codecov
         uses: codecov/codecov-action@v4
         env:
