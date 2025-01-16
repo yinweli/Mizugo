@@ -7,10 +7,11 @@ import (
 )
 
 const ( // redis定義
-	Timeout  = time.Second * 30 // redis超時時間
-	RedisNil = ""               // redis回應空字串, 通常在GET命令找不到索引時, 會以此字串回報給使用者
-	RedisOk  = "OK"             // redis回應完成, 通常在SET命令順利完成後, 會以此字串回報給使用者
-	KeepTTL  = redis.KeepTTL    // 不更動逾期時間
+	Timeout   = time.Second * 30 // redis超時時間
+	RedisNil  = ""               // redis回應空字串, 通常在GET命令找不到索引時, 會以此字串回報給使用者
+	RedisOk   = "OK"             // redis回應完成, 通常在SET命令順利完成後, 會以此字串回報給使用者
+	KeepTTL   = redis.KeepTTL    // 不更動逾期時間
+	QPushTime = "_qpush_time_"   // mongo中的佇列時間欄位
 )
 
 // Metaer 元資料介面, 提供主要/次要資料庫操作時所需的必要資訊
