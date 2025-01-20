@@ -8,11 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
-## [1.1.48] - 2025-01-16
+## [1.1.49] - 2025-01-21
+### Added
+- redmos新增QPush, QPop, QPopAll, QPeek資料庫函式
+- redmos新增MinorIndex函式
+- trials新增RedisCompareList函式
+### Deleted
+- 移除redmos.Metaer介面中的MinorField函式
 ### Changed
-- 隨機工具改用 golang.org/x/exp/rand 來產生亂數
+- 簡化redmos次要資料庫儲存程序
+- 變更redmos.Index結構
+### Fixed
+- 修正redmos次要資料庫批量操作完成後未清除操作列表的問題, 避免下次使用相同物件時重複執行已完成的操作
+
+## [1.1.48] - 2025-01-16
 ### Added
 - 增加RandSource來取得隨機來源
+### Changed
+- 隨機工具改用 golang.org/x/exp/rand 來產生亂數
 
 ## [1.1.47] - 2025-01-09
 ### Added
