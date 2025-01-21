@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.50] - 2025-01-21
+### Fixed
+- 修正建立專門用於次要資料庫的索引
+
 ## [1.1.49] - 2025-01-21
 ### Added
 - redmos新增QPush, QPop, QPopAll, QPeek資料庫函式
