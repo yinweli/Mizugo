@@ -128,6 +128,6 @@ func MinorIndex(meta Metaer) *Index {
 		Table:  meta.MinorTable(),
 		Field:  MongoKey,
 		Order:  1,
-		Unique: false,
+		Unique: true,
 	}
 }
