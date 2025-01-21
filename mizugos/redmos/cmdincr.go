@@ -8,8 +8,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// Incr 遞增行為, 以索引字串到主要/次要資料庫中遞增數值, 使用上有以下幾點須注意
-//   - 執行前設定好 MinorEnable. 請注意! 遞增行為必定會在主資料庫中執行, 因此無法禁用主資料庫
+// Incr 遞增行為, 以索引值到主要/次要資料庫中遞增數值, 使用上有以下幾點須注意
+//   - 執行前設定好 MinorEnable; 由於遞增行為只會在主要資料庫中執行, 因此次要資料庫僅用於備份
 //   - 執行前設定好 Meta, 這需要事先建立好與 Metaer 介面符合的元資料結構
 //   - 執行前設定好 Key 並且不能為空字串
 //   - 執行前設定好 Data 並且不能為空物件
@@ -25,8 +25,8 @@ type Incr struct {
 
 // IncrData 遞增資料
 type IncrData struct {
-	Incr  int64 // 遞增數值
-	Value int64 // 遞增結果
+	Incr  int64 `bson:"incr"`  // 遞增數值
+	Value int64 `bson:"value"` // 遞增結果
 }
 
 // Prepare 前置處理
@@ -40,46 +40,39 @@ func (this *Incr) Prepare() error {
 	} // if
 
 	if this.Data == nil {
-		return fmt.Errorf("incr prepare: data empty")
+		return fmt.Errorf("incr prepare: data nil")
+	} // if
+
+	if this.MinorEnable && this.Meta.MinorTable() == "" {
+		return fmt.Errorf("incr prepare: table empty")
 	} // if
 
 	key := this.Meta.MajorKey(this.Key)
 	this.cmd = this.Major().IncrBy(this.Ctx(), key, this.Data.Incr)
-
-	if this.MinorEnable {
-		if this.Meta.MinorTable() == "" {
-			return fmt.Errorf("incr prepare: table empty")
-		} // if
-
-		if this.Meta.MinorField() == "" {
-			return fmt.Errorf("incr prepare: field empty")
-		} // if
-	} // if
-
 	return nil
 }
 
 // Complete 完成處理
 func (this *Incr) Complete() error {
-	if this.Meta == nil {
-		return fmt.Errorf("incr complete: meta nil")
-	} // if
-
 	data, err := this.cmd.Result()
 
 	if err != nil {
 		return fmt.Errorf("incr complete: %w: %v", err, this.Key)
 	} // if
 
+	this.Data.Value = data
+
 	if this.MinorEnable {
-		table := this.Meta.MinorTable()
-		field := this.Meta.MinorField()
 		key := this.Meta.MinorKey(this.Key)
-		filter := bson.D{{Key: field, Value: key}}
-		replace := bson.M{field: key, "value": data} // 在mongo中, 遞增值固定儲存在value欄位
-		this.Minor().Operate(table, mongo.NewReplaceOneModel().SetUpsert(true).SetFilter(filter).SetReplacement(replace))
+		table := this.Meta.MinorTable()
+		this.Minor().Operate(table, mongo.NewReplaceOneModel().
+			SetUpsert(true).
+			SetFilter(bson.M{MongoKey: key}).
+			SetReplacement(&MinorData[IncrData]{
+				K: key,
+				D: this.Data,
+			}))
 	} // if
 
-	this.Data.Value = data
 	return nil
 }

@@ -41,57 +41,44 @@ func (this *SuiteCmdDel) TearDownSuite() {
 
 func (this *SuiteCmdDel) TestDel() {
 	this.meta.table = true
-	this.meta.field = true
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
-	data := &dataDel{Field: "redis+mongo", Value: helps.RandStringDefault()}
+	data := &dataDel{K: "redis+mongo", D: helps.RandStringDefault()}
 
-	set := &Set[dataDel]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}
+	set := &Set[dataDel]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: data.K, Data: data}
 	set.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), set.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), set.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.True(this.T(), trials.RedisCompare[dataDel](this.major.Client(), this.meta.MajorKey(data.Field), data))
-	assert.True(this.T(), trials.MongoCompare[dataDel](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data))
+	assert.True(this.T(), trials.RedisCompare[dataDel](this.major.Client(), this.meta.MajorKey(data.K), data))
+	assert.True(this.T(), trials.MongoCompare[dataDel](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data.K), data))
 
-	target := &Del{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field}
+	target := &Del{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: data.K}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), target.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.False(this.T(), trials.RedisExist(this.major.Client(), this.meta.MajorKey(data.Field)))
-	assert.False(this.T(), trials.MongoExist(this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field)))
+	assert.False(this.T(), trials.RedisExist(this.major.Client(), this.meta.MajorKey(data.K)))
+	assert.False(this.T(), trials.MongoExist(this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data.K)))
 
-	target = &Del{Meta: nil, MajorEnable: true, MinorEnable: true, Key: data.Field}
+	target = &Del{MajorEnable: true, MinorEnable: true, Meta: nil, Key: data.K}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
-	target = &Del{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: ""}
+	target = &Del{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: ""}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	this.meta.table = false
-	this.meta.field = true
-	target = &Del{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field}
+	target = &Del{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: data.K}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
-
-	this.meta.table = true
-	this.meta.field = false
-	target = &Del{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field}
-	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
-
-	target = &Del{Meta: nil, MajorEnable: true, MinorEnable: true, Key: data.Field}
-	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Complete())
 }
 
 type metaDel struct {
 	table bool
-	field bool
 }
 
 func (this *metaDel) MajorKey(key any) string {
@@ -110,15 +97,7 @@ func (this *metaDel) MinorTable() string {
 	return ""
 }
 
-func (this *metaDel) MinorField() string {
-	if this.field {
-		return "field"
-	} // if
-
-	return ""
-}
-
 type dataDel struct {
-	Field string `bson:"field"`
-	Value string `bson:"value"`
+	K string `bson:"k"`
+	D string `bson:"d"`
 }

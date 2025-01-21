@@ -42,89 +42,76 @@ func (this *SuiteCmdSetNX) TearDownSuite() {
 
 func (this *SuiteCmdSetNX) TestSetNX() {
 	this.meta.table = true
-	this.meta.field = true
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
-	dataAll := &dataSetNX{Field: "redis+mongo", Value: helps.RandStringDefault()}
-	dataRedis := &dataSetNX{Field: "redis", Value: helps.RandStringDefault()}
-	dataMongo := &dataSetNX{Field: "mongo", Value: helps.RandStringDefault()}
+	dataAll := &dataSetNX{K: "redis+mongo", D: helps.RandStringDefault()}
+	dataRedis := &dataSetNX{K: "redis", D: helps.RandStringDefault()}
+	dataMongo := &dataSetNX{K: "mongo", D: helps.RandStringDefault()}
 
-	target := &SetNX[dataSetNX]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: dataAll}
+	target := &SetNX[dataSetNX]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: dataAll.K, Data: dataAll}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), target.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.True(this.T(), trials.RedisCompare[dataSetNX](this.major.Client(), this.meta.MajorKey(dataAll.Field), dataAll))
-	assert.True(this.T(), trials.MongoCompare[dataSetNX](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(dataAll.Field), dataAll))
+	assert.True(this.T(), trials.RedisCompare[dataSetNX](this.major.Client(), this.meta.MajorKey(dataAll.K), dataAll))
+	assert.True(this.T(), trials.MongoCompare[dataSetNX](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(dataAll.K), dataAll))
 
-	target = &SetNX[dataSetNX]{Meta: &this.meta, MajorEnable: true, MinorEnable: false, Key: dataRedis.Field, Data: dataRedis}
+	target = &SetNX[dataSetNX]{MajorEnable: true, MinorEnable: false, Meta: &this.meta, Key: dataRedis.K, Data: dataRedis}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), target.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.True(this.T(), trials.RedisCompare[dataSetNX](this.major.Client(), this.meta.MajorKey(dataRedis.Field), dataRedis))
-	assert.False(this.T(), trials.MongoCompare[dataSetNX](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(dataRedis.Field), dataRedis))
+	assert.True(this.T(), trials.RedisCompare[dataSetNX](this.major.Client(), this.meta.MajorKey(dataRedis.K), dataRedis))
+	assert.False(this.T(), trials.MongoCompare[dataSetNX](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(dataRedis.K), dataRedis))
 
-	target = &SetNX[dataSetNX]{Meta: &this.meta, MajorEnable: false, MinorEnable: true, Key: dataMongo.Field, Data: dataMongo}
+	target = &SetNX[dataSetNX]{MajorEnable: false, MinorEnable: true, Meta: &this.meta, Key: dataMongo.K, Data: dataMongo}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), target.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.False(this.T(), trials.RedisCompare[dataSetNX](this.major.Client(), this.meta.MajorKey(dataMongo.Field), dataMongo))
-	assert.True(this.T(), trials.MongoCompare[dataSetNX](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(dataMongo.Field), dataMongo))
+	assert.False(this.T(), trials.RedisCompare[dataSetNX](this.major.Client(), this.meta.MajorKey(dataMongo.K), dataMongo))
+	assert.True(this.T(), trials.MongoCompare[dataSetNX](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(dataMongo.K), dataMongo))
 
-	target = &SetNX[dataSetNX]{Meta: nil, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: dataAll}
+	target = &SetNX[dataSetNX]{MajorEnable: true, MinorEnable: true, Meta: nil, Key: dataAll.K, Data: dataAll}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
-	target = &SetNX[dataSetNX]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: "", Data: dataAll}
+	target = &SetNX[dataSetNX]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: "", Data: dataAll}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
-	target = &SetNX[dataSetNX]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: nil}
+	target = &SetNX[dataSetNX]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: dataAll.K, Data: nil}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	this.meta.table = false
-	this.meta.field = true
-	target = &SetNX[dataSetNX]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: dataAll}
+	target = &SetNX[dataSetNX]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: dataAll.K, Data: dataAll}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
-
-	this.meta.table = true
-	this.meta.field = false
-	target = &SetNX[dataSetNX]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: dataAll}
-	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
-
-	target = &SetNX[dataSetNX]{Meta: nil, MajorEnable: true, MinorEnable: true, Key: dataAll.Field, Data: dataAll}
-	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Complete())
 }
 
 func (this *SuiteCmdSetNX) TestSetNXSave() {
 	this.meta.table = true
-	this.meta.field = true
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
-	data := &dataSetNXSave{Save: NewSave(), Field: helps.RandStringDefault(), Value: helps.RandStringDefault()}
+	data := &dataSetNXSave{Save: NewSave(), K: helps.RandStringDefault(), D: helps.RandStringDefault()}
 	opt := cmpopts.IgnoreFields(dataSetNXSave{}, "Save")
 
 	data.save = true
-	set := &SetNX[dataSetNXSave]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}
+	set := &SetNX[dataSetNXSave]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: data.K, Data: data}
 	set.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), set.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), set.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.True(this.T(), trials.RedisCompare[dataSetNXSave](this.major.Client(), this.meta.MajorKey(data.Field), data, opt))
-	assert.True(this.T(), trials.MongoCompare[dataSetNXSave](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data, opt))
+	assert.True(this.T(), trials.RedisCompare[dataSetNXSave](this.major.Client(), this.meta.MajorKey(data.K), data, opt))
+	assert.True(this.T(), trials.MongoCompare[dataSetNXSave](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data.K), data, opt))
 
 	data.save = false
-	set = &SetNX[dataSetNXSave]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}
+	set = &SetNX[dataSetNXSave]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: data.K, Data: data}
 	set.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), set.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
@@ -134,7 +121,6 @@ func (this *SuiteCmdSetNX) TestSetNXSave() {
 
 type metaSetNX struct {
 	table bool
-	field bool
 }
 
 func (this *metaSetNX) MajorKey(key any) string {
@@ -153,21 +139,13 @@ func (this *metaSetNX) MinorTable() string {
 	return ""
 }
 
-func (this *metaSetNX) MinorField() string {
-	if this.field {
-		return "field"
-	} // if
-
-	return ""
-}
-
 type dataSetNX struct {
-	Field string `bson:"field"`
-	Value string `bson:"value"`
+	K string `bson:"k"`
+	D string `bson:"d"`
 }
 
 type dataSetNXSave struct {
 	*Save
-	Field string `bson:"field"`
-	Value string `bson:"value"`
+	K string `bson:"k"`
+	D string `bson:"d"`
 }

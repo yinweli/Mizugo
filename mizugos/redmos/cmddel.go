@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// Del 刪除行為, 以索引字串與資料到主要/次要資料庫中刪除資料, 使用上有以下幾點須注意
+// Del 刪除行為, 以索引值與資料到主要/次要資料庫中刪除資料, 使用上有以下幾點須注意
 //   - 執行前設定好 MajorEnable, MinorEnable
 //   - 執行前設定好 Meta, 這需要事先建立好與 Metaer 介面符合的元資料結構
 //   - 執行前設定好 Key 並且不能為空字串
@@ -36,14 +36,8 @@ func (this *Del) Prepare() error {
 		this.cmd = this.Major().Del(this.Ctx(), key)
 	} // if
 
-	if this.MinorEnable {
-		if this.Meta.MinorTable() == "" {
-			return fmt.Errorf("del prepare: table empty")
-		} // if
-
-		if this.Meta.MinorField() == "" {
-			return fmt.Errorf("del prepare: field empty")
-		} // if
+	if this.MinorEnable && this.Meta.MinorTable() == "" {
+		return fmt.Errorf("del prepare: table empty")
 	} // if
 
 	return nil
@@ -51,10 +45,6 @@ func (this *Del) Prepare() error {
 
 // Complete 完成處理
 func (this *Del) Complete() error {
-	if this.Meta == nil {
-		return fmt.Errorf("del complete: meta nil")
-	} // if
-
 	if this.MajorEnable {
 		if _, err := this.cmd.Result(); err != nil {
 			return fmt.Errorf("del complete: %w: %v", err, this.Key)
@@ -62,11 +52,10 @@ func (this *Del) Complete() error {
 	} // if
 
 	if this.MinorEnable {
-		table := this.Meta.MinorTable()
-		field := this.Meta.MinorField()
 		key := this.Meta.MinorKey(this.Key)
-		filter := bson.D{{Key: field, Value: key}}
-		this.Minor().Operate(table, mongo.NewDeleteOneModel().SetFilter(filter))
+		table := this.Meta.MinorTable()
+		this.Minor().Operate(table, mongo.NewDeleteOneModel().
+			SetFilter(bson.M{MongoKey: key}))
 	} // if
 
 	return nil

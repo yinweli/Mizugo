@@ -9,8 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// Set 設值行為, 以索引字串與資料到主要/次要資料庫中儲存資料, 不會影響主要資料庫中的資料的逾期時間, 使用上有以下幾點須注意
-//   - 需要事先建立好資料結構, 並填寫到泛型類型T中, 請不要填入指標類型
+// Set 設值行為, 以索引值與資料到主要/次要資料庫中儲存資料, 不會影響主要資料庫中的資料的逾期時間, 使用上有以下幾點須注意
+//   - 泛型類型T必須是結構, 並且不能是指標
 //   - 資料結構如果包含 Save 結構或是符合 Saver 介面, 會套用儲存判斷機制, 減少不必要的儲存操作
 //   - 資料結構的成員都需要設定好`bson:xxxxx`屬性
 //   - 執行前設定好 MajorEnable, MinorEnable
@@ -56,14 +56,8 @@ func (this *Set[T]) Prepare() error {
 		this.cmd = this.Major().Set(this.Ctx(), key, data, redis.KeepTTL)
 	} // if
 
-	if this.MinorEnable {
-		if this.Meta.MinorTable() == "" {
-			return fmt.Errorf("set prepare: table empty")
-		} // if
-
-		if this.Meta.MinorField() == "" {
-			return fmt.Errorf("set prepare: field empty")
-		} // if
+	if this.MinorEnable && this.Meta.MinorTable() == "" {
+		return fmt.Errorf("set prepare: table empty")
 	} // if
 
 	return nil
@@ -71,10 +65,6 @@ func (this *Set[T]) Prepare() error {
 
 // Complete 完成處理
 func (this *Set[T]) Complete() error {
-	if this.Meta == nil {
-		return fmt.Errorf("set complete: meta nil")
-	} // if
-
 	if save, ok := any(this.Data).(Saver); ok && save.GetSave() == false {
 		return nil
 	} // if
@@ -92,11 +82,15 @@ func (this *Set[T]) Complete() error {
 	} // if
 
 	if this.MinorEnable {
-		table := this.Meta.MinorTable()
-		field := this.Meta.MinorField()
 		key := this.Meta.MinorKey(this.Key)
-		filter := bson.D{{Key: field, Value: key}}
-		this.Minor().Operate(table, mongo.NewReplaceOneModel().SetUpsert(true).SetFilter(filter).SetReplacement(this.Data))
+		table := this.Meta.MinorTable()
+		this.Minor().Operate(table, mongo.NewReplaceOneModel().
+			SetUpsert(true).
+			SetFilter(bson.M{MongoKey: key}).
+			SetReplacement(&MinorData[T]{
+				K: key,
+				D: this.Data,
+			}))
 	} // if
 
 	return nil

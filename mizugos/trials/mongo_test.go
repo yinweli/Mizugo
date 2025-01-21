@@ -28,8 +28,8 @@ func (this *SuiteMongo) TestMongoExist() {
 	key := "key"
 	client := newMongo()
 	_, _ = client.Database(dbname).Collection(table).UpdateOne(context.Background(),
-		bson.D{{Key: field, Value: key}},
-		bson.D{{Key: "$set", Value: bson.D{{Key: field, Value: key}}}},
+		bson.M{field: key},
+		bson.M{"$set": bson.M{field: key}},
 		options.Update().SetUpsert(true))
 	assert.True(this.T(), MongoExist(client.Database(dbname), table, field, key))
 	assert.False(this.T(), MongoExist(client.Database(dbname), table, field, testdata.Unknown))
@@ -39,15 +39,11 @@ func (this *SuiteMongo) TestMongoExist() {
 func (this *SuiteMongo) TestMongoCompare() {
 	dbname := "compare"
 	table := "table"
-	field := "field"
-	key := "999"
+	field := "value"
 	client := newMongo()
-	_, _ = client.Database(dbname).Collection(table).UpdateOne(context.Background(),
-		bson.D{{Key: field, Value: key}},
-		bson.D{{Key: "$set", Value: bson.D{{Key: field, Value: key}}}},
-		options.Update().SetUpsert(true))
-	assert.True(this.T(), MongoCompare[testMongo](client.Database(dbname), table, field, key, &testMongo{Field: key}))
-	assert.False(this.T(), MongoExist(client.Database(dbname), table, field, testdata.Unknown))
+	_, _ = client.Database(dbname).Collection(table).InsertOne(context.Background(), bson.M{field: "1"})
+	assert.True(this.T(), MongoCompare[testMongo](client.Database(dbname), table, field, "1", &testMongo{Value: "1"}))
+	assert.False(this.T(), MongoCompare[testMongo](client.Database(dbname), table, field, testdata.Unknown, &testMongo{Value: "1"}))
 	_ = client.Database(dbname).Drop(context.Background())
 }
 
@@ -58,5 +54,5 @@ func newMongo() *mongo.Client {
 }
 
 type testMongo struct {
-	Field string `bson:"field"`
+	Value string `bson:"value"`
 }

@@ -10,13 +10,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// SetNX 設值行為, 當索引不存在才執行, 以索引字串與資料到主要/次要資料庫中儲存資料, 使用上有以下幾點須注意
-//   - 需要事先建立好資料結構, 並填寫到泛型類型T中, 請不要填入指標類型
+// SetNX 設值行為, 當索引不存在才執行, 以索引值與資料到主要/次要資料庫中儲存資料, 使用上有以下幾點須注意
+//   - 泛型類型T必須是結構, 並且不能是指標
 //   - 資料結構如果包含 Save 結構或是符合 Saver 介面, 會套用儲存判斷機制, 減少不必要的儲存操作
 //   - 資料結構的成員都需要設定好`bson:xxxxx`屬性
 //   - 執行前設定好 MajorEnable, MinorEnable
 //   - 執行前設定好 Meta, 這需要事先建立好與 Metaer 介面符合的元資料結構
-//   - 執行前設定好 Expire, 若不設置或是設置為0表示不逾期, 如果設為-1或是 KeepTTL 則表示不更動逾期時間
+//   - 執行前設定好 Expire, 若不設置或是設置為0表示不逾期, 如果設為-1或是 RedisTTL 則表示不更動逾期時間
 //   - 執行前設定好 Key 並且不能為空字串
 //   - 執行前設定好 Data 並且不能為nil
 type SetNX[T any] struct {
@@ -24,7 +24,7 @@ type SetNX[T any] struct {
 	MajorEnable bool           // 啟用主要資料庫
 	MinorEnable bool           // 啟用次要資料庫
 	Meta        Metaer         // 元資料
-	Expire      time.Duration  // 逾期時間, 若為0表示不逾期, 若為-1或是 KeepTTL 則表示不更動逾期時間
+	Expire      time.Duration  // 逾期時間, 若為0表示不逾期, 若為-1或是 RedisTTL 則表示不更動逾期時間
 	Key         string         // 索引值
 	Data        *T             // 資料物件
 	cmd         *redis.BoolCmd // 命令結果
@@ -59,14 +59,8 @@ func (this *SetNX[T]) Prepare() error {
 		this.cmd = this.Major().SetNX(this.Ctx(), key, data, this.Expire)
 	} // if
 
-	if this.MinorEnable {
-		if this.Meta.MinorTable() == "" {
-			return fmt.Errorf("setnx prepare: table empty")
-		} // if
-
-		if this.Meta.MinorField() == "" {
-			return fmt.Errorf("setnx prepare: field empty")
-		} // if
+	if this.MinorEnable && this.Meta.MinorTable() == "" {
+		return fmt.Errorf("setnx prepare: table empty")
 	} // if
 
 	return nil
@@ -74,10 +68,6 @@ func (this *SetNX[T]) Prepare() error {
 
 // Complete 完成處理
 func (this *SetNX[T]) Complete() error {
-	if this.Meta == nil {
-		return fmt.Errorf("setnx complete: meta nil")
-	} // if
-
 	if save, ok := any(this.Data).(Saver); ok && save.GetSave() == false {
 		return nil
 	} // if
@@ -95,11 +85,15 @@ func (this *SetNX[T]) Complete() error {
 	} // if
 
 	if this.MinorEnable {
-		table := this.Meta.MinorTable()
-		field := this.Meta.MinorField()
 		key := this.Meta.MinorKey(this.Key)
-		filter := bson.D{{Key: field, Value: key}}
-		this.Minor().Operate(table, mongo.NewReplaceOneModel().SetUpsert(true).SetFilter(filter).SetReplacement(this.Data))
+		table := this.Meta.MinorTable()
+		this.Minor().Operate(table, mongo.NewReplaceOneModel().
+			SetUpsert(true).
+			SetFilter(bson.M{MongoKey: key}).
+			SetReplacement(&MinorData[T]{
+				K: key,
+				D: this.Data,
+			}))
 	} // if
 
 	return nil

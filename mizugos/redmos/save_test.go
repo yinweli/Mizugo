@@ -10,24 +10,24 @@ import (
 	"github.com/yinweli/Mizugo/testdata"
 )
 
-func TestMX(t *testing.T) {
-	suite.Run(t, new(SuiteMX))
+func TestSave(t *testing.T) {
+	suite.Run(t, new(SuiteSave))
 }
 
-type SuiteMX struct {
+type SuiteSave struct {
 	suite.Suite
 	trials.Catalog
 }
 
-func (this *SuiteMX) SetupSuite() {
-	this.Catalog = trials.Prepare(testdata.PathWork("test-redmos-mx"))
+func (this *SuiteSave) SetupSuite() {
+	this.Catalog = trials.Prepare(testdata.PathWork("test-redmos-save"))
 }
 
-func (this *SuiteMX) TearDownSuite() {
+func (this *SuiteSave) TearDownSuite() {
 	trials.Restore(this.Catalog)
 }
 
-func (this *SuiteMX) TestSave() {
+func (this *SuiteSave) TestSave() {
 	target := NewSave()
 	assert.NotNil(this.T(), target)
 	target.SetSave()

@@ -42,52 +42,40 @@ func (this *SuiteCmdIncr) TearDownSuite() {
 
 func (this *SuiteCmdIncr) TestIncr() {
 	this.meta.table = true
-	this.meta.field = true
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
-	data := &dataIncr{Field: "redis+mongo", Value: 1}
+	key := "redis+mongo"
+	data := &IncrData{Incr: 1, Value: 0}
 
-	target := &Incr{Meta: &this.meta, MinorEnable: true, Key: data.Field, Data: &IncrData{Incr: 1, Value: 0}}
+	target := &Incr{MinorEnable: true, Meta: &this.meta, Key: key, Data: data}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), target.Complete())
 	_ = minorSubmit.Exec(context.Background())
 	assert.Equal(this.T(), int64(1), target.Data.Value)
-	assert.True(this.T(), trials.MongoCompare[dataIncr](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data))
+	assert.True(this.T(), trials.MongoCompare[IncrData](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(key), &IncrData{Incr: 1, Value: 1}))
 
-	target = &Incr{Meta: nil, MinorEnable: true, Key: data.Field, Data: &IncrData{Incr: 1, Value: 0}}
+	target = &Incr{MinorEnable: true, Meta: nil, Key: key, Data: data}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
-	target = &Incr{Meta: &this.meta, MinorEnable: true, Key: "", Data: &IncrData{Incr: 1, Value: 0}}
+	target = &Incr{MinorEnable: true, Meta: &this.meta, Key: "", Data: data}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
-	target = &Incr{Meta: &this.meta, MinorEnable: true, Key: data.Field, Data: nil}
+	target = &Incr{MinorEnable: true, Meta: &this.meta, Key: key, Data: nil}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	this.meta.table = false
-	this.meta.field = true
-	target = &Incr{Meta: &this.meta, MinorEnable: true, Key: data.Field, Data: &IncrData{Incr: 1, Value: 0}}
+	target = &Incr{MinorEnable: true, Meta: &this.meta, Key: key, Data: data}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
-
-	this.meta.table = true
-	this.meta.field = false
-	target = &Incr{Meta: &this.meta, MinorEnable: true, Key: data.Field, Data: &IncrData{Incr: 1, Value: 0}}
-	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
-
-	target = &Incr{Meta: nil, MinorEnable: true, Key: data.Field, Data: &IncrData{Incr: 1, Value: 0}}
-	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Complete())
 }
 
 func (this *SuiteCmdIncr) TestDuplicate() {
 	this.meta.table = true
-	this.meta.field = true
 	count := 4
 	total := atomic.Int64{}
 	waitGroup := &sync.WaitGroup{}
@@ -101,8 +89,7 @@ func (this *SuiteCmdIncr) TestDuplicate() {
 			for i := 0; i < 100; i++ {
 				majorSubmit := this.major.Submit()
 				minorSubmit := this.minor.Submit()
-				data := &dataIncr{Field: "cmdincr+duplicate", Value: 0}
-				incr := &Incr{Meta: &this.meta, MinorEnable: true, Key: data.Field, Data: &IncrData{Incr: 1, Value: 0}}
+				incr := &Incr{MinorEnable: true, Meta: &this.meta, Key: "cmdincr+duplicate", Data: &IncrData{Incr: 1, Value: 0}}
 				incr.Initialize(context.Background(), majorSubmit, minorSubmit)
 				_ = incr.Prepare()
 				_, _ = majorSubmit.Exec(context.Background())
@@ -118,7 +105,6 @@ func (this *SuiteCmdIncr) TestDuplicate() {
 
 type metaIncr struct {
 	table bool
-	field bool
 }
 
 func (this *metaIncr) MajorKey(key any) string {
@@ -135,17 +121,4 @@ func (this *metaIncr) MinorTable() string {
 	} // if
 
 	return ""
-}
-
-func (this *metaIncr) MinorField() string {
-	if this.field {
-		return "field"
-	} // if
-
-	return ""
-}
-
-type dataIncr struct {
-	Field string `bson:"field"`
-	Value int64  `bson:"value"`
 }

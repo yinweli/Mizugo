@@ -111,5 +111,23 @@ func (this *MinorSubmit) Exec(ctx context.Context) error {
 		} // if
 	} // for
 
+	this.operate = map[string][]mongo.WriteModel{}
 	return nil
+}
+
+// MinorData 次要資料庫資料類型
+type MinorData[T any] struct {
+	K string `bson:"_KEY_"`   // 索引欄位, bson名稱必須與 MongoKey 一致
+	D *T     `bson:",inline"` // 資料欄位, 此欄位利用inline達成內嵌效果
+}
+
+// MinorIndex 建立專門用於次要資料庫的索引
+func MinorIndex(meta Metaer) *Index {
+	return &Index{
+		Name:   fmt.Sprintf("%v_minor_index", meta.MinorTable()),
+		Table:  meta.MinorTable(),
+		Field:  MongoKey,
+		Order:  1,
+		Unique: false,
+	}
 }

@@ -41,10 +41,6 @@ func (this *Exist) Prepare() error {
 
 // Complete 完成處理
 func (this *Exist) Complete() error {
-	if this.Meta == nil {
-		return fmt.Errorf("exist complete: meta nil")
-	} // if
-
 	count, err := this.cmd.Result()
 
 	if err != nil {

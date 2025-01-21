@@ -42,104 +42,90 @@ func (this *SuiteCmdSetEx) TearDownSuite() {
 
 func (this *SuiteCmdSetEx) TestSetEx() {
 	this.meta.table = true
-	this.meta.field = true
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
-	data := &dataSetEx{Field: "redis+mongo", Value: helps.RandStringDefault()}
-	dataRedis := &dataSetEx{Field: "redis", Value: helps.RandStringDefault()}
-	dataMongo := &dataSetEx{Field: "mongo", Value: helps.RandStringDefault()}
+	data := &dataSetEx{K: "redis+mongo", D: helps.RandStringDefault()}
+	dataRedis := &dataSetEx{K: "redis", D: helps.RandStringDefault()}
+	dataMongo := &dataSetEx{K: "mongo", D: helps.RandStringDefault()}
 
-	target := &SetEx[dataSetEx]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}
+	target := &SetEx[dataSetEx]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: data.K, Data: data}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), target.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.True(this.T(), trials.RedisCompare[dataSetEx](this.major.Client(), this.meta.MajorKey(data.Field), data))
-	assert.True(this.T(), trials.MongoCompare[dataSetEx](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data))
+	assert.True(this.T(), trials.RedisCompare[dataSetEx](this.major.Client(), this.meta.MajorKey(data.K), data))
+	assert.True(this.T(), trials.MongoCompare[dataSetEx](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data.K), data))
 
-	target = &SetEx[dataSetEx]{Meta: &this.meta, MajorEnable: true, MinorEnable: false, Key: dataRedis.Field, Data: dataRedis}
+	target = &SetEx[dataSetEx]{MajorEnable: true, MinorEnable: false, Meta: &this.meta, Key: dataRedis.K, Data: dataRedis}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), target.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.True(this.T(), trials.RedisCompare[dataSetEx](this.major.Client(), this.meta.MajorKey(dataRedis.Field), dataRedis))
-	assert.False(this.T(), trials.MongoCompare[dataSetEx](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(dataRedis.Field), dataRedis))
+	assert.True(this.T(), trials.RedisCompare[dataSetEx](this.major.Client(), this.meta.MajorKey(dataRedis.K), dataRedis))
+	assert.False(this.T(), trials.MongoCompare[dataSetEx](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(dataRedis.K), dataRedis))
 
-	target = &SetEx[dataSetEx]{Meta: &this.meta, MajorEnable: false, MinorEnable: true, Key: dataMongo.Field, Data: dataMongo}
+	target = &SetEx[dataSetEx]{MajorEnable: false, MinorEnable: true, Meta: &this.meta, Key: dataMongo.K, Data: dataMongo}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), target.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.False(this.T(), trials.RedisCompare[dataSetEx](this.major.Client(), this.meta.MajorKey(dataMongo.Field), dataMongo))
-	assert.True(this.T(), trials.MongoCompare[dataSetEx](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(dataMongo.Field), dataMongo))
+	assert.False(this.T(), trials.RedisCompare[dataSetEx](this.major.Client(), this.meta.MajorKey(dataMongo.K), dataMongo))
+	assert.True(this.T(), trials.MongoCompare[dataSetEx](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(dataMongo.K), dataMongo))
 
-	target = &SetEx[dataSetEx]{Meta: nil, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}
+	target = &SetEx[dataSetEx]{MajorEnable: true, MinorEnable: true, Meta: nil, Key: data.K, Data: data}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
-	target = &SetEx[dataSetEx]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: "", Data: data}
+	target = &SetEx[dataSetEx]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: "", Data: data}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
-	target = &SetEx[dataSetEx]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: nil}
+	target = &SetEx[dataSetEx]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: data.K, Data: nil}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	this.meta.table = false
-	this.meta.field = true
-	target = &SetEx[dataSetEx]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}
+	target = &SetEx[dataSetEx]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: data.K, Data: data}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	this.meta.table = true
-	this.meta.field = false
-	target = &SetEx[dataSetEx]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}
-	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
-
-	target = &SetEx[dataSetEx]{Meta: nil, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}
-	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Complete())
-
-	this.meta.table = true
-	this.meta.field = true
-	target = &SetEx[dataSetEx]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Expire: trials.Timeout * 2, Key: data.Field, Data: data}
+	target = &SetEx[dataSetEx]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Expire: trials.Timeout * 2, Key: data.K, Data: data}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), target.Complete())
 	_ = minorSubmit.Exec(context.Background())
 	trials.WaitTimeout()
-	assert.True(this.T(), trials.RedisCompare[dataSetEx](this.major.Client(), this.meta.MajorKey(data.Field), data))
-	assert.True(this.T(), trials.MongoCompare[dataSetEx](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data))
+	assert.True(this.T(), trials.RedisCompare[dataSetEx](this.major.Client(), this.meta.MajorKey(data.K), data))
+	assert.True(this.T(), trials.MongoCompare[dataSetEx](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data.K), data))
 	trials.WaitTimeout()
-	assert.False(this.T(), trials.RedisCompare[dataSetEx](this.major.Client(), this.meta.MajorKey(data.Field), data))
-	assert.True(this.T(), trials.MongoCompare[dataSetEx](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data))
+	assert.False(this.T(), trials.RedisCompare[dataSetEx](this.major.Client(), this.meta.MajorKey(data.K), data))
+	assert.True(this.T(), trials.MongoCompare[dataSetEx](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data.K), data))
 }
 
 func (this *SuiteCmdSetEx) TestSetExSave() {
 	this.meta.table = true
-	this.meta.field = true
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
-	data := &dataSetExSave{Save: NewSave(), Field: helps.RandStringDefault(), Value: helps.RandStringDefault()}
+	data := &dataSetExSave{Save: NewSave(), K: helps.RandStringDefault(), D: helps.RandStringDefault()}
 	opt := cmpopts.IgnoreFields(dataSetExSave{}, "Save")
 
 	data.save = true
-	target := &SetEx[dataSetExSave]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}
+	target := &SetEx[dataSetExSave]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: data.K, Data: data}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), target.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.True(this.T(), trials.RedisCompare[dataSetExSave](this.major.Client(), this.meta.MajorKey(data.Field), data, opt))
-	assert.True(this.T(), trials.MongoCompare[dataSetExSave](this.minor.Database(), this.meta.MinorTable(), this.meta.MinorField(), this.meta.MinorKey(data.Field), data, opt))
+	assert.True(this.T(), trials.RedisCompare[dataSetExSave](this.major.Client(), this.meta.MajorKey(data.K), data, opt))
+	assert.True(this.T(), trials.MongoCompare[dataSetExSave](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data.K), data, opt))
 
 	data.save = false
-	target = &SetEx[dataSetExSave]{Meta: &this.meta, MajorEnable: true, MinorEnable: true, Key: data.Field, Data: data}
+	target = &SetEx[dataSetExSave]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: data.K, Data: data}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
@@ -149,7 +135,6 @@ func (this *SuiteCmdSetEx) TestSetExSave() {
 
 type metaSetEx struct {
 	table bool
-	field bool
 }
 
 func (this *metaSetEx) MajorKey(key any) string {
@@ -168,21 +153,13 @@ func (this *metaSetEx) MinorTable() string {
 	return ""
 }
 
-func (this *metaSetEx) MinorField() string {
-	if this.field {
-		return "field"
-	} // if
-
-	return ""
-}
-
 type dataSetEx struct {
-	Field string `bson:"field"`
-	Value string `bson:"value"`
+	K string `bson:"k"`
+	D string `bson:"d"`
 }
 
 type dataSetExSave struct {
 	*Save
-	Field string `bson:"field"`
-	Value string `bson:"value"`
+	K string `bson:"k"`
+	D string `bson:"d"`
 }

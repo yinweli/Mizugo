@@ -34,23 +34,13 @@ func (this *Find) Prepare() error {
 		return fmt.Errorf("find prepare: table empty")
 	} // if
 
-	if this.Meta.MinorField() == "" {
-		return fmt.Errorf("find prepare: field empty")
-	} // if
-
 	return nil
 }
 
 // Complete 完成處理
 func (this *Find) Complete() error {
-	if this.Meta == nil {
-		return fmt.Errorf("find prepare: meta nil")
-	} // if
-
 	table := this.Meta.MinorTable()
-	field := this.Meta.MinorField()
-	filter := bson.M{field: bson.M{"$regex": this.Pattern}}
-	result, err := this.Minor().Collection(table).Find(this.Ctx(), filter)
+	result, err := this.Minor().Collection(table).Find(this.Ctx(), bson.M{MongoKey: bson.M{"$regex": this.Pattern}})
 
 	if err != nil {
 		return fmt.Errorf("find complete: %w: %v", err, this.Pattern)
@@ -68,10 +58,10 @@ func (this *Find) Complete() error {
 			return fmt.Errorf("find complete: %w: %v", err, this.Pattern)
 		} // if
 
-		value, ok := temp[field].(string)
+		value, ok := temp[MongoKey].(string)
 
 		if ok == false {
-			return fmt.Errorf("find complete: field %s not found or not a string: %v", field, this.Pattern)
+			return fmt.Errorf("find complete: field %s not found or not a string: %v", MongoKey, this.Pattern)
 		} // if
 
 		data = append(data, value)

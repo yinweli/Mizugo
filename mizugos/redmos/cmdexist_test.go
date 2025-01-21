@@ -63,10 +63,6 @@ func (this *SuiteCmdExist) TestExist() {
 	target = &Exist{Meta: &this.meta, Key: []string{}}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
-
-	target = &Exist{Meta: nil, Key: key}
-	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Complete())
 }
 
 type metaExist struct {
@@ -82,8 +78,4 @@ func (this *metaExist) MinorKey(key any) string {
 
 func (this *metaExist) MinorTable() string {
 	return "cmdexist"
-}
-
-func (this *metaExist) MinorField() string {
-	return "field"
 }
