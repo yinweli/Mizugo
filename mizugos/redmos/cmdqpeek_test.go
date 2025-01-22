@@ -61,7 +61,7 @@ func (this *SuiteCmdQPeek) TestQPeek() {
 	_ = minorSubmit.Exec(context.Background())
 	assert.True(this.T(), trials.RedisCompareList[dataQPeek](this.major.Client(), this.meta.MajorKey(data1.K), []*dataQPeek{data1, data2}))
 	assert.True(this.T(), trials.MongoCompare[QueueData[dataQPeek]](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data1.K), &QueueData[dataQPeek]{
-		Value: []*dataQPeek{data1, data2},
+		Data: []*dataQPeek{data1, data2},
 	}))
 
 	target := &QPeek[dataQPeek]{Meta: &this.meta, Key: data1.K}
@@ -70,7 +70,7 @@ func (this *SuiteCmdQPeek) TestQPeek() {
 	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), target.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.True(this.T(), cmp.Equal([]*dataQPeek{data1, data2}, target.Data))
+	assert.True(this.T(), cmp.Equal(&QueueData[dataQPeek]{Data: []*dataQPeek{data1, data2}}, target.Data))
 	assert.True(this.T(), trials.RedisCompareList[dataQPeek](this.major.Client(), this.meta.MajorKey(data1.K), []*dataQPeek{data1, data2}))
 
 	target = &QPeek[dataQPeek]{Meta: nil, Key: data1.K}

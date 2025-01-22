@@ -81,7 +81,7 @@ func (this *QPop[T]) Complete() error {
 				return fmt.Errorf("qpop complete: %w: %v", err, this.Key)
 			} // if
 
-			queue.Value = append(queue.Value, d)
+			queue.Data = append(queue.Data, d)
 		} // for
 
 		key := this.Meta.MinorKey(this.Key)
