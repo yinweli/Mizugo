@@ -60,7 +60,7 @@ func (this *SuiteCmdQPush) TestQPush() {
 	_ = minorSubmit.Exec(context.Background())
 	assert.True(this.T(), trials.RedisCompareList[dataQPush](this.major.Client(), this.meta.MajorKey(data1.K), []*dataQPush{data1, data2}))
 	assert.True(this.T(), trials.MongoCompare[QueueData[dataQPush]](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data1.K), &QueueData[dataQPush]{
-		Value: []*dataQPush{data1, data2},
+		Data: []*dataQPush{data1, data2},
 	}))
 
 	target = &QPush[dataQPush]{MinorEnable: true, Meta: nil, Key: data1.K, Data: data1}

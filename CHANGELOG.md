@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.51] - 2025-01-22
+### Changed
+- 變更redmos的Incr, QPopAll, QPeek的資料儲存方式, 使其與Get, Set等一致
+
 ## [1.1.50] - 2025-01-21
 ### Fixed
 - 修正建立專門用於次要資料庫的索引

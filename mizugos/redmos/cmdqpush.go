@@ -28,7 +28,7 @@ type QPush[T any] struct {
 
 // QueueData 佇列資料
 type QueueData[T any] struct {
-	Value []*T `bson:"value"` // 內容列表
+	Data []*T `bson:"value"` // 佇列列表
 }
 
 // Prepare 前置處理
@@ -89,7 +89,7 @@ func (this *QPush[T]) Complete() error {
 				return fmt.Errorf("qpush complete: %w: %v", err, this.Key)
 			} // if
 
-			queue.Value = append(queue.Value, d)
+			queue.Data = append(queue.Data, d)
 		} // for
 
 		key := this.Meta.MinorKey(this.Key)

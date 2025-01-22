@@ -61,7 +61,7 @@ func (this *SuiteCmdQPop) TestQPop() {
 	_ = minorSubmit.Exec(context.Background())
 	assert.True(this.T(), trials.RedisCompareList[dataQPop](this.major.Client(), this.meta.MajorKey(data1.K), []*dataQPop{data1, data2}))
 	assert.True(this.T(), trials.MongoCompare[QueueData[dataQPop]](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data1.K), &QueueData[dataQPop]{
-		Value: []*dataQPop{data1, data2},
+		Data: []*dataQPop{data1, data2},
 	}))
 
 	target := &QPop[dataQPop]{MinorEnable: true, Meta: &this.meta, Key: data1.K}
@@ -73,7 +73,7 @@ func (this *SuiteCmdQPop) TestQPop() {
 	assert.True(this.T(), cmp.Equal(data1, target.Data))
 	assert.True(this.T(), trials.RedisCompareList[dataQPop](this.major.Client(), this.meta.MajorKey(data1.K), []*dataQPop{data2}))
 	assert.True(this.T(), trials.MongoCompare[QueueData[dataQPop]](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data1.K), &QueueData[dataQPop]{
-		Value: []*dataQPop{data2},
+		Data: []*dataQPop{data2},
 	}))
 
 	target = &QPop[dataQPop]{MinorEnable: true, Meta: nil, Key: data1.K}

@@ -45,31 +45,27 @@ func (this *SuiteCmdIncr) TestIncr() {
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
 	key := "redis+mongo"
-	data := &IncrData{Incr: 1, Value: 0}
+	data := &IncrData{}
 
-	target := &Incr{MinorEnable: true, Meta: &this.meta, Key: key, Data: data}
+	target := &Incr{MinorEnable: true, Meta: &this.meta, Key: key, Incr: 1, Data: data}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.Nil(this.T(), target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
 	assert.Nil(this.T(), target.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.Equal(this.T(), int64(1), target.Data.Value)
-	assert.True(this.T(), trials.MongoCompare[IncrData](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(key), &IncrData{Incr: 1, Value: 1}))
+	assert.Equal(this.T(), int64(1), target.Data.Data)
+	assert.True(this.T(), trials.MongoCompare[IncrData](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(key), data))
 
-	target = &Incr{MinorEnable: true, Meta: nil, Key: key, Data: data}
+	target = &Incr{MinorEnable: true, Meta: nil, Key: key, Incr: 1, Data: data}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
-	target = &Incr{MinorEnable: true, Meta: &this.meta, Key: "", Data: data}
-	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
-
-	target = &Incr{MinorEnable: true, Meta: &this.meta, Key: key, Data: nil}
+	target = &Incr{MinorEnable: true, Meta: &this.meta, Key: "", Incr: 1, Data: data}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 
 	this.meta.table = false
-	target = &Incr{MinorEnable: true, Meta: &this.meta, Key: key, Data: data}
+	target = &Incr{MinorEnable: true, Meta: &this.meta, Key: key, Incr: 1, Data: data}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	assert.NotNil(this.T(), target.Prepare())
 }
@@ -89,12 +85,12 @@ func (this *SuiteCmdIncr) TestDuplicate() {
 			for i := 0; i < 100; i++ {
 				majorSubmit := this.major.Submit()
 				minorSubmit := this.minor.Submit()
-				incr := &Incr{MinorEnable: true, Meta: &this.meta, Key: "cmdincr+duplicate", Data: &IncrData{Incr: 1, Value: 0}}
+				incr := &Incr{MinorEnable: true, Meta: &this.meta, Key: "cmdincr+duplicate", Incr: 1, Data: &IncrData{}}
 				incr.Initialize(context.Background(), majorSubmit, minorSubmit)
 				_ = incr.Prepare()
 				_, _ = majorSubmit.Exec(context.Background())
 				_ = incr.Complete()
-				total.Add(incr.Data.Value)
+				total.Add(incr.Data.Data)
 			} // for
 		}()
 	} // for

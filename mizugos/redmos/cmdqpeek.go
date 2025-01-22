@@ -12,12 +12,13 @@ import (
 //   - 泛型類型T必須是結構, 並且不能是指標
 //   - 執行前設定好 Meta, 這需要事先建立好與 Metaer 介面符合的元資料結構
 //   - 執行前設定好 Key 並且不能為空字串
+//   - 執行前設定好 Data, 如果為nil, 則內部程序會自己建立
 //   - 執行後可用 Data 來取得資料列表
 type QPeek[T any] struct {
 	Behave                       // 行為物件
 	Meta   Metaer                // 元資料
 	Key    string                // 索引值
-	Data   []*T                  // 資料列表
+	Data   *QueueData[T]         // 資料物件
 	cmd    *redis.StringSliceCmd // 命令結果
 }
 
@@ -44,6 +45,10 @@ func (this *QPeek[T]) Complete() error {
 		return fmt.Errorf("qpeek complete: %w: %v", err, this.Key)
 	} // if
 
+	if this.Data == nil {
+		this.Data = new(QueueData[T])
+	} // if
+
 	for _, itor := range result {
 		data := new(T)
 
@@ -51,7 +56,7 @@ func (this *QPeek[T]) Complete() error {
 			return fmt.Errorf("qpeek complete: %w: %v", err, this.Key)
 		} // if
 
-		this.Data = append(this.Data, data)
+		this.Data.Data = append(this.Data.Data, data)
 	} // for
 
 	return nil
