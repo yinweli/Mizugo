@@ -2,6 +2,7 @@ package helps
 
 import (
 	"fmt"
+	"sort"
 )
 
 // NewDice 建立骰子資料
@@ -88,11 +89,42 @@ func (this *Dice) Randn(maximum int64) any {
 
 	num := RandInt64n(0, maximum)
 
-	for _, itor := range this.dice {
-		if itor.offset >= num {
-			return itor.payload
+	if find := sort.Search(len(this.dice), func(i int) bool {
+		return this.dice[i].offset >= num
+	}); find < len(this.dice) {
+		return this.dice[find].payload
+	} // if
+
+	return nil // 其實不管怎麼執行都不會跑到這邊
+}
+
+// RandOnce 擲骰並移除, 擲出的資料會從骰子中移除
+func (this *Dice) RandOnce() any {
+	if this.maximum <= 0 {
+		return nil
+	} // if
+
+	num := RandInt64n(0, this.maximum)
+
+	if find := sort.Search(len(this.dice), func(i int) bool {
+		return this.dice[i].offset >= num
+	}); find < len(this.dice) {
+		found := this.dice[find]
+		offset := found.offset
+
+		if find > 0 {
+			offset -= this.dice[find-1].offset
 		} // if
-	} // for
+
+		this.dice = append(this.dice[:find], this.dice[find+1:]...)
+
+		for n := find; n < len(this.dice); n++ {
+			this.dice[n].offset -= offset
+		} // for
+
+		this.maximum -= offset
+		return found.payload
+	} // if
 
 	return nil // 其實不管怎麼執行都不會跑到這邊
 }

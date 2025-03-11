@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease]
 
+## [1.1.52] - 2025-03-11
+### Added
+- helps的Dice組件新增RandOnce函式
+### Changed
+- helps的Dice組件擲骰時改用二分搜尋法提升效率
+
 ## [1.1.51] - 2025-01-22
 ### Changed
 - 變更redmos的Incr, QPopAll, QPeek的資料儲存方式, 使其與Get, Set等一致

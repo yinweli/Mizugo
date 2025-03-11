@@ -40,17 +40,19 @@ func (this *SuiteDice) TestDice() {
 	assert.Nil(this.T(), target.Complete("16", 10))
 	assert.Nil(this.T(), target.Complete("17", 1))
 	assert.True(this.T(), target.Valid())
+	assert.Equal(this.T(), int64(10), target.Max())
 	assert.NotNil(this.T(), target.Rand())
 	assert.NotNil(this.T(), target.Randn(10))
-	assert.Equal(this.T(), int64(10), target.Max())
+	assert.NotNil(this.T(), target.RandOnce())
 
 	target.Clear()
 	assert.False(this.T(), target.Valid())
 	assert.Nil(this.T(), target.Rand())
 	assert.Nil(this.T(), target.Randn(10))
+	assert.Nil(this.T(), target.RandOnce())
 }
 
-func (this *SuiteDice) TestValid() {
+func (this *SuiteDice) TestDiceRand() {
 	target := NewDice()
 	_ = target.Fill([]any{true, false}, []int64{10000, 0})
 
@@ -90,6 +92,18 @@ func (this *SuiteDice) TestValid() {
 	assert.True(this.T(), detect.Check(4, testdata.TestCount, 0.19, 0.21))
 	assert.True(this.T(), detect.Check(5, testdata.TestCount, 0.24, 0.26))
 	assert.True(this.T(), detect.Check(0, testdata.TestCount, 0.24, 0.26))
+}
+
+func (this *SuiteDice) TestDiceRandOnce() {
+	target := NewDice()
+	payload := []any{1, 2, 3, 4}
+	weight := []int64{10, 10, 10, 10}
+	_ = target.Fill(payload, weight)
+	assert.Contains(this.T(), payload, target.RandOnce())
+	assert.Contains(this.T(), payload, target.RandOnce())
+	assert.Contains(this.T(), payload, target.RandOnce())
+	assert.Contains(this.T(), payload, target.RandOnce())
+	assert.False(this.T(), target.Valid())
 }
 
 func (this *SuiteDice) TestDiceDetect() {
