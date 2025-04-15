@@ -39,7 +39,7 @@ func ProtoListEqual[T any](expected, actual []T, option ...cmp.Option) bool {
 
 		for _, itor := range expected {
 			if message, ok := any(itor).(proto.Message); ok {
-				_, _ = fmt.Fprintf(builder, "\n%v,", indent(protojson.Format(message), "  "))
+				_, _ = fmt.Fprintf(builder, "\n%v,", indent(protojson.Format(message)))
 			} else {
 				_, _ = fmt.Fprintf(builder, "\n  <not proto message>,")
 			} // if
@@ -50,7 +50,7 @@ func ProtoListEqual[T any](expected, actual []T, option ...cmp.Option) bool {
 
 		for _, itor := range actual {
 			if message, ok := any(itor).(proto.Message); ok {
-				_, _ = fmt.Fprintf(builder, "\n%v,", indent(protojson.Format(message), "  "))
+				_, _ = fmt.Fprintf(builder, "\n%v,", indent(protojson.Format(message)))
 			} else {
 				_, _ = fmt.Fprintf(builder, "\n  <not proto message>,")
 			} // if
@@ -63,7 +63,7 @@ func ProtoListEqual[T any](expected, actual []T, option ...cmp.Option) bool {
 	return true
 }
 
-// ProtoListContain 訊息列表是否包含指定訊息
+// ProtoListContain 訊息列表是否包含訊息
 func ProtoListContain[T any](expected any, actual []T, option ...cmp.Option) bool {
 	for _, itor := range actual {
 		if cmp.Equal(expected, itor, append(option, protocmp.Transform())...) {
@@ -81,7 +81,7 @@ func ProtoListContain[T any](expected any, actual []T, option ...cmp.Option) boo
 
 	for _, itor := range actual {
 		if message, ok := any(itor).(proto.Message); ok {
-			_, _ = fmt.Fprintf(builder, "\n%v,", indent(protojson.Format(message), "  "))
+			_, _ = fmt.Fprintf(builder, "\n%v,", indent(protojson.Format(message)))
 		} else {
 			_, _ = fmt.Fprintf(builder, "\n  <not proto message>,")
 		} // if
@@ -89,6 +89,50 @@ func ProtoListContain[T any](expected any, actual []T, option ...cmp.Option) boo
 
 	fmt.Printf("actual: %v\n", builder.String())
 	return false
+}
+
+// ProtoListMatch 訊息列表是否包含訊息列表
+func ProtoListMatch[T any](expected, actual []T, option ...cmp.Option) bool {
+	match := make([]bool, len(expected))
+
+	for i, e := range expected {
+		for _, a := range actual {
+			if cmp.Equal(e, a, append(option, protocmp.Transform())...) {
+				match[i] = true
+				break
+			} // if
+		} // for
+	} // for
+
+	found := true
+
+	for i, ok := range match {
+		if ok == false {
+			if message, ok := any(expected[i]).(proto.Message); ok {
+				fmt.Printf("expected: %v\n", protojson.Format(message))
+			} else {
+				fmt.Printf("expected: <not proto message>\n")
+			} // if
+
+			found = false
+		} // if
+	} // for
+
+	if found == false {
+		builder := &strings.Builder{}
+
+		for _, itor := range actual {
+			if message, ok := any(itor).(proto.Message); ok {
+				_, _ = fmt.Fprintf(builder, "\n%v,", indent(protojson.Format(message)))
+			} else {
+				_, _ = fmt.Fprintf(builder, "\n  <not proto message>,")
+			} // if
+		} // for
+
+		fmt.Printf("actual: %v\n", builder.String())
+	} // if
+
+	return found
 }
 
 // ProtoListExist 訊息列表是否包含指定類型
@@ -103,11 +147,11 @@ func ProtoListExist(expected any, actual []proto.Message) bool {
 }
 
 // indent 填加縮排到多行字串
-func indent(input, indent string) string {
+func indent(input string) string {
 	line := strings.Split(input, "\n")
 
 	for i, itor := range line {
-		line[i] = indent + itor
+		line[i] = "  " + itor
 	} // for
 
 	return strings.Join(line, "\n")
