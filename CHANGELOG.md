@@ -4,9 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Planning]
-
-## [Unrelease]
+## [1.1.53] - 2025-04-15
+### Added
+- trials的ProtoListMatch函式, 用來檢查訊息列表中是否有目標訊息
 
 ## [1.1.52] - 2025-03-11
 ### Added
