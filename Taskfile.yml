@@ -21,27 +21,27 @@ tasks:
     ignore_error: true
     dir: support/client-unity/Packages/com.fouridstudio.mizugo-client-unity
     cmds:
-      - dotnet csharpier .
+      - csharpier format .
 
   fmt-client-unity-sample:
     ignore_error: true
     dir: support/test-client-cs/Assets/Scripts
     cmds:
-      - dotnet csharpier .
+      - csharpier format .
 
   fmt-proto-mizugo:
     ignore_error: true
     dir: support/proto-mizugo
     cmds:
       - buf format -w .
-      - dotnet csharpier .
+      - csharpier format .
 
   fmt-proto-test:
     ignore_error: true
     dir: support/proto-test
     cmds:
       - buf format -w .
-      - dotnet csharpier .
+      - csharpier format .
 
   fmt-yaml:
     ignore_error: true
