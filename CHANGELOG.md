@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.54] - 2025-05-28
+### Deleted
+- 移除 StringJoin 函式
+### Changed
+- StringDisplayLength 函式改用第三方函式庫計算
+
 ## [1.1.53] - 2025-04-15
 ### Added
 - trials的ProtoListMatch函式, 用來檢查訊息列表中是否有目標訊息
