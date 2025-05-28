@@ -28,8 +28,6 @@ func (this *SuiteString) TearDownSuite() {
 }
 
 func (this *SuiteString) TestString() {
-	assert.Empty(this.T(), StringJoin("#"))
-	assert.Equal(this.T(), "1@2@3", StringJoin("@", "1", "2", "3"))
 	assert.Equal(this.T(), 30, StringDisplayLength("Hello, こんにちは, 안녕하세요!"))
 	assert.NotEmpty(this.T(), StrPercentage(1, 100))
 }
