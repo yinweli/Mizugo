@@ -122,7 +122,9 @@ func (this *SuiteEntity) TestProcess() {
 	assert.Nil(this.T(), target.Initialize(nil))
 	assert.NotNil(this.T(), target.SetProcess(process))
 	target.AddMessage(1, func(_ any) {})
+	assert.NotNil(this.T(), target.GetMessage(1))
 	target.DelMessage(1)
+	assert.Nil(this.T(), target.GetMessage(1))
 	target.Finalize()
 }
 

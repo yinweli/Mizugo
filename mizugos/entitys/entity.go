@@ -194,6 +194,11 @@ func (this *Entity) DelMessage(messageID int32) {
 	this.process.Get().Del(messageID)
 }
 
+// GetMessage 取得訊息處理
+func (this *Entity) GetMessage(messageID int32) procs.Process {
+	return this.process.Get().Get(messageID)
+}
+
 // ===== 會話功能 =====
 
 // SetSession 設定會話物件, 初始化完成後就不能設定會話物件

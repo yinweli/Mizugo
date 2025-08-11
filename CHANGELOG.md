@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.55] - 2025-08-11
+### Added
+- Entity 新增 ExistMessage 函式
+
 ## [1.1.54] - 2025-05-28
 ### Deleted
 - 移除 StringJoin 函式
@@ -12,17 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.53] - 2025-04-15
 ### Added
-- trials的ProtoListMatch函式, 用來檢查訊息列表中是否有目標訊息
+- trials 的 ProtoListMatch 函式, 用來檢查訊息列表中是否有目標訊息
 
 ## [1.1.52] - 2025-03-11
 ### Added
-- helps的Dice組件新增RandOnce函式
+- helps 的 Dice 組件新增 RandOnce 函式
 ### Changed
-- helps的Dice組件擲骰時改用二分搜尋法提升效率
+- helps 的 Dice 組件擲骰時改用二分搜尋法提升效率
 
 ## [1.1.51] - 2025-01-22
 ### Changed
-- 變更redmos的Incr, QPopAll, QPeek的資料儲存方式, 使其與Get, Set等一致
+- 變更 redmos 的 Incr, QPopAll, QPeek 的資料儲存方式, 使其與 Get, Set 等一致
 
 ## [1.1.50] - 2025-01-21
 ### Fixed
@@ -30,102 +34,102 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.49] - 2025-01-21
 ### Added
-- redmos新增QPush, QPop, QPopAll, QPeek資料庫函式
-- redmos新增MinorIndex函式
-- trials新增RedisCompareList函式
+- redmos 新增 QPush, QPop, QPopAll, QPeek 資料庫函式
+- redmos 新增 MinorIndex 函式
+- trials 新增 RedisCompareList 函式
 ### Deleted
-- 移除redmos.Metaer介面中的MinorField函式
+- 移除 redmos.Metaer 介面中的 MinorField 函式
 ### Changed
-- 簡化redmos次要資料庫儲存程序
-- 變更redmos.Index結構
+- 簡化 redmos 次要資料庫儲存程序
+- 變更 redmos.Index 結構
 ### Fixed
-- 修正redmos次要資料庫批量操作完成後未清除操作列表的問題, 避免下次使用相同物件時重複執行已完成的操作
+- 修正 redmos 次要資料庫批量操作完成後未清除操作列表的問題, 避免下次使用相同物件時重複執行已完成的操作
 
 ## [1.1.48] - 2025-01-16
 ### Added
-- 增加RandSource來取得隨機來源
+- 增加 RandSource 來取得隨機來源
 ### Changed
 - 隨機工具改用 golang.org/x/exp/rand 來產生亂數
 
 ## [1.1.47] - 2025-01-09
 ### Added
-- 新增Optsz組件
+- 新增 Optsz 組件
 ### Fixed
-- 修正github workflow
+- 修正 github workflow
 
 ## [1.1.46] - 2025-01-06
 ### Changed
 - 更新第三方函式庫
-- 需要go 1.22以上
+- 需要 go 1.22 以上
 
 ## [1.1.45] - 2024-12-25
 ### Fixed
-- 修正CalculateDays的時區計算錯誤
+- 修正 CalculateDays 的時區計算錯誤
 
 ## [1.1.44] - 2024-12-25
 ### Added
-- 新增CalculateDays, CalculateDaysWithBaseline函式
+- 新增 CalculateDays, CalculateDaysWithBaseline 函式
 
 ## [1.1.43] - 2024-12-23
 ### Added
-- 新增MapKey, MapValue函式
+- 新增 MapKey, MapValue 函式
 
 ## [1.1.42] - 2024-12-23
 ### Changed
-- 把MapToArray改為MapFlatten
+- 把 MapToArray 改為 MapFlatten
 
 ## [1.1.41] - 2024-12-11
 ### Changed
-- 重整Proto測試工具
+- 重整 Proto 測試工具
 
 ## [1.1.40] - 2024-12-11
 ### Added
-- 新增ProtoTypeExist函式, 內容為原來的ProtoContains函式的功能
+- 新增 ProtoTypeExist 函式, 內容為原來的 ProtoContains 函式的功能
 ### Changed
-- ProtoContains函式的功能改為檢查訊息列表是否有符合訊息
+- ProtoContains 函式的功能改為檢查訊息列表是否有符合訊息
 
 ## [1.1.39] - 2024-11-22
 ### Changed
-- 更新IAP組件, 讓外部可以獲取交易時間
+- 更新 IAP 組件, 讓外部可以獲取交易時間
 
 ## [1.1.38] - 2024-10-30
 ### Added
-- 新增ProtoContains函式
+- 新增 ProtoContains 函式
 
 ## [1.1.37] - 2024-10-15
 ### Added
-- 新增DayHourMax, WeekdayMax常數
+- 新增 DayHourMax, WeekdayMax 常數
 
 ## [1.1.36] - 2024-09-27
 ### Added
-- 新增Yearly, YearlyPrev, YearlyNext函式
+- 新增 Yearly, YearlyPrev, YearlyNext 函式
 
 ## [1.1.35] - 2024-09-18
 ### Added
-- 新增redmos.GetEx與redmos.SetEx命令
+- 新增 redmos.GetEx 與 redmos.SetEx 命令
 ### Changed
-- 移除redmos.Get與redmos.Set中的Expire Time
+- 移除 redmos.Get 與 redmos.Set 中的 Expire Time
 
 ## [1.1.34] - 2024-09-06
 ### Added
-- 在Redis Get的時候加上Expire Time，並且每次Get都會重置
+- 在 Redis Get 的時候加上 Expire Time, 並且每次 Get 都會重置
 
 ## [1.1.33] - 2024-09-03
 ### Changed
-- 把EquateApproxProtoTimestamp搬移到helps軟體包中
+- 把 EquateApproxProtoTimestamp 搬移到 helps 軟體包中
 
 ## [1.1.32] - 2024-09-03
 ### Added
-- 新增timestamppb.Timestamp的比對選項
+- 新增 timestamppb.Timestamp 的比對選項
 
 ## [1.1.31] - 2024-09-03
 ### Changed
-- proto比對改用go-cmp, 並添加比對選項列表
+- proto 比對改用 go-cmp, 並添加比對選項列表
 
 ## [1.1.30] - 2024-08-29
 ### Changed
-- 更新lint配置
-- 更新redmos說明
+- 更新 lint 配置
+- 更新 redmos 說明
 
 ## [1.1.29] - 2024-08-22
 ### Fixed
@@ -150,12 +154,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.24] - 2024-07-18
 ### Changed
-- 封包標頭長度改為4byte
-- 封包大小上限改為1MB
+- 封包標頭長度改為 4byte
+- 封包大小上限改為 1MB
 
 ## [1.1.23] - 2024-07-16
 ### Deleted
-- 移除ctxs組件
+- 移除 ctxs 組件
 
 ## [1.1.22] - 2024-07-12
 ### Added
@@ -163,33 +167,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.21] - 2024-07-12
 ### Changed
-- 更新IAP組件, 讓外部有更多的重試與逾時參數可用
+- 更新 IAP 組件, 讓外部有更多的重試與逾時參數可用
 
 ## [1.1.20] - 2024-07-10
 ### Added
-- 新增ProtoEqual, MapToArray函式
+- 新增 ProtoEqual, MapToArray 函式
 
 ## [1.1.19] - 2024-06-25
 ### Added
-- 新增FlagszAND, FlagszOR, FlagszXOR函式
+- 新增 FlagszAND, FlagszOR, FlagszXOR 函式
 
 ## [1.1.18] - 2024-06-20
 ### Changed
-- 更新Fit組件說明
-- StdColor新增失敗旗標機制
-- StdColor新增Out, Err函式
+- 更新 Fit 組件說明
+- StdColor 新增失敗旗標機制
+- StdColor 新增 Out, Err 函式
 
 ## [1.1.17] - 2024-06-06
 ### Fixed
-- 修正OneStore的IAP驗證錯誤
+- 修正 OneStore 的 IAP 驗證錯誤
 
 ## [1.1.16] - 2024-06-05
 ### Fixed
-- 修正OneStore的IAP驗證錯誤
+- 修正 OneStore 的 IAP 驗證錯誤
 
 ## [1.1.15] - 2024-06-03
 ### Added
-- 新增OneStore的IAP組件
+- 新增 OneStore 的 IAP 組件
 
 ## [1.1.14] - 2024-05-28
 ### Changed
@@ -205,41 +209,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.11] - 2024-05-23
 ### Added
-- 新增CPU剖析工具
+- 新增 CPU 剖析工具
 
 ## [1.1.10] - 2024-05-22
 ### Changed
-- 讓Raven的測試系列函式會印出錯誤內容
+- 讓 Raven 的測試系列函式會印出錯誤內容
 
 ## [1.1.9] - 2024-05-13
 ### Added
-- 新增ReflectFieldValue函式
+- 新增 ReflectFieldValue 函式
 
 ## [1.1.8] - 2024-05-13
 ### Added
-- 新增WriteFile函式
+- 新增 WriteFile 函式
 
 ### Changed
-- 將WriteTemplate改為TemplateBuild, 並且只負責將新增部分添加到字串尾端
+- 將 WriteTemplate 改為 TemplateBuild, 並且只負責將新增部分添加到字串尾端
 
 ## [1.1.7] - 2024-05-13
 ### Added
-- 新增WriteTemplate函式
+- 新增 WriteTemplate 函式
 
 ## [1.1.6] - 2024-05-08
 ### Changed
-- 日誌的Caller函式新增可選的紀錄簡單函式名稱功能
+- 日誌的 Caller 函式新增可選的紀錄簡單函式名稱功能
 
 ## [1.1.5] - 2024-05-06
 ### Added
-- 新增Before, Beforef, Beforefx函式
-- 新增After, Afterf, Afterfx函式
-- 新增Betweenf, Betweenfx函式
-- 新增Overlapff, Overlapffx函式
+- 新增 Before, Beforef, Beforefx 函式
+- 新增 After, Afterf, Afterfx 函式
+- 新增 Betweenf, Betweenfx 函式
+- 新增 Overlapff, Overlapffx 函式
 
 ## [1.1.4] - 2024-05-03
 ### Changed
-- 保留Date函式的年/月/日參數, 只有時/分/秒/毫秒可以被省略
+- 保留 Date 函式的年/月/日參數, 只有時/分/秒/毫秒可以被省略
 
 ## [1.1.3] - 2024-05-03
 ### Fixed
@@ -247,31 +251,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.2] - 2024-05-03
 ### Added
-- 新增JsonString函式
-- 新增ToProtoAny函式
-- 新增Timef函式
+- 新增 JsonString 函式
+- 新增 ToProtoAny 函式
+- 新增 Timef 函式
 
 ### Removed
-- 移除cast工具
-- 移除Beforef函式
-- 移除Afterf函式
-- 移除Betweenf函式
-- 移除SameDay函式
+- 移除 cast 工具
+- 移除 Beforef 函式
+- 移除 Afterf 函式
+- 移除 Betweenf 函式
+- 移除 SameDay 函式
 
 ### Changed
-- ProtoAny函式改名為FromProtoAny
-- ProtoJson函式改名為ProtoString
-- Date函式變得更容易使用
+- ProtoAny 函式改名為 FromProtoAny
+- ProtoJson 函式改名為 ProtoString
+- Date 函式變得更容易使用
 
 ## [1.1.1] - 2024-04-30
 ### Added
-- 新增函式Beforef, Afterf
+- 新增函式 Beforef, Afterf
 
 ## [1.1.0] - 2024-04-26
 ### Added
-- 新增單元測試工具集trial
-- 新增信號調度組件trigger
-- 新增訊息處理組件procs/raven
+- 新增單元測試工具集 trial
+- 新增信號調度組件 trigger
+- 新增訊息處理組件 procs/raven
 - 新增產生錯誤工具
 
 ### Changed
