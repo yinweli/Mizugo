@@ -54,11 +54,6 @@ func (this *Percent) SetBase() *Percent {
 	return this
 }
 
-// Get 取得比例值
-func (this *Percent) Get() int32 {
-	return this.per
-}
-
 // Add 增加比例值
 func (this *Percent) Add(per int32) *Percent {
 	this.per += per
@@ -86,17 +81,35 @@ func (this *Percent) Div(per int32) *Percent {
 	return this
 }
 
+// Get 取得比例值
+func (this *Percent) Get() int32 {
+	return this.per
+}
+
 // Calc 計算結果, input為輸入值, round為使用哪個函式來計算進位(math.Round / math.Ceil / math.Floor)
 func (this *Percent) Calc(input int32, round Rounder) int {
-	return int(round(float64(input*this.per) / float64(this.base)))
+	return int(this.calc(float64(input), round))
 }
 
 // Calc32 計算結果, input為輸入值, round為使用哪個函式來計算進位(math.Round / math.Ceil / math.Floor)
 func (this *Percent) Calc32(input int32, round Rounder) int32 {
-	return int32(round(float64(input*this.per) / float64(this.base)))
+	return int32(this.calc(float64(input), round))
 }
 
 // Calc64 計算結果, input為輸入值, round為使用哪個函式來計算進位(math.Round / math.Ceil / math.Floor)
-func (this *Percent) Calc64(input int32, round Rounder) int64 {
-	return int64(round(float64(input*this.per) / float64(this.base)))
+func (this *Percent) Calc64(input int64, round Rounder) int64 {
+	return int64(this.calc(float64(input), round))
+}
+
+// calc 計算結果
+func (this *Percent) calc(input float64, round Rounder) float64 {
+	if this.base == 0 {
+		panic("Percent.calc: base is zero")
+	} // if
+
+	if round == nil {
+		panic("Percent.calc: round is nil")
+	} // if
+
+	return round(input * float64(this.per) / float64(this.base))
 }
