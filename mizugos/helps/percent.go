@@ -104,11 +104,11 @@ func (this *Percent) Calc64(input int64, round Rounder) int64 {
 // calc 計算結果
 func (this *Percent) calc(input float64, round Rounder) float64 {
 	if this.base == 0 {
-		panic("Percent.calc: base is zero")
+		return 0
 	} // if
 
 	if round == nil {
-		panic("Percent.calc: round is nil")
+		return 0
 	} // if
 
 	return round(input * float64(this.per) / float64(this.base))
