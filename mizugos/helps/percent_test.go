@@ -78,12 +78,8 @@ func (this *SuitePercent) TestPercent() {
 	assert.Equal(this.T(), int64(20000000), target.Calc64(200000000, math.Round))
 
 	target = NewPercent(0)
-	assert.Panics(this.T(), func() {
-		target.calc(float64(1), math.Round)
-	})
+	assert.Zero(this.T(), target.calc(float64(1), math.Round))
 
 	target = NewPercent(1)
-	assert.Panics(this.T(), func() {
-		target.calc(float64(1), nil)
-	})
+	assert.Zero(this.T(), target.calc(float64(1), nil))
 }
