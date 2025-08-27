@@ -9,7 +9,7 @@ import (
 const (
 	Unknown         = "?????"                                     // 不明字串
 	TestCount       = 100000                                      // 測試次數
-	RedisTimeout    = time.Second                                 // redis超時時間
+	RedisTimeout    = time.Second                                 // redis逾時時間
 	RedisIP         = "127.0.0.1:6379"                            // redis位址
 	RedisURI        = "redisdb://127.0.0.1:6379/"                 // 有效redis連接字串
 	RedisURIInvalid = "redisdb://127.0.0.1:10001/?dialTimeout=1s" // 無效redis連接字串
@@ -29,13 +29,12 @@ func PathEnv(env string) string {
 	return filepath.Clean(filepath.Join(Root, "env", env))
 }
 
+//nolint:gochecknoinits
 func init() {
-	_, file, _, _ := runtime.Caller(0)
+	_, file, _, _ := runtime.Caller(0) //nolint:dogsled
 	Root = filepath.Clean(filepath.Dir(file))
 	TrialDir = filepath.Join(Root, TrialDirName)
-	TrialFile = filepath.Join(TrialDir, TrialFileName)
 }
 
-var Root string      // 測試根路徑
-var TrialDir string  // 測試目錄路徑
-var TrialFile string // 測試檔案路徑
+var Root string     // 測試根路徑
+var TrialDir string // 測試目錄路徑
