@@ -3,7 +3,6 @@ package helps
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/v2/mizugos/trials"
@@ -46,18 +45,18 @@ func (this *SuiteBasen) TestBase58() {
 	}
 
 	for k, v := range testcase {
-		assert.Equal(this.T(), v, ToBase58(k))
+		this.Equal(v, ToBase58(k))
 		result, err := FromBase58(v)
-		assert.Nil(this.T(), err)
-		assert.Equal(this.T(), k, result)
+		this.Nil(err)
+		this.Equal(k, result)
 	} // for
 
 	for i := uint64(0); i < testdata.TestCount; i++ {
-		assert.NotContains(this.T(), ToBase58(i), "oOlI")
+		this.NotContains(ToBase58(i), "oOlI")
 	} // for
 
 	_, err := FromBase58("{}")
-	assert.NotNil(this.T(), err)
+	this.NotNil(err)
 }
 
 func (this *SuiteBasen) TestBase80() {
@@ -79,14 +78,14 @@ func (this *SuiteBasen) TestBase80() {
 	}
 
 	for k, v := range testcase {
-		assert.Equal(this.T(), v, ToBase80(k))
+		this.Equal(v, ToBase80(k))
 		result, err := FromBase80(v)
-		assert.Nil(this.T(), err)
-		assert.Equal(this.T(), k, result)
+		this.Nil(err)
+		this.Equal(k, result)
 	} // for
 
 	_, err := FromBase80("{}")
-	assert.NotNil(this.T(), err)
+	this.NotNil(err)
 }
 
 func (this *SuiteBasen) TestBaseN() {
@@ -105,12 +104,16 @@ func (this *SuiteBasen) TestBaseN() {
 	}
 
 	for k, v := range testcase {
-		assert.Equal(this.T(), v, ToBaseN(model, k))
+		this.Equal(v, ToBaseN(model, k))
 		result, err := FromBaseN(model, v)
-		assert.Nil(this.T(), err)
-		assert.Equal(this.T(), k, result)
+		this.Nil(err)
+		this.Equal(k, result)
 	} // for
 
-	_, err := FromBaseN(model, "{}")
-	assert.NotNil(this.T(), err)
+	_, err := FromBaseN("", "{}")
+	this.NotNil(err)
+	_, err = FromBaseN(model, "")
+	this.NotNil(err)
+	_, err = FromBaseN(model, "{}")
+	this.NotNil(err)
 }

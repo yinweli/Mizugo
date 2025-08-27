@@ -4,7 +4,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/v2/mizugos/trials"
@@ -30,16 +29,49 @@ func (this *SuiteStdColor) TearDownSuite() {
 
 func (this *SuiteStdColor) TestStdColor() {
 	target := NewStdColor(os.Stdout, os.Stderr)
-	assert.NotNil(this.T(), target)
-	assert.NotNil(this.T(), target.Out("test out %v\n", 100))
-	assert.NotNil(this.T(), target.Outf("test outf %v\n", 100))
-	assert.NotNil(this.T(), target.Outln("test outln"))
-	assert.NotNil(this.T(), target.Err("test err %v\n", 100))
-	assert.NotNil(this.T(), target.Errf("test errf %v\n", 100))
-	assert.NotNil(this.T(), target.Errln("test errln"))
-	assert.NotNil(this.T(), target.GetStdout())
-	assert.NotNil(this.T(), target.GetStderr())
-	assert.True(this.T(), target.Failed())
-	_, _ = target.GetStdout().Write([]byte("test stdout\n"))
-	_, _ = target.GetStderr().Write([]byte("test stderr\n"))
+	this.NotNil(target)
+	target = NewStdColor(nil, os.Stderr)
+	this.NotNil(target)
+	target = NewStdColor(os.Stdout, nil)
+	this.NotNil(target)
+}
+
+func (this *SuiteStdColor) TestOut() {
+	target := NewStdColor(os.Stdout, os.Stderr)
+	this.NotNil(target.Out("test out %v", 100))
+	this.False(target.Failed())
+
+	target = NewStdColor(os.Stdout, os.Stderr)
+	this.NotNil(target.Outf("test outf %v\n", 100))
+	this.False(target.Failed())
+
+	target = NewStdColor(os.Stdout, os.Stderr)
+	this.NotNil(target.Outln("test outln"))
+	this.False(target.Failed())
+}
+
+func (this *SuiteStdColor) TestErr() {
+	target := NewStdColor(os.Stdout, os.Stderr)
+	this.NotNil(target.Err("test err %v", 100))
+	this.True(target.Failed())
+
+	target = NewStdColor(os.Stdout, os.Stderr)
+	this.NotNil(target.Errf("test errf %v\n", 100))
+	this.True(target.Failed())
+
+	target = NewStdColor(os.Stdout, os.Stderr)
+	this.NotNil(target.Errln("test errln"))
+	this.True(target.Failed())
+}
+
+func (this *SuiteStdColor) TestStdout() {
+	target := NewStdColor(os.Stdout, os.Stderr).GetStdout()
+	this.NotNil(target)
+	_, _ = target.Write([]byte("test stdout\n"))
+}
+
+func (this *SuiteStdColor) TestStderr() {
+	target := NewStdColor(os.Stdout, os.Stderr).GetStderr()
+	this.NotNil(target)
+	_, _ = target.Write([]byte("test stderr\n"))
 }

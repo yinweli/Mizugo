@@ -1,10 +1,8 @@
 package helps
 
 import (
-	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/v2/mizugos/trials"
@@ -28,34 +26,60 @@ func (this *SuiteRand) TearDownSuite() {
 	trials.Restore(this.Catalog)
 }
 
-func (this *SuiteRand) TestRand() {
+func (this *SuiteRand) TestRandSeed() {
 	RandSeed(0)
 	RandSeedTime()
-	assert.NotNil(this.T(), RandSource())
-	fmt.Println(RandInt())
-	value := RandIntn(-5, 5)
-	assert.True(this.T(), value >= -5 && value <= 5)
-	fmt.Println(RandInt32())
-	value32 := RandInt32n(-5, 5)
-	assert.True(this.T(), value32 >= -5 && value32 <= 5)
-	fmt.Println(RandInt64())
-	value64 := RandInt64n(-5, 5)
-	assert.True(this.T(), value64 >= -5 && value64 <= 5)
-	fmt.Println(RandReal64())
-	value64 = RandReal64n(-5, 5)
-	assert.True(this.T(), value64 >= -5 && value64 <= 5)
-	values := RandString(32, StrNumberAlpha)
-	assert.NotNil(this.T(), values)
-	assert.Len(this.T(), values, 32)
-	fmt.Println(values)
-	values = RandString(64, StrNumberAlpha)
-	assert.NotNil(this.T(), values)
-	assert.Len(this.T(), values, 64)
-	fmt.Println(values)
-	values = RandStringDefault()
-	assert.NotNil(this.T(), values)
-	assert.Len(this.T(), values, 10)
-	fmt.Println(values)
+}
+
+func (this *SuiteRand) TestRandInt() {
+	target := RandInt()
+	this.Positive(target)
+	target = RandIntn(-5, 5)
+	this.True(target >= -5 && target <= 5)
+}
+
+func (this *SuiteRand) TestRandInt32() {
+	target := RandInt32()
+	this.Positive(target)
+	target = RandInt32n(-5, 5)
+	this.True(target >= -5 && target <= 5)
+}
+
+func (this *SuiteRand) TestRandInt64() {
+	target := RandInt64()
+	this.Positive(target)
+	target = RandInt64n(-5, 5)
+	this.True(target >= -5 && target <= 5)
+}
+
+func (this *SuiteRand) TestRandReal64() {
+	target := RandReal64()
+	this.Positive(target)
+	target = RandReal64n(-5, 5)
+	this.True(target >= -5 && target <= 5)
+}
+
+func (this *SuiteRand) TestRandString() {
+	target := RandString(32, StrNumberAlpha)
+	this.Len(target, 32)
+
+	for _, itor := range target {
+		this.Contains(StrNumberAlpha, string(itor))
+	} // for
+
+	target = RandString(64, StrNumberAlpha)
+	this.Len(target, 64)
+
+	for _, itor := range target {
+		this.Contains(StrNumberAlpha, string(itor))
+	} // for
+
+	target = RandStringDefault()
+	this.Len(target, 10)
+
+	for _, itor := range target {
+		this.Contains(StrNumberAlpha, string(itor))
+	} // for
 }
 
 func BenchmarkRandInt32(b *testing.B) {

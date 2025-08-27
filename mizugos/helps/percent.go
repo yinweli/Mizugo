@@ -1,9 +1,9 @@
 package helps
 
 const (
-	PercentRatio100 = 100   // 百分比例值
-	PercentRatio1K  = 1000  // 千分比例值
-	PercentRatio10K = 10000 // 萬分比例值
+	PercentRatio100 int32 = 100   // 百分比例值
+	PercentRatio1K  int32 = 1000  // 千分比例值
+	PercentRatio10K int32 = 10000 // 萬分比例值
 )
 
 // NewP100 建立百分比計算器
@@ -29,12 +29,16 @@ func NewPercent(base int32) *Percent {
 }
 
 // Percent 比例計算器
+//
+// 內部以 base (分母) 與 per (分子) 表達比例
+//   - base 代表分母(如 100/1000/10000 等)
+//   - per 代表分子, 後續透過 Set / Add / Del / Mul / Div 調整
 type Percent struct {
 	base int32 // 基準值
 	per  int32 // 比例值
 }
 
-// Rounder 進位函式類型
+// Rounder 進位函式類型, 可用 math.Round / math.Ceil / math.Floor
 type Rounder func(value float64) float64
 
 // Base 取得基準值
@@ -60,8 +64,8 @@ func (this *Percent) Add(per int32) *Percent {
 	return this
 }
 
-// Del 減少比例值
-func (this *Percent) Del(per int32) *Percent {
+// Sub 減少比例值
+func (this *Percent) Sub(per int32) *Percent {
 	this.per -= per
 	return this
 }
@@ -88,21 +92,21 @@ func (this *Percent) Get() int32 {
 
 // Calc 計算結果, input為輸入值, round為使用哪個函式來計算進位(math.Round / math.Ceil / math.Floor)
 func (this *Percent) Calc(input int32, round Rounder) int {
-	return int(this.calc(float64(input), round))
+	return int(this.calculate(float64(input), round))
 }
 
 // Calc32 計算結果, input為輸入值, round為使用哪個函式來計算進位(math.Round / math.Ceil / math.Floor)
 func (this *Percent) Calc32(input int32, round Rounder) int32 {
-	return int32(this.calc(float64(input), round))
+	return int32(this.calculate(float64(input), round))
 }
 
 // Calc64 計算結果, input為輸入值, round為使用哪個函式來計算進位(math.Round / math.Ceil / math.Floor)
 func (this *Percent) Calc64(input int64, round Rounder) int64 {
-	return int64(this.calc(float64(input), round))
+	return int64(this.calculate(float64(input), round))
 }
 
-// calc 計算結果
-func (this *Percent) calc(input float64, round Rounder) float64 {
+// calculate 計算結果
+func (this *Percent) calculate(input float64, round Rounder) float64 {
 	if this.base == 0 {
 		return 0
 	} // if

@@ -4,7 +4,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/v2/mizugos/trials"
@@ -29,14 +28,40 @@ func (this *SuiteReflect) TearDownSuite() {
 }
 
 func (this *SuiteReflect) TestReflect() {
-	target := reflect.ValueOf(&testReflect{Value: testdata.Unknown})
-	result, ok := ReflectFieldValue[string](target, "Value")
-	assert.True(this.T(), ok)
-	assert.Equal(this.T(), testdata.Unknown, result)
-	_, ok = ReflectFieldValue[string](target, testdata.Unknown)
-	assert.False(this.T(), ok)
+	target, ok := ReflectFieldValue[string](reflect.ValueOf(testReflect{
+		Export:   testdata.Unknown,
+		unexport: testdata.Unknown,
+	}), "Export")
+	this.True(ok)
+	this.Equal(testdata.Unknown, target)
+
+	target, ok = ReflectFieldValue[string](reflect.ValueOf(&testReflect{
+		Export:   testdata.Unknown,
+		unexport: testdata.Unknown,
+	}), "Export")
+	this.True(ok)
+	this.Equal(testdata.Unknown, target)
+
+	_, ok = ReflectFieldValue[string](reflect.ValueOf(&testReflect{
+		Export:   testdata.Unknown,
+		unexport: testdata.Unknown,
+	}), "unexport")
+	this.False(ok)
+
+	_, ok = ReflectFieldValue[string](reflect.ValueOf(&testReflect{
+		Export:   testdata.Unknown,
+		unexport: testdata.Unknown,
+	}), testdata.Unknown)
+	this.False(ok)
+
+	_, ok = ReflectFieldValue[string](reflect.ValueOf(testdata.Unknown), testdata.Unknown)
+	this.False(ok)
+
+	_, ok = ReflectFieldValue[string](reflect.ValueOf(nil), testdata.Unknown)
+	this.False(ok)
 }
 
 type testReflect struct {
-	Value string
+	Export   string
+	unexport string
 }

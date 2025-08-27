@@ -3,7 +3,6 @@ package helps
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/v2/mizugos/trials"
@@ -30,7 +29,7 @@ func (this *SuiteOptsz) TearDownSuite() {
 func (this *SuiteOptsz) TestOptsz() {
 	target := Optsz(1)
 	option := target.On("")
-	assert.True(this.T(), target.Get(option))
+	this.True(target.Get(option))
 	option = target.Off(option)
-	assert.False(this.T(), target.Get(option))
+	this.False(target.Get(option))
 }

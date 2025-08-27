@@ -4,7 +4,6 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/v2/mizugos/trials"
@@ -29,21 +28,20 @@ func (this *SuiteSync) TearDownSuite() {
 }
 
 func (this *SuiteSync) TestSyncOnce() {
-	target := SyncOnce{}
-	valid := atomic.Int64{}
+	valid := atomic.Int32{}
 	validFunc := func() {
 		valid.Add(1)
 	}
+	target := SyncOnce{}
 	go target.Do(validFunc)
 	go target.Do(validFunc)
 	trials.WaitTimeout()
-	assert.Equal(this.T(), int64(1), valid.Load())
-	assert.True(this.T(), target.Done())
+	this.Equal(int32(1), valid.Load())
+	this.True(target.Done())
 }
 
 func (this *SuiteSync) TestSyncAttr() {
-	data := "data"
 	target := SyncAttr[string]{}
-	target.Set(data)
-	assert.Equal(this.T(), data, target.Get())
+	target.Set(testdata.Unknown)
+	this.Equal(testdata.Unknown, target.Get())
 }

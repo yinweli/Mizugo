@@ -3,7 +3,6 @@ package helps
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/v2/mizugos/trials"
@@ -29,94 +28,109 @@ func (this *SuiteDice) TearDownSuite() {
 
 func (this *SuiteDice) TestDice() {
 	target := NewDice()
-	assert.NotNil(this.T(), target)
-	assert.Nil(this.T(), target.One("1", 1))
-	assert.Nil(this.T(), target.One("2", 0))
-	assert.NotNil(this.T(), target.One("3", -1))
-	assert.Nil(this.T(), target.Fill([]any{"4", "5", "6"}, []int64{1, 1, 1}))
-	assert.Nil(this.T(), target.Fill([]any{"7", "8", "9"}, []int64{0, 0, 0}))
-	assert.NotNil(this.T(), target.Fill([]any{"10", "11", "12"}, []int64{-1, -1, -1}))
-	assert.NotNil(this.T(), target.Fill([]any{"13", "14", "15"}, []int64{1}))
-	assert.Nil(this.T(), target.Complete("16", 10))
-	assert.Nil(this.T(), target.Complete("17", 1))
-	assert.True(this.T(), target.Valid())
-	assert.Equal(this.T(), int64(10), target.Max())
-	assert.NotNil(this.T(), target.Rand())
-	assert.NotNil(this.T(), target.Randn(10))
-	assert.NotNil(this.T(), target.RandOnce())
-
+	this.NotNil(target)
 	target.Clear()
-	assert.False(this.T(), target.Valid())
-	assert.Nil(this.T(), target.Rand())
-	assert.Nil(this.T(), target.Randn(10))
-	assert.Nil(this.T(), target.RandOnce())
+	this.False(target.Valid())
 }
 
-func (this *SuiteDice) TestDiceRand() {
+func (this *SuiteDice) TestOne() {
 	target := NewDice()
-	_ = target.Fill([]any{true, false}, []int64{10000, 0})
+	this.Nil(target.One("a", 1))
+	this.Nil(target.One("b", 0))
+	this.NotNil(target.One("c", -1))
+	this.True(target.Valid())
+	this.Equal(int64(1), target.Max())
+}
 
-	detect := NewDiceDetect()
+func (this *SuiteDice) TestFill() {
+	target := NewDice()
+	this.Nil(target.Fill([]any{"a", "b", "c"}, []int64{1, 1, 1}))
+	this.Nil(target.Fill([]any{"d", "e", "f"}, []int64{0, 0, 0}))
+	this.NotNil(target.Fill([]any{"g", "h", "i"}, []int64{-1, -1, -1}))
+	this.NotNil(target.Fill([]any{"j", "k", "l"}, []int64{1}))
+	this.True(target.Valid())
+	this.Equal(int64(3), target.Max())
+}
+
+func (this *SuiteDice) TestComplete() {
+	target := NewDice()
+	this.Nil(target.One("a", 1))
+	this.Nil(target.Complete("b", 3))
+	this.Nil(target.Complete("c", 0))
+	this.True(target.Valid())
+	this.Equal(int64(3), target.Max())
+}
+
+func (this *SuiteDice) TestRand() {
+	target := NewDice()
+	_ = target.Fill([]any{"a", "b"}, []int64{10000, 0})
+	tester := newDiceTester()
 
 	for i := 0; i < testdata.TestCount; i++ {
-		detect.Add(target.Rand(), 1)
+		tester.Add(target.Rand(), 1)
 	} // for
 
-	assert.True(this.T(), detect.Check(true, testdata.TestCount, 1, 1))
-	assert.True(this.T(), detect.Check(false, testdata.TestCount, 0, 0))
+	this.True(tester.Check("a", testdata.TestCount, 1, 1))
+	this.True(tester.Check("b", testdata.TestCount, 0, 0))
 
 	target = NewDice()
-	_ = target.Fill([]any{true, false}, []int64{0, 10000})
-
-	detect = NewDiceDetect()
+	_ = target.Fill([]any{"a", "b"}, []int64{0, 10000})
+	tester = newDiceTester()
 
 	for i := 0; i < testdata.TestCount; i++ {
-		detect.Add(target.Rand(), 1)
+		tester.Add(target.Rand(), 1)
 	} // for
 
-	assert.True(this.T(), detect.Check(true, testdata.TestCount, 0, 0))
-	assert.True(this.T(), detect.Check(false, testdata.TestCount, 1, 1))
+	this.True(tester.Check("a", testdata.TestCount, 0, 0))
+	this.True(tester.Check("b", testdata.TestCount, 1, 1))
 
 	target = NewDice()
-	_ = target.Fill([]any{1, 2, 3, 4, 5}, []int64{500, 1000, 1500, 2000, 2500})
-	_ = target.Complete(0, 10000)
-	detect = NewDiceDetect()
+	_ = target.Fill([]any{"a", "b", "c", "d", "e"}, []int64{500, 1000, 1500, 2000, 2500})
+	_ = target.Complete("f", 10000)
+	tester = newDiceTester()
 
 	for i := 0; i < testdata.TestCount; i++ {
-		detect.Add(target.Rand(), 1)
+		tester.Add(target.Rand(), 1)
 	} // for
 
-	assert.True(this.T(), detect.Check(1, testdata.TestCount, 0.04, 0.06))
-	assert.True(this.T(), detect.Check(2, testdata.TestCount, 0.09, 0.11))
-	assert.True(this.T(), detect.Check(3, testdata.TestCount, 0.14, 0.16))
-	assert.True(this.T(), detect.Check(4, testdata.TestCount, 0.19, 0.21))
-	assert.True(this.T(), detect.Check(5, testdata.TestCount, 0.24, 0.26))
-	assert.True(this.T(), detect.Check(0, testdata.TestCount, 0.24, 0.26))
+	this.True(tester.Check("a", testdata.TestCount, 0.04, 0.06))
+	this.True(tester.Check("b", testdata.TestCount, 0.09, 0.11))
+	this.True(tester.Check("c", testdata.TestCount, 0.14, 0.16))
+	this.True(tester.Check("d", testdata.TestCount, 0.19, 0.21))
+	this.True(tester.Check("e", testdata.TestCount, 0.24, 0.26))
+	this.True(tester.Check("f", testdata.TestCount, 0.24, 0.26))
+
+	target = NewDice()
+	this.Nil(target.Rand())
 }
 
-func (this *SuiteDice) TestDiceRandOnce() {
+func (this *SuiteDice) TestRandOnce() {
 	target := NewDice()
-	payload := []any{1, 2, 3, 4}
-	weight := []int64{10, 10, 10, 10}
-	_ = target.Fill(payload, weight)
-	assert.Contains(this.T(), payload, target.RandOnce())
-	assert.Contains(this.T(), payload, target.RandOnce())
-	assert.Contains(this.T(), payload, target.RandOnce())
-	assert.Contains(this.T(), payload, target.RandOnce())
-	assert.False(this.T(), target.Valid())
+	payload := []any{"a", "b", "c", "d"}
+	_ = target.Fill(payload, []int64{10, 10, 10, 10})
+	this.Contains(payload, target.RandOnce())
+	this.Contains(payload, target.RandOnce())
+	this.Contains(payload, target.RandOnce())
+	this.Contains(payload, target.RandOnce())
+	this.Nil(target.RandOnce())
+	this.False(target.Valid())
 }
 
-func (this *SuiteDice) TestDiceDetect() {
-	target := NewDiceDetect()
-	assert.NotNil(this.T(), target)
-	target.Add(1, 1)
-	target.Add(2, 2)
-	target.Add(3, 3)
-	target.Add(4, 4)
-	assert.Equal(this.T(), 0.1, target.Ratio(1, 10))
-	assert.Equal(this.T(), 0.2, target.Ratio(2, 10))
-	assert.Equal(this.T(), 0.3, target.Ratio(3, 10))
-	assert.Equal(this.T(), 0.4, target.Ratio(4, 10))
-	assert.True(this.T(), target.Check(4, 10, 0.1, 0.4))
-	assert.False(this.T(), target.Check(4, 10, 0.1, 0.1))
+func newDiceTester() *testDice {
+	return &testDice{
+		data: map[any]int{},
+	}
+}
+
+type testDice struct {
+	data map[any]int
+}
+
+func (this *testDice) Add(key any, count int) {
+	this.data[key] += count
+}
+
+func (this *testDice) Check(key any, total int, minimum, maximum float64) bool {
+	ratio := float64(this.data[key]) / float64(total)
+	return ratio >= minimum && ratio <= maximum
 }

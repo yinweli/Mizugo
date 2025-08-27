@@ -15,19 +15,33 @@ const (
 	ErrUnwrap  = 2 // 取得錯誤編號失敗
 )
 
-// Err 產生錯誤, 最後會產生 Error 物件, 物件中分為字串與錯誤編號兩個部分, 產生的方式為
-//   - 字串部分: 由 a 列表中的項目轉為字串後組合而成
-//   - 錯誤編號部分: a 列表中最後一個可獲取的錯誤編號, 只有項目為錯誤編號或是 Error 才能獲取錯誤編號
+// Err 產生錯誤, 建立一個具「訊息字串 + 錯誤編號」的錯誤物件
 //
-// 使用時, 請讓參數結尾為 [ error | 字串 | Error, 錯誤編號]; 以下提供使用的範例
-//   - trials.Err(字串, 字串, ... , error, 錯誤編號)
-//   - trials.Err(字串, 字串, ... , error)
-//   - trials.Err(字串, 字串, ... , 錯誤編號)
-//   - trials.Err(字串, 錯誤編號)
-//   - trials.Err(error, 錯誤編號)
-//   - trials.Err(錯誤編號)
+// 回傳的錯誤型別為 *Error, 其 Error 顯示格式為: <呼叫端函式名>: <訊息串>, ... (<錯誤編號>)
 //
-// 在制定錯誤編號時, 請加入以下三個預設的錯誤編號 Success, ErrUnknown, ErrUnwrap
+// 訊息字串的來源: 依序走訪參數 a, 將可轉成字串的內容(error 或 string)串接起來
+// 錯誤編號的來源: 以「最後一個可辨識錯誤編號」為準可辨識來源如下:
+//   - *Error: 沿用其內含的錯誤編號
+//   - 任何整數/無號整數型別(int/int32/uint64…): 視為錯誤編號
+//   - 其他型別將被忽略(不影響訊息與錯誤編號)
+//
+// 參數建議寫法(方便人讀與機器解析):
+//   - Err("說明A", "說明B", err, 錯誤編號)
+//   - Err("說明A", "說明B", err) // 無錯誤編號時將使用 ErrUnknown
+//   - Err("說明A", 錯誤編號)
+//   - Err(err, 錯誤編號)
+//   - Err(錯誤編號)
+//
+// 注意:
+//   - 在制定錯誤編號時, 請加入以下三個預設的錯誤編號 Success, ErrUnknown, ErrUnwrap
+//   - 為了產出呼叫端位置, Err 會使用 runtime.Caller(1) 取得「呼叫 Err 的函式名稱」, 僅作為訊息前綴
+//   - 若 *Error 與一般 error 同時存在, 請確保 *Error 出現在 error 之前(否則可能顯示兩個不同錯誤編號的文字訊息)
+//
+// 範例:
+//
+//	if err := doWork(); err != nil {
+//	    return Err("處理失敗", err, 10001) // Worker: 處理失敗, <底層訊息> (10001)
+//	} // if
 func Err(a ...any) error {
 	builder := strings.Builder{}
 	errorID := ErrUnknown
@@ -45,7 +59,7 @@ func Err(a ...any) error {
 		sz := ""
 
 		switch v := itor.(type) {
-		case *Error: // *Error 必須在 error 之前, 否則會出現2個 errorID 的顯示
+		case *Error: // *Error 必須在 error 之前, 否則會出現 2 個 errorID 的顯示
 			sz = v.err
 			errorID = v.errID
 
@@ -78,7 +92,21 @@ func Err(a ...any) error {
 	}
 }
 
-// UnwrapErrID 從錯誤物件取得錯誤編號
+// UnwrapErrID 從任何 error 物件取出錯誤編號
+//
+// 若 err 為本套件建立的 *Error, 回傳其錯誤碼; 否則回傳 ErrUnwrap
+//
+// 範例：
+//
+//	if err != nil {
+//	    switch UnwrapErrID(err) {
+//	    case 10001:
+//	        // 處理特定錯誤
+//
+//	    case ErrUnwrap:
+//	        // 非 *Error 或無法解碼
+//	    } // switch
+//	} // if
 func UnwrapErrID(err error) int {
 	var e *Error
 

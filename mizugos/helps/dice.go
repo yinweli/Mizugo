@@ -2,7 +2,7 @@ package helps
 
 import (
 	"fmt"
-	"sort"
+	"slices"
 )
 
 // NewDice 建立骰子資料
@@ -11,6 +11,45 @@ func NewDice() *Dice {
 }
 
 // Dice 骰子資料
+//
+// 它允許將多個元素依照「權重」放入, 之後可以隨機抽取:
+//   - Rand: 依照權重隨機回傳一個元素, 不會移除
+//   - RandOnce: 依照權重隨機回傳一個元素, 並從池中移除
+//   - Complete: 將最後一個元素的權重補到指定總和
+//   - Valid: 判斷是否還有可用的元素
+//   - Max: 取得目前權重總和
+//
+// 基本用法:
+//
+//	// 建立骰子
+//	d := helps.NewDice()
+//
+//	// 填入元素與權重
+//	_ = d.One("apple", 10)  // apple 權重 10
+//	_ = d.One("banana", 20) // banana 權重 20
+//	_ = d.One("orange", 30) // orange 權重 30
+//
+//	// 擲骰 (不移除)
+//	result := d.Rand()
+//	fmt.Println("選到:", result)
+//
+//	// 擲骰 (移除)
+//	for d.Valid() {
+//	    fmt.Println("一次性選到:", d.RandOnce())
+//	} // for
+//
+// 進階用法:
+//
+//	// 一次填入多個元素
+//	_ = d.Fill([]any{"a", "b", "c"}, []int64{5, 10, 15})
+//
+//	// 設定總權重上限為 100, 自動補上缺少的權重
+//	_ = d.Complete("other", 100)
+//
+// 注意:
+//   - 權重必須為非負數 (weight < 0 會回錯誤)
+//   - 權重 = 0 的元素會被忽略, 不會出現在結果中
+//   - RandInt64n(0, this.maximum) 須保證回傳 [0, maximum) 範圍
 type Dice struct {
 	dice    []dice // 骰子元素列表
 	maximum int64  // 最大值
@@ -76,21 +115,20 @@ func (this *Dice) Complete(payload any, maximum int64) error {
 	return nil
 }
 
-// Rand 擲骰, 最大值用內部設置
+// Rand 擲骰
 func (this *Dice) Rand() any {
-	return this.Randn(this.maximum)
-}
-
-// Randn 擲骰, 最大值用外部設置
-func (this *Dice) Randn(maximum int64) any {
-	if maximum <= 0 {
+	if this.maximum <= 0 {
 		return nil
 	} // if
 
-	num := RandInt64n(0, maximum)
+	num := RandInt64n(0, this.maximum)
 
-	if find := sort.Search(len(this.dice), func(i int) bool {
-		return this.dice[i].offset >= num
+	if find, _ := slices.BinarySearchFunc(this.dice, num, func(d dice, t int64) int {
+		if d.offset >= t {
+			return 1
+		} // if
+
+		return -1
 	}); find < len(this.dice) {
 		return this.dice[find].payload
 	} // if
@@ -106,8 +144,12 @@ func (this *Dice) RandOnce() any {
 
 	num := RandInt64n(0, this.maximum)
 
-	if find := sort.Search(len(this.dice), func(i int) bool {
-		return this.dice[i].offset >= num
+	if find, _ := slices.BinarySearchFunc(this.dice, num, func(d dice, t int64) int {
+		if d.offset >= t {
+			return 1
+		} // if
+
+		return -1
 	}); find < len(this.dice) {
 		found := this.dice[find]
 		offset := found.offset
@@ -137,32 +179,4 @@ func (this *Dice) Valid() bool {
 // Max 取得最大值
 func (this *Dice) Max() int64 {
 	return this.maximum
-}
-
-// NewDiceDetect 建立骰子檢測資料
-func NewDiceDetect() *DiceDetect {
-	return &DiceDetect{
-		data: map[any]int{},
-	}
-}
-
-// DiceDetect 骰子檢測資料
-type DiceDetect struct {
-	data map[any]int // 檢測列表
-}
-
-// Add 增加檢測資料
-func (this *DiceDetect) Add(key any, count int) {
-	this.data[key] += count
-}
-
-// Ratio 取得檢測比例
-func (this *DiceDetect) Ratio(key any, total int) float64 {
-	return float64(this.data[key]) / float64(total)
-}
-
-// Check 檢測比例是否正確, 比對的方式為檢測比例是否在min與max之間
-func (this *DiceDetect) Check(key any, total int, minimum, maximum float64) bool {
-	ratio := this.Ratio(key, total)
-	return ratio >= minimum && ratio <= maximum
 }

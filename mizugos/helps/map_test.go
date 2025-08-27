@@ -1,10 +1,8 @@
 package helps
 
 import (
-	"sort"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/v2/mizugos/trials"
@@ -34,10 +32,7 @@ func (this *SuiteMap) TestMapKey() {
 		2: "b",
 		3: "c",
 	})
-	sort.Slice(target, func(l, r int) bool {
-		return target[l] < target[r]
-	})
-	assert.Equal(this.T(), []int{1, 2, 3}, target)
+	this.ElementsMatch(target, []int{1, 2, 3})
 }
 
 func (this *SuiteMap) TestMapValue() {
@@ -46,10 +41,7 @@ func (this *SuiteMap) TestMapValue() {
 		2: "b",
 		3: "c",
 	})
-	sort.Slice(target, func(l, r int) bool {
-		return target[l] < target[r]
-	})
-	assert.Equal(this.T(), []string{"a", "b", "c"}, target)
+	this.ElementsMatch(target, []string{"a", "b", "c"})
 }
 
 func (this *SuiteMap) TestMapFlatten() {
@@ -58,12 +50,9 @@ func (this *SuiteMap) TestMapFlatten() {
 		2: "b",
 		3: "c",
 	})
-	sort.Slice(target, func(l, r int) bool {
-		return target[l].K < target[r].K
-	})
-	assert.Equal(this.T(), []MapFlattenData[int, string]{
+	this.ElementsMatch(target, []MapFlattenData[int, string]{
 		{K: 1, V: "a"},
 		{K: 2, V: "b"},
 		{K: 3, V: "c"},
-	}, target)
+	})
 }
