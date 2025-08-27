@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/v2/testdata"
@@ -20,33 +19,43 @@ type SuiteRedis struct {
 }
 
 func (this *SuiteRedis) TestRedisExist() {
-	key := "exist"
 	client := newRedis()
-	client.Set(context.Background(), key, "1", 0)
-	assert.True(this.T(), RedisExist(client, key))
-	assert.False(this.T(), RedisExist(client, testdata.Unknown))
-	client.Del(context.Background(), key)
+	client.Set(context.Background(), "redis exist", "1", 0)
+	this.True(RedisExist(client, "redis exist"))
+	this.False(RedisExist(client, testdata.Unknown))
+	client.Del(context.Background(), "redis exist")
 }
 
-func (this *SuiteRedis) TestRedisCompare() {
-	key := "compare"
+func (this *SuiteRedis) TestRedisEqual() {
 	client := newRedis()
-	client.Set(context.Background(), key, "{ \"Value\": 1 }", 0)
-	assert.True(this.T(), RedisCompare[testRedis](client, key, &testRedis{Value: 1}))
-	assert.False(this.T(), RedisCompare[testRedis](client, testdata.Unknown, nil))
-	client.Del(context.Background(), key)
+	client.Set(context.Background(), "redis compare", "{ \"Value\": 1 }", 0)
+	client.Set(context.Background(), "redis compare?", "1234567890123456789012345678901234567890", 0)
+	this.True(RedisEqual[testRedis](client, "redis compare", &testRedis{Value: 1}))
+	this.False(RedisEqual[testRedis](client, testdata.Unknown, &testRedis{}))
+	this.False(RedisEqual[testRedis](client, "redis compare?", &testRedis{}))
+	this.False(RedisEqual[testRedis](client, "redis compare", &testRedis{Value: 2}))
+	client.Del(context.Background(), "redis compare")
+	client.Del(context.Background(), "redis compare?")
 }
 
-func (this *SuiteRedis) TestRedisCompareList() {
-	key := "compareList"
+func (this *SuiteRedis) TestRedisListEqual() {
 	client := newRedis()
-	client.RPush(context.Background(), key, "{ \"Value\": 1 }", "{ \"Value\": 2 }")
-	assert.True(this.T(), RedisCompareList[testRedis](client, key, []*testRedis{
+	client.RPush(context.Background(), "redis compare list", "{ \"Value\": 1 }", "{ \"Value\": 2 }")
+	client.RPush(context.Background(), "redis compare list?", "1234567890123456789012345678901234567890")
+	client.Set(context.Background(), "redis compare list@", testdata.Unknown, 0)
+	this.True(RedisListEqual[testRedis](client, "redis compare list", []*testRedis{
 		{Value: 1},
 		{Value: 2},
 	}))
-	assert.False(this.T(), RedisCompareList[testRedis](client, testdata.Unknown, nil))
-	client.Del(context.Background(), key)
+	this.False(RedisListEqual[testRedis](client, "redis compare list@", []*testRedis{}))
+	this.False(RedisListEqual[testRedis](client, "redis compare list?", []*testRedis{}))
+	this.False(RedisListEqual[testRedis](client, "redis compare list", []*testRedis{
+		{Value: 2},
+		{Value: 1},
+	}))
+	client.Del(context.Background(), "redis compare list")
+	client.Del(context.Background(), "redis compare list?")
+	client.Del(context.Background(), "redis compare list@")
 }
 
 func newRedis() redis.Cmdable {
@@ -57,5 +66,5 @@ func newRedis() redis.Cmdable {
 }
 
 type testRedis struct {
-	Value int `json:"value"`
+	Value int
 }

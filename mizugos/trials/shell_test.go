@@ -4,7 +4,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/v2/testdata"
@@ -24,19 +23,19 @@ func (this *SuiteShell) TestShell() {
 	proc := func() {
 		count++
 	}
-	assert.Equal(this.T(), 0, Shell(nil, proc, proc, work))
-	assert.Equal(this.T(), 2, count)
+	this.Equal(0, Shell(nil, proc, proc, work))
+	this.Equal(2, count)
 }
 
 func (this *SuiteShell) TestPrepareRestore() {
 	work := filepath.Join(Root(), "prepare-restore")
-	test := filepath.Join(Root(), "prepare-restore", testdata.TrialFileName)
+	path := filepath.Join(Root(), "prepare-restore", testdata.TrialFileName)
 	catalog := Prepare(work, testdata.TrialDir)
-	assert.True(this.T(), FileExist(test))
+	this.FileExists(path)
 	Restore(catalog)
-	assert.False(this.T(), FileExist(test))
+	this.NoFileExists(path)
 }
 
 func (this *SuiteShell) TestRoot() {
-	assert.Contains(this.T(), Root(), filepath.Clean("mizugos/trials"))
+	this.Contains(Root(), filepath.Clean("mizugos/trials"))
 }
