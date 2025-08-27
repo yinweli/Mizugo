@@ -46,7 +46,7 @@ tasks:
   fmt-yaml:
     ignore_error: true
     cmds:
-      - npx prettier --write "*.yaml" "*.yml" "**/*.yaml" "**/*.yml"
+      - npx prettier --write "*.yaml" "*.yml" "**/*.yaml" "**/*.yml" --end-of-line lf
 
   lint-mizugo:
     ignore_error: true
@@ -100,15 +100,15 @@ tasks:
           docker network create dev
         fi
       # 啟動redis
-      - docker build -t dbredis -f docker/docker-redis .
+      - docker build -t dbredis -f script/docker-redis .
       - docker rm -f -v dbredis || true
       - docker volume rm dbredis-volume || true
       - docker run -d --name dbredis --network dev -v dbredis-volume:/data -p 6379:6379 dbredis redis-server /usr/local/etc/redis/redis.conf
       # 啟動mongo
-      - docker pull mongo:latest
-      - docker rm -f -v dbmongo
+      - docker build -t dbmongo -f script/docker-mongo .
+      - docker rm -f -v dbmongo || true
       - docker volume rm dbmongo-volume || true
-      - docker run -d --name dbmongo --network dev -v dbmongo-volume:/data/db -p 27017:27017 mongo:latest
+      - docker run -d --name dbmongo --network dev -v dbmongo-volume:/data/db -p 27017:27017 dbmongo
       # 清除懸空鏡像
       - docker image prune -f
 
@@ -119,4 +119,5 @@ tasks:
       - dotnet tool install csharpier -g # 安裝cs格式化工具
       - go install github.com/bufbuild/buf/cmd/buf@latest # 安裝proto格式化工具
       - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest # 安裝lint
+      - go install golang.org/x/tools/cmd/goimports@latest # 安裝go引入排序工具
       - npm install -g prettier # 安裝yaml格式化工具

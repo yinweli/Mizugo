@@ -1,0 +1,2 @@
+# 從mongo建置鏡像檔
+FROM mongo:latest
