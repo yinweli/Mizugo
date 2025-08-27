@@ -3,13 +3,13 @@ package entrys //nolint:dupl
 import (
 	"fmt"
 
-	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/mizugos/cryptos"
-	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/nets"
-	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/support/test-server/internal/features"
-	"github.com/yinweli/Mizugo/support/test-server/internal/modules"
+	"github.com/yinweli/Mizugo/v2/mizugos"
+	"github.com/yinweli/Mizugo/v2/mizugos/cryptos"
+	"github.com/yinweli/Mizugo/v2/mizugos/entitys"
+	"github.com/yinweli/Mizugo/v2/mizugos/nets"
+	"github.com/yinweli/Mizugo/v2/mizugos/procs"
+	"github.com/yinweli/Mizugo/v2/support/test-server/internal/features"
+	"github.com/yinweli/Mizugo/v2/support/test-server/internal/modules"
 )
 
 // JsonInitialize 初始化Json入口

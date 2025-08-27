@@ -3,11 +3,11 @@ package modules
 import (
 	"fmt"
 
-	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
-	"github.com/yinweli/Mizugo/support/test-server/internal/features"
-	"github.com/yinweli/Mizugo/support/test-server/msgs"
+	"github.com/yinweli/Mizugo/v2/mizugos/entitys"
+	"github.com/yinweli/Mizugo/v2/mizugos/procs"
+	"github.com/yinweli/Mizugo/v2/support/test-server/internal/defines"
+	"github.com/yinweli/Mizugo/v2/support/test-server/internal/features"
+	"github.com/yinweli/Mizugo/v2/support/test-server/msgs"
 )
 
 // NewProto 建立Proto模組
@@ -32,9 +32,7 @@ func (this *Proto) Awake() error {
 
 // procMProtoQ 處理要求Proto
 func (this *Proto) procMProtoQ(message any) {
-	rec := features.MeterProto.Rec()
-	defer rec()
-	_, msg, err := procs.ProtoUnmarshal[msgs.MProtoQ](message)
+	_, msg, err := procs.ProtoUnmarshal[*msgs.MProtoQ](message)
 
 	if err != nil {
 		this.sendMProtoA(nil, msgs.ErrID_ProtoUnmarshal, 0)

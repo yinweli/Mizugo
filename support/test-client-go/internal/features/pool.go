@@ -3,8 +3,8 @@ package features
 import (
 	"fmt"
 
-	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/mizugos/pools"
+	"github.com/yinweli/Mizugo/v2/mizugos"
+	"github.com/yinweli/Mizugo/v2/mizugos/pools"
 )
 
 // PoolInitialize 初始化執行緒池

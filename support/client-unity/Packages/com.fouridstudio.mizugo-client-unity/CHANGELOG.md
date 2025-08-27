@@ -4,10 +4,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Planning]
-
-## [Unrelease]
-
 ## [0.4.4] - 2024-08-28
 ### Fixed
 - 傳輸流內部的錯誤都算是斷線
@@ -68,7 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 變更客戶端組件介面(IClient)
 - 更新說明文件
 ### Fixed
-- 修正連線超時檢測
+- 修正連線逾時檢測
 
 ## [0.1.4] - 2023-02-08
 ### Changed

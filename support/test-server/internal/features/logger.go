@@ -3,8 +3,8 @@ package features
 import (
 	"fmt"
 
-	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/mizugos/loggers"
+	"github.com/yinweli/Mizugo/v2/mizugos"
+	"github.com/yinweli/Mizugo/v2/mizugos/loggers"
 )
 
 // LoggerInitialize 初始化日誌

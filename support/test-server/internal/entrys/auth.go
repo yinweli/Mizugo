@@ -3,12 +3,12 @@ package entrys
 import (
 	"fmt"
 
-	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/nets"
-	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/support/test-server/internal/features"
-	"github.com/yinweli/Mizugo/support/test-server/internal/modules"
+	"github.com/yinweli/Mizugo/v2/mizugos"
+	"github.com/yinweli/Mizugo/v2/mizugos/entitys"
+	"github.com/yinweli/Mizugo/v2/mizugos/nets"
+	"github.com/yinweli/Mizugo/v2/mizugos/procs"
+	"github.com/yinweli/Mizugo/v2/support/test-server/internal/features"
+	"github.com/yinweli/Mizugo/v2/support/test-server/internal/modules"
 )
 
 // AuthInitialize 初始化Auth入口

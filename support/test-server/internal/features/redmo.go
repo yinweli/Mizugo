@@ -3,8 +3,8 @@ package features
 import (
 	"fmt"
 
-	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/mizugos/redmos"
+	"github.com/yinweli/Mizugo/v2/mizugos"
+	"github.com/yinweli/Mizugo/v2/mizugos/redmos"
 )
 
 // RedmoInitialize 初始化資料庫

@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/nets"
-	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/support/test-client-go/internal/features"
-	"github.com/yinweli/Mizugo/support/test-client-go/internal/modules"
+	"github.com/yinweli/Mizugo/v2/mizugos"
+	"github.com/yinweli/Mizugo/v2/mizugos/entitys"
+	"github.com/yinweli/Mizugo/v2/mizugos/nets"
+	"github.com/yinweli/Mizugo/v2/mizugos/procs"
+	"github.com/yinweli/Mizugo/v2/support/test-client-go/internal/features"
+	"github.com/yinweli/Mizugo/v2/support/test-client-go/internal/modules"
 )
 
 // AuthInitialize 初始化Auth入口
@@ -44,7 +44,7 @@ type AuthConfig struct {
 	Enable  bool          `yaml:"enable"`  // 啟用旗標
 	IP      string        `yaml:"ip"`      // 位址
 	Port    string        `yaml:"port"`    // 埠號
-	Timeout time.Duration `yaml:"timeout"` // 超時時間
+	Timeout time.Duration `yaml:"timeout"` // 逾時時間
 	Delay   time.Duration `yaml:"delay"`   // 延遲時間
 	Account string        `yaml:"account"` // 帳號
 	Update  int           `yaml:"update"`  // 更新次數
@@ -85,7 +85,6 @@ func (this *Auth) bind(session nets.Sessioner) bool {
 	session.SetPublish(entity.PublishOnce)
 	session.SetWrong(this.wrong)
 	session.SetOwner(entity)
-	features.MeterConnect.Add(1)
 	features.LogSystem.Get().Info("auth").Message("bind").Caller(0).EndFlush()
 	return true
 
@@ -105,7 +104,6 @@ func (this *Auth) unbind(session nets.Sessioner) {
 	if entity, ok := session.GetOwner().(*entitys.Entity); ok {
 		entity.Finalize()
 		mizugos.Entity.Del(entity.EntityID())
-		features.MeterConnect.Add(-1)
 	} // if
 }
 

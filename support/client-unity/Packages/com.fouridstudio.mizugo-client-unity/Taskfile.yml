@@ -4,4 +4,4 @@ tasks:
   # 進行程式碼檢查
   lint:
     cmds:
-      - dotnet csharpier . # 程式碼格式化
+      - csharpier format .

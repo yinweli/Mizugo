@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
-	"github.com/yinweli/Mizugo/support/test-client-go/internal/features"
-	"github.com/yinweli/Mizugo/support/test-client-go/msgs"
+	"github.com/yinweli/Mizugo/v2/mizugos/entitys"
+	"github.com/yinweli/Mizugo/v2/mizugos/procs"
+	"github.com/yinweli/Mizugo/v2/support/test-client-go/internal/defines"
+	"github.com/yinweli/Mizugo/v2/support/test-client-go/internal/features"
+	"github.com/yinweli/Mizugo/v2/support/test-client-go/msgs"
 )
 
 // NewProto 建立Proto模組
@@ -49,7 +49,7 @@ func (this *Proto) eventBegin(_ any) {
 
 // procMProtoA 處理回應Proto
 func (this *Proto) procMProtoA(message any) {
-	_, msg, err := procs.ProtoUnmarshal[msgs.MProtoA](message)
+	_, msg, err := procs.ProtoUnmarshal[*msgs.MProtoA](message)
 
 	if err != nil {
 		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("proto procMProtoA: %w", err)).EndFlush()
@@ -62,7 +62,6 @@ func (this *Proto) procMProtoA(message any) {
 	} // if
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
-	features.MeterProto.Add(duration)
 	features.LogSystem.Get().Info(this.name).KV("count", msg.Count).KV("duration", duration).Caller(0).EndFlush()
 
 	if this.disconnect {

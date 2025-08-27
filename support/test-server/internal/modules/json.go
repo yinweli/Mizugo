@@ -3,11 +3,11 @@ package modules
 import (
 	"fmt"
 
-	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
-	"github.com/yinweli/Mizugo/support/test-server/internal/features"
-	"github.com/yinweli/Mizugo/support/test-server/msgs"
+	"github.com/yinweli/Mizugo/v2/mizugos/entitys"
+	"github.com/yinweli/Mizugo/v2/mizugos/procs"
+	"github.com/yinweli/Mizugo/v2/support/test-server/internal/defines"
+	"github.com/yinweli/Mizugo/v2/support/test-server/internal/features"
+	"github.com/yinweli/Mizugo/v2/support/test-server/msgs"
 )
 
 // NewJson 建立Json模組
@@ -32,8 +32,6 @@ func (this *Json) Awake() error {
 
 // procMJsonQ 處理要求Json
 func (this *Json) procMJsonQ(message any) {
-	rec := features.MeterJson.Rec()
-	defer rec()
 	_, msg, err := procs.JsonUnmarshal[msgs.MJsonQ](message)
 
 	if err != nil {
