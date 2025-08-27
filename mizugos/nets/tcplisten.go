@@ -5,7 +5,7 @@ import (
 	"net"
 	"sync/atomic"
 
-	"github.com/yinweli/Mizugo/mizugos/pools"
+	"github.com/yinweli/Mizugo/v2/mizugos/pools"
 )
 
 // NewTCPListen 建立TCP接聽器

@@ -9,8 +9,8 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 
-	"github.com/yinweli/Mizugo/mizugos/helps"
-	"github.com/yinweli/Mizugo/mizugos/msgs"
+	"github.com/yinweli/Mizugo/v2/mizugos/helps"
+	"github.com/yinweli/Mizugo/v2/mizugos/msgs"
 )
 
 // NewRaven 建立raven處理器

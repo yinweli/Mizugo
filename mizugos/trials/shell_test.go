@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestShell(t *testing.T) {

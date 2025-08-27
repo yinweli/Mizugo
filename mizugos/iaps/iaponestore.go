@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos/helps"
+	"github.com/yinweli/Mizugo/v2/mizugos/helps"
 )
 
 // NewIAPOneStore 建立OneStore驗證器

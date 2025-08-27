@@ -1,7 +1,7 @@
 package entitys
 
 import (
-	"github.com/yinweli/Mizugo/mizugos/nets"
+	"github.com/yinweli/Mizugo/v2/mizugos/nets"
 )
 
 const ( // 內部事件名稱

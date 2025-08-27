@@ -8,9 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/helps"
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/helps"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestCmdFind(t *testing.T) {

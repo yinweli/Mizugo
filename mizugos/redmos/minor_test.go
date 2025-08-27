@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestMinor(t *testing.T) {

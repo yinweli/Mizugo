@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestMongo(t *testing.T) {

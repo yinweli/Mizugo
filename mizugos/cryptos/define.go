@@ -1,7 +1,7 @@
 package cryptos
 
 import (
-	"github.com/yinweli/Mizugo/mizugos/helps"
+	"github.com/yinweli/Mizugo/v2/mizugos/helps"
 )
 
 const DesKeySize = 8                      // des密鑰長度

@@ -1,12 +1,12 @@
 package mizugos
 
 import (
-	"github.com/yinweli/Mizugo/mizugos/configs"
-	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/loggers"
-	"github.com/yinweli/Mizugo/mizugos/nets"
-	"github.com/yinweli/Mizugo/mizugos/pools"
-	"github.com/yinweli/Mizugo/mizugos/redmos"
+	"github.com/yinweli/Mizugo/v2/mizugos/configs"
+	"github.com/yinweli/Mizugo/v2/mizugos/entitys"
+	"github.com/yinweli/Mizugo/v2/mizugos/loggers"
+	"github.com/yinweli/Mizugo/v2/mizugos/nets"
+	"github.com/yinweli/Mizugo/v2/mizugos/pools"
+	"github.com/yinweli/Mizugo/v2/mizugos/redmos"
 )
 
 // Start 啟動伺服器

@@ -8,7 +8,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/yinweli/Mizugo/mizugos/pools"
+	"github.com/yinweli/Mizugo/v2/mizugos/pools"
 )
 
 // NewTCPSession 建立TCP會話器

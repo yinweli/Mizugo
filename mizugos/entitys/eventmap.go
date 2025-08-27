@@ -9,8 +9,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos/helps"
-	"github.com/yinweli/Mizugo/mizugos/pools"
+	"github.com/yinweli/Mizugo/v2/mizugos/helps"
+	"github.com/yinweli/Mizugo/v2/mizugos/pools"
 )
 
 // NewEventmap 建立事件列表

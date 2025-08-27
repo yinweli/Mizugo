@@ -5,7 +5,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/yinweli/Mizugo/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
 )
 
 // newInformTester 建立測試器

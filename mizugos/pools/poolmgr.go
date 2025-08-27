@@ -6,7 +6,7 @@ import (
 
 	"github.com/panjf2000/ants/v2"
 
-	"github.com/yinweli/Mizugo/mizugos/helps"
+	"github.com/yinweli/Mizugo/v2/mizugos/helps"
 )
 
 // NewPoolmgr 建立執行緒池管理器

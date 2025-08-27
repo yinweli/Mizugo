@@ -5,9 +5,9 @@ import (
 	"net"
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos/helps"
-	"github.com/yinweli/Mizugo/mizugos/nets"
-	"github.com/yinweli/Mizugo/mizugos/procs"
+	"github.com/yinweli/Mizugo/v2/mizugos/helps"
+	"github.com/yinweli/Mizugo/v2/mizugos/nets"
+	"github.com/yinweli/Mizugo/v2/mizugos/procs"
 )
 
 // NewEntity 建立實體資料

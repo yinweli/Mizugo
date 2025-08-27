@@ -5,7 +5,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos/pools"
+	"github.com/yinweli/Mizugo/v2/mizugos/pools"
 )
 
 // NewTCPConnect 建立TCP連接器

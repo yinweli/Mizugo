@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/yinweli/Mizugo/mizugos/helps"
+	"github.com/yinweli/Mizugo/v2/mizugos/helps"
 )
 
 // QPopAll 彈出全部佇列行為, 以索引值到主要資料庫中取得全部佇列, 使用上有以下幾點須注意
