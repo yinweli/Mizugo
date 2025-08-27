@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2025-10-01
+### Deleted
+- 移除標籤管理器
+- 移除度量管理器
+- 移除信號調度管理器
+### Changed
+- 更新測試工具
+- 更新加解密工具
+- 更新 IAP 工具
+- 更新配置管理器
+- 更新執行緒管理器
+- 更新日誌管理器
+- 更新協助工具
+- 更新實體機制
+- 更新網路機制
+- 更新訊息處理機制
+- 更新資料庫機制
+
 ## [1.1.57] - 2025-08-13
 ### Fixed
 - 修正 Percent 的計算有問題時不吐 panic, 改回傳0
