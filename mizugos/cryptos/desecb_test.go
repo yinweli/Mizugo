@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/v2/mizugos/helps"
@@ -31,41 +30,42 @@ func (this *SuiteDesECB) TearDownSuite() {
 }
 
 func (this *SuiteDesECB) TestDesECB() {
-	keyValid := RandDesKeyString()
-	keyInvalid := helps.RandString(15, helps.StrNumberAlpha)
-	target := NewDesECB(PaddingPKCS7, keyValid)
-	assert.NotNil(this.T(), target)
+	key1 := RandDesKeyString()
+	key2 := helps.RandString(15, helps.StrNumberAlpha)
+	target := NewDesECB(PaddingPKCS7, key1)
+	this.NotNil(target)
 
 	for size := 16; size <= 64; size++ {
 		input := []byte(helps.RandString(size, helps.StrNumberAlpha))
 		crypto, err := target.Encode(input)
-		assert.Nil(this.T(), err)
+		this.Nil(err)
 		output, err := target.Decode(crypto)
-		assert.Nil(this.T(), err)
-		assert.Equal(this.T(), input, output)
+		this.Nil(err)
+		this.Equal(input, output)
 
-		fmt.Printf("----- size: %v -----\n", size)
-		fmt.Printf("input=%v\n", string(input))
-		fmt.Printf("output=%v\n", string(output.([]byte)))
-		fmt.Printf("crypto=%v\n", hex.EncodeToString(crypto.([]byte)))
+		fmt.Printf("size: %v\n", size)
+		fmt.Printf("  input  %v\n", string(input))
+		fmt.Printf("  output %v\n", string(output.([]byte)))
+		fmt.Printf("  crypto %v\n", hex.EncodeToString(crypto.([]byte)))
 	} // for
 
-	_, err := NewDesECB(PaddingPKCS7, keyInvalid).Encode(nil)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesECB(PaddingPKCS7, keyValid).Encode(nil)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesECB(PaddingPKCS7, keyValid).Encode(testdata.Unknown)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesECB(PaddingPKCS7, keyValid).Encode([]byte{})
-	assert.NotNil(this.T(), err)
-	_, err = NewDesECB(PaddingPKCS7, keyInvalid).Decode(nil)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesECB(PaddingPKCS7, keyValid).Decode(nil)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesECB(PaddingPKCS7, keyValid).Decode(testdata.Unknown)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesECB(PaddingPKCS7, keyValid).Decode([]byte{})
-	assert.NotNil(this.T(), err)
+	_, err := NewDesECB(PaddingPKCS7, key1).Encode(nil)
+	this.NotNil(err)
+	_, err = NewDesECB(PaddingPKCS7, key1).Encode(testdata.Unknown)
+	this.NotNil(err)
+	_, err = NewDesECB(PaddingPKCS7, key1).Encode([]byte{})
+	this.NotNil(err)
+	_, err = NewDesECB(PaddingPKCS7, key2).Encode(nil)
+	this.NotNil(err)
+
+	_, err = NewDesECB(PaddingPKCS7, key1).Decode(nil)
+	this.NotNil(err)
+	_, err = NewDesECB(PaddingPKCS7, key1).Decode(testdata.Unknown)
+	this.NotNil(err)
+	_, err = NewDesECB(PaddingPKCS7, key1).Decode([]byte{})
+	this.NotNil(err)
+	_, err = NewDesECB(PaddingPKCS7, key2).Decode(nil)
+	this.NotNil(err)
 }
 
 func BenchmarkDesECBEncode1024(b *testing.B) {

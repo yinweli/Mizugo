@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/v2/mizugos/helps"
@@ -32,7 +31,7 @@ func (this *SuiteMD5) TearDownSuite() {
 func (this *SuiteMD5) TestMD5String() {
 	input := "test md5 string"
 	output := MD5String([]byte(input))
-	assert.NotNil(this.T(), output)
+	this.NotNil(output)
 	fmt.Printf("%v => %v\n", input, output)
 }
 
