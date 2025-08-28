@@ -10,13 +10,20 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// QPop 彈出佇列行為, 以索引值到主要資料庫中取得佇列, 使用上有以下幾點須注意
-//   - 泛型類型T必須是結構, 並且不能是指標
-//   - 執行前設定好 MinorEnable; 由於佇列行為只會在主要資料庫中執行, 因此次要資料庫僅用於備份
-//   - 執行前設定好 Meta, 這需要事先建立好與 Metaer 介面符合的元資料結構
-//   - 執行前設定好 Key 並且不能為空字串
-//   - 執行前設定好 Data, 如果為nil, 則內部程序會自己建立
-//   - 執行後可用 Data 來取得資料
+// QPop 佇列彈出行為
+//
+// 以索引鍵(Key)自主要資料庫的「佇列(List)」頭部彈出一筆元素, 並可選擇將「彈出後的佇列狀態」備份到次要資料庫;
+// 若成功完成後, 會將彈出元素儲存至 Data
+//
+// 事前準備:
+//   - (可選)設定 MinorEnable: true 表示完成時會將「彈出後的佇列快照」寫入次要資料庫
+//   - 設定 Meta: 需為符合 Metaer 介面的元資料物件(至少需提供 MajorKey；若啟用備份，還需提供 MinorKey 與 MinorTable)
+//   - 設定 Key: 不可為空字串
+//   - (可選)設定 Data: 若為 nil, 執行時會自動建立 *T
+//
+// 注意:
+//   - 泛型 T 應為「值型別的結構(struct)」, 且不要以 *T 作為型別參數
+//   - 若佇列過長可能造成效能問題, 建議用於小~中型佇列
 type QPop[T any] struct {
 	Behave                            // 行為物件
 	MinorEnable bool                  // 啟用次要資料庫
@@ -43,24 +50,28 @@ func (this *QPop[T]) Prepare() error {
 
 	key := this.Meta.MajorKey(this.Key)
 	this.cmd = this.Major().LPop(this.Ctx(), key)
-	this.cmdQueued = this.Major().LRange(this.Ctx(), key, 0, -1)
+
+	if this.MinorEnable {
+		this.cmdQueued = this.Major().LRange(this.Ctx(), key, 0, -1)
+	} // if
+
 	return nil
 }
 
 // Complete 完成處理
 func (this *QPop[T]) Complete() error {
-	data, err := this.cmd.Result()
+	result, err := this.cmd.Result()
 
 	if err != nil && errors.Is(err, redis.Nil) == false {
 		return fmt.Errorf("qpop complete: %w: %v", err, this.Key)
 	} // if
 
-	if data != RedisNil {
+	if result != RedisNil {
 		if this.Data == nil {
 			this.Data = new(T)
 		} // if
 
-		if err = json.Unmarshal([]byte(data), this.Data); err != nil {
+		if err = json.Unmarshal([]byte(result), this.Data); err != nil {
 			return fmt.Errorf("qpop complete: %w: %v", err, this.Key)
 		} // if
 	} // if

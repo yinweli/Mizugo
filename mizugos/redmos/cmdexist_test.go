@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/v2/mizugos/trials"
@@ -19,7 +18,7 @@ func TestCmdExist(t *testing.T) {
 type SuiteCmdExist struct {
 	suite.Suite
 	trials.Catalog
-	meta  metaExist
+	meta  testMetaExist
 	major *Major
 	minor *Minor
 }
@@ -47,35 +46,35 @@ func (this *SuiteCmdExist) TestExist() {
 
 	target := &Exist{Meta: &this.meta, Key: key}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), target.Prepare())
+	this.Nil(target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), target.Complete())
-	assert.Equal(this.T(), 2, target.Count)
+	this.Nil(target.Complete())
+	this.Equal(2, target.Count)
 
 	target = &Exist{Meta: nil, Key: key}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 
 	target = &Exist{Meta: &this.meta, Key: nil}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 
 	target = &Exist{Meta: &this.meta, Key: []string{}}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 }
 
-type metaExist struct {
+type testMetaExist struct {
 }
 
-func (this *metaExist) MajorKey(key any) string {
+func (this *testMetaExist) MajorKey(key any) string {
 	return fmt.Sprintf("cmdexist:%v", key)
 }
 
-func (this *metaExist) MinorKey(key any) string {
+func (this *testMetaExist) MinorKey(key any) string {
 	return fmt.Sprintf("%v", key)
 }
 
-func (this *metaExist) MinorTable() string {
+func (this *testMetaExist) MinorTable() string {
 	return "cmdexist"
 }

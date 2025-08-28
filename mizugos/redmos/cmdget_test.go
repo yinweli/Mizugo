@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/v2/mizugos/helps"
@@ -21,7 +20,7 @@ func TestCmdGet(t *testing.T) {
 type SuiteCmdGet struct {
 	suite.Suite
 	trials.Catalog
-	meta  metaGet
+	meta  testMetaGet
 	major *Major
 	minor *Minor
 }
@@ -44,76 +43,76 @@ func (this *SuiteCmdGet) TestGet() {
 	this.meta.table = true
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
-	data := &dataGet{K: "redis+mongo", D: helps.RandStringDefault()}
+	data := &testDataGet{K: "redis+mongo", D: helps.RandStringDefault()}
 
-	set := &Set[dataGet]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: data.K, Data: data}
+	set := &Set[testDataGet]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: data.K, Data: data}
 	set.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), set.Prepare())
+	this.Nil(set.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), set.Complete())
+	this.Nil(set.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.True(this.T(), trials.RedisCompare[dataGet](this.major.Client(), this.meta.MajorKey(data.K), data))
-	assert.True(this.T(), trials.MongoCompare[dataGet](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data.K), data))
+	this.True(trials.RedisEqual[testDataGet](this.major.Client(), this.meta.MajorKey(data.K), data))
+	this.True(trials.MongoEqual[testDataGet](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data.K), data))
 
-	target := &Get[dataGet]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: data.K}
+	target := &Get[testDataGet]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: data.K}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), target.Prepare())
+	this.Nil(target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), target.Complete())
+	this.Nil(target.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.True(this.T(), cmp.Equal(data, target.Data))
+	this.True(cmp.Equal(data, target.Data))
 
-	target = &Get[dataGet]{MajorEnable: true, MinorEnable: false, Meta: &this.meta, Key: data.K}
+	target = &Get[testDataGet]{MajorEnable: true, MinorEnable: false, Meta: &this.meta, Key: data.K}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), target.Prepare())
+	this.Nil(target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), target.Complete())
+	this.Nil(target.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.True(this.T(), cmp.Equal(data, target.Data))
+	this.True(cmp.Equal(data, target.Data))
 
-	target = &Get[dataGet]{MajorEnable: false, MinorEnable: true, Meta: &this.meta, Key: data.K}
+	target = &Get[testDataGet]{MajorEnable: false, MinorEnable: true, Meta: &this.meta, Key: data.K}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), target.Prepare())
+	this.Nil(target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), target.Complete())
+	this.Nil(target.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.True(this.T(), cmp.Equal(data, target.Data))
+	this.True(cmp.Equal(data, target.Data))
 
-	target = &Get[dataGet]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: testdata.Unknown}
+	target = &Get[testDataGet]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: testdata.Unknown}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), target.Prepare())
+	this.Nil(target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), target.Complete())
+	this.Nil(target.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), target.Data)
+	this.Nil(target.Data)
 
-	target = &Get[dataGet]{MajorEnable: true, MinorEnable: true, Meta: nil, Key: data.K}
+	target = &Get[testDataGet]{MajorEnable: true, MinorEnable: true, Meta: nil, Key: data.K}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 
-	target = &Get[dataGet]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: ""}
+	target = &Get[testDataGet]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: ""}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 
 	this.meta.table = false
-	target = &Get[dataGet]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: data.K}
+	target = &Get[testDataGet]{MajorEnable: true, MinorEnable: true, Meta: &this.meta, Key: data.K}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 }
 
-type metaGet struct {
+type testMetaGet struct {
 	table bool
 }
 
-func (this *metaGet) MajorKey(key any) string {
+func (this *testMetaGet) MajorKey(key any) string {
 	return fmt.Sprintf("cmdget:%v", key)
 }
 
-func (this *metaGet) MinorKey(key any) string {
+func (this *testMetaGet) MinorKey(key any) string {
 	return fmt.Sprintf("%v", key)
 }
 
-func (this *metaGet) MinorTable() string {
+func (this *testMetaGet) MinorTable() string {
 	if this.table {
 		return "cmdget"
 	} // if
@@ -121,7 +120,7 @@ func (this *metaGet) MinorTable() string {
 	return ""
 }
 
-type dataGet struct {
+type testDataGet struct {
 	K string `bson:"k"`
 	D string `bson:"d"`
 }

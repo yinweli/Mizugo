@@ -3,7 +3,6 @@ package redmos
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/v2/mizugos/trials"
@@ -29,7 +28,7 @@ func (this *SuiteSave) TearDownSuite() {
 
 func (this *SuiteSave) TestSave() {
 	target := NewSave()
-	assert.NotNil(this.T(), target)
+	this.NotNil(target)
 	target.SetSave()
-	assert.True(this.T(), target.GetSave())
+	this.True(target.GetSave())
 }

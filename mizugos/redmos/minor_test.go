@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -31,58 +30,60 @@ func (this *SuiteMinor) TearDownSuite() {
 
 func (this *SuiteMinor) TestMinor() {
 	target, err := newMinor(testdata.MongoURI, "minor")
-	assert.Nil(this.T(), err)
-	assert.NotNil(this.T(), target)
-	assert.NotNil(this.T(), target.Submit())
-	assert.NotNil(this.T(), target.Client())
-	assert.NotNil(this.T(), target.Database())
-	assert.Nil(this.T(), target.SwitchDB("minor"))
-	assert.NotNil(this.T(), target.SwitchDB(""))
-	target.DropDB()
-	assert.Nil(this.T(), target.Client().Ping(context.Background(), nil))
+	this.Nil(err)
+	this.NotNil(target)
 	target.stop()
-	assert.Nil(this.T(), target.Submit())
-	assert.Nil(this.T(), target.Client())
-	assert.Nil(this.T(), target.Database())
-	assert.NotNil(this.T(), target.SwitchDB("minor"))
-	target.DropDB()
-
 	_, err = newMinor("", "minor")
-	assert.NotNil(this.T(), err)
+	this.NotNil(err)
 	_, err = newMinor(testdata.MongoURI, "")
-	assert.NotNil(this.T(), err)
+	this.NotNil(err)
 	_, err = newMinor(testdata.MongoURIInvalid, "minor")
-	assert.NotNil(this.T(), err)
+	this.NotNil(err)
 }
 
-func (this *SuiteMinor) TestMinorSubmit() {
-	minor, _ := newMinor(testdata.MongoURI, "minor")
-	target := minor.Submit()
-	assert.NotNil(this.T(), target.Collection("minor"))
-	assert.NotNil(this.T(), target.Operate("minor", mongo.NewReplaceOneModel()))
-	target = minor.Submit()
-	assert.Nil(this.T(), target.Exec(context.Background()))
+func (this *SuiteMinor) TestSubmit() {
+	target, _ := newMinor(testdata.MongoURI, "minor")
+	submit := target.Submit()
+	this.NotNil(submit.Collection("minor"))
+	this.NotNil(submit.Operate("minor", mongo.NewReplaceOneModel()))
+	submit = target.Submit()
+	this.Nil(submit.Exec(context.Background()))
+	target.stop()
+	this.Nil(target.Submit())
+}
+
+func (this *SuiteMinor) TestClient() {
+	target, _ := newMinor(testdata.MongoURI, "minor")
+	client := target.Client()
+	this.NotNil(client)
+	this.Nil(target.Client().Ping(context.Background(), nil))
+	target.stop()
+}
+
+func (this *SuiteMinor) TestDatabase() {
+	target, _ := newMinor(testdata.MongoURI, "minor")
+	this.NotNil(target.Database())
+	target.stop()
+}
+
+func (this *SuiteMinor) TestSwitchDB() {
+	target, _ := newMinor(testdata.MongoURI, "minor")
+	this.Nil(target.SwitchDB("minor"))
+	this.NotNil(target.SwitchDB(""))
+	target.stop()
+	this.NotNil(target.SwitchDB("minor"))
+}
+
+func (this *SuiteMinor) TestDropDB() {
+	target, _ := newMinor(testdata.MongoURI, "minor")
+	target.DropDB()
+	target.stop()
 }
 
 func (this *SuiteMinor) TestMinorIndex() {
-	target := MinorIndex(&meta{})
-	assert.NotNil(this.T(), target)
-	assert.NotEmpty(this.T(), target.Name)
-	assert.NotEmpty(this.T(), target.Table)
-	assert.NotEmpty(this.T(), target.Field)
-}
-
-type meta struct {
-}
-
-func (this *meta) MajorKey(key any) string {
-	return ""
-}
-
-func (this *meta) MinorKey(key any) string {
-	return ""
-}
-
-func (this *meta) MinorTable() string {
-	return testdata.Unknown
+	target := MinorIndex(&testMeta{})
+	this.NotNil(target)
+	this.NotEmpty(target.Name)
+	this.NotEmpty(target.Table)
+	this.NotEmpty(target.Field)
 }

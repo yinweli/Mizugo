@@ -10,12 +10,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// QPush 推入佇列行為, 以索引值與資料到主要資料庫中儲存佇列, 使用上有以下幾點須注意
-//   - 泛型類型T必須是結構, 並且不能是指標
-//   - 執行前設定好 MinorEnable; 由於佇列行為只會在主要資料庫中執行, 因此次要資料庫僅用於備份
-//   - 執行前設定好 Meta, 這需要事先建立好與 Metaer 介面符合的元資料結構
-//   - 執行前設定好 Key 並且不能為空字串
-//   - 執行前設定好 Data 並且不能為nil
+// QPush 佇列推入行為
+//
+// 以索引鍵(Key)將一筆資料(Data)推入主要資料庫的「佇列(List)」尾端, 並可選擇將「推入後的佇列快照」備份至次要資料庫
+//
+// 事前準備:
+//   - (可選)設定 MinorEnable: true 表示在完成時會將「推入後的佇列快照」寫入次要資料庫
+//   - 設定 Meta: 需為符合 Metaer 介面的元資料物件(至少需提供 MajorKey; 若啟用備份, 還需提供 MinorKey 與 MinorTable)
+//   - 設定 Key: 不可為空字串
+//   - 設定 Data: 不可為 nil
+//
+// 注意:
+//   - 泛型 T 應為「值型別的結構(struct)」, 且不要以 *T 作為型別參數
+//   - 若佇列過長可能造成效能問題, 建議用於小~中型佇列
 type QPush[T any] struct {
 	Behave                            // 行為物件
 	MinorEnable bool                  // 啟用次要資料庫
@@ -26,7 +33,7 @@ type QPush[T any] struct {
 	cmdQueued   *redis.StringSliceCmd // 佇列內容結果
 }
 
-// QueueData 佇列資料
+// QueueData 佇列資料, 作為次要資料庫備份時的文件載體
 type QueueData[T any] struct {
 	Data []*T `bson:"value"` // 佇列列表
 }
@@ -57,20 +64,20 @@ func (this *QPush[T]) Prepare() error {
 	} // if
 
 	this.cmd = this.Major().RPush(this.Ctx(), key, data)
-	this.cmdQueued = this.Major().LRange(this.Ctx(), key, 0, -1)
+
+	if this.MinorEnable {
+		this.cmdQueued = this.Major().LRange(this.Ctx(), key, 0, -1)
+	} // if
+
 	return nil
 }
 
 // Complete 完成處理
 func (this *QPush[T]) Complete() error {
-	count, err := this.cmd.Result()
+	_, err := this.cmd.Result()
 
 	if err != nil {
 		return fmt.Errorf("qpush complete: %w: %v", err, this.Key)
-	} // if
-
-	if count == 0 {
-		return fmt.Errorf("qpush complete: save to redis failed: %v", this.Key)
 	} // if
 
 	if this.MinorEnable {

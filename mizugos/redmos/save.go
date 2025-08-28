@@ -1,17 +1,13 @@
 package redmos
 
-// Saver 儲存判斷介面
-type Saver interface {
-	// GetSave 取得儲存旗標
-	GetSave() bool
-}
-
 // NewSave 建立儲存判斷資料
 func NewSave() *Save {
 	return &Save{}
 }
 
-// Save 儲存判斷資料, 用儲存旗標來判斷是否要儲存到主要/次要資料庫
+// Save 儲存判斷資料
+//
+// 用於描述當前物件是否需要儲存到主要/次要資料庫, 通常配合 Saver 介面使用, 決定物件是否需要持久化
 type Save struct {
 	save bool // 儲存旗標
 }

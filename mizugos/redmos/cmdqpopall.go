@@ -13,19 +13,27 @@ import (
 	"github.com/yinweli/Mizugo/v2/mizugos/helps"
 )
 
-// QPopAll 彈出全部佇列行為, 以索引值到主要資料庫中取得全部佇列, 使用上有以下幾點須注意
-//   - 泛型類型T必須是結構, 並且不能是指標
-//   - 執行前設定好 MinorEnable; 由於佇列行為只會在主要資料庫中執行, 因此次要資料庫僅用於備份
-//   - 執行前設定好 Meta, 這需要事先建立好與 Metaer 介面符合的元資料結構
-//   - 執行前設定好 Key 並且不能為空字串
-//   - 執行前設定好 Data, 如果為nil, 則內部程序會自己建立
-//   - 執行後可用 Data 來取得資料列表
+// QPopAll 佇列全部彈出行為
+//
+// 以索引鍵(Key)將主要資料庫中的「佇列(List)」取出全部元素並清空佇列, 並可選擇將「彈出後的佇列狀態」備份到次要資料庫;
+// 若成功完成後, 會將彈出元素儲存至 Data, 最後可選擇以 Done 回呼帶出結果
+//
+// 事前準備:
+//   - (可選)設定 MinorEnable: true 表示完成時會將「彈出後的佇列快照」寫入次要資料庫
+//   - 設定 Meta: 需為符合 Metaer 介面的元資料物件(至少需提供 MajorKey；若啟用備份，還需提供 MinorKey 與 MinorTable)
+//   - 設定 Key: 不可為空字串
+//   - (可選)設定 Done: 完成時的回呼函式, 參數為資料列表
+//
+// 注意:
+//   - 泛型 T 應為「值型別的結構(struct)」, 且不要以 *T 作為型別參數
+//   - 若佇列過長可能造成效能問題, 建議用於小~中型佇列
 type QPopAll[T any] struct {
 	Behave                            // 行為物件
 	MinorEnable bool                  // 啟用次要資料庫
 	Meta        Metaer                // 元資料
 	Key         string                // 索引值
-	Data        *QueueData[T]         // 資料物件
+	Data        []*T                  // 資料列表
+	Done        func(data []*T)       // 完成回呼
 	cmd         *redis.StringSliceCmd // 命令結果
 	cmdRename   *redis.StatusCmd      // 更名命令結果
 	cmdDelete   *redis.IntCmd         // 刪除命令結果
@@ -69,10 +77,6 @@ func (this *QPopAll[T]) Complete() error {
 		return fmt.Errorf("qpopall complete: %w: %v", err, this.Key)
 	} // if
 
-	if this.Data == nil {
-		this.Data = new(QueueData[T])
-	} // if
-
 	for _, itor := range result {
 		data := new(T)
 
@@ -80,7 +84,7 @@ func (this *QPopAll[T]) Complete() error {
 			return fmt.Errorf("qpopall complete: %w: %v", err, this.Key)
 		} // if
 
-		this.Data.Data = append(this.Data.Data, data)
+		this.Data = append(this.Data, data)
 	} // for
 
 	if this.MinorEnable {
@@ -93,6 +97,10 @@ func (this *QPopAll[T]) Complete() error {
 				K: key,
 				D: &QueueData[T]{}, // 將次要資料庫中的儲存資料清空
 			}))
+	} // if
+
+	if this.Done != nil {
+		this.Done(this.Data)
 	} // if
 
 	return nil

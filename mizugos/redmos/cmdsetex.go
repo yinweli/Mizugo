@@ -10,21 +10,28 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// SetEx 設值設定逾期時間行為, 以索引值與資料到主要/次要資料庫中儲存資料, 主要資料庫中的資料將會有逾期時間, 使用上有以下幾點須注意
-//   - 泛型類型T必須是結構, 並且不能是指標
-//   - 資料結構如果包含 Save 結構或是符合 Saver 介面, 會套用儲存判斷機制, 減少不必要的儲存操作
-//   - 資料結構的成員都需要設定好`bson:xxxxx`屬性
-//   - 執行前設定好 MajorEnable, MinorEnable
-//   - 執行前設定好 Meta, 這需要事先建立好與 Metaer 介面符合的元資料結構
-//   - 執行前設定好 Expire, 若不設置或是設置為0表示不逾期, 如果設為-1或是 RedisTTL 則表示不更動逾期時間
-//   - 執行前設定好 Key 並且不能為空字串
-//   - 執行前設定好 Data 並且不能為nil
+// SetEx 設值(含逾期)行為
+//
+// 以索引鍵(Key)將資料寫入主要資料庫與/或次要資料庫;
+// 在主要資料庫(快取層)寫入時, 可同時設定該鍵的逾期時間(TTL)
+//
+// 事前準備:
+//   - 設定 MajorEnable / MinorEnable: 指示要作用的層
+//   - 設定 Meta: 需為符合 Metaer 介面的元資料物件(提供 MajorKey/MinorKey/MinorTable)
+//   - 設定 Expire: 0 → 表示「不逾期」, RedisTTL → 表示「不更動逾期時間」, > 0 表示「設定新的逾期時間」
+//   - 設定 Key: 不可為空字串
+//   - 設定 Data: 不可為 nil, 且其成員需具備正確 bson 標籤(寫入次要資料庫時使用)
+//
+// 注意:
+//   - 本行為包括儲存以及更新逾期時間
+//   - 泛型 T 應為「值型別的結構(struct)」, 且不要以 *T 作為型別參數
+//   - 若 Data 實作 Saver 且 Saver.GetSave == false, 將直接略過寫入
 type SetEx[T any] struct {
 	Behave                       // 行為物件
 	MajorEnable bool             // 啟用主要資料庫
 	MinorEnable bool             // 啟用次要資料庫
 	Meta        Metaer           // 元資料
-	Expire      time.Duration    // 逾期時間, 若為0表示不逾期, 若為-1或是 RedisTTL 則表示不更動逾期時間
+	Expire      time.Duration    // 逾期時間
 	Key         string           // 索引值
 	Data        *T               // 資料物件
 	cmd         *redis.StatusCmd // 命令結果
@@ -73,13 +80,13 @@ func (this *SetEx[T]) Complete() error {
 	} // if
 
 	if this.MajorEnable {
-		data, err := this.cmd.Result()
+		result, err := this.cmd.Result()
 
 		if err != nil {
 			return fmt.Errorf("setex complete: %w: %v", err, this.Key)
 		} // if
 
-		if data != RedisOk {
+		if result != RedisOk {
 			return fmt.Errorf("setex complete: save to redis failed: %v", this.Key)
 		} // if
 	} // if

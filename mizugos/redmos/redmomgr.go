@@ -14,24 +14,30 @@ func NewRedmomgr() *Redmomgr {
 	}
 }
 
-// Redmomgr 資料庫管理器, 用於管理雙層式資料庫架構
-//   - 主要資料庫: 用redis實作
-//   - 次要資料庫: 用mongo實作
+// Redmomgr 資料庫管理器
 //
-// 當要新增資料庫時, 需要遵循以下流程:
-//   - 新增主要/次要資料庫
-//   - 新增混合資料庫: 這時會去取得先前新增的主要/次要資料庫, 並且將其`綁定`到混合資料庫中;
-//     要注意的是, 混合資料庫必定是一個主要資料庫加上一個次要資料庫的組合, 若是缺少了任何一方則會失敗
+// 用於管理雙層式資料庫架構, 包含:
+//   - 主要資料庫(Major): 以 Redis 為基礎, 用於快取或高速查詢
+//   - 次要資料庫(Minor): 以 Mongo 為基礎, 用於持久化或複雜查詢
+//   - 混合資料庫(Mixed): 由 Major + Minor 組合而成, 整合兩者特性
 //
-// 若要執行資料庫操作時, 呼叫 Get... 系列函式來取得資料庫物件
+// 使用流程:
+//  1. 呼叫 AddMajor / AddMinor 新增資料庫
+//  2. 呼叫 AddMixed 將已建立的 Major 與 Minor 綁定成混合資料庫
+//  3. 呼叫 GetMajor / GetMinor / GetMixed 取得對應的資料庫物件並操作
+//
+// 注意事項:
+//   - Mixed 必須同時依賴一個 Major 與一個 Minor, 缺少任一方則無法建立
+//   - Add* 系列函式若遇到重複名稱會回傳錯誤
+//   - Finalize 會關閉並清理所有已註冊的資料庫
 type Redmomgr struct {
-	major map[string]*Major // 主要資料庫列表
-	minor map[string]*Minor // 次要資料庫列表
-	mixed map[string]*Mixed // 混合資料庫列表
+	major map[string]*Major // 主要資料庫列表(Redis)
+	minor map[string]*Minor // 次要資料庫列表(Mongo)
+	mixed map[string]*Mixed // 混合資料庫列表(Redis+Mongo)
 	lock  sync.RWMutex      // 執行緒鎖
 }
 
-// AddMajor 新增主要資料庫, 需要提供 RedisURI 來指定要連接的資料庫以及連接選項
+// AddMajor 新增主要資料庫
 func (this *Redmomgr) AddMajor(majorName string, uri RedisURI) (major *Major, err error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -62,8 +68,7 @@ func (this *Redmomgr) GetMajor(majorName string) *Major {
 	return nil
 }
 
-// AddMinor 新增次要資料庫, 需要提供 MongoURI 來指定要連接的資料庫以及連接選項;
-// 另外需要指定mongo資料庫名稱, 簡化後面取得執行器的流程, 但也因此限制次要資料庫不能在多個mongo資料庫間切換
+// AddMinor 新增次要資料庫
 func (this *Redmomgr) AddMinor(minorName string, uri MongoURI, dbName string) (minor *Minor, err error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -94,7 +99,7 @@ func (this *Redmomgr) GetMinor(minorName string) *Minor {
 	return nil
 }
 
-// AddMixed 新增混合資料庫, 必須確保 majorName 與 minorName 必須是先前建立好的資料庫, 否則會失敗
+// AddMixed 新增混合資料庫
 func (this *Redmomgr) AddMixed(mixedName, majorName, minorName string) (mixed *Mixed, err error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -115,10 +120,7 @@ func (this *Redmomgr) AddMixed(mixedName, majorName, minorName string) (mixed *M
 		return nil, fmt.Errorf("redmomgr addMixed: minor not exist")
 	} // if
 
-	mixed = &Mixed{
-		major: major,
-		minor: minor,
-	}
+	mixed = newMixed(major, minor)
 	this.mixed[mixedName] = mixed
 	return mixed, nil
 }
