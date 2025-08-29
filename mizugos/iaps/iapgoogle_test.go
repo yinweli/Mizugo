@@ -1,10 +1,12 @@
 package iaps
 
 import (
+	"context"
+	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"google.golang.org/api/androidpublisher/v3"
 
 	"github.com/yinweli/Mizugo/v2/mizugos/trials"
 	"github.com/yinweli/Mizugo/v2/testdata"
@@ -20,7 +22,7 @@ type SuiteIAPGoogle struct {
 }
 
 func (this *SuiteIAPGoogle) SetupSuite() {
-	this.Catalog = trials.Prepare(testdata.PathWork("test-helps-iapGoogle"))
+	this.Catalog = trials.Prepare(testdata.PathWork("test-iaps-iapGoogle"))
 }
 
 func (this *SuiteIAPGoogle) TearDownSuite() {
@@ -28,12 +30,38 @@ func (this *SuiteIAPGoogle) TearDownSuite() {
 }
 
 func (this *SuiteIAPGoogle) TestIAPGoogle() {
-	// 由於需要金鑰與憑證, 因此無法測試細節
 	target := NewIAPGoogle(&IAPGoogleConfig{})
-	assert.NotNil(this.T(), target)
-	assert.NotNil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.Verify(testdata.Unknown, testdata.Unknown).Err)
-	assert.Panics(this.T(), func() {
-		target.Finalize()
+	this.NotNil(target)
+	this.Nil(target.Initialize(&testIAPGoogleClient{}))
+	target.Finalize()
+}
+
+func (this *SuiteIAPGoogle) TestVerify() {
+	target := NewIAPGoogle(&IAPGoogleConfig{})
+	_ = target.Initialize(&testIAPGoogleClient{
+		verify: true,
 	})
+	result := target.Verify(testdata.Unknown, testdata.Unknown)
+	this.Nil(result.Err)
+	target.Finalize()
+	this.NotNil(target.Verify(testdata.Unknown, testdata.Unknown))
+
+	_ = target.Initialize(&testIAPGoogleClient{
+		verify: false,
+	})
+	result = target.Verify(testdata.Unknown, testdata.Unknown)
+	this.NotNil(result.Err)
+	target.Finalize()
+}
+
+type testIAPGoogleClient struct {
+	verify bool
+}
+
+func (this *testIAPGoogleClient) VerifyProduct(context.Context, string, string, string) (*androidpublisher.ProductPurchase, error) {
+	if this.verify {
+		return &androidpublisher.ProductPurchase{}, nil
+	} else {
+		return nil, fmt.Errorf("fail")
+	} // if
 }
