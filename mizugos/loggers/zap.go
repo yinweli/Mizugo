@@ -3,6 +3,7 @@ package loggers
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -14,31 +15,37 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// ZapLogger zap日誌, uber實現的高效能日誌功能;
-// 使用前必須填寫好 ZapLogger 中的公開成員, 可以選擇從yaml格式的配置檔案來填寫 ZapLogger 結構;
-// 使用時要注意由於 ZapRetain 並非執行緒安全, 因此使用時不可以把 ZapRetain 儲存下來使用
+// ZapLogger 基於 uber/zap 的高效能日誌實作
+//
+// 使用方式:
+//   - 建立 ZapLogger 並填寫公開欄位, 可從 YAML 設定檔載入
+//   - 呼叫 Initialize 完成初始化
+//   - 透過 Get 取得 Retain 來記錄日誌
+//   - 程式結束時呼叫 Finalize 釋放資源
+//
+// 注意事項:
+//   - ZapRetain 並非執行緒安全, 不可跨執行緒共用
+//   - 每個執行緒應該建立並使用自己的 Retain
 type ZapLogger struct {
-	// 關於時間布局字串
-	// - 如果不需要時區資訊, 可以寫成"2006-01-02 15:04:05"
-	// - 遵循ISO8601標準, 可以寫成"2006-01-02T15:04:05.000Z0700"
-	// - 遵循RFC3339標準, 可以寫成"2006-01-02T15:04:05.000000Z07:00"
-
-	Name       string `yaml:"name"`       // 日誌名稱, 會被用到日誌檔案名稱上
-	Path       string `yaml:"path"`       // 日誌路徑, 指定日誌檔案的位置
-	Json       bool   `yaml:"json"`       // 是否使用json格式日誌, 建議正式環境使用json格式日誌
+	Name       string `yaml:"name"`       // 日誌檔案名稱
+	Path       string `yaml:"path"`       // 日誌輸出路徑
+	Json       bool   `yaml:"json"`       // 是否輸出為 JSON 格式(建議正式環境開啟)
 	Console    bool   `yaml:"console"`    // 是否輸出到控制台
-	File       bool   `yaml:"file"`       // 是否輸出到日誌檔案
-	Level      string `yaml:"level"`      // 輸出日誌等級, 當記錄的日誌等級超過此值時才會儲存到檔案中; 有以下選擇: LevelDebug, LevelInfo, LevelWarn, LevelError
-	TimeLayout string `yaml:"timeLayout"` // 時間布局字串
-	TimeZone   string `yaml:"timeZone"`   // 時區字串, 採用與 time.LoadLocation 一樣的方式, 預設是UTC+0
-	MaxSize    int    `yaml:"maxSize"`    // 日誌大小(MB), 當日誌檔案超過此大小時就會建立新檔案, 預設是100MB
-	MaxTime    int    `yaml:"maxTime"`    // 日誌保留時間(日), 當日誌檔案儲存超過此時間時會被刪除, 預設不會刪除檔案
-	MaxBackups int    `yaml:"maxBackups"` // 日誌保留數量, 當日誌檔案數量超過此數量時會刪除舊檔案, 預設不會刪除檔案
-	Compress   bool   `yaml:"compress"`   // 是否壓縮日誌檔案, 預設不會壓縮
-	Jsonify    bool   `yaml:"jsonify"`    // 物件記錄時是否以json字串記錄, 預設為關閉
+	File       bool   `yaml:"file"`       // 是否輸出到檔案
+	Level      string `yaml:"level"`      // 日誌等級，僅記錄 >= 此等級的訊息; 可選 LevelDebug, LevelInfo, LevelWarn, LevelError
+	TimeLayout string `yaml:"timeLayout"` // 時間格式(例如: 2006-01-02 15:04:05 或 ISO8601 / RFC3339 標準)
+	TimeZone   string `yaml:"timeZone"`   // 時區字串(與 time.LoadLocation 相同, 預設 time.UTC)
+	MaxSize    int    `yaml:"maxSize"`    // 日誌檔案最大容量(MB), 超過時會切割新檔案(預設 100MB)
+	MaxTime    int    `yaml:"maxTime"`    // 日誌檔案保留天數, 超過時會刪除(預設不刪除)
+	MaxBackups int    `yaml:"maxBackups"` // 保留的日誌檔案數量, 超過時刪除最舊檔案(預設不限制)
+	Compress   bool   `yaml:"compress"`   // 是否壓縮舊日誌檔案(預設 false)
+	Jsonify    bool   `yaml:"jsonify"`    // 記錄物件時是否以 JSON 格式序列化(預設 false)
 
 	location *time.Location // 時區物件
 	logger   *zap.Logger    // zap日誌物件
+
+	// ISO8601標準: "2006-01-02T15:04:05.000Z0700"
+	// RFC3339標準: "2006-01-02T15:04:05.000000Z07:00"
 }
 
 // Initialize 初始化處理
@@ -70,7 +77,7 @@ func (this *ZapLogger) Finalize() {
 	this.logger = nil
 }
 
-// Get 取得儲存器
+// Get 取得 Retain 儲存器
 func (this *ZapLogger) Get() Retain {
 	return &ZapRetain{
 		location: this.location,
@@ -94,6 +101,12 @@ func (this *ZapLogger) timeZone() (location *time.Location, err error) {
 
 // encoder 取得日誌編碼器
 func (this *ZapLogger) encoder() zapcore.Encoder {
+	layout := this.TimeLayout
+
+	if layout == "" {
+		layout = time.RFC3339Nano
+	} // if
+
 	encoder := zapcore.EncoderConfig{
 		MessageKey:     "msg",
 		LevelKey:       "level",
@@ -104,7 +117,7 @@ func (this *ZapLogger) encoder() zapcore.Encoder {
 		StacktraceKey:  "stacktrace",
 		LineEnding:     zapcore.DefaultLineEnding,
 		EncodeLevel:    zapcore.CapitalLevelEncoder,
-		EncodeTime:     zapcore.TimeEncoderOfLayout(this.TimeLayout),
+		EncodeTime:     zapcore.TimeEncoderOfLayout(layout),
 		EncodeDuration: zapcore.SecondsDurationEncoder,
 		EncodeCaller:   zapcore.FullCallerEncoder,
 		EncodeName:     zapcore.FullNameEncoder,
@@ -135,6 +148,10 @@ func (this *ZapLogger) writeSyncer() zapcore.WriteSyncer {
 		}))
 	} // if
 
+	if len(writeSyncer) == 0 { // 如果都沒有設定, 使用 io.Discard 作為黑洞輸出, 避免錯誤
+		writeSyncer = append(writeSyncer, zapcore.AddSync(io.Discard))
+	} // if
+
 	return zapcore.NewMultiWriteSyncer(writeSyncer...)
 }
 
@@ -154,7 +171,7 @@ func (this *ZapLogger) zapLevel(level string) zapcore.Level {
 		return zapcore.ErrorLevel
 
 	default:
-		return zapcore.InvalidLevel
+		return zapcore.InfoLevel
 	} // switch
 }
 
@@ -174,28 +191,29 @@ func (this *ZapRetain) Clear() Retain {
 
 // Flush 儲存並清空內部 Stream 列表
 func (this *ZapRetain) Flush() Retain {
+	if this.logger == nil {
+		this.stream = nil
+		return this
+	} // if
+
+	location := this.location
+
+	if location == nil {
+		location = time.UTC
+	} // if
+
 	for _, itor := range this.stream {
-		logger := this.logger.Named(itor.label)
-
-		if logger == nil {
-			continue
+		if log := this.logger.Named(itor.label).Check(itor.level, itor.message); log != nil {
+			log.Time = time.Now().In(location)
+			log.Write(itor.field...)
 		} // if
-
-		log := logger.Check(itor.level, itor.message)
-
-		if log == nil {
-			continue
-		} // if
-
-		log.Time = time.Now().In(this.location)
-		log.Write(itor.field...)
 	} // for
 
 	this.stream = nil
 	return this
 }
 
-// Debug 記錄除錯訊息, 用於記錄除錯訊息
+// Debug 建立除錯訊息的 Stream
 func (this *ZapRetain) Debug(label string) Stream {
 	return &ZapStream{
 		retain:  this,
@@ -205,7 +223,7 @@ func (this *ZapRetain) Debug(label string) Stream {
 	}
 }
 
-// Info 記錄一般訊息, 用於記錄一般訊息
+// Info 建立一般訊息的 Stream
 func (this *ZapRetain) Info(label string) Stream {
 	return &ZapStream{
 		retain:  this,
@@ -215,7 +233,7 @@ func (this *ZapRetain) Info(label string) Stream {
 	}
 }
 
-// Warn 記錄警告訊息, 用於記錄邏輯錯誤
+// Warn 建立警告訊息的 Stream
 func (this *ZapRetain) Warn(label string) Stream {
 	return &ZapStream{
 		retain:  this,
@@ -225,7 +243,7 @@ func (this *ZapRetain) Warn(label string) Stream {
 	}
 }
 
-// Error 記錄錯誤訊息, 用於記錄嚴重錯誤
+// Error 建立錯誤訊息的 Stream
 func (this *ZapRetain) Error(label string) Stream {
 	return &ZapStream{
 		retain:  this,
@@ -235,7 +253,7 @@ func (this *ZapRetain) Error(label string) Stream {
 	}
 }
 
-// ZapStream zap記錄
+// ZapStream zap記錄器
 type ZapStream struct {
 	retain  *ZapRetain    // 儲存器
 	level   zapcore.Level // 日誌等級
@@ -245,19 +263,22 @@ type ZapStream struct {
 	field   []zap.Field   // 索引與數值列表
 }
 
-// Message 記錄訊息
+// Message 記錄文字訊息
 func (this *ZapStream) Message(format string, a ...any) Stream {
 	this.message = fmt.Sprintf(format, a...)
 	return this
 }
 
-// KV 記錄索引與數值
+// KV 記錄鍵值訊息
 func (this *ZapStream) KV(key string, value any) Stream {
 	field := zap.Any(key, value)
 
 	if this.jsonify && field.Type == zapcore.ReflectType {
-		bytes, _ := json.Marshal(value)
-		field = zap.String(key, string(bytes))
+		if bytes, err := json.Marshal(value); err == nil {
+			field = zap.String(key, string(bytes))
+		} else {
+			field = zap.String(key, fmt.Sprintf("json_error:%v", err))
+		} // if
 	} // if
 
 	this.field = append(this.field, field)
@@ -271,10 +292,7 @@ func (this *ZapStream) Caller(skip int, simple ...bool) Stream {
 
 		if len(simple) > 0 && simple[0] {
 			if last := strings.Index(caller, "."); last != -1 && last+1 < len(caller) {
-				caller = caller[last+1:]
-				caller = strings.Replace(caller, "(", "", 1)
-				caller = strings.Replace(caller, "*", "", 1)
-				caller = strings.Replace(caller, ")", "", 1)
+				caller = strings.Trim(caller[last+1:], "()*")
 			} // if
 		} // if
 
@@ -284,19 +302,19 @@ func (this *ZapStream) Caller(skip int, simple ...bool) Stream {
 	return this
 }
 
-// Error 記錄錯誤
+// Error 記錄錯誤物件
 func (this *ZapStream) Error(err error) Stream {
 	this.field = append(this.field, zap.Error(err))
 	return this
 }
 
-// End 結束記錄
+// End 結束記錄, 將記錄交回 Retain
 func (this *ZapStream) End() Retain {
 	this.retain.stream = append(this.retain.stream, this)
 	return this.retain
 }
 
-// EndFlush 結束記錄, 並把記錄加回到 Retain 中, 然後儲存記錄
+// EndFlush 結束記錄, 將記錄交回 Retain 並立即儲存
 func (this *ZapStream) EndFlush() {
 	this.End().Flush()
 }

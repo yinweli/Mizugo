@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap/zapcore"
 
@@ -39,13 +38,13 @@ func (this *SuiteZap) TestZapLogger() {
 		Level:      LevelDebug,
 		TimeLayout: "2006-01-02 15:04:05.000",
 	}
-	assert.Nil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.Get())
-	assert.Equal(this.T(), zapcore.DebugLevel, target.zapLevel(LevelDebug))
-	assert.Equal(this.T(), zapcore.InfoLevel, target.zapLevel(LevelInfo))
-	assert.Equal(this.T(), zapcore.WarnLevel, target.zapLevel(LevelWarn))
-	assert.Equal(this.T(), zapcore.ErrorLevel, target.zapLevel(LevelError))
-	assert.Equal(this.T(), zapcore.InvalidLevel, target.zapLevel("!?"))
+	this.Nil(target.Initialize())
+	this.NotNil(target.Get())
+	this.Equal(zapcore.DebugLevel, target.zapLevel(LevelDebug))
+	this.Equal(zapcore.InfoLevel, target.zapLevel(LevelInfo))
+	this.Equal(zapcore.WarnLevel, target.zapLevel(LevelWarn))
+	this.Equal(zapcore.ErrorLevel, target.zapLevel(LevelError))
+	this.Equal(zapcore.InfoLevel, target.zapLevel("!?"))
 	target.Finalize()
 
 	target = &ZapLogger{
@@ -58,13 +57,21 @@ func (this *SuiteZap) TestZapLogger() {
 		TimeLayout: "2006-01-02 15:04:05.000",
 		TimeZone:   "Asia/Taipei",
 	}
-	assert.Nil(this.T(), target.Initialize())
+	this.Nil(target.Initialize())
+	target.Finalize()
+
+	target = &ZapLogger{
+		Name:     "zapLogger",
+		Path:     "zapLogger",
+		TimeZone: "Asia/Taipei",
+	}
+	this.Nil(target.Initialize())
 	target.Finalize()
 
 	target = &ZapLogger{
 		TimeZone: testdata.Unknown,
 	}
-	assert.NotNil(this.T(), target.Initialize())
+	this.NotNil(target.Initialize())
 }
 
 func (this *SuiteZap) TestZapRetain() {
@@ -79,12 +86,13 @@ func (this *SuiteZap) TestZapRetain() {
 	_ = logger.Initialize()
 
 	target := logger.Get()
-	assert.Equal(this.T(), target, target.Clear())
-	assert.Equal(this.T(), target, target.Debug("").End().Flush())
-	assert.NotNil(this.T(), target.Debug(""))
-	assert.NotNil(this.T(), target.Info(""))
-	assert.NotNil(this.T(), target.Warn(""))
-	assert.NotNil(this.T(), target.Error(""))
+	this.Equal(target, target.Clear())
+	this.Equal(target, target.Debug("").End().Flush())
+	this.NotNil(target.Debug(""))
+	this.NotNil(target.Info(""))
+	this.NotNil(target.Warn(""))
+	this.NotNil(target.Error(""))
+	logger.Finalize()
 }
 
 func (this *SuiteZap) TestZapStream() {
@@ -97,18 +105,17 @@ func (this *SuiteZap) TestZapStream() {
 		TimeLayout: "2006-01-02 15:04:05.000",
 	}
 	_ = logger.Initialize()
+
 	retain := logger.Get()
-
 	target := retain.Debug("log")
-	assert.Equal(this.T(), target, target.Message("message"))
-	assert.Equal(this.T(), target, target.KV("key", "value"))
-	assert.Equal(this.T(), target, target.Caller(0))
-	assert.Equal(this.T(), target, target.Caller(0, true))
-	assert.Equal(this.T(), target, target.Caller(0, false))
-	assert.Equal(this.T(), target, target.Error(fmt.Errorf("error")))
-	assert.Equal(this.T(), retain, target.End())
+	this.Equal(target, target.Message("message"))
+	this.Equal(target, target.KV("key", "value"))
+	this.Equal(target, target.Caller(0))
+	this.Equal(target, target.Caller(0, true))
+	this.Equal(target, target.Caller(0, false))
+	this.Equal(target, target.Error(fmt.Errorf("error")))
+	this.Equal(retain, target.End())
 	target.EndFlush()
-
 	logger.Finalize()
 }
 
@@ -124,7 +131,6 @@ func (this *SuiteZap) TestZapStreamKV() {
 		Jsonify:    true,
 	}
 	_ = logger.Initialize()
-	retain := logger.Get()
 
 	i8 := int8(0)
 	ui8 := uint8(0)
@@ -167,59 +173,59 @@ func (this *SuiteZap) TestZapStreamKV() {
 		"1": 1,
 	}
 
+	retain := logger.Get()
 	target := retain.Debug("log")
-	assert.Equal(this.T(), target, target.KV("int8", i8))
-	assert.Equal(this.T(), target, target.KV("uint8", ui8))
-	assert.Equal(this.T(), target, target.KV("*int8", &i8))
-	assert.Equal(this.T(), target, target.KV("*uint8", &ui8))
-	assert.Equal(this.T(), target, target.KV("int8[]", i8s))
-	assert.Equal(this.T(), target, target.KV("uint8[]", ui8s))
-	assert.Equal(this.T(), target, target.KV("int16", i16))
-	assert.Equal(this.T(), target, target.KV("uint16", ui16))
-	assert.Equal(this.T(), target, target.KV("*int16", &i16))
-	assert.Equal(this.T(), target, target.KV("*uint16", &ui16))
-	assert.Equal(this.T(), target, target.KV("[]int16", i16s))
-	assert.Equal(this.T(), target, target.KV("[]uint16", ui16s))
-	assert.Equal(this.T(), target, target.KV("int32", i32))
-	assert.Equal(this.T(), target, target.KV("uint32", ui32))
-	assert.Equal(this.T(), target, target.KV("*int32", &i32))
-	assert.Equal(this.T(), target, target.KV("*uint32", &ui32))
-	assert.Equal(this.T(), target, target.KV("[]int32", i32s))
-	assert.Equal(this.T(), target, target.KV("[]uint32", ui32s))
-	assert.Equal(this.T(), target, target.KV("int64", i64))
-	assert.Equal(this.T(), target, target.KV("uint64", ui64))
-	assert.Equal(this.T(), target, target.KV("*int64", &i64))
-	assert.Equal(this.T(), target, target.KV("*uint64", &ui64))
-	assert.Equal(this.T(), target, target.KV("[]int64", i64s))
-	assert.Equal(this.T(), target, target.KV("[]uint64", ui64s))
-	assert.Equal(this.T(), target, target.KV("int", i))
-	assert.Equal(this.T(), target, target.KV("uint", ui))
-	assert.Equal(this.T(), target, target.KV("*int", &i))
-	assert.Equal(this.T(), target, target.KV("*uint", &ui))
-	assert.Equal(this.T(), target, target.KV("[]int", is))
-	assert.Equal(this.T(), target, target.KV("[]uint", uis))
-	assert.Equal(this.T(), target, target.KV("float32", f32))
-	assert.Equal(this.T(), target, target.KV("*float32", &f32))
-	assert.Equal(this.T(), target, target.KV("[]float32", f32s))
-	assert.Equal(this.T(), target, target.KV("float64", f64))
-	assert.Equal(this.T(), target, target.KV("*float64", &f64))
-	assert.Equal(this.T(), target, target.KV("[]float64", f64s))
-	assert.Equal(this.T(), target, target.KV("complex64", c64))
-	assert.Equal(this.T(), target, target.KV("*complex64", &c64))
-	assert.Equal(this.T(), target, target.KV("[]complex64", c64s))
-	assert.Equal(this.T(), target, target.KV("complex128", c128))
-	assert.Equal(this.T(), target, target.KV("*complex128", &c128))
-	assert.Equal(this.T(), target, target.KV("[]complex128", c128s))
-	assert.Equal(this.T(), target, target.KV("string", s))
-	assert.Equal(this.T(), target, target.KV("*string", &s))
-	assert.Equal(this.T(), target, target.KV("[]string", ss))
-	assert.Equal(this.T(), target, target.KV("bool", b))
-	assert.Equal(this.T(), target, target.KV("*bool", &b))
-	assert.Equal(this.T(), target, target.KV("[]bool", bs))
-	assert.Equal(this.T(), target, target.KV("object", o))
-	assert.Equal(this.T(), target, target.KV("*object", &o))
-	assert.Equal(this.T(), target, target.KV("map", m))
+	this.Equal(target, target.KV("int8", i8))
+	this.Equal(target, target.KV("uint8", ui8))
+	this.Equal(target, target.KV("*int8", &i8))
+	this.Equal(target, target.KV("*uint8", &ui8))
+	this.Equal(target, target.KV("int8[]", i8s))
+	this.Equal(target, target.KV("uint8[]", ui8s))
+	this.Equal(target, target.KV("int16", i16))
+	this.Equal(target, target.KV("uint16", ui16))
+	this.Equal(target, target.KV("*int16", &i16))
+	this.Equal(target, target.KV("*uint16", &ui16))
+	this.Equal(target, target.KV("[]int16", i16s))
+	this.Equal(target, target.KV("[]uint16", ui16s))
+	this.Equal(target, target.KV("int32", i32))
+	this.Equal(target, target.KV("uint32", ui32))
+	this.Equal(target, target.KV("*int32", &i32))
+	this.Equal(target, target.KV("*uint32", &ui32))
+	this.Equal(target, target.KV("[]int32", i32s))
+	this.Equal(target, target.KV("[]uint32", ui32s))
+	this.Equal(target, target.KV("int64", i64))
+	this.Equal(target, target.KV("uint64", ui64))
+	this.Equal(target, target.KV("*int64", &i64))
+	this.Equal(target, target.KV("*uint64", &ui64))
+	this.Equal(target, target.KV("[]int64", i64s))
+	this.Equal(target, target.KV("[]uint64", ui64s))
+	this.Equal(target, target.KV("int", i))
+	this.Equal(target, target.KV("uint", ui))
+	this.Equal(target, target.KV("*int", &i))
+	this.Equal(target, target.KV("*uint", &ui))
+	this.Equal(target, target.KV("[]int", is))
+	this.Equal(target, target.KV("[]uint", uis))
+	this.Equal(target, target.KV("float32", f32))
+	this.Equal(target, target.KV("*float32", &f32))
+	this.Equal(target, target.KV("[]float32", f32s))
+	this.Equal(target, target.KV("float64", f64))
+	this.Equal(target, target.KV("*float64", &f64))
+	this.Equal(target, target.KV("[]float64", f64s))
+	this.Equal(target, target.KV("complex64", c64))
+	this.Equal(target, target.KV("*complex64", &c64))
+	this.Equal(target, target.KV("[]complex64", c64s))
+	this.Equal(target, target.KV("complex128", c128))
+	this.Equal(target, target.KV("*complex128", &c128))
+	this.Equal(target, target.KV("[]complex128", c128s))
+	this.Equal(target, target.KV("string", s))
+	this.Equal(target, target.KV("*string", &s))
+	this.Equal(target, target.KV("[]string", ss))
+	this.Equal(target, target.KV("bool", b))
+	this.Equal(target, target.KV("*bool", &b))
+	this.Equal(target, target.KV("[]bool", bs))
+	this.Equal(target, target.KV("object", o))
+	this.Equal(target, target.KV("*object", &o))
+	this.Equal(target, target.KV("map", m))
 	target.EndFlush()
-
 	logger.Finalize()
 }

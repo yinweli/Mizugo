@@ -1,21 +1,30 @@
 package loggers
 
-// EmptyLogger 空日誌, 作為預設的日誌使用, 不會輸出任何訊息
+import (
+	"fmt"
+)
+
+// EmptyLogger 空日誌, 不會輸出任何訊息
 type EmptyLogger struct {
+	fail bool // 提供給單元測試使用的初始化旗標
 }
 
 // Initialize 初始化處理
 func (this *EmptyLogger) Initialize() error {
-	return nil
+	if this.fail == false {
+		return nil
+	} else {
+		return fmt.Errorf("initialize failed")
+	} // if
 }
 
 // Finalize 結束處理
 func (this *EmptyLogger) Finalize() {
 }
 
-// Get 取得儲存器
+// Get 取得 Retain 儲存器
 func (this *EmptyLogger) Get() Retain {
-	return &EmptyRetain{}
+	return emptyRetain
 }
 
 // EmptyRetain 空儲存
@@ -32,37 +41,36 @@ func (this *EmptyRetain) Flush() Retain {
 	return this
 }
 
-// Debug 記錄除錯訊息, 用於記錄除錯訊息
+// Debug 建立除錯訊息的 Stream
 func (this *EmptyRetain) Debug(_ string) Stream {
-	return &EmptyStream{retain: this}
+	return emptyStream
 }
 
-// Info 記錄一般訊息, 用於記錄一般訊息
+// Info 建立一般訊息的 Stream
 func (this *EmptyRetain) Info(_ string) Stream {
-	return &EmptyStream{retain: this}
+	return emptyStream
 }
 
-// Warn 記錄警告訊息, 用於記錄邏輯錯誤
+// Warn 建立警告訊息的 Stream
 func (this *EmptyRetain) Warn(_ string) Stream {
-	return &EmptyStream{retain: this}
+	return emptyStream
 }
 
-// Error 記錄錯誤訊息, 用於記錄嚴重錯誤
+// Error 建立錯誤訊息的 Stream
 func (this *EmptyRetain) Error(_ string) Stream {
-	return &EmptyStream{retain: this}
+	return emptyStream
 }
 
 // EmptyStream 空記錄
 type EmptyStream struct {
-	retain Retain
 }
 
-// Message 記錄訊息
+// Message 記錄文字訊息
 func (this *EmptyStream) Message(_ string, _ ...any) Stream {
 	return this
 }
 
-// KV 記錄索引與數值
+// KV 記錄鍵值訊息
 func (this *EmptyStream) KV(_ string, _ any) Stream {
 	return this
 }
@@ -72,16 +80,19 @@ func (this *EmptyStream) Caller(_ int, _ ...bool) Stream {
 	return this
 }
 
-// Error 記錄錯誤
+// Error 記錄錯誤物件
 func (this *EmptyStream) Error(_ error) Stream {
 	return this
 }
 
-// End 結束記錄, 並把記錄加回到 Retain 中
+// End 結束記錄, 將記錄交回 Retain
 func (this *EmptyStream) End() Retain {
-	return this.retain
+	return emptyRetain
 }
 
-// EndFlush 結束記錄, 並把記錄加回到 Retain 中, 然後儲存記錄
+// EndFlush 結束記錄, 將記錄交回 Retain 並立即儲存
 func (this *EmptyStream) EndFlush() {
 }
+
+var emptyRetain = &EmptyRetain{}
+var emptyStream = &EmptyStream{}

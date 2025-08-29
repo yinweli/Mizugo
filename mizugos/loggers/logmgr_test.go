@@ -3,7 +3,6 @@ package loggers
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/v2/mizugos/trials"
@@ -29,15 +28,18 @@ func (this *SuiteLogmgr) TearDownSuite() {
 
 func (this *SuiteLogmgr) TestLogmgr() {
 	target := NewLogmgr()
-	assert.NotNil(this.T(), target)
-	assert.Nil(this.T(), target.Add("log", newLoggerTester(true)))
-	assert.NotNil(this.T(), target.Get("log"))
-	assert.Nil(this.T(), target.Get(testdata.Unknown))
+	this.NotNil(target)
 	target.Finalize()
+}
 
-	assert.NotNil(this.T(), target.Add("", newLoggerTester(true)))
-	assert.Nil(this.T(), target.Add("log1", newLoggerTester(true)))
-	assert.NotNil(this.T(), target.Add("log1", newLoggerTester(true)))
-	assert.NotNil(this.T(), target.Add("log2", nil))
-	assert.NotNil(this.T(), target.Add("log3", newLoggerTester(false)))
+func (this *SuiteLogmgr) TestAdd() {
+	target := NewLogmgr()
+	this.Nil(target.Add("log", &EmptyLogger{}))
+	this.NotNil(target.Get("log"))
+	this.Nil(target.Get(testdata.Unknown))
+	this.NotNil(target.Add("", &EmptyLogger{}))
+	this.NotNil(target.Add("log", &EmptyLogger{}))
+	this.NotNil(target.Add("log nil", nil))
+	this.NotNil(target.Add("log fail", &EmptyLogger{fail: true}))
+	target.Finalize()
 }
