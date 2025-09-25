@@ -16,39 +16,33 @@ func NewNetmgr() *Netmgr {
 	}
 }
 
-// Netmgr 網路管理器, 用於管理接聽或是連接, 以及使用中的會話, 但是會話不開放給外部使用
+// Netmgr 網路管理器
 //
-// 當新增連接時, 使用者須提供以下參數
-//   - timeout: 連接超時時間, 連接若超過此時間會連接失敗
-//   - bind: 連接成功時要執行的初始化流程
-//   - unbind: 中斷連接時要執行的釋放流程
-//   - wrong: 錯誤處理函式
+// 用於集中管理「連接器(Connecter)」, 「接聽器(Listener)」與「會話(Sessioner)」
+// 會話僅在內部維護, 不對外直接提供存取或操作
 //
-// Bind 通常要做的流程如下
-//   - 建立實體
-//   - 實體設置
-//   - 模組設置
-//   - 處理設置
-//   - 會話設置(設定發布事件處理, 錯誤處理, 編碼/解碼, 擁有者)
-//   - 實體初始化
-//   - 標籤設置
-//   - 錯誤處理
+// 使用流程:
+//   - AddConnectTCP / AddListenTCP → wrapperBind → bind 成功後加入 sessionmgr
+//   - Stop → 依序停止 connectmgr / listenmgr / sessionmgr (細節見各 clear 實作)
 //
-// Unbind 通常要做的流程如下
-//   - 釋放實體
-//   - 刪除實體
-//   - 刪除標籤
+// 使用情境:
+//   - 使用 AddConnectTCP 啟動連線, 或使用 AddListenTCP 啟動監聽
+//   - 使用 DelConnect / DelListen 移除並停止特定資源
+//   - 使用 Stop 一次性關閉所有資源(連線, 接聽, 會話)
+//
+// Bind 常見流程:
+//   - 建立並配置實體(處理器, 會話, 模組)
+//   - 執行實體初始化
+//   - 設定會話(編碼/解碼, 事件發布, 錯誤處理, 封包大小, 擁有者)
+//   - 定義錯誤處理邏輯
+//
+// Unbind 常見流程:
+//   - 釋放實體相關資源
+//   - 移除實體資料
 type Netmgr struct {
 	connectmgr *connectmgr // 連接管理器
 	listenmgr  *listenmgr  // 接聽管理器
 	sessionmgr *sessionmgr // 會話管理器
-}
-
-// Status 狀態資料
-type Status struct {
-	Connect int // 連接數量
-	Listen  int // 接聽數量
-	Session int // 會話數量
 }
 
 // ConnectID 連接編號
@@ -57,7 +51,7 @@ type ConnectID = int64
 // ListenID 接聽編號
 type ListenID = int64
 
-// AddConnectTCP 新增連接(TCP)
+// AddConnectTCP 新增一個 TCP 連接器並立即嘗試連線
 func (this *Netmgr) AddConnectTCP(ip, port string, timeout time.Duration, bind Bind, unbind Unbind, wrong Wrong) ConnectID {
 	connect := NewTCPConnect(ip, port, timeout)
 	connect.Connect(this.wrapperBind(bind), this.wrapperUnbind(unbind), wrong)
@@ -74,48 +68,48 @@ func (this *Netmgr) GetConnect(connectID ConnectID) Connecter {
 	return this.connectmgr.get(connectID)
 }
 
-// AddListenTCP 新增接聽(TCP)
+// AddListenTCP 新增一個 TCP 接聽器並立即開始監聽
 func (this *Netmgr) AddListenTCP(ip, port string, bind Bind, unbind Unbind, wrong Wrong) ListenID {
 	listen := NewTCPListen(ip, port)
 	listen.Listen(this.wrapperBind(bind), this.wrapperUnbind(unbind), wrong)
 	return this.listenmgr.add(listen)
 }
 
-// DelListen 刪除連接
+// DelListen 刪除接聽
 func (this *Netmgr) DelListen(listenID ListenID) {
 	this.listenmgr.del(listenID)
 }
 
-// GetListen 取得連接
+// GetListen 取得接聽
 func (this *Netmgr) GetListen(listenID ListenID) Listener {
 	return this.listenmgr.get(listenID)
 }
 
-// Stop 停止網路
+// Stop 停止 Netmgr 管理的所有資源
 func (this *Netmgr) Stop() {
 	this.connectmgr.clear()
 	this.listenmgr.clear()
 	this.sessionmgr.clear()
 }
 
-// Status 取得狀態資料
-func (this *Netmgr) Status() *Status {
-	return &Status{
-		Connect: this.connectmgr.count(),
-		Listen:  this.listenmgr.count(),
-		Session: this.sessionmgr.count(),
-	}
+// Status 取得當前統計資料(connect 數量, listen 數量, session 數量)
+func (this *Netmgr) Status() (connect, listen, session int) {
+	return this.connectmgr.count(), this.listenmgr.count(), this.sessionmgr.count()
 }
 
-// wrapperBind 包裝綁定處理
+// wrapperBind 將外部傳入的 bind 包裝為 Netmgr 內部使用的初始化流程
 func (this *Netmgr) wrapperBind(bind Bind) Bind {
 	return func(session Sessioner) bool {
-		this.sessionmgr.add(session)
-		return bind.Do(session)
+		if bind.Do(session) {
+			this.sessionmgr.add(session)
+			return true
+		} // if
+
+		return false
 	}
 }
 
-// wrapperUnbind 包裝解綁處理
+// wrapperUnbind 將外部傳入的 unbind 包裝為 Netmgr 內部使用的釋放流程
 func (this *Netmgr) wrapperUnbind(unbind Unbind) Unbind {
 	return func(session Sessioner) {
 		unbind.Do(session)

@@ -4,7 +4,6 @@ import (
 	"net"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/v2/mizugos/trials"
@@ -30,29 +29,29 @@ func (this *SuiteTCPConnect) TearDownSuite() {
 
 func (this *SuiteTCPConnect) TestTCPConnect() {
 	addr := host{ip: "google.com", port: "80"}
-	test := newTester(true, true, true)
+	test := newTestNet(true, true, true)
 	target := NewTCPConnect(addr.ip, addr.port, trials.Timeout)
-	assert.NotNil(this.T(), target)
+	this.NotNil(target)
 	target.Connect(test.Bind, test.Unbind, test.Wrong)
 
 	trials.WaitTimeout()
-	assert.True(this.T(), test.Valid())
+	this.True(test.Valid())
 	test.Get().StopWait()
 
-	test = newTester(true, true, true)
+	test = newTestNet(true, true, true)
 	target = NewTCPConnect("!?", addr.port, trials.Timeout)
 	target.Connect(test.Bind, test.Unbind, test.Wrong)
 
 	trials.WaitTimeout()
-	assert.False(this.T(), test.Valid())
+	this.False(test.Valid())
 
-	test = newTester(true, true, true)
+	test = newTestNet(true, true, true)
 	target = NewTCPConnect(addr.ip, "9999", trials.Timeout) // 故意連線到不開放的埠號才會引發錯誤
 	target.Connect(test.Bind, test.Unbind, test.Wrong)
 
 	trials.WaitTimeout(trials.Timeout * 2) // 因為錯誤會是timeout, 所以要等待長一點
-	assert.False(this.T(), test.Valid())
+	this.False(test.Valid())
 
 	target = NewTCPConnect(addr.ip, addr.port, trials.Timeout)
-	assert.Equal(this.T(), net.JoinHostPort(addr.ip, addr.port), target.Address())
+	this.Equal(net.JoinHostPort(addr.ip, addr.port), target.Address())
 }

@@ -22,15 +22,18 @@ func NewTCPSession(conn net.Conn) *TCPSession {
 
 // TCPSession TCP會話器, 負責傳送/接收訊息等相關的功能
 type TCPSession struct {
-	conn       net.Conn       // 連接物件
-	message    chan any       // 訊息通道
-	signal     sync.WaitGroup // 通知信號
-	codec      []Codec        // 編碼/解碼
-	codecr     []Codec        // 編碼/解碼(反序)
-	publish    []Publish      // 發布事件處理
-	wrong      []Wrong        // 錯誤處理
-	packetSize int            // 封包長度
-	owner      any            // 擁有者
+	conn       net.Conn         // 連接物件
+	message    chan any         // 訊息通道
+	signal     sync.WaitGroup   // 通知信號
+	stopOnce   sync.Once        // 關閉單次執行物件
+	headerRecv [HeaderSize]byte // 接收標頭
+	headerSend [HeaderSize]byte // 傳送標頭
+	codec      []Codec          // 編碼/解碼
+	codecr     []Codec          // 編碼/解碼(反序)
+	publish    []Publish        // 發布事件處理
+	wrong      []Wrong          // 錯誤處理
+	packetSize int              // 封包長度
+	owner      any              // 擁有者
 }
 
 // Start 啟動會話
@@ -42,10 +45,10 @@ func (this *TCPSession) Start(bind Bind, unbind Unbind) {
 			return
 		} // if
 
+		this.signal.Add(2)
 		pools.DefaultPool.Submit(this.recvLoop)
 		pools.DefaultPool.Submit(this.sendLoop)
 		this.doPublish(EventStart, this)
-		this.signal.Add(2)
 		this.signal.Wait() // 等待接收循環與傳送循環結束, 如果接收循環與傳送循環結束, 就會繼續進行結束處理
 		unbind.Do(this)
 		this.doPublish(EventStop, this)
@@ -54,12 +57,12 @@ func (this *TCPSession) Start(bind Bind, unbind Unbind) {
 
 // Stop 停止會話, 不會等待會話內部循環結束
 func (this *TCPSession) Stop() {
-	this.message <- nil // 以空訊息通知會話結束
+	this.stop()
 }
 
 // StopWait 停止會話, 會等待會話內部循環結束
 func (this *TCPSession) StopWait() {
-	this.message <- nil // 以空訊息通知會話結束
+	this.stop()
 	this.signal.Wait()
 }
 
@@ -93,6 +96,11 @@ func (this *TCPSession) SetOwner(owner any) {
 	this.owner = owner
 }
 
+// GetOwner 取得擁有者
+func (this *TCPSession) GetOwner() any {
+	return this.owner
+}
+
 // Send 傳送訊息
 func (this *TCPSession) Send(message any) {
 	if message != nil {
@@ -108,11 +116,6 @@ func (this *TCPSession) RemoteAddr() net.Addr {
 // LocalAddr 取得本地位址
 func (this *TCPSession) LocalAddr() net.Addr {
 	return this.conn.LocalAddr()
-}
-
-// GetOwner 取得擁有者
-func (this *TCPSession) GetOwner() any {
-	return this.owner
 }
 
 // recvLoop 接收循環
@@ -139,13 +142,13 @@ func (this *TCPSession) recvLoop() {
 		this.doPublish(EventRecv, message)
 	} // for
 
-	this.message <- nil // 以空訊息通知會話結束
+	this.stop()
 	this.signal.Done()
 }
 
 // recvPacket 接收封包
 func (this *TCPSession) recvPacket(reader io.Reader) (packet []byte, err error) {
-	header := make([]byte, HeaderSize)
+	header := this.headerRecv[:]
 
 	if _, err = io.ReadFull(reader, header); err != nil {
 		return nil, fmt.Errorf("tcp session recv packet: %w", err)
@@ -219,7 +222,7 @@ func (this *TCPSession) sendPacket(writer io.Writer, packet []byte) (err error) 
 		return fmt.Errorf("tcp session send packet: packet too large")
 	} // if
 
-	header := make([]byte, HeaderSize)
+	header := this.headerSend[:]
 	binary.LittleEndian.PutUint32(header, uint32(size))
 
 	if _, err = writer.Write(header); err != nil {
@@ -231,6 +234,15 @@ func (this *TCPSession) sendPacket(writer io.Writer, packet []byte) (err error) 
 	} // if
 
 	return nil
+}
+
+// stop 關閉會話
+func (this *TCPSession) stop() {
+	this.stopOnce.Do(func() {
+		// 投遞一個空訊息以通知會話結束
+		// 使用 goroutine 避免當通道暫時塞滿時, 呼叫端被阻塞
+		go func() { this.message <- nil }()
+	})
 }
 
 // doPublish 執行發布事件處理
