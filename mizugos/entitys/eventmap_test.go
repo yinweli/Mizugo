@@ -4,7 +4,6 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/yinweli/Mizugo/v2/mizugos/trials"
@@ -21,7 +20,7 @@ type SuiteEventmap struct {
 }
 
 func (this *SuiteEventmap) SetupSuite() {
-	this.Catalog = trials.Prepare(testdata.PathWork("test-events-eventmap"))
+	this.Catalog = trials.Prepare(testdata.PathWork("test-entitys-eventmap"))
 }
 
 func (this *SuiteEventmap) TearDownSuite() {
@@ -30,17 +29,17 @@ func (this *SuiteEventmap) TearDownSuite() {
 
 func (this *SuiteEventmap) TestEventmap() {
 	target := NewEventmap()
-	assert.NotNil(this.T(), target)
+	this.NotNil(target)
 	target.Finalize() // 初始化前執行, 這次應該不執行
-	assert.Nil(this.T(), target.Initialize())
-	assert.NotNil(this.T(), target.Initialize()) // 故意啟動兩次, 這次應該失敗
+	this.Nil(target.Initialize())
+	this.NotNil(target.Initialize()) // 故意啟動兩次, 這次應該失敗
 	target.Finalize()
 	target.Finalize() // 故意結束兩次, 這次應該不執行
 }
 
 func (this *SuiteEventmap) TestPubOnce() {
 	target := NewEventmap()
-	assert.Nil(this.T(), target.Initialize())
+	this.Nil(target.Initialize())
 
 	value := "value once"
 	valid := atomic.Bool{}
@@ -52,7 +51,7 @@ func (this *SuiteEventmap) TestPubOnce() {
 
 	target.PubOnce(value, value)
 	trials.WaitTimeout()
-	assert.True(this.T(), valid.Load())
+	this.True(valid.Load())
 
 	target.Finalize()
 	target.PubOnce(value, value)
@@ -61,7 +60,7 @@ func (this *SuiteEventmap) TestPubOnce() {
 
 func (this *SuiteEventmap) TestPubDelay() {
 	target := NewEventmap()
-	assert.Nil(this.T(), target.Initialize())
+	this.Nil(target.Initialize())
 
 	value := "value delay"
 	valid := atomic.Bool{}
@@ -73,7 +72,7 @@ func (this *SuiteEventmap) TestPubDelay() {
 
 	target.PubDelay(value, value, trials.Timeout)
 	trials.WaitTimeout(trials.Timeout * 2) // 多等一下讓延遲事件發生
-	assert.True(this.T(), valid.Load())
+	this.True(valid.Load())
 
 	target.Finalize()
 	target.PubDelay(value, value, trials.Timeout)
@@ -82,7 +81,7 @@ func (this *SuiteEventmap) TestPubDelay() {
 
 func (this *SuiteEventmap) TestPubFixed() {
 	target := NewEventmap()
-	assert.Nil(this.T(), target.Initialize())
+	this.Nil(target.Initialize())
 
 	value := "value fixed"
 	valid := atomic.Bool{}
@@ -94,7 +93,7 @@ func (this *SuiteEventmap) TestPubFixed() {
 
 	target.PubFixed(value, value, trials.Timeout)
 	trials.WaitTimeout(trials.Timeout * 2) // 多等一下讓定時事件發生
-	assert.True(this.T(), valid.Load())
+	this.True(valid.Load())
 
 	target.Finalize()
 	target.PubFixed(value, value, trials.Timeout)
@@ -114,15 +113,15 @@ func (this *SuiteEventmap) TestPubsub() {
 	subID2 := target.sub(value, validFunc)
 
 	target.pub(value, value)
-	assert.Equal(this.T(), 2, valid)
+	this.Equal(2, valid)
 
 	target.unsub(subID1)
 	target.pub(value, value)
-	assert.Equal(this.T(), 3, valid)
+	this.Equal(3, valid)
 
 	target.unsub(subID2)
 	target.pub(value, value)
-	assert.Equal(this.T(), 3, valid)
+	this.Equal(3, valid)
 
 	value1 := "value cycle1"
 	value2 := "value cycle2"
@@ -136,18 +135,18 @@ func (this *SuiteEventmap) TestPubsub() {
 	})
 	target.pub(value1, nil)
 	target.pub(value2, nil)
-	assert.Equal(this.T(), 1, valid1)
-	assert.Equal(this.T(), 1, valid2)
+	this.Equal(1, valid1)
+	this.Equal(1, valid2)
 }
 
 func (this *SuiteEventmap) TestSubID() {
 	name1 := "subID"
 	serial1 := int64(1)
 	name2, serial2, ok := subIDDecode(subIDEncode(name1, serial1))
-	assert.True(this.T(), ok)
-	assert.Equal(this.T(), name1, name2)
-	assert.Equal(this.T(), serial1, serial2)
+	this.True(ok)
+	this.Equal(name1, name2)
+	this.Equal(serial1, serial2)
 
 	_, _, ok = subIDDecode("!?")
-	assert.False(this.T(), ok)
+	this.False(ok)
 }
