@@ -154,6 +154,7 @@ func main() {
 | subtree        | 更新子專案分支   |
 | stop           | 停止容器         |
 | db             | 啟動資料庫       |
+| install        | 安裝工具         |
 
 # JetBrains 感謝與授權標示
 [Mizugo] 使用了 JetBrains 的 Goland 的免費開發許可, 在此表示感謝
