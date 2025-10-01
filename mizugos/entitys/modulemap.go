@@ -63,8 +63,8 @@ func (this *Modulemap) All() []Moduler {
 		result = append(result, itor)
 	} // for
 
-	sort.Slice(result, func(r, l int) bool {
-		return result[r].ModuleID() < result[l].ModuleID()
+	sort.Slice(result, func(l, r int) bool {
+		return result[l].ModuleID() < result[r].ModuleID()
 	})
 	return result
 }

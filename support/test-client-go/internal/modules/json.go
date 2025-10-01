@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
-	"github.com/yinweli/Mizugo/support/test-client-go/internal/features"
-	"github.com/yinweli/Mizugo/support/test-client-go/msgs"
+	"github.com/yinweli/Mizugo/v2/mizugos/entitys"
+	"github.com/yinweli/Mizugo/v2/mizugos/procs"
+	"github.com/yinweli/Mizugo/v2/support/test-client-go/internal/defines"
+	"github.com/yinweli/Mizugo/v2/support/test-client-go/internal/features"
+	"github.com/yinweli/Mizugo/v2/support/test-client-go/msgs"
 )
 
 // NewJson 建立Json模組
@@ -62,7 +62,6 @@ func (this *Json) procMJsonA(message any) {
 	} // if
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
-	features.MeterJson.Add(duration)
 	features.LogSystem.Get().Info(this.name).KV("count", msg.Count).KV("duration", duration).Caller(0).EndFlush()
 
 	if this.disconnect {

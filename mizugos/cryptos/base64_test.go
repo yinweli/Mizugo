@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/helps"
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/helps"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestBase64(t *testing.T) {
@@ -31,17 +30,27 @@ func (this *SuiteBase64) TearDownSuite() {
 }
 
 func (this *SuiteBase64) TestBase64() {
-	input := []byte("test base64 string")
+	input := []byte(helps.RandString(64, helps.StrNumberAlpha))
 	target := NewBase64()
-	assert.NotNil(this.T(), target)
+	this.NotNil(target)
 	crypto, err := target.Encode(input)
-	assert.Nil(this.T(), err)
+	this.Nil(err)
 	output, err := target.Decode(crypto)
-	assert.Nil(this.T(), err)
-	assert.Equal(this.T(), input, output)
-	fmt.Printf("input=%v\n", string(input))
-	fmt.Printf("output=%v\n", string(output.([]byte)))
-	fmt.Printf("crypto=%v\n", hex.EncodeToString(crypto.([]byte)))
+	this.Nil(err)
+	this.Equal(input, output)
+	fmt.Printf("input  %v\n", string(input))
+	fmt.Printf("output %v\n", string(output.([]byte)))
+	fmt.Printf("crypto %v\n", hex.EncodeToString(crypto.([]byte)))
+
+	_, err = target.Encode(nil)
+	this.NotNil(err)
+	_, err = target.Encode(1)
+	this.NotNil(err)
+
+	_, err = target.Decode(nil)
+	this.NotNil(err)
+	_, err = target.Decode(1)
+	this.NotNil(err)
 }
 
 func BenchmarkBase64Encode1024(b *testing.B) {

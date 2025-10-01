@@ -2,36 +2,60 @@ package procs
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 	"unsafe"
 
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 
-	"github.com/yinweli/Mizugo/mizugos/helps"
-	"github.com/yinweli/Mizugo/mizugos/msgs"
+	"github.com/yinweli/Mizugo/v2/mizugos/helps"
+	"github.com/yinweli/Mizugo/v2/mizugos/msgs"
 )
 
-// NewRaven 建立raven處理器
+// NewRaven 建立 Raven 處理器
 func NewRaven() *Raven {
 	return &Raven{
 		Procmgr: NewProcmgr(),
 	}
 }
 
-// Raven raven處理器, 封包結構使用msgs.RavenS, msgs.RavenC
-//   - 訊息定義: support/proto/mizugo/raven.proto
+// Raven 伺服器處理器
+//
+// 訊息結構基於 msgs.RavenS / msgs.RavenC
+//   - messageID: 訊息編號
+//   - header: 標頭訊息, 內容為任意 Proto 訊息
+//   - request: 請求訊息, 內容為任意 Proto 訊息
+//   - respond: 回應列表, 每筆皆為任意 Proto 訊息
+//
+// 對應的訊息定義檔:
+//   - Go: support/proto-mizugo/msg-go/msgs/raven.pb.go
+//   - C#: support/proto-mizugo/msg-cs/msgs/Raven.cs
+//   - Proto 定義: support/proto-mizugo/raven.proto
+//
+// 職責:
+//   - Encode: 將 *msgs.RavenC 物件轉為 []byte 以利傳輸
+//   - Decode: 將 []byte 解碼回 *msgs.RavenS
+//   - Process: 根據 messageID 呼叫對應的處理函式
+//
+// 另外提供以下工具
+//   - RavenSBuilder / RavenSParser / RavenSData: 建立與解析伺服器訊息
+//   - RavenIsMessageID / RavenIsErrID / RavenHeader / RavenRequest / RavenRespondAt / RavenRespondFind: 常用查詢工具
 type Raven struct {
 	*Procmgr // 管理器
 }
 
-// Encode 封包編碼
+// Encode 訊息編碼
+//
+// 輸入必須是 *msgs.RavenC, 輸出為 []byte
 func (this *Raven) Encode(input any) (output any, err error) {
+	if input == nil {
+		return nil, fmt.Errorf("raven encode: input nil")
+	} // if
+
 	message, ok := input.(*msgs.RavenC)
 
 	if ok == false {
-		return nil, fmt.Errorf("raven encode: input")
+		return nil, fmt.Errorf("raven encode: input not *msgs.RavenC")
 	} // if
 
 	output, err = proto.Marshal(message)
@@ -43,12 +67,18 @@ func (this *Raven) Encode(input any) (output any, err error) {
 	return output, nil
 }
 
-// Decode 封包解碼
+// Decode 訊息解碼
+//
+// 輸入必須是 []byte, 輸出為 *msgs.RavenS
 func (this *Raven) Decode(input any) (output any, err error) {
+	if input == nil {
+		return nil, fmt.Errorf("raven decode: input nil")
+	} // if
+
 	temp, ok := input.([]byte)
 
 	if ok == false {
-		return nil, fmt.Errorf("raven decode: input")
+		return nil, fmt.Errorf("raven decode: input not []byte")
 	} // if
 
 	message := &msgs.RavenS{}
@@ -61,11 +91,17 @@ func (this *Raven) Decode(input any) (output any, err error) {
 }
 
 // Process 訊息處理
+//
+// 輸入必須是 *msgs.RavenS, 會依據 messageID 找出並執行已註冊的處理函式, 若找不到對應的處理函式則回傳錯誤
 func (this *Raven) Process(input any) error {
+	if input == nil {
+		return fmt.Errorf("raven process: input nil")
+	} // if
+
 	message, ok := input.(*msgs.RavenS)
 
 	if ok == false {
-		return fmt.Errorf("raven process: input")
+		return fmt.Errorf("raven process: input not *msgs.RavenS")
 	} // if
 
 	process := this.Get(message.MessageID)
@@ -78,25 +114,50 @@ func (this *Raven) Process(input any) error {
 	return nil
 }
 
-// NewRavenClient 建立raven客戶端處理器
+// NewRavenClient 建立 Raven 客戶端處理器
 func NewRavenClient() *RavenClient {
 	return &RavenClient{
 		Procmgr: NewProcmgr(),
 	}
 }
 
-// RavenClient raven客戶端處理器, 封包結構使用msgs.RavenS, msgs.RavenC; 這個處理器提供給客戶端使用
-//   - 訊息定義: support/proto/mizugo/raven.proto
+// RavenClient Raven 客戶端處理器
+//
+// 訊息結構基於 msgs.RavenS / msgs.RavenC
+//   - messageID: 訊息編號
+//   - header: 標頭訊息, 內容為任意 Proto 訊息
+//   - request: 請求訊息, 內容為任意 Proto 訊息
+//   - respond: 回應列表, 每筆皆為任意 Proto 訊息
+//
+// 對應的訊息定義檔:
+//   - Go: support/proto-mizugo/msg-go/msgs/raven.pb.go
+//   - C#: support/proto-mizugo/msg-cs/msgs/Raven.cs
+//   - Proto 定義: support/proto-mizugo/raven.proto
+//
+// 職責:
+//   - Encode: 將 *msgs.RavenS 物件轉為 []byte 以利傳輸
+//   - Decode: 將 []byte 解碼回 *msgs.RavenC
+//   - Process: 根據 messageID 呼叫對應的處理函式
+//
+// 另外提供以下工具
+//   - RavenCBuilder / RavenCParser / RavenCData: 建立與解析客戶端訊息
+//   - RavenIsMessageID / RavenIsErrID / RavenHeader / RavenRequest / RavenRespondAt / RavenRespondFind: 常用查詢工具
 type RavenClient struct {
 	*Procmgr // 管理器
 }
 
-// Encode 封包編碼
+// Encode 訊息編碼
+//
+// 輸入必須是 *msgs.RavenS, 輸出為 []byte
 func (this *RavenClient) Encode(input any) (output any, err error) {
+	if input == nil {
+		return nil, fmt.Errorf("raven client encode: input nil")
+	} // if
+
 	message, ok := input.(*msgs.RavenS)
 
 	if ok == false {
-		return nil, fmt.Errorf("raven client encode: input")
+		return nil, fmt.Errorf("raven client encode: input not *msgs.RavenS")
 	} // if
 
 	output, err = proto.Marshal(message)
@@ -108,12 +169,18 @@ func (this *RavenClient) Encode(input any) (output any, err error) {
 	return output, nil
 }
 
-// Decode 封包解碼
+// Decode 訊息解碼
+//
+// 輸入必須是 []byte, 輸出為 *msgs.RavenC
 func (this *RavenClient) Decode(input any) (output any, err error) {
+	if input == nil {
+		return nil, fmt.Errorf("raven client decode: input nil")
+	} // if
+
 	temp, ok := input.([]byte)
 
 	if ok == false {
-		return nil, fmt.Errorf("raven client decode: input")
+		return nil, fmt.Errorf("raven client decode: input not []byte")
 	} // if
 
 	message := &msgs.RavenC{}
@@ -126,11 +193,17 @@ func (this *RavenClient) Decode(input any) (output any, err error) {
 }
 
 // Process 訊息處理
+//
+// 輸入必須是 *msgs.RavenC, 會依據 messageID 找出並執行已註冊的處理函式, 若找不到對應的處理函式則回傳錯誤
 func (this *RavenClient) Process(input any) error {
+	if input == nil {
+		return fmt.Errorf("raven client process: input nil")
+	} // if
+
 	message, ok := input.(*msgs.RavenC)
 
 	if ok == false {
-		return fmt.Errorf("raven client process: input")
+		return fmt.Errorf("raven client process: input not *msgs.RavenC")
 	} // if
 
 	process := this.Get(message.MessageID)
@@ -143,10 +216,19 @@ func (this *RavenClient) Process(input any) error {
 	return nil
 }
 
-// RavenSBuilder 建立RavenS訊息
+// RavenSBuilder 建立 *msgs.RavenS
 func RavenSBuilder(messageID int32, header, request proto.Message) (output any, err error) {
-	message := &msgs.RavenS{}
-	message.MessageID = messageID
+	if header == nil {
+		return nil, fmt.Errorf("ravenSBuilder: header nil")
+	} // if
+
+	if request == nil {
+		return nil, fmt.Errorf("ravenSBuilder: request nil")
+	} // if
+
+	message := &msgs.RavenS{
+		MessageID: messageID,
+	}
 
 	if message.Header, err = anypb.New(header); err != nil {
 		return nil, fmt.Errorf("ravenSBuilder: header: %w", err)
@@ -159,19 +241,32 @@ func RavenSBuilder(messageID int32, header, request proto.Message) (output any, 
 	return message, nil
 }
 
-// RavenSParser 解析RavenS訊息
-func RavenSParser[H, Q any](input any) (output *RavenSData[H, Q], err error) {
+// RavenSParser 解析 *msgs.RavenS → RavenSData
+func RavenSParser[H, Q proto.Message](input any) (output *RavenSData[H, Q], err error) {
+	if input == nil {
+		return nil, fmt.Errorf("ravenSParser: input nil")
+	} // if
+
 	message, ok := input.(*msgs.RavenS)
 
 	if ok == false {
-		return nil, fmt.Errorf("ravenSParser: input")
+		return nil, fmt.Errorf("ravenSParser: input not *msgs.RavenS")
 	} // if
 
-	output = &RavenSData[H, Q]{}
-	output.MessageID = message.MessageID
+	output = &RavenSData[H, Q]{
+		MessageID: message.MessageID,
+	}
+
+	if message.Header == nil {
+		return nil, fmt.Errorf("ravenSParser: header nil")
+	} // if
 
 	if output.Header, err = helps.FromProtoAny[H](message.Header); err != nil {
 		return nil, fmt.Errorf("ravenSParser: header: %w", err)
+	} // if
+
+	if message.Request == nil {
+		return nil, fmt.Errorf("ravenSParser: request nil")
 	} // if
 
 	if output.Request, err = helps.FromProtoAny[Q](message.Request); err != nil {
@@ -181,11 +276,44 @@ func RavenSParser[H, Q any](input any) (output *RavenSData[H, Q], err error) {
 	return output, nil
 }
 
-// RavenCBuilder 建立RavenC訊息
+// RavenSData RavenS 資料模型
+type RavenSData[H, Q proto.Message] struct {
+	MessageID int32 // 訊息編號
+	Header    H     // 標頭訊息
+	Request   Q     // 請求訊息
+}
+
+// Size 取得訊息大小的粗估值
+func (this *RavenSData[H, Q]) Size() int {
+	size := int(unsafe.Sizeof(this.MessageID))
+	size += proto.Size(this.Header)
+	size += proto.Size(this.Request)
+	return size
+}
+
+// Detail 取得詳細資訊字串
+func (this *RavenSData[H, Q]) Detail() string {
+	builder := &strings.Builder{}
+	_, _ = fmt.Fprintf(builder, "messageID: %v\n", this.MessageID)
+	_, _ = fmt.Fprintf(builder, "header: %v\n", helps.ProtoString(this.Header))
+	_, _ = fmt.Fprintf(builder, "request: %v\n", helps.ProtoString(this.Request))
+	return builder.String()
+}
+
+// RavenCBuilder 建立 *msgs.RavenC
 func RavenCBuilder(messageID, errID int32, header, request proto.Message, respond ...proto.Message) (output any, err error) {
-	message := &msgs.RavenC{}
-	message.MessageID = messageID
-	message.ErrID = errID
+	if header == nil {
+		return nil, fmt.Errorf("ravenCBuilder: header nil")
+	} // if
+
+	if request == nil {
+		return nil, fmt.Errorf("ravenCBuilder: request nil")
+	} // if
+
+	message := &msgs.RavenC{
+		MessageID: messageID,
+		ErrID:     errID,
+	}
 
 	if message.Header, err = anypb.New(header); err != nil {
 		return nil, fmt.Errorf("ravenCBuilder: header: %w", err)
@@ -196,8 +324,8 @@ func RavenCBuilder(messageID, errID int32, header, request proto.Message, respon
 	} // if
 
 	for _, itor := range respond {
-		if temp, err := anypb.New(itor); err == nil {
-			message.Respond = append(message.Respond, temp)
+		if r, err := anypb.New(itor); err == nil {
+			message.Respond = append(message.Respond, r)
 		} else {
 			return nil, fmt.Errorf("ravenCBuilder: respond: %w", err)
 		} // if
@@ -206,20 +334,33 @@ func RavenCBuilder(messageID, errID int32, header, request proto.Message, respon
 	return message, nil
 }
 
-// RavenCParser 解析RavenC訊息
-func RavenCParser[H, Q any](input any) (output *RavenCData[H, Q], err error) {
+// RavenCParser 解析 *msgs.RavenC → RavenCData
+func RavenCParser[H, Q proto.Message](input any) (output *RavenCData[H, Q], err error) {
+	if input == nil {
+		return nil, fmt.Errorf("ravenCParser: input nil")
+	} // if
+
 	message, ok := input.(*msgs.RavenC)
 
 	if ok == false {
-		return nil, fmt.Errorf("ravenCParser: input")
+		return nil, fmt.Errorf("ravenCParser: input not *msgs.RavenC")
 	} // if
 
-	output = &RavenCData[H, Q]{}
-	output.MessageID = message.MessageID
-	output.ErrID = message.ErrID
+	output = &RavenCData[H, Q]{
+		MessageID: message.MessageID,
+		ErrID:     message.ErrID,
+	}
+
+	if message.Header == nil {
+		return nil, fmt.Errorf("ravenCParser: header nil")
+	} // if
 
 	if output.Header, err = helps.FromProtoAny[H](message.Header); err != nil {
 		return nil, fmt.Errorf("ravenCParser: header: %w", err)
+	} // if
+
+	if message.Request == nil {
+		return nil, fmt.Errorf("ravenCParser: request nil")
 	} // if
 
 	if output.Request, err = helps.FromProtoAny[Q](message.Request); err != nil {
@@ -227,8 +368,8 @@ func RavenCParser[H, Q any](input any) (output *RavenCData[H, Q], err error) {
 	} // if
 
 	for _, itor := range message.Respond {
-		if temp, err := itor.UnmarshalNew(); err == nil {
-			output.Respond = append(output.Respond, temp)
+		if r, err := itor.UnmarshalNew(); err == nil {
+			output.Respond = append(output.Respond, r)
 		} else {
 			return nil, fmt.Errorf("ravenCParser: respond: %w", err)
 		} // if
@@ -237,59 +378,35 @@ func RavenCParser[H, Q any](input any) (output *RavenCData[H, Q], err error) {
 	return output, nil
 }
 
-// RavenSData RavenS資料
-type RavenSData[H, Q any] struct {
-	MessageID int32 // 訊息編號
-	Header    *H    // 標頭資料
-	Request   *Q    // 要求資料
-}
-
-// Size 取得訊息大小
-func (this *RavenSData[H, Q]) Size() int {
-	size := int(unsafe.Sizeof(this.MessageID))
-	size += proto.Size(any(this.Header).(proto.Message))
-	size += proto.Size(any(this.Request).(proto.Message))
-	return size
-}
-
-// Detail 取得訊息資訊
-func (this *RavenSData[H, Q]) Detail() string {
-	builder := &strings.Builder{}
-	_, _ = fmt.Fprintf(builder, "messageID: %v\n", this.MessageID)
-	_, _ = fmt.Fprintf(builder, "header: %v\n", helps.ProtoString(any(this.Header).(proto.Message)))
-	_, _ = fmt.Fprintf(builder, "request: %v\n", helps.ProtoString(any(this.Request).(proto.Message)))
-	return builder.String()
-}
-
-// RavenCData RavenC資料
-type RavenCData[H, Q any] struct {
+// RavenCData RavenC 資料模型
+type RavenCData[H, Q proto.Message] struct {
 	MessageID int32           // 訊息編號
 	ErrID     int32           // 錯誤編號
-	Header    *H              // 標頭資料
-	Request   *Q              // 要求資料
+	Header    H               // 標頭訊息
+	Request   Q               // 請求訊息
 	Respond   []proto.Message // 回應列表
 }
 
-// Size 取得訊息大小
+// Size 取得訊息大小的粗估值
 func (this *RavenCData[H, Q]) Size() int {
 	size := int(unsafe.Sizeof(this.MessageID)) + int(unsafe.Sizeof(this.ErrID))
-	size += proto.Size(any(this.Header).(proto.Message))
-	size += proto.Size(any(this.Request).(proto.Message))
+	size += proto.Size(this.Header)
+	size += proto.Size(this.Request)
 
 	for _, itor := range this.Respond {
-		size += proto.Size(any(itor).(proto.Message))
+		size += proto.Size(itor)
 	} // for
 
 	return size
 }
 
-// Detail 取得詳細資訊
+// Detail 取得詳細資訊字串
 func (this *RavenCData[H, Q]) Detail() string {
 	builder := &strings.Builder{}
 	_, _ = fmt.Fprintf(builder, "messageID: %v\n", this.MessageID)
 	_, _ = fmt.Fprintf(builder, "errID: %v\n", this.ErrID)
-	_, _ = fmt.Fprintf(builder, "header: %v\n", helps.ProtoString(any(this.Header).(proto.Message)))
-	_, _ = fmt.Fprintf(builder, "request: %v\n", helps.ProtoString(any(this.Request).(proto.Message)))
+	_, _ = fmt.Fprintf(builder, "header: %v\n", helps.ProtoString(this.Header))
+	_, _ = fmt.Fprintf(builder, "request: %v\n", helps.ProtoString(this.Request))
 
 	for i, itor := range this.Respond {
 		_, _ = fmt.Fprintf(builder, "respond[%v]: %v\n", i, helps.ProtoString(itor))
@@ -298,226 +415,120 @@ func (this *RavenCData[H, Q]) Detail() string {
 	return builder.String()
 }
 
-// RavenRespondAt 取得回應列表中指定位置的資料
-func RavenRespondAt(input any, index int) proto.Message {
+// RavenIsMessageID 檢查 *msgs.RavenC 的 messageID 是否為期望值
+func RavenIsMessageID(input any, expected int32) bool {
 	message, ok := input.(*msgs.RavenC)
-
-	if ok == false {
-		return nil
-	} // if
-
-	if index >= 0 && index < len(message.Respond) {
-		if respond, err := message.Respond[index].UnmarshalNew(); err == nil {
-			return respond
-		} // if
-	} // if
-
-	return nil
+	return ok && message != nil && message.MessageID == expected
 }
 
-// RavenRespondFind 取得回應列表中首個符合指定類型的資料
-func RavenRespondFind(input, respondType any) proto.Message {
+// RavenIsErrID 檢查 *msgs.RavenC 的 errID 是否為期望值
+func RavenIsErrID(input any, expected int32) bool {
+	message, ok := input.(*msgs.RavenC)
+	return ok && message != nil && message.ErrID == expected
+}
+
+// RavenHeader 從 *msgs.RavenC 解析標頭
+func RavenHeader[T proto.Message](input any) (result T) {
+	if input == nil {
+		return result
+	} // if
+
 	message, ok := input.(*msgs.RavenC)
 
 	if ok == false {
-		return nil
+		return result
 	} // if
+
+	result, err := helps.FromProtoAny[T](message.Header)
+
+	if err != nil {
+		return result
+	} // if
+
+	return result
+}
+
+// RavenRequest 從 *msgs.RavenC 解析請求
+func RavenRequest[T proto.Message](input any) (result T) {
+	if input == nil {
+		return result
+	} // if
+
+	message, ok := input.(*msgs.RavenC)
+
+	if ok == false {
+		return result
+	} // if
+
+	result, err := helps.FromProtoAny[T](message.Request)
+
+	if err != nil {
+		return result
+	} // if
+
+	return result
+}
+
+// RavenRespondAt 以索引取得 *msgs.RavenC 回應
+func RavenRespondAt[T proto.Message](input any, index int) (result T) {
+	if input == nil {
+		return result
+	} // if
+
+	message, ok := input.(*msgs.RavenC)
+
+	if ok == false {
+		return result
+	} // if
+
+	size := len(message.Respond)
+
+	if index < 0 || index >= size {
+		return result
+	} // if
+
+	respond := message.Respond[index]
+
+	if respond == nil {
+		return result
+	} // if
+
+	result, err := helps.FromProtoAny[T](respond)
+
+	if err != nil {
+		return result
+	} // if
+
+	return result
+}
+
+// RavenRespondFind 取得 *msgs.RavenC 回應列表中第一筆符合型別 T 的回應
+func RavenRespondFind[T proto.Message](input any) (result T) {
+	if input == nil {
+		return result
+	} // if
+
+	message, ok := input.(*msgs.RavenC)
+
+	if ok == false {
+		return result
+	} // if
+
+	messageName := result.ProtoReflect().Descriptor().FullName()
 
 	for _, itor := range message.Respond {
-		if respond, err := itor.UnmarshalNew(); err == nil && reflect.TypeOf(respond) == reflect.TypeOf(respondType) {
-			return respond
+		if itor == nil {
+			continue
+		} // if
+
+		if itor.MessageName() != messageName {
+			continue
+		} // if
+
+		if result, err := helps.FromProtoAny[T](itor); err == nil {
+			return result
 		} // if
 	} // for
 
-	return nil
-}
-
-// RavenTestMessageID 測試訊息編號, input必須是msgs.RavenC, 並且訊息編號與expected相符才會傳回true, 否則為false
-func RavenTestMessageID(input any, expected int32) bool {
-	message, ok := input.(*msgs.RavenC)
-
-	if ok == false {
-		fmt.Printf("ravenTest: messageID: invalid input\n")
-		return false
-	} // if
-
-	if expected != message.MessageID {
-		fmt.Printf("ravenTest: messageID: expected {%v} but actual {%v}\n", expected, message.MessageID)
-		return false
-	} // if
-
-	return true
-}
-
-// RavenTestErrID 測試錯誤編號, input必須是msgs.RavenC, 並且錯誤編號與expected相符才會傳回true, 否則為false
-func RavenTestErrID(input any, expected int32) bool {
-	message, ok := input.(*msgs.RavenC)
-
-	if ok == false {
-		fmt.Printf("ravenTest: errID: invalid input\n")
-		return false
-	} // if
-
-	if expected != message.ErrID {
-		fmt.Printf("ravenTest: errID: expected {%v} but actual {%v}\n", expected, message.ErrID)
-		return false
-	} // if
-
-	return true
-}
-
-// RavenTestHeader 測試標頭資料, input必須是msgs.RavenC, 並且標頭資料與expected相符才會傳回true, 否則為false
-func RavenTestHeader(input any, expected proto.Message) bool {
-	message, ok := input.(*msgs.RavenC)
-
-	if ok == false {
-		fmt.Printf("ravenTest: header: invalid input\n")
-		return false
-	} // if
-
-	header, err := message.Header.UnmarshalNew()
-
-	if err != nil {
-		fmt.Printf("ravenTest: header: unmarshal failed\n")
-		return false
-	} // if
-
-	if proto.Equal(expected, header) == false {
-		fmt.Printf("ravenTest: header: expected {%v} but actual {%v}\n", expected, header)
-		return false
-	} // if
-
-	return true
-}
-
-// RavenTestRequest 測試要求資料, input必須是msgs.RavenC, 並且要求資料與expected相符才會傳回true, 否則為false
-func RavenTestRequest(input any, expected proto.Message) bool {
-	message, ok := input.(*msgs.RavenC)
-
-	if ok == false {
-		fmt.Printf("ravenTest: request: invalid input\n")
-		return false
-	} // if
-
-	request, err := message.Request.UnmarshalNew()
-
-	if err != nil {
-		fmt.Printf("ravenTest: request: unmarshal failed\n")
-		return false
-	} // if
-
-	if proto.Equal(expected, request) == false {
-		fmt.Printf("ravenTest: request: expected {%v} but actual {%v}\n", expected, request)
-		return false
-	} // if
-
-	return true
-}
-
-// RavenTestRespond 測試回應列表, input必須是msgs.RavenC, 並且expected列表中的每一個元素都在回應列表中找到並且相符才會傳回true, 否則為false
-// 但是這並不代表expected列表與回應列表完全一致, 例如有只出現於回應列表, 但不在expected列表中的資料, 就無法通過此方式檢測出來
-func RavenTestRespond(input any, expected ...proto.Message) bool {
-	message, ok := input.(*msgs.RavenC)
-
-	if ok == false {
-		fmt.Printf("ravenTest: respond: invalid input\n")
-		return false
-	} // if
-
-	result := true
-	report := &strings.Builder{}
-	report.WriteString("respond:\n")
-
-	for i, itor := range expected {
-		if i >= len(message.Respond) {
-			result = false
-			_, _ = fmt.Fprintf(report, "    [%v] not found\n", i)
-			continue
-		} // if
-
-		respond, err := message.Respond[i].UnmarshalNew()
-
-		if err != nil {
-			result = false
-			_, _ = fmt.Fprintf(report, "    [%v] unmarshal failed\n", i)
-			continue
-		} // if
-
-		if proto.Equal(itor, respond) == false {
-			result = false
-			_, _ = fmt.Fprintf(report, "    [%v] expected {%v} but actual {%v}\n", i, itor, respond)
-			continue
-		} // if
-	} // for
-
-	if result == false {
-		fmt.Print(report.String())
-		return false
-	} // if
-
-	return true
-}
-
-// RavenTestRespondType 測試回應類型, input必須是msgs.RavenC, 並且expected列表中的每一個元素類型都在回應列表中找到才會傳回true, 否則為false;
-// 但是這並不代表expected列表與回應列表完全一致, 例如有只出現於回應列表, 但不在expected列表中的類型, 就無法通過此方式檢測出來
-func RavenTestRespondType(input any, expected ...proto.Message) bool {
-	message, ok := input.(*msgs.RavenC)
-
-	if ok == false {
-		fmt.Printf("ravenTest: respond type: invalid input\n")
-		return false
-	} // if
-
-	result := true
-	report := &strings.Builder{}
-	report.WriteString("respond type:\n")
-
-	for i, itor := range expected {
-		if i >= len(message.Respond) {
-			result = false
-			_, _ = fmt.Fprintf(report, "    [%v] not found\n", i)
-			continue
-		} // if
-
-		respond, err := message.Respond[i].UnmarshalNew()
-
-		if err != nil {
-			result = false
-			_, _ = fmt.Fprintf(report, "    [%v] unmarshal failed\n", i)
-			continue
-		} // if
-
-		expectedType := reflect.TypeOf(itor).String()
-		actualType := reflect.TypeOf(respond).String()
-
-		if expectedType != actualType {
-			result = false
-			_, _ = fmt.Fprintf(report, "    [%v] expected {%v} but actual {%v}\n", i, expectedType, actualType)
-			continue
-		} // if
-	} // for
-
-	if result == false {
-		fmt.Print(report.String())
-		return false
-	} // if
-
-	return true
-}
-
-// RavenTestRespondLength 測試回應長度, input必須是msgs.RavenC, 並且回應列表長度必須相符才會傳回true, 否則為false
-func RavenTestRespondLength(input any, expected int) bool {
-	message, ok := input.(*msgs.RavenC)
-
-	if ok == false {
-		fmt.Printf("ravenTest: length: invalid input\n")
-		return false
-	} // if
-
-	if length := len(message.Respond); expected != length {
-		fmt.Printf("ravenTest: length: expected {%v} but actual {%v}\n", expected, length)
-		return false
-	} // if
-
-	return true
+	return result
 }

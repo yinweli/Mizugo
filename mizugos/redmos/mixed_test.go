@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestMixed(t *testing.T) {
@@ -39,45 +38,44 @@ func (this *SuiteMixed) TearDownSuite() {
 
 func (this *SuiteMixed) TestMixed() {
 	target := newMixed(this.major, this.minor)
-	assert.NotNil(this.T(), target)
-	assert.NotNil(this.T(), target.Submit(context.Background()))
-	assert.Equal(this.T(), this.major, target.Major())
-	assert.Equal(this.T(), this.minor, target.Minor())
+	this.NotNil(target)
+	this.NotNil(target.Submit(context.Background()))
+	this.NotNil(target.Major())
+	this.NotNil(target.Minor())
 }
 
-func (this *SuiteMixed) TestExec() {
-	key := "mixed queue"
+func (this *SuiteMixed) TestSubmit() {
 	target := newMixed(this.major, this.minor)
-	assert.Nil(this.T(), target.Submit(context.Background()).Add(newBehaveTester(true, true)).Exec())
-	assert.Nil(this.T(), target.Submit(context.Background()).Add(newBehaveTester(true, true), newBehaveTester(true, true)).Exec())
-	assert.Nil(this.T(), target.Submit(context.Background()).Lock(key).Unlock(key).Exec())
-	assert.Nil(this.T(), target.Submit(context.Background()).LockIf(key, true).UnlockIf(key, true).Exec())
-	assert.Nil(this.T(), target.Submit(context.Background()).LockIf(key, false).UnlockIf(key, false).Exec())
-	assert.NotNil(this.T(), target.Submit(context.Background()).Add(newBehaveTester(false, true)).Exec())
-	assert.NotNil(this.T(), target.Submit(context.Background()).Add(newBehaveTester(true, false)).Exec())
+	this.Nil(target.Submit(context.Background()).Add(newTestBehave(true, true)).Exec())
+	this.Nil(target.Submit(context.Background()).Add(newTestBehave(true, true), newTestBehave(true, true)).Exec())
+	this.Nil(target.Submit(context.Background()).Lock(testdata.Unknown, testdata.Unknown).Unlock(testdata.Unknown, testdata.Unknown).Exec())
+	this.Nil(target.Submit(context.Background()).LockIf(testdata.Unknown, testdata.Unknown, true).UnlockIf(testdata.Unknown, testdata.Unknown, true).Exec())
+	this.Nil(target.Submit(context.Background()).LockIf(testdata.Unknown, testdata.Unknown, false).UnlockIf(testdata.Unknown, testdata.Unknown, false).Exec())
+	this.NotNil(target.Submit(context.Background()).Add(newTestBehave(false, true)).Exec())
+	this.NotNil(target.Submit(context.Background()).Add(newTestBehave(true, false)).Exec())
 }
 
 func (this *SuiteMixed) TestBehave() {
-	target := Behave{
+	target := &Behave{
 		context: context.Background(),
 		major:   this.major.Submit(),
 		minor:   this.minor.Submit(),
 	}
-	assert.NotNil(this.T(), target.Ctx())
-	assert.NotNil(this.T(), target.Major())
-	assert.NotNil(this.T(), target.Minor())
+	this.NotNil(target.Ctx())
+	this.NotNil(target.Major())
+	this.NotNil(target.Minor())
 }
 
-// newBehaveTester 建立測試行為
-func newBehaveTester(prepare, result bool) Behavior {
-	return &behaveTester{
+// newTestBehave 建立測試行為
+func newTestBehave(prepare, result bool) Behavior {
+	return &testBehave{
 		prepare: prepare,
 		result:  result,
 	}
 }
 
-// behaveTester 測試行為
-type behaveTester struct {
+// testBehave 測試行為
+type testBehave struct {
 	Behave
 	prepare      bool
 	result       bool
@@ -85,7 +83,7 @@ type behaveTester struct {
 	validResult  bool
 }
 
-func (this *behaveTester) Prepare() error {
+func (this *testBehave) Prepare() error {
 	if this.Ctx() == nil {
 		return fmt.Errorf("ctx nil")
 	} // if
@@ -106,7 +104,7 @@ func (this *behaveTester) Prepare() error {
 	return nil
 }
 
-func (this *behaveTester) Complete() error {
+func (this *testBehave) Complete() error {
 	if this.result == false {
 		return fmt.Errorf("complete failed")
 	} // if

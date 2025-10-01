@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
-	"github.com/yinweli/Mizugo/support/test-client-go/internal/features"
-	"github.com/yinweli/Mizugo/support/test-client-go/msgs"
+	"github.com/yinweli/Mizugo/v2/mizugos/entitys"
+	"github.com/yinweli/Mizugo/v2/mizugos/procs"
+	"github.com/yinweli/Mizugo/v2/support/test-client-go/internal/defines"
+	"github.com/yinweli/Mizugo/v2/support/test-client-go/internal/features"
+	"github.com/yinweli/Mizugo/v2/support/test-client-go/msgs"
 )
 
 // NewAuth 建立Auth模組
@@ -66,7 +66,6 @@ func (this *Auth) procMLoginA(message any) {
 	} // if
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
-	features.MeterAuth.Add(duration)
 	features.LogSystem.Get().Info(this.name).KV("token", msg.Token).KV("duration", duration).Caller(0).EndFlush()
 
 	this.token = msg.Token
@@ -103,7 +102,6 @@ func (this *Auth) procMUpdateA(message any) {
 	} // if
 
 	duration := time.Duration(time.Now().UnixNano() - msg.From.Time)
-	features.MeterAuth.Add(duration)
 	features.LogSystem.Get().Info(this.name).KV("token", msg.Token).KV("duration", duration).Caller(0).EndFlush()
 
 	this.token = msg.Token

@@ -1,7 +1,7 @@
 package defines
 
 import (
-	"github.com/yinweli/Mizugo/mizugos/entitys"
+	"github.com/yinweli/Mizugo/v2/mizugos/entitys"
 )
 
 const ( // 常數定義

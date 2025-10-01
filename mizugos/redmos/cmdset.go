@@ -9,14 +9,20 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// Set 設值行為, 以索引值與資料到主要/次要資料庫中儲存資料, 不會影響主要資料庫中的資料的逾期時間, 使用上有以下幾點須注意
-//   - 泛型類型T必須是結構, 並且不能是指標
-//   - 資料結構如果包含 Save 結構或是符合 Saver 介面, 會套用儲存判斷機制, 減少不必要的儲存操作
-//   - 資料結構的成員都需要設定好`bson:xxxxx`屬性
-//   - 執行前設定好 MajorEnable, MinorEnable
-//   - 執行前設定好 Meta, 這需要事先建立好與 Metaer 介面符合的元資料結構
-//   - 執行前設定好 Key 並且不能為空字串
-//   - 執行前設定好 Data 並且不能為nil
+// Set 設值行為
+//
+// 以索引鍵(Key)將資料寫入主要資料庫與/或次要資料庫
+//
+// 事前準備:
+//   - 設定 MajorEnable / MinorEnable: 指示要作用的層
+//   - 設定 Meta: 需為符合 Metaer 介面的元資料物件(提供 MajorKey/MinorKey/MinorTable)
+//   - 設定 Key: 不可為空字串
+//   - 設定 Data: 不可為 nil, 且其成員需具備正確 bson 標籤(寫入次要資料庫時使用)
+//
+// 注意:
+//   - 本行為僅儲存, 不會刷新主要資料庫 TTL
+//   - 泛型 T 應為「值型別的結構(struct)」, 且不要以 *T 作為型別參數
+//   - 若 Data 實作 Saver 且 Saver.GetSave == false, 將直接略過寫入
 type Set[T any] struct {
 	Behave                       // 行為物件
 	MajorEnable bool             // 啟用主要資料庫
@@ -70,13 +76,13 @@ func (this *Set[T]) Complete() error {
 	} // if
 
 	if this.MajorEnable {
-		data, err := this.cmd.Result()
+		result, err := this.cmd.Result()
 
 		if err != nil {
 			return fmt.Errorf("set complete: %w: %v", err, this.Key)
 		} // if
 
-		if data != RedisOk {
+		if result != RedisOk {
 			return fmt.Errorf("set complete: save to redis failed: %v", this.Key)
 		} // if
 	} // if

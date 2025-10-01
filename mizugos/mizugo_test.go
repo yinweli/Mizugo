@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestMizugo(t *testing.T) {
@@ -31,23 +31,17 @@ func (this *SuiteMizugo) TestMizugo() {
 	Start()
 	trials.WaitTimeout()
 	assert.NotNil(this.T(), Config)
-	assert.NotNil(this.T(), Metrics)
 	assert.NotNil(this.T(), Logger)
 	assert.NotNil(this.T(), Network)
 	assert.NotNil(this.T(), Redmo)
 	assert.NotNil(this.T(), Entity)
-	assert.NotNil(this.T(), Label)
 	assert.NotNil(this.T(), Pool)
-	assert.NotNil(this.T(), Trigger)
 	Stop()
 	trials.WaitTimeout()
 	assert.Nil(this.T(), Config)
-	assert.Nil(this.T(), Metrics)
 	assert.Nil(this.T(), Logger)
 	assert.Nil(this.T(), Network)
 	assert.Nil(this.T(), Redmo)
 	assert.Nil(this.T(), Entity)
-	assert.Nil(this.T(), Label)
 	assert.Nil(this.T(), Pool)
-	assert.Nil(this.T(), Trigger)
 }

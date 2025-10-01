@@ -9,15 +9,25 @@ import (
 	"github.com/otiai10/copy"
 )
 
-// Shell 測試框架處理, 依照以下流程執行
-//   - 使用 Prepare 準備測試目錄
-//   - 執行初始化處理
-//   - 執行單元測試
-//   - 執行結束處理
-//   - 使用 Restore 還原測試目錄
-//   - 回傳單元測試的結果編號, 可用此編號呼叫 os.Exit, 讓外部能夠獲得測試結果
+// Shell 測試框架的統一入口, 用於包裝測試流程
+//
+// 執行順序
+//   - 呼叫 Prepare 建立測試工作目錄
+//   - 執行初始化處理(initialize)
+//   - 執行測試
+//   - 執行結束處理(finalize)
+//   - 呼叫 Restore 還原測試目錄
+//
+// 回傳的結果編號, 可直接傳給 os.Exit 以回報測試結果
 func Shell(m *testing.M, initialize, finalize func(), work string, from ...string) (result int) {
 	catalog := Prepare(work, from...)
+	defer func() {
+		if r := recover(); r != nil {
+			result = 1
+		} // if
+
+		Restore(catalog)
+	}()
 
 	if initialize != nil {
 		initialize()
@@ -33,17 +43,21 @@ func Shell(m *testing.M, initialize, finalize func(), work string, from ...strin
 		WaitTimeout() // 等待一下, 讓結束處理有機會完成
 	} // if
 
-	Restore(catalog)
 	return result
 }
 
-// Prepare 準備測試目錄, 依照以下流程執行
-//   - 工作目錄改為 work 指定的路徑, 必須是絕對路徑
-//   - 從 from 把資料複製過來
-//   - 回傳用於還原的目錄資料
+// Prepare 建立並切換至測試工作目錄
+//
+// 執行順序
+//   - 驗證 work 必須是絕對路徑
+//   - 建立目錄(若不存在)
+//   - 切換至工作目錄
+//   - 將 from 中的資料複製到工作目錄
+//
+// 回傳的 Catalog 將用於 Restore
 func Prepare(work string, from ...string) Catalog {
 	if filepath.IsAbs(work) == false {
-		panic("work must be absolute")
+		panic("shell: work must be absolute")
 	} // if
 
 	root, err := os.Getwd()
@@ -72,9 +86,11 @@ func Prepare(work string, from ...string) Catalog {
 	}
 }
 
-// Restore 還原測試目錄, 依照以下流程執行
-//   - 工作目錄改為目錄資料中的原始路徑
-//   - 刪除目錄資料中的工作路徑及其所有內容
+// Restore 還原目錄狀態
+//
+// 執行順序
+//   - 切換回原始路徑
+//   - 刪除工作目錄及其所有內容
 func Restore(catalog Catalog) {
 	if err := os.Chdir(catalog.root); err != nil {
 		panic(err)
@@ -85,12 +101,12 @@ func Restore(catalog Catalog) {
 	} // if
 }
 
-// Root 取得當前路徑
+// Root 取得呼叫端檔案所在的目錄路徑; 若無法取得呼叫端資訊，會觸發 panic
 func Root() string {
 	_, file, _, ok := runtime.Caller(1)
 
 	if ok == false {
-		panic("get root failed")
+		panic("shell: get root failed")
 	} // if
 
 	return filepath.Clean(filepath.Dir(file))

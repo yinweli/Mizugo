@@ -4,13 +4,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/yinweli/Mizugo/mizugos/msgs"
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/msgs"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestCmpOpt(t *testing.T) {
@@ -22,13 +21,15 @@ type SuiteCmpOpt struct {
 	trials.Catalog
 }
 
-func (this *SuiteCmpOpt) TestEquateApproxProtoTimestamp() {
+func (this *SuiteCmpOpt) TestProtoTimestampWithin() {
 	now := time.Now()
-	assert.True(this.T(), trials.ProtoEqual(
+	this.True(trials.ProtoEqual(
 		&msgs.ProtoTest{Data: testdata.Unknown, Time: timestamppb.New(now)},
 		&msgs.ProtoTest{Data: testdata.Unknown, Time: timestamppb.New(now.Add(time.Millisecond))},
-		EquateApproxProtoTimestamp(time.Second)))
-	assert.False(this.T(), trials.ProtoEqual(
+		ProtoTimestampWithin(time.Second),
+	))
+	this.False(trials.ProtoEqual(
 		&msgs.ProtoTest{Data: testdata.Unknown, Time: timestamppb.New(now)},
-		&msgs.ProtoTest{Data: testdata.Unknown, Time: timestamppb.New(now.Add(time.Millisecond))}))
+		&msgs.ProtoTest{Data: testdata.Unknown, Time: timestamppb.New(now.Add(time.Millisecond))},
+	))
 }

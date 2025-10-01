@@ -8,10 +8,8 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// EquateApproxProtoTimestamp 取得比對選項, 用於比較兩個 proto 的 timestamppb.Timestamp 時, 時間差異在 margin 範圍內時, 視為相等
-//
-// margin 必須是非負數, 否則會觸發 panic
-func EquateApproxProtoTimestamp(margin time.Duration) cmp.Option {
+// ProtoTimestampWithin 回傳一個 cmp.Option, 當兩個 google.protobuf.Timestamp 的時間差在 margin 以內時視為相等(margin < 0 會 panic)
+func ProtoTimestampWithin(margin time.Duration) cmp.Option {
 	if margin < 0 {
 		panic("margin must be a non-negative number")
 	} // if
@@ -51,7 +49,7 @@ func EquateApproxProtoTimestamp(margin time.Duration) cmp.Option {
 				lt, rt = rt, lt
 			} // if
 
-			return lt.Add(margin).Before(rt) == false
+			return rt.Sub(lt) <= margin
 		}),
 	)
 }

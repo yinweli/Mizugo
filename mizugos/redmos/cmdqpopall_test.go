@@ -6,12 +6,11 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/helps"
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/helps"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestCmdQPopAll(t *testing.T) {
@@ -21,7 +20,7 @@ func TestCmdQPopAll(t *testing.T) {
 type SuiteCmdQPopAll struct {
 	suite.Suite
 	trials.Catalog
-	meta  metaQPopAll
+	meta  testMetaQPopAll
 	major *Major
 	minor *Minor
 }
@@ -44,63 +43,65 @@ func (this *SuiteCmdQPopAll) TestQPopAll() {
 	this.meta.table = true
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
-	data1 := &dataQPopAll{K: "redis+mongo", D: helps.RandStringDefault()}
-	data2 := &dataQPopAll{K: "redis+mongo", D: helps.RandStringDefault()}
+	data1 := &testDataQPopAll{K: "redis+mongo", D: helps.RandStringDefault()}
+	data2 := &testDataQPopAll{K: "redis+mongo", D: helps.RandStringDefault()}
 
-	qpush := &QPush[dataQPopAll]{MinorEnable: true, Meta: &this.meta, Key: data1.K, Data: data1}
+	qpush := &QPush[testDataQPopAll]{MinorEnable: true, Meta: &this.meta, Key: data1.K, Data: data1}
 	qpush.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), qpush.Prepare())
+	this.Nil(qpush.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), qpush.Complete())
+	this.Nil(qpush.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	qpush = &QPush[dataQPopAll]{MinorEnable: true, Meta: &this.meta, Key: data2.K, Data: data2}
+	qpush = &QPush[testDataQPopAll]{MinorEnable: true, Meta: &this.meta, Key: data2.K, Data: data2}
 	qpush.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), qpush.Prepare())
+	this.Nil(qpush.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), qpush.Complete())
+	this.Nil(qpush.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.True(this.T(), trials.RedisCompareList[dataQPopAll](this.major.Client(), this.meta.MajorKey(data1.K), []*dataQPopAll{data1, data2}))
-	assert.True(this.T(), trials.MongoCompare[QueueData[dataQPopAll]](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data1.K), &QueueData[dataQPopAll]{
-		Data: []*dataQPopAll{data1, data2},
+	this.True(trials.RedisListEqual[testDataQPopAll](this.major.Client(), this.meta.MajorKey(data1.K), []*testDataQPopAll{data1, data2}))
+	this.True(trials.MongoEqual[QueueData[testDataQPopAll]](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data1.K), &QueueData[testDataQPopAll]{
+		Data: []*testDataQPopAll{data1, data2},
 	}))
 
-	target := &QPopAll[dataQPopAll]{MinorEnable: true, Meta: &this.meta, Key: data1.K}
+	target := &QPopAll[testDataQPopAll]{MinorEnable: true, Meta: &this.meta, Key: data1.K, Done: func(data []*testDataQPopAll) {
+		this.Equal([]*testDataQPopAll{data1, data2}, data)
+	}}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), target.Prepare())
+	this.Nil(target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), target.Complete())
+	this.Nil(target.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.True(this.T(), cmp.Equal(&QueueData[dataQPopAll]{Data: []*dataQPopAll{data1, data2}}, target.Data))
-	assert.True(this.T(), trials.RedisCompareList[dataQPop](this.major.Client(), this.meta.MajorKey(data1.K), []*dataQPop{}))
-	assert.True(this.T(), trials.MongoCompare[QueueData[dataQPop]](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data1.K), &QueueData[dataQPop]{}))
+	this.True(cmp.Equal([]*testDataQPopAll{data1, data2}, target.Data))
+	this.True(trials.RedisListEqual[testDataQPop](this.major.Client(), this.meta.MajorKey(data1.K), []*testDataQPop{}))
+	this.True(trials.MongoEqual[QueueData[testDataQPop]](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data1.K), &QueueData[testDataQPop]{}))
 
-	target = &QPopAll[dataQPopAll]{MinorEnable: true, Meta: nil, Key: data1.K}
+	target = &QPopAll[testDataQPopAll]{MinorEnable: true, Meta: nil, Key: data1.K}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 
-	target = &QPopAll[dataQPopAll]{MinorEnable: true, Meta: &this.meta, Key: ""}
+	target = &QPopAll[testDataQPopAll]{MinorEnable: true, Meta: &this.meta, Key: ""}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 
 	this.meta.table = false
-	target = &QPopAll[dataQPopAll]{MinorEnable: true, Meta: &this.meta, Key: data1.K}
+	target = &QPopAll[testDataQPopAll]{MinorEnable: true, Meta: &this.meta, Key: data1.K}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 }
 
-type metaQPopAll struct {
+type testMetaQPopAll struct {
 	table bool
 }
 
-func (this *metaQPopAll) MajorKey(key any) string {
+func (this *testMetaQPopAll) MajorKey(key any) string {
 	return fmt.Sprintf("cmdqpopall:%v", key)
 }
 
-func (this *metaQPopAll) MinorKey(key any) string {
+func (this *testMetaQPopAll) MinorKey(key any) string {
 	return fmt.Sprintf("%v", key)
 }
 
-func (this *metaQPopAll) MinorTable() string {
+func (this *testMetaQPopAll) MinorTable() string {
 	if this.table {
 		return "cmdqpopall"
 	} // if
@@ -108,7 +109,7 @@ func (this *metaQPopAll) MinorTable() string {
 	return ""
 }
 
-type dataQPopAll struct {
+type testDataQPopAll struct {
 	K string `bson:"k"`
 	D string `bson:"d"`
 }

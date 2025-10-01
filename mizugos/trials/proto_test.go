@@ -3,12 +3,11 @@ package trials
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/yinweli/Mizugo/mizugos/msgs"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/msgs"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestProto(t *testing.T) {
@@ -20,14 +19,14 @@ type SuiteProto struct {
 }
 
 func (this *SuiteProto) TestProtoEqual() {
-	assert.True(this.T(), ProtoEqual(&msgs.ProtoTest{Data: testdata.Unknown}, &msgs.ProtoTest{Data: testdata.Unknown}))
-	assert.False(this.T(), ProtoEqual(&msgs.ProtoTest{Data: testdata.Unknown}, &msgs.ProtoTest{}))
-	assert.False(this.T(), ProtoEqual(&msgs.ProtoTest{}, testdata.Unknown))
-	assert.False(this.T(), ProtoEqual(testdata.Unknown, &msgs.ProtoTest{}))
+	this.True(ProtoEqual(&msgs.ProtoTest{Data: testdata.Unknown}, &msgs.ProtoTest{Data: testdata.Unknown}))
+	this.False(ProtoEqual(&msgs.ProtoTest{Data: testdata.Unknown}, &msgs.ProtoTest{}))
+	this.False(ProtoEqual(&msgs.ProtoTest{}, testdata.Unknown))
+	this.False(ProtoEqual(testdata.Unknown, &msgs.ProtoTest{}))
 }
 
 func (this *SuiteProto) TestProtoListEqual() {
-	assert.True(this.T(), ProtoListEqual(
+	this.True(ProtoListEqual(
 		[]*msgs.ProtoTest{
 			{Data: ""},
 			{Data: "12345"},
@@ -37,8 +36,9 @@ func (this *SuiteProto) TestProtoListEqual() {
 			{Data: ""},
 			{Data: "12345"},
 			{Data: testdata.Unknown},
-		}))
-	assert.False(this.T(), ProtoListEqual(
+		},
+	))
+	this.False(ProtoListEqual(
 		[]*msgs.ProtoTest{
 			{Data: ""},
 			{Data: "12345"},
@@ -47,61 +47,85 @@ func (this *SuiteProto) TestProtoListEqual() {
 		[]*msgs.ProtoTest{
 			{Data: ""},
 			{Data: "12345"},
-		}))
-	assert.False(this.T(), ProtoListEqual(
+		},
+	))
+	this.False(ProtoListEqual(
 		[]string{
-			testdata.Unknown,
+			testdata.Unknown + "expected",
 		},
 		[]string{
-			"12345",
-		}))
+			testdata.Unknown + "actual",
+		},
+	))
 }
 
-func (this *SuiteProto) TestProtoListContain() {
-	assert.True(this.T(), ProtoListContain(&msgs.ProtoTest{Data: testdata.Unknown}, []*msgs.ProtoTest{
-		nil,
+func (this *SuiteProto) TestProtoListMatch() {
+	this.True(ProtoListMatch(
+		[]*msgs.ProtoTest{
+			{Data: ""},
+			{Data: "12345"},
+			{Data: testdata.Unknown},
+		},
+		[]*msgs.ProtoTest{
+			{Data: ""},
+			{Data: "12345"},
+			{Data: testdata.Unknown},
+		},
+	))
+	this.True(ProtoListMatch(
+		[]*msgs.ProtoTest{
+			{Data: ""},
+			{Data: "12345"},
+			{Data: testdata.Unknown},
+		},
+		[]*msgs.ProtoTest{
+			{Data: testdata.Unknown},
+			{Data: "12345"},
+			{Data: ""},
+		},
+	))
+	this.False(ProtoListMatch(
+		[]*msgs.ProtoTest{
+			{Data: ""},
+			{Data: "12345"},
+			{Data: testdata.Unknown},
+		},
+		[]*msgs.ProtoTest{
+			{Data: ""},
+			{Data: "12345"},
+		},
+	))
+	this.False(ProtoListMatch(
+		[]string{
+			testdata.Unknown + "expected",
+		},
+		[]string{
+			testdata.Unknown + "actual",
+		},
+	))
+}
+
+func (this *SuiteProto) TestProtoListHasData() {
+	this.True(ProtoListHasData(&msgs.ProtoTest{Data: testdata.Unknown}, []*msgs.ProtoTest{
 		{Data: ""},
 		{Data: "12345"},
 		{Data: testdata.Unknown},
 	}))
-	assert.False(this.T(), ProtoListContain(&msgs.ProtoTest{Data: testdata.Unknown}, []*msgs.ProtoTest{
-		nil,
+	this.False(ProtoListHasData(&msgs.ProtoTest{Data: testdata.Unknown}, []*msgs.ProtoTest{
 		{Data: ""},
 		{Data: "12345"},
 	}))
-	assert.False(this.T(), ProtoListContain(&msgs.ProtoTest{Data: testdata.Unknown}, []string{
+	this.False(ProtoListHasData(&msgs.ProtoTest{Data: testdata.Unknown}, []string{
 		testdata.Unknown,
 	}))
-	assert.False(this.T(), ProtoListContain(testdata.Unknown, []*msgs.ProtoTest{
+	this.False(ProtoListHasData(testdata.Unknown, []*msgs.ProtoTest{
 		nil,
 		{Data: ""},
 		{Data: "12345"},
 	}))
 }
 
-func (this *SuiteProto) TestProtoListMatch() {
-	assert.True(this.T(), ProtoListMatch(
-		[]*msgs.ProtoTest{
-			{Data: testdata.Unknown},
-		},
-		[]*msgs.ProtoTest{
-			nil,
-			{Data: ""},
-			{Data: "12345"},
-			{Data: testdata.Unknown},
-		}))
-	assert.False(this.T(), ProtoListMatch(
-		[]*msgs.ProtoTest{
-			{Data: testdata.Unknown},
-		},
-		[]*msgs.ProtoTest{
-			nil,
-			{Data: ""},
-			{Data: "12345"},
-		}))
-}
-
-func (this *SuiteProto) TestProtoListExist() {
-	assert.True(this.T(), ProtoListExist((*msgs.ProtoTest)(nil), []proto.Message{&msgs.ProtoTest{}}))
-	assert.False(this.T(), ProtoListExist((*msgs.Proto)(nil), []proto.Message{&msgs.ProtoTest{}}))
+func (this *SuiteProto) TestProtoListHasType() {
+	this.True(ProtoListHasType((*msgs.ProtoTest)(nil), []proto.Message{&msgs.ProtoTest{}}))
+	this.False(ProtoListHasType((*msgs.Proto)(nil), []proto.Message{&msgs.ProtoTest{}}))
 }

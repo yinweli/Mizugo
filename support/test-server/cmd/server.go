@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/support/test-server/internal/entrys"
-	"github.com/yinweli/Mizugo/support/test-server/internal/features"
+	"github.com/yinweli/Mizugo/v2/mizugos"
+	"github.com/yinweli/Mizugo/v2/support/test-server/internal/entrys"
+	"github.com/yinweli/Mizugo/v2/support/test-server/internal/features"
 )
 
 func main() {
@@ -27,11 +27,6 @@ func main() {
 	} // if
 
 	if err = features.LoggerInitialize(); err != nil {
-		fmt.Println(err)
-		return
-	} // if
-
-	if err = features.MetricsInitialize(); err != nil {
 		fmt.Println(err)
 		return
 	} // if

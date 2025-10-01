@@ -3,13 +3,12 @@ package helps
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/protobuf/types/known/anypb"
 
-	"github.com/yinweli/Mizugo/mizugos/msgs"
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/msgs"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestProto(t *testing.T) {
@@ -30,28 +29,31 @@ func (this *SuiteProto) TearDownSuite() {
 }
 
 func (this *SuiteProto) TestToProtoAny() {
-	result, err := ToProtoAny(&msgs.ProtoTest{}, &msgs.ProtoTest{}, &msgs.ProtoTest{})
-	assert.Nil(this.T(), err)
-	assert.Len(this.T(), result, 3)
+	target, err := ToProtoAny(&msgs.ProtoTest{}, &msgs.ProtoTest{}, &msgs.ProtoTest{})
+	this.Nil(err)
+	this.Len(target, 3)
+
 	_, err = ToProtoAny(nil)
-	assert.NotNil(this.T(), err)
+	this.NotNil(err)
 }
 
 func (this *SuiteProto) TestFromProtoAny() {
-	input, _ := anypb.New(&msgs.ProtoTest{
+	message, _ := anypb.New(&msgs.ProtoTest{
 		Data: testdata.Unknown,
 	})
-	output, err := FromProtoAny[msgs.ProtoTest](input)
-	assert.Nil(this.T(), err)
-	assert.NotNil(this.T(), output)
-	assert.Equal(this.T(), testdata.Unknown, output.Data)
-	_, err = FromProtoAny[msgs.ProtoTest](nil)
-	assert.NotNil(this.T(), err)
-	_, err = FromProtoAny[int](input)
-	assert.NotNil(this.T(), err)
+	target, err := FromProtoAny[*msgs.ProtoTest](message)
+	this.Nil(err)
+	this.NotNil(target)
+	this.Equal(testdata.Unknown, target.Data)
+
+	_, err = FromProtoAny[*msgs.ProtoTest](nil)
+	this.NotNil(err)
+
+	_, err = FromProtoAny[*msgs.Proto](message)
+	this.NotNil(err)
 }
 
 func (this *SuiteProto) TestProtoString() {
-	assert.NotNil(this.T(), ProtoString(&msgs.ProtoTest{}))
-	assert.NotNil(this.T(), ProtoString(nil))
+	this.NotEmpty(ProtoString(&msgs.ProtoTest{}))
+	this.NotEmpty(ProtoString(nil))
 }

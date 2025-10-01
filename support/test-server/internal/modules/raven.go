@@ -3,11 +3,11 @@ package modules
 import (
 	"fmt"
 
-	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
-	"github.com/yinweli/Mizugo/support/test-server/internal/features"
-	"github.com/yinweli/Mizugo/support/test-server/msgs"
+	"github.com/yinweli/Mizugo/v2/mizugos/entitys"
+	"github.com/yinweli/Mizugo/v2/mizugos/procs"
+	"github.com/yinweli/Mizugo/v2/support/test-server/internal/defines"
+	"github.com/yinweli/Mizugo/v2/support/test-server/internal/features"
+	"github.com/yinweli/Mizugo/v2/support/test-server/msgs"
 )
 
 // NewRaven 建立Raven模組
@@ -32,9 +32,7 @@ func (this *Raven) Awake() error {
 
 // procMRavenQ 處理要求Raven
 func (this *Raven) procMRavenQ(message any) {
-	rec := features.MeterRaven.Rec()
-	defer rec()
-	raven, err := procs.RavenSParser[msgs.HRaven, msgs.MRavenQ](message)
+	raven, err := procs.RavenSParser[*msgs.HRaven, *msgs.MRavenQ](message)
 
 	if err != nil {
 		this.sendMRavenA(nil, nil, msgs.ErrID_RavenUnmarshal, 0)

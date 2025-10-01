@@ -6,7 +6,12 @@ import (
 	"fmt"
 )
 
-// NewDesCBC 建立des-cbc加密/解密器
+// NewDesCBC 建立 DES-CBC 編碼/解碼器
+//
+// 參數:
+//   - padding: 填充模式(Zero padding 或 PKCS7 padding)
+//   - key: 密鑰字串, 長度必須等於 DesKeySize
+//   - iv: 初始化向量, 長度必須等於 DesKeySize
 func NewDesCBC(padding Padding, key, iv string) *DesCBC {
 	return &DesCBC{
 		padding: padding,
@@ -15,14 +20,14 @@ func NewDesCBC(padding Padding, key, iv string) *DesCBC {
 	}
 }
 
-// DesCBC des-cbc加密/解密器
+// DesCBC DES-CBC 編碼/解碼器
 type DesCBC struct {
 	padding Padding // 填充模式
 	key     []byte  // 密鑰, 長度必須是 DesKeySize
-	iv      []byte  // 向量值
+	iv      []byte  // 初始化向量
 }
 
-// Encode 加密
+// Encode 編碼
 func (this *DesCBC) Encode(input any) (output any, err error) {
 	if len(this.key) != DesKeySize {
 		return nil, fmt.Errorf("des-cbc encode: key len must %v", DesKeySize)
@@ -58,14 +63,17 @@ func (this *DesCBC) Encode(input any) (output any, err error) {
 		return nil, fmt.Errorf("des-cbc encode: iv len must %v", blockSize)
 	} // if
 
-	source = pad(this.padding, source, blockSize)
-	target := make([]byte, len(source))
+	if source, err = pad(this.padding, source, blockSize); err != nil {
+		return nil, fmt.Errorf("des-cbc encode: %w", err)
+	} // if
+
+	result := make([]byte, len(source))
 	encrypter := cipher.NewCBCEncrypter(block, this.iv)
-	encrypter.CryptBlocks(target, source)
-	return target, nil
+	encrypter.CryptBlocks(result, source)
+	return result, nil
 }
 
-// Decode 解密
+// Decode 解碼
 func (this *DesCBC) Decode(input any) (output any, err error) {
 	if len(this.key) != DesKeySize {
 		return nil, fmt.Errorf("des-cbc decode: key len must %v", DesKeySize)
@@ -105,9 +113,13 @@ func (this *DesCBC) Decode(input any) (output any, err error) {
 		return nil, fmt.Errorf("des-cbc decode: src not full blocks")
 	} // if
 
-	target := make([]byte, len(source))
+	result := make([]byte, len(source))
 	decrypter := cipher.NewCBCDecrypter(block, this.iv)
-	decrypter.CryptBlocks(target, source)
-	target = unpad(this.padding, target)
-	return target, nil
+	decrypter.CryptBlocks(result, source)
+
+	if result, err = unpad(this.padding, result); err != nil {
+		return nil, fmt.Errorf("des-cbc decode: %w", err)
+	} // if
+
+	return result, nil
 }

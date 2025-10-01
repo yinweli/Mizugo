@@ -3,11 +3,10 @@ package entitys
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestModule(t *testing.T) {
@@ -29,10 +28,10 @@ func (this *SuiteModule) TearDownSuite() {
 
 func (this *SuiteModule) TestModule() {
 	target := NewModule(ModuleID(1))
-	assert.NotNil(this.T(), target)
+	this.NotNil(target)
 	entity := NewEntity(EntityID(1))
 	target.initialize(entity)
 
-	assert.Equal(this.T(), ModuleID(1), target.ModuleID())
-	assert.Equal(this.T(), entity, target.Entity())
+	this.Equal(ModuleID(1), target.ModuleID())
+	this.Equal(entity, target.Entity())
 }

@@ -59,15 +59,15 @@ func (this *Entitymgr) Get(entityID EntityID) *Entity {
 // All 取得實體列表
 func (this *Entitymgr) All() []*Entity {
 	this.lock.RLock()
-	defer this.lock.RUnlock()
 	result := []*Entity{}
 
 	for _, itor := range this.data {
 		result = append(result, itor)
 	} // for
 
-	sort.Slice(result, func(r, l int) bool {
-		return result[r].EntityID() < result[l].EntityID()
+	this.lock.RUnlock()
+	sort.Slice(result, func(l, r int) bool {
+		return result[l].EntityID() < result[r].EntityID()
 	})
 	return result
 }

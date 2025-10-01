@@ -11,21 +11,29 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// GetEx 取值並設定逾期時間行為, 以索引值到主要/次要資料庫中取得資料, 主要資料庫中的資料將會有逾期時間, 使用上有以下幾點須注意
-//   - 泛型類型T必須是結構, 並且不能是指標
-//   - 資料結構的成員都需要設定好`bson:xxxxx`屬性
-//   - 執行前設定好 MajorEnable, MinorEnable
-//   - 執行前設定好 Meta, 這需要事先建立好與 Metaer 介面符合的元資料結構
-//   - 執行前設定好 Expire, 若不設置或是設置為0表示不逾期, 如果設為-1或是 RedisTTL 則表示不更動逾期時間
-//   - 執行前設定好 Key 並且不能為空字串
-//   - 執行前設定好 Data, 如果為nil, 則內部程序會自己建立
-//   - 執行後可用 Data 來取得資料
+// GetEx 取值(並可設定逾期)行為
+//
+// 以索引鍵(Key)讀取主要資料庫與/或次要資料庫中的資料;
+// 若主要資料庫(快取層)命中則直接回傳, 否則回落至次要資料庫(持久層)查詢;
+// 讀取主要資料庫時, 可同時調整該鍵的逾期時間(TTL)
+//
+// 事前準備:
+//   - 設定 MajorEnable / MinorEnable: 指示要作用的層
+//   - 設定 Meta: 需為符合 Metaer 介面的元資料物件(提供 MajorKey/MinorKey/MinorTable)
+//   - 設定 Expire: 0 → 表示「不逾期」, RedisTTL → 表示「不更動逾期時間」, > 0 表示「設定新的逾期時間」
+//   - 設定 Key: 不可為空字串
+//   - (可選)設定 Data: 若為 nil, 執行時會自動建立 *T
+//
+// 注意:
+//   - 本行為僅讀取, 但有可能刷新主要資料庫 TTL
+//   - 泛型 T 應為「值型別的結構(struct)」, 且不要以 *T 作為型別參數
+//   - 若同時啟用 Major 與 Minor, 會先嘗試 Major; 命中即結束, 不再查 Minor
 type GetEx[T any] struct {
 	Behave                       // 行為物件
 	MajorEnable bool             // 啟用主要資料庫
 	MinorEnable bool             // 啟用次要資料庫
 	Meta        Metaer           // 元資料
-	Expire      time.Duration    // 逾期時間, 若為0表示不逾期, 若為-1或是 RedisTTL 則表示不更動逾期時間
+	Expire      time.Duration    // 逾期時間
 	Key         string           // 索引值
 	Data        *T               // 資料物件
 	cmd         *redis.StringCmd // 命令結果
@@ -56,18 +64,18 @@ func (this *GetEx[T]) Prepare() error {
 // Complete 完成處理
 func (this *GetEx[T]) Complete() error {
 	if this.MajorEnable {
-		data, err := this.cmd.Result()
+		result, err := this.cmd.Result()
 
 		if err != nil && errors.Is(err, redis.Nil) == false {
 			return fmt.Errorf("getex complete: %w: %v", err, this.Key)
 		} // if
 
-		if data != RedisNil {
+		if result != RedisNil {
 			if this.Data == nil {
 				this.Data = new(T)
 			} // if
 
-			if err = json.Unmarshal([]byte(data), this.Data); err != nil {
+			if err = json.Unmarshal([]byte(result), this.Data); err != nil {
 				return fmt.Errorf("getex complete: %w: %v", err, this.Key)
 			} // if
 

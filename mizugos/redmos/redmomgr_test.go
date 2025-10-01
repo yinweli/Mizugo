@@ -3,11 +3,10 @@ package redmos
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestRedmomgr(t *testing.T) {
@@ -28,47 +27,54 @@ func (this *SuiteRedmomgr) TearDownSuite() {
 }
 
 func (this *SuiteRedmomgr) TestRedmomgr() {
-	dbName := "dbName"
-	majorName := "majorName"
-	minorName := "minorName"
-	mixedName := "mixedName"
-	unknownName := "unknown"
 	target := NewRedmomgr()
-	assert.NotNil(this.T(), target)
+	this.NotNil(target)
+}
 
-	major, err := target.AddMajor(majorName, testdata.RedisURI)
-	assert.Nil(this.T(), err)
-	assert.NotNil(this.T(), major)
-	_, err = target.AddMajor(majorName, testdata.RedisURI)
-	assert.NotNil(this.T(), err)
-	_, err = target.AddMajor(unknownName, testdata.RedisURIInvalid)
-	assert.NotNil(this.T(), err)
-	assert.NotNil(this.T(), target.GetMajor(majorName))
-	assert.Nil(this.T(), target.GetMajor(unknownName))
+func (this *SuiteRedmomgr) TestMajor() {
+	target := NewRedmomgr()
+	major, err := target.AddMajor("major", testdata.RedisURI)
+	this.Nil(err)
+	this.NotNil(major)
+	this.NotNil(target.GetMajor("major"))
+	_, err = target.AddMajor("major", testdata.RedisURI)
+	this.NotNil(err)
+	_, err = target.AddMajor(testdata.Unknown, testdata.RedisURIInvalid)
+	this.NotNil(err)
+	this.Nil(target.GetMajor(testdata.Unknown))
+	target.Finalize()
+}
 
-	minor, err := target.AddMinor(minorName, testdata.MongoURI, dbName)
-	assert.Nil(this.T(), err)
-	assert.NotNil(this.T(), minor)
-	_, err = target.AddMinor(minorName, testdata.MongoURI, dbName)
-	assert.NotNil(this.T(), err)
-	_, err = target.AddMinor(minorName, testdata.MongoURI, "")
-	assert.NotNil(this.T(), err)
-	_, err = target.AddMinor(unknownName, testdata.MongoURIInvalid, dbName)
-	assert.NotNil(this.T(), err)
-	assert.NotNil(this.T(), target.GetMinor(minorName))
-	assert.Nil(this.T(), target.GetMinor(unknownName))
+func (this *SuiteRedmomgr) TestMinor() {
+	target := NewRedmomgr()
+	minor, err := target.AddMinor("minor", testdata.MongoURI, "dbName")
+	this.Nil(err)
+	this.NotNil(minor)
+	this.NotNil(target.GetMinor("minor"))
+	_, err = target.AddMinor("minor", testdata.MongoURI, "dbName")
+	this.NotNil(err)
+	_, err = target.AddMinor(testdata.Unknown, testdata.MongoURI, "")
+	this.NotNil(err)
+	_, err = target.AddMinor(testdata.Unknown, testdata.MongoURIInvalid, "dbName")
+	this.NotNil(err)
+	this.Nil(target.GetMinor(testdata.Unknown))
+	target.Finalize()
+}
 
-	mixed, err := target.AddMixed(mixedName, majorName, minorName)
-	assert.Nil(this.T(), err)
-	assert.NotNil(this.T(), mixed)
-	_, err = target.AddMixed(mixedName, majorName, minorName)
-	assert.NotNil(this.T(), err)
-	_, err = target.AddMixed(unknownName, majorName, unknownName)
-	assert.NotNil(this.T(), err)
-	_, err = target.AddMixed(unknownName, unknownName, minorName)
-	assert.NotNil(this.T(), err)
-	assert.NotNil(this.T(), target.GetMixed(mixedName))
-	assert.Nil(this.T(), target.GetMixed(unknownName))
-
+func (this *SuiteRedmomgr) TestMixed() {
+	target := NewRedmomgr()
+	_, _ = target.AddMajor("major", testdata.RedisURI)
+	_, _ = target.AddMinor("minor", testdata.MongoURI, "dbName")
+	mixed, err := target.AddMixed("mixed", "major", "minor")
+	this.Nil(err)
+	this.NotNil(mixed)
+	this.NotNil(target.GetMixed("mixed"))
+	_, err = target.AddMixed("mixed", testdata.Unknown, testdata.Unknown)
+	this.NotNil(err)
+	_, err = target.AddMixed(testdata.Unknown, "major", testdata.Unknown)
+	this.NotNil(err)
+	_, err = target.AddMixed(testdata.Unknown, testdata.Unknown, "minor")
+	this.NotNil(err)
+	this.Nil(target.GetMixed(testdata.Unknown))
 	target.Finalize()
 }

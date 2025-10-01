@@ -3,8 +3,8 @@ package features
 import (
 	"fmt"
 
-	"github.com/yinweli/Mizugo/mizugos"
-	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
+	"github.com/yinweli/Mizugo/v2/mizugos"
+	"github.com/yinweli/Mizugo/v2/support/test-client-go/internal/defines"
 )
 
 // ConfigInitialize 初始化配置

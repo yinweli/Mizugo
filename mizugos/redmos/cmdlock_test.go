@@ -7,11 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestCmdLock(t *testing.T) {
@@ -41,30 +40,36 @@ func (this *SuiteCmdLock) TearDownSuite() {
 
 func (this *SuiteCmdLock) TestLock() {
 	majorSubmit := this.major.Submit()
-	key := "lock"
-
-	lock := &Lock{Key: key, time: testdata.RedisTimeout}
+	lock := &Lock{Key: "lock", Token: testdata.Unknown, ttl: testdata.RedisTimeout}
 	lock.Initialize(context.Background(), majorSubmit, nil)
-	unlock := &Unlock{Key: key}
+	unlock := &Unlock{Key: "lock", Token: testdata.Unknown}
 	unlock.Initialize(context.Background(), majorSubmit, nil)
 
-	assert.Nil(this.T(), lock.Prepare())
+	this.Nil(lock.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), lock.Complete())
+	this.Nil(lock.Complete())
 
-	assert.Nil(this.T(), lock.Prepare())
+	this.Nil(lock.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.NotNil(this.T(), lock.Complete())
+	this.NotNil(lock.Complete())
 
-	assert.Nil(this.T(), unlock.Prepare())
+	this.Nil(unlock.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), unlock.Complete())
+	this.Nil(unlock.Complete())
 
 	lock.Key = ""
-	assert.NotNil(this.T(), lock.Prepare())
+	this.NotNil(lock.Prepare())
+
+	lock.Key = "lock"
+	lock.Token = ""
+	this.NotNil(lock.Prepare())
 
 	unlock.Key = ""
-	assert.NotNil(this.T(), unlock.Prepare())
+	this.NotNil(unlock.Prepare())
+
+	unlock.Key = "lock"
+	unlock.Token = ""
+	this.NotNil(unlock.Prepare())
 }
 
 func (this *SuiteCmdLock) TestDuplicate() {
@@ -76,8 +81,9 @@ func (this *SuiteCmdLock) TestDuplicate() {
 
 	go func() {
 		defer waitGroup.Done()
+		token := time.Now().Format("20060102150405.000000000")
 		majorSubmit := this.major.Submit()
-		lock := &Lock{Key: key, time: testdata.RedisTimeout}
+		lock := &Lock{Key: key, Token: token, ttl: testdata.RedisTimeout}
 		lock.Initialize(context.Background(), majorSubmit, nil)
 		_ = lock.Prepare()
 		_, _ = majorSubmit.Exec(context.Background())
@@ -88,7 +94,7 @@ func (this *SuiteCmdLock) TestDuplicate() {
 
 		trials.WaitTimeout(time.Second)
 
-		unlock := &Unlock{Key: key}
+		unlock := &Unlock{Key: key, Token: token}
 		unlock.Initialize(context.Background(), majorSubmit, nil)
 		_ = unlock.Prepare()
 		_, _ = majorSubmit.Exec(context.Background())
@@ -101,8 +107,9 @@ func (this *SuiteCmdLock) TestDuplicate() {
 			trials.WaitTimeout()
 
 			for i := 0; i < 100; i++ {
+				token := time.Now().Format("20060102150405.000000000")
 				majorSubmit := this.major.Submit()
-				lock := &Lock{Key: key, time: testdata.RedisTimeout}
+				lock := &Lock{Key: key, Token: token, ttl: testdata.RedisTimeout}
 				lock.Initialize(context.Background(), majorSubmit, nil)
 				_ = lock.Prepare()
 				_, _ = majorSubmit.Exec(context.Background())
@@ -114,7 +121,7 @@ func (this *SuiteCmdLock) TestDuplicate() {
 
 				total.Add(1)
 
-				unlock := &Unlock{Key: key}
+				unlock := &Unlock{Key: key, Token: token}
 				unlock.Initialize(context.Background(), majorSubmit, nil)
 				_ = unlock.Prepare()
 				_, _ = majorSubmit.Exec(context.Background())
@@ -124,5 +131,5 @@ func (this *SuiteCmdLock) TestDuplicate() {
 	} // for
 
 	waitGroup.Wait()
-	assert.Zero(this.T(), total.Load())
+	this.Zero(total.Load())
 }

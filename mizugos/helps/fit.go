@@ -1,24 +1,38 @@
 package helps
 
 // NewFit 建立數值檢測資料
-func NewFit[T int | int32 | int64](maxCap, minCap FitCap[T]) *Fit[T] {
+func NewFit[T ~int | ~int32 | ~int64](maximum, minimum func() T) *Fit[T] {
 	return &Fit[T]{
-		maxCap: maxCap,
-		minCap: minCap,
+		maximum: maximum,
+		minimum: minimum,
 	}
 }
 
 // Fit 數值檢測資料
-type Fit[T int | int32 | int64] struct {
-	maxCap FitCap[T] // 取得最大值函式
-	minCap FitCap[T] // 取得最小值函式
+//
+// 適用於有「上下限」概念的數值(如血量、能量、經驗值), 透過 maximum / minimum 函式動態提供上下界
+//
+// 當沒有提供 maximum / minimum 時, 會以 0 為預設值
+type Fit[T ~int | ~int32 | ~int64] struct {
+	maximum func() T // 取得最大值函式
+	minimum func() T // 取得最小值函式
 }
 
-// Check 數值檢測
+// Check 檢測數值範圍, 並計算調整後的結果
+//
+// 計算方式:
 //   - 輸入值 = source + sum(modify...)
-//   - 當輸入值在範圍時: result = 輸入值, remain = 0
-//   - 當輸入值大於上限時: result = 上限值, remain = 溢出值(正值), added = 增加值
-//   - 當輸入值小於下限時: result = 下限值, remain = 溢出值(負值), added = 增加值
+//   - 若輸入值在 [minimum, maximum] 之間:
+//     result = 輸入值, remain = 0, added = 輸入值 - source
+//   - 若輸入值 > maximum:
+//     result = maximum, remain = 輸入值 - maximum (正值), added = maximum - source
+//   - 若輸入值 < minimum:
+//     result = minimum, remain = 輸入值 - minimum (負值), added = minimum - source
+//
+// 回傳值:
+//   - result: 實際落在範圍內的值
+//   - remain: 超出範圍的溢出量(大於上限時為正, 小於下限時為負)
+//   - added : 相對於原始 source 的淨增減量(即 result - source)
 func (this *Fit[T]) Check(source T, modify ...T) (result, remain, added T) {
 	fin := int64(source)
 
@@ -26,8 +40,17 @@ func (this *Fit[T]) Check(source T, modify ...T) (result, remain, added T) {
 		fin += int64(itor)
 	} // for
 
-	valueMax := int64(this.maxCap.do())
-	valueMin := int64(this.minCap.do())
+	valueMax := int64(0)
+
+	if this.maximum != nil {
+		valueMax = int64(this.maximum())
+	} // if
+
+	valueMin := int64(0)
+
+	if this.minimum != nil {
+		valueMin = int64(this.minimum())
+	} // if
 
 	if fin > valueMax {
 		return T(valueMax), T(fin - valueMax), T(valueMax) - source
@@ -38,16 +61,4 @@ func (this *Fit[T]) Check(source T, modify ...T) (result, remain, added T) {
 	} // if
 
 	return T(fin), 0, T(fin) - source
-}
-
-// FitCap 數值限制函式類型
-type FitCap[T int | int32 | int64] func() T
-
-// do 執行數值限制函式
-func (this FitCap[T]) do() T {
-	if this != nil {
-		return this()
-	} // if
-
-	return 0
 }

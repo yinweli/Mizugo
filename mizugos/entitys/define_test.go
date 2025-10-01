@@ -5,17 +5,17 @@ import (
 	"sync/atomic"
 )
 
-// newModuleTester 建立模組測試器
-func newModuleTester(awake, start bool, moduleID ModuleID) *moduleTester {
-	return &moduleTester{
+// newTestModule 建立模組測試器
+func newTestModule(awake, start bool, moduleID ModuleID) *testModule {
+	return &testModule{
 		Module: NewModule(moduleID),
 		awake:  awake,
 		start:  start,
 	}
 }
 
-// moduleTester 模組測試器
-type moduleTester struct {
+// testModule 模組測試器
+type testModule struct {
 	*Module
 	awake      bool
 	start      bool
@@ -23,7 +23,7 @@ type moduleTester struct {
 	startCount atomic.Int64
 }
 
-func (this *moduleTester) Awake() error {
+func (this *testModule) Awake() error {
 	this.awakeCount.Add(1)
 
 	if this.awake {
@@ -33,7 +33,7 @@ func (this *moduleTester) Awake() error {
 	} // if
 }
 
-func (this *moduleTester) Start() error {
+func (this *testModule) Start() error {
 	this.startCount.Add(1)
 
 	if this.start {

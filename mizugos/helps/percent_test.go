@@ -4,11 +4,10 @@ import (
 	"math"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestPercent(t *testing.T) {
@@ -30,56 +29,97 @@ func (this *SuitePercent) TearDownSuite() {
 
 func (this *SuitePercent) TestPercent() {
 	target := NewP100()
-	assert.NotNil(this.T(), target)
-	assert.Equal(this.T(), int32(100), target.Base())
+	this.NotNil(target)
+	this.Equal(PercentRatio100, target.Base())
 
 	target = NewP1K()
-	assert.NotNil(this.T(), target)
-	assert.Equal(this.T(), int32(1000), target.Base())
+	this.NotNil(target)
+	this.Equal(PercentRatio1K, target.Base())
 
 	target = NewP10K()
-	assert.NotNil(this.T(), target)
-	assert.Equal(this.T(), int32(10000), target.Base())
+	this.NotNil(target)
+	this.Equal(PercentRatio10K, target.Base())
+}
 
-	target = NewP100()
-	assert.NotNil(this.T(), target.Set(10))
-	assert.Equal(this.T(), int32(10), target.Get())
-	assert.NotNil(this.T(), target.SetBase())
-	assert.Equal(this.T(), int32(100), target.Get())
-	assert.NotNil(this.T(), target.Add(5))
-	assert.NotNil(this.T(), target.Del(5))
-	assert.NotNil(this.T(), target.Mul(2))
-	assert.NotNil(this.T(), target.Div(2))
-	assert.NotNil(this.T(), target.Div(0))
-	assert.Equal(this.T(), int32(100), target.Get())
+func (this *SuitePercent) TestSet() {
+	target := NewP100()
+	this.NotNil(target.Set(1))
+	this.Equal(int32(1), target.Get())
+	this.NotNil(target.SetBase())
+	this.Equal(PercentRatio100, target.Get())
+}
 
-	target = NewP100()
-	assert.NotNil(this.T(), target.Set(10))
-	assert.Equal(this.T(), 6, target.Calc(55, math.Round))
-	assert.Equal(this.T(), 6, target.Calc(55, math.Ceil))
-	assert.Equal(this.T(), 5, target.Calc(55, math.Floor))
-	assert.Equal(this.T(), 8, target.Calc(75, math.Round))
-	assert.Equal(this.T(), 8, target.Calc(75, math.Ceil))
-	assert.Equal(this.T(), 7, target.Calc(75, math.Floor))
-	assert.Equal(this.T(), 20000000, target.Calc(200000000, math.Round))
-	assert.Equal(this.T(), int32(6), target.Calc32(55, math.Round))
-	assert.Equal(this.T(), int32(6), target.Calc32(55, math.Ceil))
-	assert.Equal(this.T(), int32(5), target.Calc32(55, math.Floor))
-	assert.Equal(this.T(), int32(8), target.Calc32(75, math.Round))
-	assert.Equal(this.T(), int32(8), target.Calc32(75, math.Ceil))
-	assert.Equal(this.T(), int32(7), target.Calc32(75, math.Floor))
-	assert.Equal(this.T(), int32(20000000), target.Calc32(200000000, math.Round))
-	assert.Equal(this.T(), int64(6), target.Calc64(55, math.Round))
-	assert.Equal(this.T(), int64(6), target.Calc64(55, math.Ceil))
-	assert.Equal(this.T(), int64(5), target.Calc64(55, math.Floor))
-	assert.Equal(this.T(), int64(8), target.Calc64(75, math.Round))
-	assert.Equal(this.T(), int64(8), target.Calc64(75, math.Ceil))
-	assert.Equal(this.T(), int64(7), target.Calc64(75, math.Floor))
-	assert.Equal(this.T(), int64(20000000), target.Calc64(200000000, math.Round))
+func (this *SuitePercent) TestAdd() {
+	target := NewP100()
+	this.NotNil(target.Add(1))
+	this.Equal(int32(1), target.Get())
+}
+
+func (this *SuitePercent) TestSub() {
+	target := NewP100()
+	this.NotNil(target.Set(1))
+	this.NotNil(target.Sub(1))
+	this.Zero(target.Get())
+}
+
+func (this *SuitePercent) TestMul() {
+	target := NewP100()
+	this.NotNil(target.Set(1))
+	this.NotNil(target.Mul(2))
+	this.Equal(int32(2), target.Get())
+}
+
+func (this *SuitePercent) TestDiv() {
+	target := NewP100()
+	this.NotNil(target.Set(1))
+	this.NotNil(target.Div(1))
+	this.NotNil(target.Div(0))
+	this.Equal(int32(1), target.Get())
+}
+
+func (this *SuitePercent) TestCalc() {
+	target := NewP100()
+	this.NotNil(target.Set(10))
+	this.Equal(6, target.Calc(55, math.Round))
+	this.Equal(6, target.Calc(55, math.Ceil))
+	this.Equal(5, target.Calc(55, math.Floor))
+	this.Equal(8, target.Calc(75, math.Round))
+	this.Equal(8, target.Calc(75, math.Ceil))
+	this.Equal(7, target.Calc(75, math.Floor))
+	this.Equal(20000000, target.Calc(200000000, math.Round))
+}
+
+func (this *SuitePercent) TestCalc32() {
+	target := NewP100()
+	this.NotNil(target.Set(10))
+	this.Equal(int32(6), target.Calc32(55, math.Round))
+	this.Equal(int32(6), target.Calc32(55, math.Ceil))
+	this.Equal(int32(5), target.Calc32(55, math.Floor))
+	this.Equal(int32(8), target.Calc32(75, math.Round))
+	this.Equal(int32(8), target.Calc32(75, math.Ceil))
+	this.Equal(int32(7), target.Calc32(75, math.Floor))
+	this.Equal(int32(20000000), target.Calc32(200000000, math.Round))
+}
+
+func (this *SuitePercent) TestCalc64() {
+	target := NewP100()
+	this.NotNil(target.Set(10))
+	this.Equal(int64(6), target.Calc64(55, math.Round))
+	this.Equal(int64(6), target.Calc64(55, math.Ceil))
+	this.Equal(int64(5), target.Calc64(55, math.Floor))
+	this.Equal(int64(8), target.Calc64(75, math.Round))
+	this.Equal(int64(8), target.Calc64(75, math.Ceil))
+	this.Equal(int64(7), target.Calc64(75, math.Floor))
+	this.Equal(int64(20000000), target.Calc64(200000000, math.Round))
+}
+
+func (this *SuitePercent) TestCalculate() {
+	target := NewPercent(1)
+	this.Zero(target.calculate(1, math.Round))
 
 	target = NewPercent(0)
-	assert.Zero(this.T(), target.calc(float64(1), math.Round))
+	this.Zero(target.calculate(1, math.Round))
 
 	target = NewPercent(1)
-	assert.Zero(this.T(), target.calc(float64(1), nil))
+	this.Zero(target.calculate(1, nil))
 }

@@ -4,11 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestCmdIndex(t *testing.T) {
@@ -42,27 +41,27 @@ func (this *SuiteCmdIndex) TestIndex() {
 
 	target := &Index{Name: "index", Table: "cmdindex", Field: "field", Order: 1}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), target.Prepare())
+	this.Nil(target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), target.Complete())
+	this.Nil(target.Complete())
 	_ = minorSubmit.Exec(context.Background())
 
 	target = &Index{Name: "index", Table: "cmdindex", Field: "field", Order: 1}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), target.Prepare())
+	this.Nil(target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), target.Complete())
+	this.Nil(target.Complete())
 	_ = minorSubmit.Exec(context.Background())
 
 	target = &Index{Name: "", Table: "cmdindex", Field: "field", Order: 1}
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 
 	target = &Index{Name: "index", Table: "", Field: "field", Order: 1}
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 
 	target = &Index{Name: "index", Table: "cmdindex", Field: "", Order: 1}
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 
 	target = &Index{Name: "index", Table: "cmdindex", Field: "field", Order: 0}
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 }

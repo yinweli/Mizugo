@@ -8,10 +8,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// Del 刪除行為, 以索引值與資料到主要/次要資料庫中刪除資料, 使用上有以下幾點須注意
-//   - 執行前設定好 MajorEnable, MinorEnable
-//   - 執行前設定好 Meta, 這需要事先建立好與 Metaer 介面符合的元資料結構
-//   - 執行前設定好 Key 並且不能為空字串
+// Del 刪除行為
+//
+// 以索引鍵(Key)刪除主要資料庫與/或次要資料庫的對應紀錄
+//
+// 事前準備:
+//   - 設定 MajorEnable / MinorEnable: 指示要作用的層
+//   - 設定 Meta: 需為符合 Metaer 介面的元資料物件(提供 MajorKey/MinorKey/MinorTable)
+//   - 設定 Key: 不可為空字串
 type Del struct {
 	Behave                    // 行為物件
 	MajorEnable bool          // 啟用主要資料庫

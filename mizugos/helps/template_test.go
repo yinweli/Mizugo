@@ -4,11 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestTemplate(t *testing.T) {
@@ -28,12 +27,10 @@ func (this *SuiteTemplate) TearDownSuite() {
 	trials.Restore(this.Catalog)
 }
 
-func (this *SuiteTemplate) TestWriteTmpl() {
-	blueprint1 := "{{$.Value}}"
-	blueprint2 := "{{{$.Value}}"
+func (this *SuiteTemplate) TestTemplateBuild() {
 	builder := &strings.Builder{}
-	assert.Nil(this.T(), TemplateBuild(blueprint1, builder, map[string]string{"Value": "Value"}))
-	assert.Equal(this.T(), "Value", builder.String())
-	assert.NotNil(this.T(), TemplateBuild(blueprint1, builder, "nothing!"))
-	assert.NotNil(this.T(), TemplateBuild(blueprint2, builder, nil))
+	this.Nil(TemplateBuild("{{$.Value}}", builder, map[string]string{"Value": "Value"}))
+	this.Equal("Value", builder.String())
+	this.NotNil(TemplateBuild("{{$.Value}}", builder, "nothing"))
+	this.NotNil(TemplateBuild("{{{$.Value}}", builder, "syntax error"))
 }

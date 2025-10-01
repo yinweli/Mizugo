@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/helps"
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/helps"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestDesCBC(t *testing.T) {
@@ -31,47 +30,48 @@ func (this *SuiteDesCBC) TearDownSuite() {
 }
 
 func (this *SuiteDesCBC) TestDesCBC() {
-	keyValid := RandDesKeyString()
-	keyInvalid := helps.RandString(15, helps.StrNumberAlpha)
-	ivValid := RandDesKeyString()
-	ivInvalid := ""
-	target := NewDesCBC(PaddingPKCS7, keyValid, ivValid)
-	assert.NotNil(this.T(), target)
+	key1 := RandDesKeyString()
+	key2 := helps.RandString(15, helps.StrNumberAlpha)
+	iv1 := RandDesKeyString()
+	iv2 := ""
+	target := NewDesCBC(PaddingPKCS7, key1, iv1)
+	this.NotNil(target)
 
 	for size := 16; size <= 64; size++ {
 		input := []byte(helps.RandString(size, helps.StrNumberAlpha))
 		crypto, err := target.Encode(input)
-		assert.Nil(this.T(), err)
+		this.Nil(err)
 		output, err := target.Decode(crypto)
-		assert.Nil(this.T(), err)
-		assert.Equal(this.T(), input, output)
+		this.Nil(err)
+		this.Equal(input, output)
 
-		fmt.Printf("----- size: %v -----\n", size)
-		fmt.Printf("input=%v\n", string(input))
-		fmt.Printf("output=%v\n", string(output.([]byte)))
-		fmt.Printf("crypto=%v\n", hex.EncodeToString(crypto.([]byte)))
+		fmt.Printf("size: %v\n", size)
+		fmt.Printf("  input  %v\n", string(input))
+		fmt.Printf("  output %v\n", string(output.([]byte)))
+		fmt.Printf("  crypto %v\n", hex.EncodeToString(crypto.([]byte)))
 	} // for
 
-	_, err := NewDesCBC(PaddingPKCS7, keyInvalid, ivValid).Encode(nil)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesCBC(PaddingPKCS7, keyValid, ivInvalid).Encode(nil)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesCBC(PaddingPKCS7, keyValid, ivValid).Encode(nil)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesCBC(PaddingPKCS7, keyValid, ivValid).Encode(testdata.Unknown)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesCBC(PaddingPKCS7, keyValid, ivValid).Encode([]byte{})
-	assert.NotNil(this.T(), err)
-	_, err = NewDesCBC(PaddingPKCS7, keyInvalid, ivValid).Decode(nil)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesCBC(PaddingPKCS7, keyValid, ivInvalid).Decode(nil)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesCBC(PaddingPKCS7, keyValid, ivValid).Decode(nil)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesCBC(PaddingPKCS7, keyValid, ivValid).Decode(testdata.Unknown)
-	assert.NotNil(this.T(), err)
-	_, err = NewDesCBC(PaddingPKCS7, keyValid, ivValid).Decode([]byte{})
-	assert.NotNil(this.T(), err)
+	_, err := NewDesCBC(PaddingPKCS7, key1, iv1).Encode(nil)
+	this.NotNil(err)
+	_, err = NewDesCBC(PaddingPKCS7, key1, iv2).Encode(nil)
+	this.NotNil(err)
+	_, err = NewDesCBC(PaddingPKCS7, key1, iv1).Encode(testdata.Unknown)
+	this.NotNil(err)
+	_, err = NewDesCBC(PaddingPKCS7, key1, iv1).Encode([]byte{})
+	this.NotNil(err)
+	_, err = NewDesCBC(PaddingPKCS7, key2, iv1).Encode(nil)
+	this.NotNil(err)
+
+	_, err = NewDesCBC(PaddingPKCS7, key1, iv1).Decode(nil)
+	this.NotNil(err)
+	_, err = NewDesCBC(PaddingPKCS7, key1, iv2).Decode(nil)
+	this.NotNil(err)
+	_, err = NewDesCBC(PaddingPKCS7, key1, iv1).Decode(testdata.Unknown)
+	this.NotNil(err)
+	_, err = NewDesCBC(PaddingPKCS7, key1, iv1).Decode([]byte{})
+	this.NotNil(err)
+	_, err = NewDesCBC(PaddingPKCS7, key2, iv1).Decode(nil)
+	this.NotNil(err)
 }
 
 func BenchmarkDesCBCEncode1024(b *testing.B) {

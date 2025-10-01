@@ -4,11 +4,10 @@ import (
 	"net"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestTCPListen(t *testing.T) {
@@ -30,37 +29,37 @@ func (this *SuiteTCPListen) TearDownSuite() {
 
 func (this *SuiteTCPListen) TestTCPListen() {
 	addr := host{port: "9001"}
-	testl := newTester(true, true, true)
+	testl := newTestNet(true, true, true)
 	target := NewTCPListen(addr.ip, addr.port)
-	assert.NotNil(this.T(), target)
+	this.NotNil(target)
 	target.Listen(testl.Bind, testl.Unbind, testl.Wrong)
 
-	testc := newTester(true, true, true)
+	testc := newTestNet(true, true, true)
 	client := NewTCPConnect(addr.ip, addr.port, trials.Timeout)
 	client.Connect(testc.Bind, testc.Unbind, testc.Wrong)
 
 	trials.WaitTimeout()
-	assert.True(this.T(), testl.Valid())
-	assert.True(this.T(), testc.Valid())
+	this.True(testl.Valid())
+	this.True(testc.Valid())
 
 	trials.WaitTimeout()
 	testc.Get().Stop()
-	assert.Nil(this.T(), target.Stop())
+	this.Nil(target.Stop())
 
-	testl = newTester(true, true, true)
+	testl = newTestNet(true, true, true)
 	target = NewTCPListen("!?", addr.port)
 	target.Listen(testl.Bind, testl.Unbind, testl.Wrong)
 
 	trials.WaitTimeout()
-	assert.False(this.T(), testl.Valid())
+	this.False(testl.Valid())
 
-	testl = newTester(true, true, true)
+	testl = newTestNet(true, true, true)
 	target = NewTCPListen("192.168.0.1", addr.port) // 故意要接聽錯誤位址才會引發錯誤
 	target.Listen(testl.Bind, testl.Unbind, testl.Wrong)
 
 	trials.WaitTimeout()
-	assert.False(this.T(), testl.Valid())
+	this.False(testl.Valid())
 
 	target = NewTCPListen(addr.ip, addr.port)
-	assert.Equal(this.T(), net.JoinHostPort(addr.ip, addr.port), target.Address())
+	this.Equal(net.JoinHostPort(addr.ip, addr.port), target.Address())
 }

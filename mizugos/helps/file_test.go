@@ -1,14 +1,14 @@
 package helps
 
 import (
-	"path/filepath"
+	"io/fs"
+	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestFile(t *testing.T) {
@@ -28,10 +28,22 @@ func (this *SuiteFile) TearDownSuite() {
 	trials.Restore(this.Catalog)
 }
 
-func (this *SuiteFile) TestWriteFile() {
-	path := filepath.Join("path", "test.file")
-	data := []byte("this is a string")
+func (this *SuiteFile) TestFileExist() {
+	this.Nil(FileWrite("file/exist.txt", []byte("ok")))
+	this.True(FileExist("file/exist.txt"))
+	this.False(FileExist(testdata.Unknown))
+}
 
-	assert.Nil(this.T(), WriteFile(path, data))
-	assert.True(this.T(), trials.FileCompare(path, data))
+func (this *SuiteFile) TestFileCompare() {
+	this.Nil(FileWrite("file/compare.txt", []byte("ok")))
+	this.True(FileCompare("file/compare.txt", []byte("ok")))
+	this.False(FileCompare("file/compare.txt", []byte("no")))
+	this.False(FileCompare(testdata.Unknown, []byte("ok")))
+}
+
+func (this *SuiteFile) TestFileWrite() {
+	_ = os.WriteFile("parent", []byte("x"), fs.ModePerm)
+	this.Nil(FileWrite("file/write.txt", []byte("ok")))
+	this.NotNil(FileWrite("parent/write.txt", []byte("ok")))
+	this.NotNil(FileWrite("bad\x00name.txt", []byte("ok")))
 }

@@ -3,6 +3,7 @@
     <module name="Mizugo" />
     <working_directory value="$PROJECT_DIR$/support/test-client-go/.runtime" />
     <kind value="DIRECTORY" />
+    <package value="github.com/yinweli/Mizugo/v2/support/test-client-go/.runtime" />
     <directory value="$PROJECT_DIR$/support/test-client-go/cmd" />
     <filePath value="$PROJECT_DIR$" />
     <output_directory value="$PROJECT_DIR$/support/test-client-go/.runtime/bin" />

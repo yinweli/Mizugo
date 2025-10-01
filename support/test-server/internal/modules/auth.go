@@ -7,12 +7,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/support/test-server/internal/defines"
-	"github.com/yinweli/Mizugo/support/test-server/internal/features"
-	"github.com/yinweli/Mizugo/support/test-server/internal/querys"
-	"github.com/yinweli/Mizugo/support/test-server/msgs"
+	"github.com/yinweli/Mizugo/v2/mizugos/entitys"
+	"github.com/yinweli/Mizugo/v2/mizugos/helps"
+	"github.com/yinweli/Mizugo/v2/mizugos/procs"
+	"github.com/yinweli/Mizugo/v2/support/test-server/internal/defines"
+	"github.com/yinweli/Mizugo/v2/support/test-server/internal/features"
+	"github.com/yinweli/Mizugo/v2/support/test-server/internal/querys"
+	"github.com/yinweli/Mizugo/v2/support/test-server/msgs"
 )
 
 // NewAuth 建立Auth模組
@@ -38,8 +39,6 @@ func (this *Auth) Awake() error {
 
 // procMLoginQ 處理要求登入
 func (this *Auth) procMLoginQ(message any) {
-	rec := features.MeterLogin.Rec()
-	defer rec()
 	_, msg, err := procs.JsonUnmarshal[msgs.MLoginQ](message)
 
 	if err != nil {
@@ -49,8 +48,9 @@ func (this *Auth) procMLoginQ(message any) {
 	} // if
 
 	auth := querys.NewAuth(msg.Account)
+	token := helps.RandStringDefault()
 
-	if err = features.DBMixed.Submit(context.Background()).Lock(msg.Account).Add(auth.NewGetter()).Exec(); err != nil {
+	if err = features.DBMixed.Submit(context.Background()).Lock(msg.Account, token).Add(auth.NewGetter()).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
 		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMLoginQ: %w", err)).EndFlush()
 		return
@@ -60,7 +60,7 @@ func (this *Auth) procMLoginQ(message any) {
 	auth.Time = time.Now()
 	auth.SetSave()
 
-	if err = features.DBMixed.Submit(context.Background()).Add(auth.NewSetter()).Unlock(msg.Account).Exec(); err != nil {
+	if err = features.DBMixed.Submit(context.Background()).Add(auth.NewSetter()).Unlock(msg.Account, token).Exec(); err != nil {
 		this.sendMLoginA(msg, msgs.ErrID_SubmitFailed, "")
 		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMLoginQ: %w", err)).EndFlush()
 		return
@@ -88,8 +88,6 @@ func (this *Auth) sendMLoginA(from *msgs.MLoginQ, errID msgs.ErrID, token string
 
 // procMUpdateQ 處理要求更新
 func (this *Auth) procMUpdateQ(message any) {
-	rec := features.MeterUpdate.Rec()
-	defer rec()
 	_, msg, err := procs.JsonUnmarshal[msgs.MUpdateQ](message)
 
 	if err != nil {
@@ -99,8 +97,9 @@ func (this *Auth) procMUpdateQ(message any) {
 	} // if
 
 	auth := querys.NewAuth(msg.Account)
+	token := helps.RandStringDefault()
 
-	if err = features.DBMixed.Submit(context.Background()).Lock(msg.Account).Add(auth.NewGetter()).Exec(); err != nil {
+	if err = features.DBMixed.Submit(context.Background()).Lock(msg.Account, token).Add(auth.NewGetter()).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
 		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMUpdateQ: %w", err)).EndFlush()
 		return
@@ -116,7 +115,7 @@ func (this *Auth) procMUpdateQ(message any) {
 	auth.Time = time.Now()
 	auth.SetSave()
 
-	if err = features.DBMixed.Submit(context.Background()).Add(auth.NewSetter()).Unlock(msg.Account).Exec(); err != nil {
+	if err = features.DBMixed.Submit(context.Background()).Add(auth.NewSetter()).Unlock(msg.Account, token).Exec(); err != nil {
 		this.sendMUpdateA(msg, msgs.ErrID_SubmitFailed, "")
 		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("auth procMUpdateQ: %w", err)).EndFlush()
 		return

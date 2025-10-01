@@ -1,6 +1,6 @@
 package helps
 
-// MapKey 取得映射索引列表
+// MapKey 回傳輸入 map 的所有鍵 (key) 的列表
 func MapKey[K comparable, V any](input map[K]V) (result []K) {
 	for itor := range input {
 		result = append(result, itor)
@@ -9,7 +9,7 @@ func MapKey[K comparable, V any](input map[K]V) (result []K) {
 	return result
 }
 
-// MapValue 取得映射資料列表
+// MapValue 回傳輸入 map 的所有值 (value) 的列表
 func MapValue[K comparable, V any](input map[K]V) (result []V) {
 	for _, itor := range input {
 		result = append(result, itor)
@@ -18,7 +18,7 @@ func MapValue[K comparable, V any](input map[K]V) (result []V) {
 	return result
 }
 
-// MapFlatten 取得映射展平列表
+// MapFlatten 將輸入 map 展平成一個列表, 其中每個元素為 MapFlattenData (含 key 與 value)
 func MapFlatten[K comparable, V any](input map[K]V) (result []MapFlattenData[K, V]) {
 	for k, v := range input {
 		result = append(result, MapFlattenData[K, V]{
@@ -30,7 +30,7 @@ func MapFlatten[K comparable, V any](input map[K]V) (result []MapFlattenData[K, 
 	return result
 }
 
-// MapFlattenData 映射展平資料
+// MapFlattenData 展平資料
 type MapFlattenData[K comparable, V any] struct {
 	K K // 索引
 	V V // 資料

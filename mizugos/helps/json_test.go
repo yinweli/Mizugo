@@ -3,11 +3,10 @@ package helps
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestJson(t *testing.T) {
@@ -28,6 +27,6 @@ func (this *SuiteJson) TearDownSuite() {
 }
 
 func (this *SuiteJson) TestJsonString() {
-	assert.NotNil(this.T(), JsonString(struct{ Data int }{Data: 100}))
-	assert.NotNil(this.T(), JsonString(nil))
+	this.NotEmpty(JsonString(struct{ Data int }{Data: 100}))
+	this.Equal("null", JsonString(nil))
 }

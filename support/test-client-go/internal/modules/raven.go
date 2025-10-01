@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos/entitys"
-	"github.com/yinweli/Mizugo/mizugos/procs"
-	"github.com/yinweli/Mizugo/support/test-client-go/internal/defines"
-	"github.com/yinweli/Mizugo/support/test-client-go/internal/features"
-	"github.com/yinweli/Mizugo/support/test-client-go/msgs"
+	"github.com/yinweli/Mizugo/v2/mizugos/entitys"
+	"github.com/yinweli/Mizugo/v2/mizugos/procs"
+	"github.com/yinweli/Mizugo/v2/support/test-client-go/internal/defines"
+	"github.com/yinweli/Mizugo/v2/support/test-client-go/internal/features"
+	"github.com/yinweli/Mizugo/v2/support/test-client-go/msgs"
 )
 
 // NewRaven 建立Raven模組
@@ -49,7 +49,7 @@ func (this *Raven) eventBegin(_ any) {
 
 // procMRavenA 處理回應Raven
 func (this *Raven) procMRavenA(message any) {
-	raven, err := procs.RavenCParser[msgs.HRaven, msgs.MRavenQ](message)
+	raven, err := procs.RavenCParser[*msgs.HRaven, *msgs.MRavenQ](message)
 
 	if err != nil {
 		features.LogSystem.Get().Warn(this.name).Caller(0).Error(fmt.Errorf("raven procMRavenA: %w", err)).EndFlush()
@@ -61,9 +61,8 @@ func (this *Raven) procMRavenA(message any) {
 		return
 	} // if
 
-	respond := procs.RavenRespondFind(message, &msgs.MRavenA{}).(*msgs.MRavenA)
+	respond := procs.RavenRespondFind[*msgs.MRavenA](message)
 	duration := time.Duration(time.Now().UnixNano() - raven.Request.Time)
-	features.MeterRaven.Add(duration)
 	features.LogSystem.Get().Info(this.name).KV("count", respond.Count).KV("duration", duration).Caller(0).EndFlush()
 
 	if this.disconnect {

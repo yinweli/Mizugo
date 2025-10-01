@@ -4,11 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestCmdKeys(t *testing.T) {
@@ -44,19 +43,19 @@ func (this *SuiteCmdKeys) TestKeys() {
 
 	target := &Keys{Pattern: "key*"}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), target.Prepare())
+	this.Nil(target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), target.Complete())
-	assert.ElementsMatch(this.T(), target.Data, []string{"key1", "key2"})
+	this.Nil(target.Complete())
+	this.ElementsMatch(target.Data, []string{"key1", "key2"})
 
 	target = &Keys{Pattern: "a*"}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), target.Prepare())
+	this.Nil(target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), target.Complete())
-	assert.Empty(this.T(), target.Data)
+	this.Nil(target.Complete())
+	this.Empty(target.Data)
 
 	target = &Keys{Pattern: ""}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 }

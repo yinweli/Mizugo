@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -19,9 +18,9 @@ type SuiteTime struct {
 func (this *SuiteTime) TestWaitTimeout() {
 	now := time.Now()
 	WaitTimeout()
-	assert.GreaterOrEqual(this.T(), time.Since(now), Timeout)
+	this.GreaterOrEqual(time.Since(now), Timeout)
 
 	now = time.Now()
 	WaitTimeout(time.Second)
-	assert.GreaterOrEqual(this.T(), time.Since(now), time.Second)
+	this.GreaterOrEqual(time.Since(now), time.Second)
 }

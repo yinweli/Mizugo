@@ -3,11 +3,10 @@ package procs
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestProcmgr(t *testing.T) {
@@ -29,9 +28,9 @@ func (this *SuiteProcmgr) TearDownSuite() {
 
 func (this *SuiteProcmgr) TestNewProcmgr() {
 	target := NewProcmgr()
-	assert.NotNil(this.T(), target)
+	this.NotNil(target)
 	target.Add(1, func(_ any) {})
-	assert.NotNil(this.T(), target.Get(1))
+	this.NotNil(target.Get(1))
 	target.Del(1)
-	assert.Nil(this.T(), target.Get(1))
+	this.Nil(target.Get(1))
 }

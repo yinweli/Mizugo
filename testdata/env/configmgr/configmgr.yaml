@@ -1,28 +1,4 @@
-valid: valid
-valueb: true
-valuei: 1
-valuei32: 100000000
-valuei64: 100000000000
-valueu: 2
-valueu32: 200000000
-valueu64: 200000000000
-valuef: 3.33
-values: string
-valuelisti:
-  - 1
-  - 2
-  - 3
-valuelists:
-  - a
-  - b
-  - c
-valuet: 2020-12-31 09:30:30
-valued: 360s
-valuec: 1KB
-object:
-  value1: 1
-  value2: 2
-  value3:
-    - a
-    - b
-    - c
+v1: 1
+v2:
+  v: 2
+  s: [a, b, c]

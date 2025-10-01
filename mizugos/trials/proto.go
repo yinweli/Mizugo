@@ -3,7 +3,6 @@ package trials
 import (
 	"fmt"
 	"reflect"
-	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -11,19 +10,26 @@ import (
 	"google.golang.org/protobuf/testing/protocmp"
 )
 
-// ProtoEqual 訊息是否符合
+// ProtoEqual 比對訊息是否符合預期
 func ProtoEqual(expected, actual any, option ...cmp.Option) bool {
-	if cmp.Equal(expected, actual, append(option, protocmp.Transform())...) == false {
-		if message, ok := expected.(proto.Message); ok {
-			fmt.Printf("expected: %v\n", protojson.Format(message))
+	option = append([]cmp.Option{protocmp.Transform()}, option...) // 慣例是把 protocmp.Transform() 放在最前面
+
+	if cmp.Equal(expected, actual, option...) == false {
+		fmt.Println("proto not equal:")
+		fmt.Println("  expected:")
+
+		if m, ok := expected.(proto.Message); ok && m != nil {
+			fmt.Printf("    %v\n", protoJSON.Format(m))
 		} else {
-			fmt.Printf("expected: <not proto message>\n")
+			fmt.Printf("    not proto message\n")
 		} // if
 
-		if message, ok := actual.(proto.Message); ok {
-			fmt.Printf("actual: %v\n", protojson.Format(message))
+		fmt.Println("  actual:")
+
+		if m, ok := actual.(proto.Message); ok && m != nil {
+			fmt.Printf("    %v\n", protoJSON.Format(m))
 		} else {
-			fmt.Printf("actual: <not proto message>\n")
+			fmt.Printf("    not proto message\n")
 		} // if
 
 		return false
@@ -32,111 +38,114 @@ func ProtoEqual(expected, actual any, option ...cmp.Option) bool {
 	return true
 }
 
-// ProtoListEqual 訊息列表是否符合
+// ProtoListEqual 比對訊息列表是否符合預期
 func ProtoListEqual[T any](expected, actual []T, option ...cmp.Option) bool {
-	if cmp.Equal(expected, actual, append(option, protocmp.Transform())...) == false {
-		builder := &strings.Builder{}
+	option = append([]cmp.Option{protocmp.Transform()}, option...) // 慣例是把 protocmp.Transform() 放在最前面
+
+	if cmp.Equal(expected, actual, option...) == false {
+		fmt.Println("proto not equal:")
+		fmt.Println("  expected:")
 
 		for _, itor := range expected {
-			if message, ok := any(itor).(proto.Message); ok {
-				_, _ = fmt.Fprintf(builder, "\n%v,", indent(protojson.Format(message)))
+			if m, ok := any(itor).(proto.Message); ok && m != nil {
+				fmt.Printf("    %v\n", protoJSON.Format(m))
 			} else {
-				_, _ = fmt.Fprintf(builder, "\n  <not proto message>,")
+				fmt.Printf("    not proto message\n")
 			} // if
 		} // for
 
-		fmt.Printf("expected: %v\n", builder.String())
-		builder.Reset()
+		fmt.Println("  actual:")
 
 		for _, itor := range actual {
-			if message, ok := any(itor).(proto.Message); ok {
-				_, _ = fmt.Fprintf(builder, "\n%v,", indent(protojson.Format(message)))
+			if m, ok := any(itor).(proto.Message); ok && m != nil {
+				fmt.Printf("    %v\n", protoJSON.Format(m))
 			} else {
-				_, _ = fmt.Fprintf(builder, "\n  <not proto message>,")
+				fmt.Printf("    not proto message\n")
 			} // if
 		} // for
 
-		fmt.Printf("actual: %v\n", builder.String())
 		return false
 	} // if
 
 	return true
 }
 
-// ProtoListContain 訊息列表是否包含訊息
-func ProtoListContain[T any](expected any, actual []T, option ...cmp.Option) bool {
-	for _, itor := range actual {
-		if cmp.Equal(expected, itor, append(option, protocmp.Transform())...) {
-			return true
-		} // if
-	} // for
-
-	if message, ok := expected.(proto.Message); ok {
-		fmt.Printf("expected: %v\n", protojson.Format(message))
-	} else {
-		fmt.Printf("expected: <not proto message>\n")
-	} // if
-
-	builder := &strings.Builder{}
-
-	for _, itor := range actual {
-		if message, ok := any(itor).(proto.Message); ok {
-			_, _ = fmt.Fprintf(builder, "\n%v,", indent(protojson.Format(message)))
-		} else {
-			_, _ = fmt.Fprintf(builder, "\n  <not proto message>,")
-		} // if
-	} // for
-
-	fmt.Printf("actual: %v\n", builder.String())
-	return false
-}
-
-// ProtoListMatch 訊息列表是否包含訊息列表
+// ProtoListMatch 比對訊息列表是否符合預期, 無關順序
 func ProtoListMatch[T any](expected, actual []T, option ...cmp.Option) bool {
-	match := make([]bool, len(expected))
+	option = append([]cmp.Option{protocmp.Transform()}, option...) // 慣例是把 protocmp.Transform() 放在最前面
+	match := map[int]bool{}
 
-	for i, e := range expected {
-		for _, a := range actual {
-			if cmp.Equal(e, a, append(option, protocmp.Transform())...) {
+	for _, e := range expected {
+		for i, a := range actual {
+			if match[i] == false && cmp.Equal(e, a, option...) {
 				match[i] = true
 				break
 			} // if
 		} // for
 	} // for
 
-	found := true
+	if len(expected) != len(actual) || len(expected) != len(match) {
+		fmt.Println("proto not equal:")
+		fmt.Println("  expected:")
 
-	for i, ok := range match {
-		if ok == false {
-			if message, ok := any(expected[i]).(proto.Message); ok {
-				fmt.Printf("expected: %v\n", protojson.Format(message))
+		for _, itor := range expected {
+			if m, ok := any(itor).(proto.Message); ok && m != nil {
+				fmt.Printf("    %v\n", protoJSON.Format(m))
 			} else {
-				fmt.Printf("expected: <not proto message>\n")
-			} // if
-
-			found = false
-		} // if
-	} // for
-
-	if found == false {
-		builder := &strings.Builder{}
-
-		for _, itor := range actual {
-			if message, ok := any(itor).(proto.Message); ok {
-				_, _ = fmt.Fprintf(builder, "\n%v,", indent(protojson.Format(message)))
-			} else {
-				_, _ = fmt.Fprintf(builder, "\n  <not proto message>,")
+				fmt.Printf("    not proto message\n")
 			} // if
 		} // for
 
-		fmt.Printf("actual: %v\n", builder.String())
+		fmt.Println("  actual:")
+
+		for _, itor := range actual {
+			if m, ok := any(itor).(proto.Message); ok && m != nil {
+				fmt.Printf("    %v\n", protoJSON.Format(m))
+			} else {
+				fmt.Printf("    not proto message\n")
+			} // if
+		} // for
+
+		return false
 	} // if
 
-	return found
+	return true
 }
 
-// ProtoListExist 訊息列表是否包含指定類型
-func ProtoListExist(expected any, actual []proto.Message) bool {
+// ProtoListHasData 檢查訊息列表是否有指定項目
+func ProtoListHasData[T any](expected any, actual []T, option ...cmp.Option) bool {
+	option = append([]cmp.Option{protocmp.Transform()}, option...) // 慣例是把 protocmp.Transform() 放在最前面
+
+	for _, itor := range actual {
+		if cmp.Equal(expected, itor, option...) {
+			return true
+		} // if
+	} // for
+
+	fmt.Println("proto not equal:")
+	fmt.Println("  expected:")
+
+	if m, ok := expected.(proto.Message); ok && m != nil {
+		fmt.Printf("    %v\n", protoJSON.Format(m))
+	} else {
+		fmt.Printf("    not proto message\n")
+	} // if
+
+	fmt.Println("  actual:")
+
+	for _, itor := range actual {
+		if m, ok := any(itor).(proto.Message); ok && m != nil {
+			fmt.Printf("    %v\n", protoJSON.Format(m))
+		} else {
+			fmt.Printf("    not proto message\n")
+		} // if
+	} // for
+
+	return false
+}
+
+// ProtoListHasType 檢查訊息列表是否有指定類型
+func ProtoListHasType[T any](expected any, actual []T) bool {
 	for _, itor := range actual {
 		if reflect.TypeOf(itor) == reflect.TypeOf(expected) {
 			return true
@@ -146,13 +155,4 @@ func ProtoListExist(expected any, actual []proto.Message) bool {
 	return false
 }
 
-// indent 填加縮排到多行字串
-func indent(input string) string {
-	line := strings.Split(input, "\n")
-
-	for i, itor := range line {
-		line[i] = "  " + itor
-	} // for
-
-	return strings.Join(line, "\n")
-}
+var protoJSON = protojson.MarshalOptions{} // Proto 轉換 JSON 工具

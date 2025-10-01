@@ -5,21 +5,21 @@ import (
 	"net"
 	"sync"
 
-	"github.com/yinweli/Mizugo/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
 )
 
-// newInformTester 建立測試器
-func newTester(bind, encode, decode bool) *tester {
+// newTestNet 建立網路測試器
+func newTestNet(bind, encode, decode bool) *testNet {
 	trials.WaitTimeout() // 在這邊等待一下, 讓程序有機會完成
-	return &tester{
+	return &testNet{
 		bind:   bind,
 		encode: encode,
 		decode: decode,
 	}
 }
 
-// tester 測試器
-type tester struct {
+// testNet 網路測試器
+type testNet struct {
 	bind        bool
 	encode      bool
 	decode      bool
@@ -37,7 +37,7 @@ type tester struct {
 	lock        sync.RWMutex
 }
 
-func (this *tester) Bind(session Sessioner) bool {
+func (this *testNet) Bind(session Sessioner) bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -47,7 +47,7 @@ func (this *tester) Bind(session Sessioner) bool {
 
 	this.bindCount++
 	this.session = session
-	session.SetCodec(&testerCodec{
+	session.SetCodec(&testCodec{
 		encode: func(input any) (output any, err error) {
 			this.lock.Lock()
 			defer this.lock.Unlock()
@@ -95,102 +95,102 @@ func (this *tester) Bind(session Sessioner) bool {
 	return true
 }
 
-func (this *tester) Unbind(_ Sessioner) {
+func (this *testNet) Unbind(_ Sessioner) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	this.unbindCount++
 	this.session = nil
 }
 
-func (this *tester) Wrong(err error) {
+func (this *testNet) Wrong(err error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	this.err = err
 }
 
-func (this *tester) Valid() bool {
+func (this *testNet) Valid() bool {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 	return this.err == nil
 }
 
-func (this *tester) ValidBind() bool {
+func (this *testNet) ValidBind() bool {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 	return this.bindCount > 0
 }
 
-func (this *tester) ValidUnbind() bool {
+func (this *testNet) ValidUnbind() bool {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 	return this.unbindCount > 0
 }
 
-func (this *tester) ValidEncode() bool {
+func (this *testNet) ValidEncode() bool {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 	return this.encodeCount > 0
 }
 
-func (this *tester) ValidDecode() bool {
+func (this *testNet) ValidDecode() bool {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 	return this.decodeCount > 0
 }
 
-func (this *tester) ValidStart() bool {
+func (this *testNet) ValidStart() bool {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 	return this.startCount == 1
 }
 
-func (this *tester) ValidStop() bool {
+func (this *testNet) ValidStop() bool {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 	return this.stopCount == 1
 }
 
-func (this *tester) ValidRecv() bool {
+func (this *testNet) ValidRecv() bool {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 	return this.recvCount > 0
 }
 
-func (this *tester) ValidSend() bool {
+func (this *testNet) ValidSend() bool {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 	return this.sendCount > 0
 }
 
-func (this *tester) ValidSession() bool {
+func (this *testNet) ValidSession() bool {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 	return this.session != nil
 }
 
-func (this *tester) ValidMessage(message any) bool {
+func (this *testNet) ValidMessage(message any) bool {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 	return this.message == message
 }
 
-func (this *tester) Get() Sessioner {
+func (this *testNet) Get() Sessioner {
 	this.lock.RLock()
 	defer this.lock.RUnlock()
 	return this.session
 }
 
-// testerCodec 測試編碼/解碼
-type testerCodec struct {
+// testCodec 測試編碼/解碼
+type testCodec struct {
 	encode func(input any) (output any, err error)
 	decode func(input any) (output any, err error)
 }
 
-func (this *testerCodec) Encode(input any) (output any, err error) {
+func (this *testCodec) Encode(input any) (output any, err error) {
 	return this.encode(input)
 }
 
-func (this *testerCodec) Decode(input any) (output any, err error) {
+func (this *testCodec) Decode(input any) (output any, err error) {
 	return this.decode(input)
 }
 
@@ -251,6 +251,10 @@ func (this *emptySession) SetPacketSize(_ int) {
 func (this *emptySession) SetOwner(_ any) {
 }
 
+func (this *emptySession) GetOwner() any {
+	return nil
+}
+
 func (this *emptySession) Send(_ any) {
 }
 
@@ -260,10 +264,6 @@ func (this *emptySession) RemoteAddr() net.Addr {
 
 func (this *emptySession) LocalAddr() net.Addr {
 	return &net.TCPAddr{}
-}
-
-func (this *emptySession) GetOwner() any {
-	return nil
 }
 
 // host 端點資料

@@ -3,7 +3,7 @@ package miscs
 import (
 	"time"
 
-	"github.com/yinweli/Mizugo/mizugos"
+	"github.com/yinweli/Mizugo/v2/mizugos"
 )
 
 // GenerateConnection 產生連線

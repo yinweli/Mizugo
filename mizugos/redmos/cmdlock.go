@@ -7,18 +7,24 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-const lockFormat = "lock:%v" // 鎖定/解鎖索引格式
-
-// Lock 鎖定行為, 以索引值到主要資料庫中執行分布式鎖定, 避免同時執行客戶端動作, 使用上有以下幾點須注意
-//   - 執行前設定好 Key 並且不能為空字串
-//   - 鎖定完成後, 需要執行 Unlock 行為來解除鎖定
-//   - 鎖定後會在 Timeout 之後自動解鎖, 避免死鎖
+// Lock 鎖定行為
+//
+// 以索引鍵(Key)在主要資料庫執行分布式鎖定
+//
+// 事前準備:
+//   - 設定 Key: 不可為空字串
+//   - 設定 Token: 不可為空字串
+//
+// 注意:
+//   - 本行為僅使用主要資料庫, 次要資料庫不參與
+//   - 鎖定後需搭配 Unlock 行為解鎖
+//   - Token 必須為唯一識別字串; Unlock 會核對 Token, 避免誤解他人持有的鎖
 type Lock struct {
-	Behave                // 行為物件
-	Key    string         // 索引值
-	time   time.Duration  // 超時時間, redis的超時時間不能低於1秒; 這個欄位是為了讓單元測試可以設定較短的超時時間
-	incr   *redis.IntCmd  // 遞增命令結果
-	expire *redis.BoolCmd // 超時命令結果
+	Behave                  // 行為物件
+	Key    string           // 索引值
+	Token  string           // 識別字串
+	ttl    time.Duration    // 逾時時間(供測試調整)
+	cmd    *redis.StatusCmd // 命令結果
 }
 
 // Prepare 前置處理
@@ -27,37 +33,47 @@ func (this *Lock) Prepare() error {
 		return fmt.Errorf("lock prepare: key empty")
 	} // if
 
+	if this.Token == "" {
+		return fmt.Errorf("lock prepare: token empty")
+	} // if
+
 	key := fmt.Sprintf(lockFormat, this.Key)
-	this.incr = this.Major().Incr(this.Ctx(), key)
-	this.expire = this.Major().Expire(this.Ctx(), key, this.time)
+	this.cmd = this.Major().SetArgs(this.Ctx(), key, this.Token, redis.SetArgs{Mode: "NX", TTL: this.ttl})
 	return nil
 }
 
 // Complete 完成處理
 func (this *Lock) Complete() error {
-	data, err := this.incr.Result()
+	ok, err := this.cmd.Result()
 
 	if err != nil {
 		return fmt.Errorf("lock complete: %w: %v", err, this.Key)
 	} // if
 
-	if data != 1 {
+	if ok != RedisOk {
 		return fmt.Errorf("lock complete: already lock: %v", this.Key)
-	} // if
-
-	if _, err = this.expire.Result(); err != nil {
-		return fmt.Errorf("lock complete: %w: %v", err, this.Key)
 	} // if
 
 	return nil
 }
 
-// Unlock 解鎖行為, 解除被 Lock 行為鎖定的索引, 使用上有以下幾點須注意
-//   - 執行前設定好 Key 並且不能為空字串
+// Unlock 解鎖行為
+//
+// 以索引鍵(Key)在主要資料庫執行解鎖
+//
+// 事前準備:
+//   - 設定 Key: 不可為空字串
+//   - 設定 Token: 不可為空字串; 須與 Lock 時所用 Token 一致
+//
+// 注意:
+//   - 本行為僅使用主要資料庫, 次要資料庫不參與
+//   - 僅在 Token 相符時才會刪除鎖鍵; Token 不符或鎖已逾期/不存在時, 不會刪除
+//   - 若鎖已因 ttl 逾期而自動釋放, 此操作將不會刪除任何鍵
 type Unlock struct {
-	Behave               // 行為物件
-	Key    string        // 索引值
-	del    *redis.IntCmd // 刪除命令結果
+	Behave            // 行為物件
+	Key    string     // 索引值
+	Token  string     // 識別字串
+	cmd    *redis.Cmd // 命令結果
 }
 
 // Prepare 前置處理
@@ -66,16 +82,23 @@ func (this *Unlock) Prepare() error {
 		return fmt.Errorf("unlock prepare: key empty")
 	} // if
 
+	if this.Token == "" {
+		return fmt.Errorf("unlock prepare: token empty")
+	} // if
+
 	key := fmt.Sprintf(lockFormat, this.Key)
-	this.del = this.Major().Del(this.Ctx(), key)
+	this.cmd = this.Major().Eval(this.Ctx(), lockLUA, []string{key}, this.Token)
 	return nil
 }
 
 // Complete 完成處理
 func (this *Unlock) Complete() error {
-	if _, err := this.del.Result(); err != nil {
+	if _, err := this.cmd.Result(); err != nil {
 		return fmt.Errorf("unlock complete: %w: %v", err, this.Key)
 	} // if
 
 	return nil
 }
+
+const lockFormat = "lock:%v"                                                                                        // 鎖定/解鎖索引格式
+const lockLUA = `if redis.call("GET", KEYS[1]) == ARGV[1] then return redis.call("DEL", KEYS[1]) else return 0 end` // 解鎖 LUA 腳本

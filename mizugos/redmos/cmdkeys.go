@@ -7,36 +7,29 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// Keys 搜尋行為, 以匹配字串到主要資料庫中取得索引, 使用上有以下幾點須注意
-//   - 執行前設定好 Pattern 並且不能為空字串
-//   - 執行後可用 Data 來取得資料
+// Keys 索引搜尋行為
 //
-// # Pattern匹配規則
+// 以匹配字串(Pattern)在主要資料庫中搜尋符合條件的鍵, 並回傳結果列表(Data)
 //
-// `*`: 匹配任意數量的字符(包括零個字符)
-//   - 模式 `user:*` 匹配所有以 `user:` 開頭的鍵
-//   - 模式 `*` 匹配所有鍵
+// 事前準備:
+//   - 設定 Pattern: 不可為空字串, 使用 Redis 的全域匹配語法
 //
-// `?`: 匹配任意一個字符
-//   - 模式 `user:???` 匹配所有以 `user:` 開頭, 後面跟三個字符的鍵, 如 `user:abc`
+// 注意:
+//   - 本行為僅使用主要資料庫, 次要資料庫不參與
+//   - 內部以 Redis `KEYS` 指令實作, 時間複雜度 O(N); 在鍵數量龐大時可能造成阻塞, 不建議於生產環境大量使用
+//   - 執行成功後, 結果會寫入 Data; 當無匹配結果時回傳空列表
 //
-// `[]`: 匹配括號內的任意一個字符, 可以使用範圍來指定字符, 例如 [a-z] 匹配所有小寫字母
-//   - 模式 `user:[abc]*` 匹配所有以 `user:` 開頭, 且接著是 a、b、或 c 的鍵, 如 `user:a123`、`user:b456`
+// Pattern 匹配規則(節錄):
+//   - `*`  : 匹配任意長度(含 0)的字元, 例 `user:*`
+//   - `?`  : 匹配任意單一字元, 例 `user:???` → `user:abc`
+//   - `[]` : 字元集合/範圍, 例 `user:[a-c]*` → `user:a123`/`b456`
+//   - `[^]`: 否定集合, 例 `user:[^abc]*` → 第一個字元非 a/b/c
+//   - `\`  : 逸出特殊字元, 例 `user:\*` 僅匹配鍵名 `user:*`
 //
-// `[^]`: 匹配不在括號內的任意一個字符(否定模式)
-//   - 模式 `user:[^abc]*` 匹配所有以 `user:` 開頭, 且後面跟的第一個字符不是 a、b、或 c 的鍵, 如 `user:d123`
-//
-// `\`: 用於轉義特殊字符, 使其作為普通字符匹配
-//   - 模式 `user:\*` 匹配鍵 `user:*`, 而不是所有以 `user:` 開頭的鍵
-//
-// # 其他範例
-//   - `user:*`:匹配所有以 `user:` 開頭的鍵
-//   - `user:?*`:匹配所有以 `user:` 開頭, 且後面至少有一個字符的鍵
-//   - `user:[abc]*`:匹配所有以 `user:` 開頭, 且接著是 a、b、或 c 的鍵
-//   - `user:[^abc]*`:匹配所有以 `user:` 開頭, 且接著的第一個字符不是 a、b、或 c 的鍵
-//
-// # 注意事項
-//   - Keys 命令的時間複雜度為O(N), 其中N是主要資料庫中的鍵的數量, 由於這個原因, Keys 命令在大數據集上運行時可能會導致性能問題, 因此在生產環境中應謹慎使用
+// 範例:
+//   - `user:*`      : 匹配 `user:` 開頭的鍵
+//   - `user:?*`     : 匹配 `user:` 後至少還有 1 個字元的鍵
+//   - `sess:[0-9]*` : 匹配 `sess:` 後為數字的鍵
 type Keys struct {
 	Behave                        // 行為物件
 	Pattern string                // 匹配字串
@@ -56,12 +49,12 @@ func (this *Keys) Prepare() error {
 
 // Complete 完成處理
 func (this *Keys) Complete() error {
-	data, err := this.cmd.Result()
+	result, err := this.cmd.Result()
 
 	if err != nil && errors.Is(err, redis.Nil) == false {
 		return fmt.Errorf("keys complete: %w: %v", err, this.Pattern)
 	} // if
 
-	this.Data = data
+	this.Data = result
 	return nil
 }

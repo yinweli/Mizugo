@@ -5,7 +5,11 @@ import (
 	"fmt"
 )
 
-// NewDesECB 建立des-ecb加密/解密器
+// NewDesECB 建立 DES-ECB 編碼/解碼器
+//
+// 參數:
+//   - padding: 填充模式(Zero padding 或 PKCS7 padding)
+//   - key: 密鑰字串, 長度必須等於 DesKeySize
 func NewDesECB(padding Padding, key string) *DesECB {
 	return &DesECB{
 		padding: padding,
@@ -13,13 +17,15 @@ func NewDesECB(padding Padding, key string) *DesECB {
 	}
 }
 
-// DesECB des-ecb加密/解密器
+// DesECB DES-ECB 編碼/解碼器
+//
+// 注意: ECB 模式無法隱藏明文模式, 通常不建議用於安全性要求高的場合
 type DesECB struct {
 	padding Padding // 填充模式
 	key     []byte  // 密鑰, 長度必須是 DesKeySize
 }
 
-// Encode 加密
+// Encode 編碼
 func (this *DesECB) Encode(input any) (output any, err error) {
 	if len(this.key) != DesKeySize {
 		return nil, fmt.Errorf("des-ecb encode: key len must %v", DesKeySize)
@@ -46,9 +52,13 @@ func (this *DesECB) Encode(input any) (output any, err error) {
 	} // if
 
 	blockSize := block.BlockSize()
-	source = pad(this.padding, source, blockSize)
-	target := make([]byte, len(source))
-	dst := target
+
+	if source, err = pad(this.padding, source, blockSize); err != nil {
+		return nil, fmt.Errorf("des-ecb encode: %w", err)
+	} // if
+
+	result := make([]byte, len(source))
+	dst := result
 
 	for len(source) > 0 {
 		block.Encrypt(dst, source[:blockSize])
@@ -56,10 +66,10 @@ func (this *DesECB) Encode(input any) (output any, err error) {
 		dst = dst[blockSize:]
 	} // for
 
-	return target, nil
+	return result, nil
 }
 
-// Decode 解密
+// Decode 解碼
 func (this *DesECB) Decode(input any) (output any, err error) {
 	if len(this.key) != DesKeySize {
 		return nil, fmt.Errorf("des-ecb decode: key len must %v", DesKeySize)
@@ -91,8 +101,8 @@ func (this *DesECB) Decode(input any) (output any, err error) {
 		return nil, fmt.Errorf("des-ecb decode: src not full blocks")
 	} // if
 
-	target := make([]byte, len(source))
-	dst := target
+	result := make([]byte, len(source))
+	dst := result
 
 	for len(source) > 0 {
 		block.Decrypt(dst, source[:blockSize])
@@ -100,6 +110,9 @@ func (this *DesECB) Decode(input any) (output any, err error) {
 		dst = dst[blockSize:]
 	} // for
 
-	target = unpad(this.padding, target)
-	return target, nil
+	if result, err = unpad(this.padding, result); err != nil {
+		return nil, fmt.Errorf("des-ecb decode: %w", err)
+	} // if
+
+	return result, nil
 }

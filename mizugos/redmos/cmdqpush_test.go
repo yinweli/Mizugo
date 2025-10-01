@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/helps"
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/helps"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestCmdQPush(t *testing.T) {
@@ -20,7 +19,7 @@ func TestCmdQPush(t *testing.T) {
 type SuiteCmdQPush struct {
 	suite.Suite
 	trials.Catalog
-	meta  metaQPush
+	meta  testMetaQPush
 	major *Major
 	minor *Minor
 }
@@ -43,57 +42,57 @@ func (this *SuiteCmdQPush) TestQPush() {
 	this.meta.table = true
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
-	data1 := &dataQPush{K: "redis+mongo", D: helps.RandStringDefault()}
-	data2 := &dataQPush{K: "redis+mongo", D: helps.RandStringDefault()}
+	data1 := &testDataQPush{K: "redis+mongo", D: helps.RandStringDefault()}
+	data2 := &testDataQPush{K: "redis+mongo", D: helps.RandStringDefault()}
 
-	target := &QPush[dataQPush]{MinorEnable: true, Meta: &this.meta, Key: data1.K, Data: data1}
+	target := &QPush[testDataQPush]{MinorEnable: true, Meta: &this.meta, Key: data1.K, Data: data1}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), target.Prepare())
+	this.Nil(target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), target.Complete())
+	this.Nil(target.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	target = &QPush[dataQPush]{MinorEnable: true, Meta: &this.meta, Key: data2.K, Data: data2}
+	target = &QPush[testDataQPush]{MinorEnable: true, Meta: &this.meta, Key: data2.K, Data: data2}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), target.Prepare())
+	this.Nil(target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), target.Complete())
+	this.Nil(target.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.True(this.T(), trials.RedisCompareList[dataQPush](this.major.Client(), this.meta.MajorKey(data1.K), []*dataQPush{data1, data2}))
-	assert.True(this.T(), trials.MongoCompare[QueueData[dataQPush]](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data1.K), &QueueData[dataQPush]{
-		Data: []*dataQPush{data1, data2},
+	this.True(trials.RedisListEqual[testDataQPush](this.major.Client(), this.meta.MajorKey(data1.K), []*testDataQPush{data1, data2}))
+	this.True(trials.MongoEqual[QueueData[testDataQPush]](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data1.K), &QueueData[testDataQPush]{
+		Data: []*testDataQPush{data1, data2},
 	}))
 
-	target = &QPush[dataQPush]{MinorEnable: true, Meta: nil, Key: data1.K, Data: data1}
+	target = &QPush[testDataQPush]{MinorEnable: true, Meta: nil, Key: data1.K, Data: data1}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 
-	target = &QPush[dataQPush]{MinorEnable: true, Meta: &this.meta, Key: "", Data: data1}
+	target = &QPush[testDataQPush]{MinorEnable: true, Meta: &this.meta, Key: "", Data: data1}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 
-	target = &QPush[dataQPush]{MinorEnable: true, Meta: &this.meta, Key: data1.K, Data: nil}
+	target = &QPush[testDataQPush]{MinorEnable: true, Meta: &this.meta, Key: data1.K, Data: nil}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 
 	this.meta.table = false
-	target = &QPush[dataQPush]{MinorEnable: true, Meta: &this.meta, Key: data1.K, Data: data1}
+	target = &QPush[testDataQPush]{MinorEnable: true, Meta: &this.meta, Key: data1.K, Data: data1}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 }
 
-type metaQPush struct {
+type testMetaQPush struct {
 	table bool
 }
 
-func (this *metaQPush) MajorKey(key any) string {
+func (this *testMetaQPush) MajorKey(key any) string {
 	return fmt.Sprintf("cmdqpush:%v", key)
 }
 
-func (this *metaQPush) MinorKey(key any) string {
+func (this *testMetaQPush) MinorKey(key any) string {
 	return fmt.Sprintf("%v", key)
 }
 
-func (this *metaQPush) MinorTable() string {
+func (this *testMetaQPush) MinorTable() string {
 	if this.table {
 		return "cmdqpush"
 	} // if
@@ -101,7 +100,7 @@ func (this *metaQPush) MinorTable() string {
 	return ""
 }
 
-type dataQPush struct {
+type testDataQPush struct {
 	K string `bson:"k"`
 	D string `bson:"d"`
 }

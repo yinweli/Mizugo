@@ -6,12 +6,11 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/yinweli/Mizugo/mizugos/helps"
-	"github.com/yinweli/Mizugo/mizugos/trials"
-	"github.com/yinweli/Mizugo/testdata"
+	"github.com/yinweli/Mizugo/v2/mizugos/helps"
+	"github.com/yinweli/Mizugo/v2/mizugos/trials"
+	"github.com/yinweli/Mizugo/v2/testdata"
 )
 
 func TestCmdQPeek(t *testing.T) {
@@ -21,7 +20,7 @@ func TestCmdQPeek(t *testing.T) {
 type SuiteCmdQPeek struct {
 	suite.Suite
 	trials.Catalog
-	meta  metaQPeek
+	meta  testMetaQPeek
 	major *Major
 	minor *Minor
 }
@@ -44,57 +43,59 @@ func (this *SuiteCmdQPeek) TestQPeek() {
 	this.meta.table = true
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
-	data1 := &dataQPeek{K: "redis+mongo", D: helps.RandStringDefault()}
-	data2 := &dataQPeek{K: "redis+mongo", D: helps.RandStringDefault()}
+	data1 := &testDataQPeek{K: "redis+mongo", D: helps.RandStringDefault()}
+	data2 := &testDataQPeek{K: "redis+mongo", D: helps.RandStringDefault()}
 
-	qpush := &QPush[dataQPeek]{MinorEnable: true, Meta: &this.meta, Key: data1.K, Data: data1}
+	qpush := &QPush[testDataQPeek]{MinorEnable: true, Meta: &this.meta, Key: data1.K, Data: data1}
 	qpush.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), qpush.Prepare())
+	this.Nil(qpush.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), qpush.Complete())
+	this.Nil(qpush.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	qpush = &QPush[dataQPeek]{MinorEnable: true, Meta: &this.meta, Key: data2.K, Data: data2}
+	qpush = &QPush[testDataQPeek]{MinorEnable: true, Meta: &this.meta, Key: data2.K, Data: data2}
 	qpush.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), qpush.Prepare())
+	this.Nil(qpush.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), qpush.Complete())
+	this.Nil(qpush.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.True(this.T(), trials.RedisCompareList[dataQPeek](this.major.Client(), this.meta.MajorKey(data1.K), []*dataQPeek{data1, data2}))
-	assert.True(this.T(), trials.MongoCompare[QueueData[dataQPeek]](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data1.K), &QueueData[dataQPeek]{
-		Data: []*dataQPeek{data1, data2},
+	this.True(trials.RedisListEqual[testDataQPeek](this.major.Client(), this.meta.MajorKey(data1.K), []*testDataQPeek{data1, data2}))
+	this.True(trials.MongoEqual[QueueData[testDataQPeek]](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data1.K), &QueueData[testDataQPeek]{
+		Data: []*testDataQPeek{data1, data2},
 	}))
 
-	target := &QPeek[dataQPeek]{Meta: &this.meta, Key: data1.K}
+	target := &QPeek[testDataQPeek]{Meta: &this.meta, Key: data1.K, Done: func(data []*testDataQPeek) {
+		this.Equal([]*testDataQPeek{data1, data2}, data)
+	}}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.Nil(this.T(), target.Prepare())
+	this.Nil(target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
-	assert.Nil(this.T(), target.Complete())
+	this.Nil(target.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	assert.True(this.T(), cmp.Equal(&QueueData[dataQPeek]{Data: []*dataQPeek{data1, data2}}, target.Data))
-	assert.True(this.T(), trials.RedisCompareList[dataQPeek](this.major.Client(), this.meta.MajorKey(data1.K), []*dataQPeek{data1, data2}))
+	this.True(cmp.Equal([]*testDataQPeek{data1, data2}, target.Data))
+	this.True(trials.RedisListEqual[testDataQPeek](this.major.Client(), this.meta.MajorKey(data1.K), []*testDataQPeek{data1, data2}))
 
-	target = &QPeek[dataQPeek]{Meta: nil, Key: data1.K}
+	target = &QPeek[testDataQPeek]{Meta: nil, Key: data1.K}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 
-	target = &QPeek[dataQPeek]{Meta: &this.meta, Key: ""}
+	target = &QPeek[testDataQPeek]{Meta: &this.meta, Key: ""}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
-	assert.NotNil(this.T(), target.Prepare())
+	this.NotNil(target.Prepare())
 }
 
-type metaQPeek struct {
+type testMetaQPeek struct {
 	table bool
 }
 
-func (this *metaQPeek) MajorKey(key any) string {
+func (this *testMetaQPeek) MajorKey(key any) string {
 	return fmt.Sprintf("cmdqpeek:%v", key)
 }
 
-func (this *metaQPeek) MinorKey(key any) string {
+func (this *testMetaQPeek) MinorKey(key any) string {
 	return fmt.Sprintf("%v", key)
 }
 
-func (this *metaQPeek) MinorTable() string {
+func (this *testMetaQPeek) MinorTable() string {
 	if this.table {
 		return "cmdqpeek"
 	} // if
@@ -102,7 +103,7 @@ func (this *metaQPeek) MinorTable() string {
 	return ""
 }
 
-type dataQPeek struct {
+type testDataQPeek struct {
 	K string `bson:"k"`
 	D string `bson:"d"`
 }
