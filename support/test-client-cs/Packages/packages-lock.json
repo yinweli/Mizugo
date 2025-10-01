@@ -5,14 +5,14 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "becb18b8d7213d7eb3742ac5e91de433a369960e"
+      "hash": "e008b0d3c8bb4242716a2ea2f29db3051032dd56"
     },
     "com.fouridstudio.mizugo-proto-unity": {
       "version": "https://github.com/yinweli/Mizugo.git#proto-unity",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "6b3de29200b50376cbbae1e97c423b9fd42fc104"
+      "hash": "e0e617c23b95216806cbda2168e3c7d7f0f2fbf5"
     },
     "com.unity.2d.animation": {
       "version": "10.2.1",
