@@ -70,12 +70,12 @@ tasks:
       - task: proto-test
 
   proto-mizugo:
-    dir: support\proto\mizugo
+    dir: support\proto-mizugo
     cmds:
       - cmd /C build.bat
 
   proto-test:
-    dir: support\proto\test
+    dir: support\proto-test
     cmds:
       - cmd /C build.bat
 
