@@ -61,7 +61,7 @@ func (this *Raven) procMRavenA(message any) {
 		return
 	} // if
 
-	respond := procs.RavenRespondFind[*msgs.MRavenA](message)
+	respond := procs.RavenRespondFindT[*msgs.MRavenA](message)
 	duration := time.Duration(time.Now().UnixNano() - raven.Request.Time)
 	features.LogSystem.Get().Info(this.name).KV("count", respond.Count).KV("duration", duration).Caller(0).EndFlush()
 
