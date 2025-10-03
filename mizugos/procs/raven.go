@@ -38,8 +38,11 @@ func NewRaven() *Raven {
 //   - Process: 根據 messageID 呼叫對應的處理函式
 //
 // 另外提供以下工具
-//   - RavenSBuilder / RavenSParser / RavenSData: 建立與解析伺服器訊息
-//   - RavenIsMessageID / RavenIsErrID / RavenHeader / RavenRequest / RavenRespondAt / RavenRespondFind: 常用查詢工具
+//   - 建立與解析伺服器訊息: RavenSBuilder, RavenSParser, RavenSData
+//   - 查詢訊息編號與錯誤編號: RavenIsMessageID, RavenIsErrID
+//   - 查詢訊息標頭: RavenHeader, RavenHeaderT
+//   - 查詢訊息請求: RavenRequest, RavenRequestT,
+//   - 查詢訊息回應: RavenRespondAt, RavenRespondAtT, RavenRespondFind, RavenRespondFindT
 type Raven struct {
 	*Procmgr // 管理器
 }
@@ -141,7 +144,7 @@ func NewRavenClient() *RavenClient {
 //
 // 另外提供以下工具
 //   - RavenCBuilder / RavenCParser / RavenCData: 建立與解析客戶端訊息
-//   - RavenIsMessageID / RavenIsErrID / RavenHeader / RavenRequest / RavenRespondAt / RavenRespondFind: 常用查詢工具
+//   - RavenIsMessageID / RavenIsErrID / RavenHeaderT / RavenRequestT / RavenRespondAtT / RavenRespondFindT: 常用查詢工具
 type RavenClient struct {
 	*Procmgr // 管理器
 }
@@ -428,7 +431,12 @@ func RavenIsErrID(input any, expected int32) bool {
 }
 
 // RavenHeader 從 *msgs.RavenC 解析標頭
-func RavenHeader[T proto.Message](input any) (result T) {
+func RavenHeader(input any) (result proto.Message) {
+	return RavenHeaderT[proto.Message](input)
+}
+
+// RavenHeaderT 從 *msgs.RavenC 解析標頭並轉換型別
+func RavenHeaderT[T proto.Message](input any) (result T) {
 	if input == nil {
 		return result
 	} // if
@@ -449,7 +457,12 @@ func RavenHeader[T proto.Message](input any) (result T) {
 }
 
 // RavenRequest 從 *msgs.RavenC 解析請求
-func RavenRequest[T proto.Message](input any) (result T) {
+func RavenRequest(input any) (result proto.Message) {
+	return RavenRequestT[proto.Message](input)
+}
+
+// RavenRequestT 從 *msgs.RavenC 解析請求並轉換型別
+func RavenRequestT[T proto.Message](input any) (result T) {
 	if input == nil {
 		return result
 	} // if
@@ -470,7 +483,12 @@ func RavenRequest[T proto.Message](input any) (result T) {
 }
 
 // RavenRespondAt 以索引取得 *msgs.RavenC 回應
-func RavenRespondAt[T proto.Message](input any, index int) (result T) {
+func RavenRespondAt(input any, index int) (result proto.Message) {
+	return RavenRespondAtT[proto.Message](input, index)
+}
+
+// RavenRespondAtT 以索引取得 *msgs.RavenC 回應並轉換型別
+func RavenRespondAtT[T proto.Message](input any, index int) (result T) {
 	if input == nil {
 		return result
 	} // if
@@ -502,8 +520,43 @@ func RavenRespondAt[T proto.Message](input any, index int) (result T) {
 	return result
 }
 
-// RavenRespondFind 取得 *msgs.RavenC 回應列表中第一筆符合型別 T 的回應
-func RavenRespondFind[T proto.Message](input any) (result T) {
+// RavenRespondFind 取得 *msgs.RavenC 回應列表中第一筆符合 expected 型別的回應
+func RavenRespondFind(input any, expected proto.Message) (result proto.Message) {
+	if input == nil {
+		return result
+	} // if
+
+	if expected == nil {
+		return result
+	} // if
+
+	message, ok := input.(*msgs.RavenC)
+
+	if ok == false {
+		return result
+	} // if
+
+	messageName := expected.ProtoReflect().Descriptor().FullName()
+
+	for _, itor := range message.Respond {
+		if itor == nil {
+			continue
+		} // if
+
+		if itor.MessageName() != messageName {
+			continue
+		} // if
+
+		if result, err := helps.FromProtoAny[proto.Message](itor); err == nil {
+			return result
+		} // if
+	} // for
+
+	return result
+}
+
+// RavenRespondFindT 取得 *msgs.RavenC 回應列表中第一筆符合型別 T 的回應並轉換型別
+func RavenRespondFindT[T proto.Message](input any) (result T) {
 	if input == nil {
 		return result
 	} // if
