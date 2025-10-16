@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.3] - 2025-10-16
+### Changed
+- 更新第三方函式庫
+
 ## [2.0.2] - 2025-10-03
 ### Fixed
 - 修正 redmos 執行 Redis 命令時應該無視回應
