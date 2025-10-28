@@ -51,12 +51,17 @@ func (this *SuiteBasen) TestBase58() {
 		this.Equal(k, result)
 	} // for
 
-	for i := uint64(0); i < testdata.TestCount; i++ {
-		this.NotContains(ToBase58(i), "oOlI")
-	} // for
-
-	_, err := FromBase58("{}")
+	_, err := FromBase58("/")
 	this.NotNil(err)
+
+	this.True(LessBase58("1", "2"))
+	this.False(LessBase58("2", "1"))
+
+	for i := uint64(0); i < testdata.TestCount; i++ {
+		for _, c := range []byte{'o', 'O', 'l', 'I'} {
+			this.NotContains(ToBase58(i), string([]byte{c}))
+		} // for
+	} // for
 }
 
 func (this *SuiteBasen) TestBase80() {
@@ -84,12 +89,16 @@ func (this *SuiteBasen) TestBase80() {
 		this.Equal(k, result)
 	} // for
 
-	_, err := FromBase80("{}")
+	_, err := FromBase80("/")
 	this.NotNil(err)
+
+	this.True(LessBase80("1", "2"))
+	this.False(LessBase80("2", "1"))
 }
 
 func (this *SuiteBasen) TestBaseN() {
 	model := "0123456789"
+	rank := RankBaseN(model)
 	testcase := map[uint64]string{
 		0:         "0",
 		1:         "1",
@@ -104,16 +113,33 @@ func (this *SuiteBasen) TestBaseN() {
 	}
 
 	for k, v := range testcase {
-		this.Equal(v, ToBaseN(model, k))
-		result, err := FromBaseN(model, v)
+		this.Equal(v, ToBaseN(k, model))
+		result, err := FromBaseN(v, model, rank)
 		this.Nil(err)
 		this.Equal(k, result)
 	} // for
 
-	_, err := FromBaseN("", "{}")
+	_, err := FromBaseN("", model, rank)
 	this.NotNil(err)
-	_, err = FromBaseN(model, "")
+	_, err = FromBaseN("/", model, rank)
 	this.NotNil(err)
-	_, err = FromBaseN(model, "{}")
+	_, err = FromBaseN("18446744073709551616", model, rank)
 	this.NotNil(err)
+
+	this.True(LessBaseN("1", "2", model, rank))
+	this.False(LessBaseN("2", "1", model, rank))
+	this.True(LessBaseN("1", "10", model, rank))
+	this.False(LessBaseN("10", "1", model, rank))
+	this.False(LessBaseN("1", "1", model, rank))
+	this.True(LessBaseN("01", "2", model, rank))
+	this.False(LessBaseN("01", "1", model, rank))
+	this.True(LessBaseN("1a", "1b", model, rank))
+	this.False(LessBaseN("1b", "1a", model, rank))
+
+	this.Panics(func() {
+		_ = RankBaseN("0")
+	})
+	this.Panics(func() {
+		_ = RankBaseN("00123456789")
+	})
 }
