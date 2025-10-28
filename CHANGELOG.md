@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.4] - 2025-10-28
+### Added
+- LessBase58 / LessBase80: 提供字串數值排序用比較器, 可直接供 sort.Slice 或 slices.SortFunc 使用
+- RankBaseN(model string): 建立進制字元表對應表
+- LessBaseN: 泛用進制字串比較函式, 支援忽略前導零, 非法字元回退字典序
+### Changed
+- ToBaseN 由 func ToBaseN(model string, input uint64) → func ToBaseN(input uint64, model string)
+- FromBaseN 由 func FromBaseN(model, input string) → func FromBaseN(input, model string, rank *[256]int)
+- ToBase58 / FromBase58 / ToBase80 / FromBase80 改為使用排序表
+- 新增溢位檢查, 防止 uint64 轉換時超界
+- 編碼邏輯改用固定長度陣列, 減少 GC 與動態分配
+
 ## [2.0.3] - 2025-10-16
 ### Changed
 - 更新第三方函式庫
