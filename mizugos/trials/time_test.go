@@ -24,3 +24,17 @@ func (this *SuiteTime) TestWaitTimeout() {
 	WaitTimeout(time.Second)
 	this.GreaterOrEqual(time.Since(now), time.Second)
 }
+
+func (this *SuiteTime) TestWaitFor() {
+	now := time.Now()
+	WaitFor(time.Second, func() bool {
+		return true
+	})
+	this.LessOrEqual(time.Since(now), time.Second)
+
+	now = time.Now()
+	WaitFor(time.Second, func() bool {
+		return false
+	})
+	this.GreaterOrEqual(time.Since(now), time.Second)
+}
