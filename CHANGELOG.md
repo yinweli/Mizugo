@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.6] - 2025-11-20
+### Added
+- StringDuration: 新增支援解析包含時間單位的字串, 轉換為 time.Duration
+### Changed
+- StrPercentage → StringPercentage: 統一命名規則, 回傳格式不變
+
 ## [2.0.5] - 2025-10-31
 ### Added
 - WaitFor: 新增可等待條件函式達成或超時的功能, 支援設定逾時時間
