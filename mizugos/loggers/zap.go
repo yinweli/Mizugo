@@ -23,7 +23,7 @@ import (
 //   - 透過 Get 取得 Retain 來記錄日誌
 //   - 程式結束時呼叫 Finalize 釋放資源
 //
-// 注意事項:
+// 注意:
 //   - ZapRetain 並非執行緒安全, 不可跨執行緒共用
 //   - 每個執行緒應該建立並使用自己的 Retain
 type ZapLogger struct {
