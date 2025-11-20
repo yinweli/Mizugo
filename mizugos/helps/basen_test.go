@@ -46,9 +46,9 @@ func (this *SuiteBasen) TestBase58() {
 
 	for k, v := range testcase {
 		this.Equal(v, ToBase58(k))
-		result, err := FromBase58(v)
+		target, err := FromBase58(v)
 		this.Nil(err)
-		this.Equal(k, result)
+		this.Equal(k, target)
 	} // for
 
 	_, err := FromBase58("/")
@@ -84,9 +84,9 @@ func (this *SuiteBasen) TestBase80() {
 
 	for k, v := range testcase {
 		this.Equal(v, ToBase80(k))
-		result, err := FromBase80(v)
+		target, err := FromBase80(v)
 		this.Nil(err)
-		this.Equal(k, result)
+		this.Equal(k, target)
 	} // for
 
 	_, err := FromBase80("/")
@@ -114,9 +114,9 @@ func (this *SuiteBasen) TestBaseN() {
 
 	for k, v := range testcase {
 		this.Equal(v, ToBaseN(k, model))
-		result, err := FromBaseN(v, model, rank)
+		target, err := FromBaseN(v, model, rank)
 		this.Nil(err)
-		this.Equal(k, result)
+		this.Equal(k, target)
 	} // for
 
 	_, err := FromBaseN("", model, rank)

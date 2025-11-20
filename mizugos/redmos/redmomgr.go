@@ -26,7 +26,7 @@ func NewRedmomgr() *Redmomgr {
 //  2. 呼叫 AddMixed 將已建立的 Major 與 Minor 綁定成混合資料庫
 //  3. 呼叫 GetMajor / GetMinor / GetMixed 取得對應的資料庫物件並操作
 //
-// 注意事項:
+// 注意:
 //   - Mixed 必須同時依賴一個 Major 與一個 Minor, 缺少任一方則無法建立
 //   - Add* 系列函式若遇到重複名稱會回傳錯誤
 //   - Finalize 會關閉並清理所有已註冊的資料庫

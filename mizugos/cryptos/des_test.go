@@ -41,18 +41,18 @@ func (this *SuitePadding) TestRandDesKeyString() {
 
 func (this *SuitePadding) TestPadding() {
 	source := []byte(helps.RandString(99, helps.StrNumberAlpha))
-	result, err := pad(PaddingZero, source, 64)
+	target, err := pad(PaddingZero, source, 64)
 	this.Nil(err)
-	result, err = unpad(PaddingZero, result)
+	target, err = unpad(PaddingZero, target)
 	this.Nil(err)
-	this.Equal(source, result)
+	this.Equal(source, target)
 
 	source = []byte(helps.RandString(99, helps.StrNumberAlpha))
-	result, err = pad(PaddingPKCS7, source, 64)
+	target, err = pad(PaddingPKCS7, source, 64)
 	this.Nil(err)
-	result, err = unpad(PaddingPKCS7, result)
+	target, err = unpad(PaddingPKCS7, target)
 	this.Nil(err)
-	this.Equal(source, result)
+	this.Equal(source, target)
 
 	_, err = pad(-1, nil, 0)
 	this.NotNil(err)
@@ -62,11 +62,11 @@ func (this *SuitePadding) TestPadding() {
 
 func (this *SuitePadding) TestZeroPad() {
 	source := []byte(helps.RandString(99, helps.StrNumberAlpha))
-	result, err := zeroPad(source, 64)
+	target, err := zeroPad(source, 64)
 	this.Nil(err)
-	result, err = zeroUnpad(result)
+	target, err = zeroUnpad(target)
 	this.Nil(err)
-	this.Equal(source, result)
+	this.Equal(source, target)
 
 	_, err = zeroPad(nil, 0)
 	this.NotNil(err)
@@ -74,18 +74,18 @@ func (this *SuitePadding) TestZeroPad() {
 
 func (this *SuitePadding) TestPKCS7Pad() {
 	source := []byte(helps.RandString(99, helps.StrNumberAlpha))
-	result, err := pkcs7Pad(source, 64)
+	target, err := pkcs7Pad(source, 64)
 	this.Nil(err)
-	result, err = pkcs7Unpad(result)
+	target, err = pkcs7Unpad(target)
 	this.Nil(err)
-	this.Equal(source, result)
+	this.Equal(source, target)
 
 	source = []byte(helps.RandString(199, helps.StrNumberAlpha))
-	result, err = pkcs7Pad(source, 64)
+	target, err = pkcs7Pad(source, 64)
 	this.Nil(err)
-	result, err = pkcs7Unpad(result)
+	target, err = pkcs7Unpad(target)
 	this.Nil(err)
-	this.Equal(source, result)
+	this.Equal(source, target)
 
 	_, err = pkcs7Pad(source, 0)
 	this.NotNil(err)
