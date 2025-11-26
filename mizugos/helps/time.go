@@ -468,15 +468,9 @@ func FixedPrev(base, now time.Time, duration time.Duration) time.Time {
 		now = base
 	} // if
 
-	nsec := time.Duration(now.Sub(base).Seconds())
-	dsec := time.Duration(duration.Seconds())
-	quotient := nsec / dsec
-
-	if quotient < 0 {
-		quotient = 0
-	} // if
-
-	return base.Add(quotient * dsec * time.Second)
+	delta := now.Sub(base)
+	quotient := delta / duration
+	return base.Add(quotient * duration)
 }
 
 // FixedNext 取得下個固定間隔時間
@@ -498,17 +492,9 @@ func FixedNext(base, now time.Time, duration time.Duration) time.Time {
 		now = base
 	} // if
 
-	nsec := time.Duration(now.Sub(base).Seconds())
-	dsec := time.Duration(duration.Seconds())
-	quotient := nsec / dsec
-
-	if quotient < 0 {
-		quotient = 1
-	} else {
-		quotient++
-	} // if
-
-	return base.Add(quotient * dsec * time.Second)
+	delta := now.Sub(base)
+	quotient := delta / duration
+	return base.Add((quotient + 1) * duration)
 }
 
 // CalculateDays 計算兩個時間相差幾天

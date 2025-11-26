@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.7] - 2025-11-26
+### Changed
+- 更新第三方函式庫
+- FixedPrev, FixedNext: 優化算法, 改用 `time.Duration` 直接運算取代原本的秒數轉換邏輯, 提升運算效率並確保納秒級別的精度
+
 ## [2.0.6] - 2025-11-20
 ### Added
 - StringDuration: 新增支援解析包含時間單位的字串, 轉換為 time.Duration
