@@ -287,13 +287,15 @@ func (this *ZapStream) KV(key string, value any) Stream {
 
 // Caller 記錄呼叫位置
 func (this *ZapStream) Caller(skip int, simple ...bool) Stream {
-	if pc, _, _, ok := runtime.Caller(skip + 1); ok { // 這裡把skip+1的原因是為了多跳過現在這層, 這樣外部使用時就可以指定0為呼叫起點, 比較直覺
+	if pc, _, _, ok := runtime.Caller(skip + 1); ok { // 這裡把 skip + 1 的原因是為了多跳過現在這層, 這樣外部使用時就可以指定 0 為呼叫起點, 比較直覺
 		caller := filepath.Base(runtime.FuncForPC(pc).Name())
 
 		if len(simple) > 0 && simple[0] {
 			if last := strings.Index(caller, "."); last != -1 && last+1 < len(caller) {
-				caller = strings.Trim(caller[last+1:], "()*")
+				caller = caller[last+1:]
 			} // if
+
+			caller = callerNameReplacer.Replace(caller)
 		} // if
 
 		this.field = append(this.field, zap.String("caller", caller))
@@ -318,3 +320,5 @@ func (this *ZapStream) End() Retain {
 func (this *ZapStream) EndFlush() {
 	this.End().Flush()
 }
+
+var callerNameReplacer = strings.NewReplacer("(", "", ")", "", "*", "") // 用來清理函式名稱的修剪器
