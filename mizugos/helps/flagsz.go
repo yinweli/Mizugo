@@ -18,15 +18,15 @@ const (
 //   - flag=false → 產生 size 個 '0'
 //
 // 若 size <= 0, 回傳空字串
-func FlagszInit(size int32, flag bool) string {
+func FlagszInit(size int, flag bool) string {
 	if size <= 0 {
 		return ""
 	} // if
 
 	if flag {
-		return strings.Repeat(flagszOn, int(size))
+		return strings.Repeat(flagszOn, size)
 	} else {
-		return strings.Repeat(flagszOff, int(size))
+		return strings.Repeat(flagszOff, size)
 	} // if
 }
 
@@ -36,15 +36,15 @@ func FlagszInit(size int32, flag bool) string {
 //   - index < 0  → 直接回傳原字串
 //   - flag=true  → 將該位置設為 '1'
 //   - flag=false → 將該位置設為 '0'
-func FlagszSet(input string, index int32, flag bool) string {
+func FlagszSet(input string, index int, flag bool) string {
 	if index < 0 {
 		return input
 	} // if
 
 	size := len(input)
 
-	if size <= int(index) {
-		input += strings.Repeat(flagszOff, int(index)-size+1)
+	if size <= index {
+		input += strings.Repeat(flagszOff, index-size+1)
 	} // if
 
 	return input[:index] + flagsz(flag) + input[index+1:]
@@ -63,8 +63,8 @@ func FlagszAND(input, other string) string {
 	size := max(len(input), len(other))
 
 	for i := 0; i < size; i++ {
-		a := FlagszGet(input, int32(i))
-		b := FlagszGet(other, int32(i))
+		a := FlagszGet(input, i)
+		b := FlagszGet(other, i)
 		result.WriteString(flagsz(a && b))
 	} // for
 
@@ -79,8 +79,8 @@ func FlagszOR(input, other string) string {
 	size := max(len(input), len(other))
 
 	for i := 0; i < size; i++ {
-		a := FlagszGet(input, int32(i))
-		b := FlagszGet(other, int32(i))
+		a := FlagszGet(input, i)
+		b := FlagszGet(other, i)
 		result.WriteString(flagsz(a || b))
 	} // for
 
@@ -95,8 +95,8 @@ func FlagszXOR(input, other string) string {
 	size := max(len(input), len(other))
 
 	for i := 0; i < size; i++ {
-		a := FlagszGet(input, int32(i))
-		b := FlagszGet(other, int32(i))
+		a := FlagszGet(input, i)
+		b := FlagszGet(other, i)
 		result.WriteString(flagsz(a != b))
 	} // for
 
@@ -106,8 +106,8 @@ func FlagszXOR(input, other string) string {
 // FlagszGet 取得旗標字串在指定索引位置的狀態
 //   - 若 index 在範圍內且為 '1' → 回傳 true
 //   - 其他情況 → 回傳 false
-func FlagszGet(input string, index int32) bool {
-	return index >= 0 && int(index) < len(input) && input[index] == FlagszOnRune
+func FlagszGet(input string, index int) bool {
+	return index >= 0 && index < len(input) && input[index] == FlagszOnRune
 }
 
 // FlagszAny 判斷字串中是否至少有一個旗標為開啟 (至少一個 '1')
@@ -126,8 +126,8 @@ func FlagszNone(input string) bool {
 }
 
 // FlagszCount 計算字串中指定旗標的出現次數
-func FlagszCount(input string, flag bool) int32 {
-	return int32(strings.Count(input, flagsz(flag)))
+func FlagszCount(input string, flag bool) int {
+	return strings.Count(input, flagsz(flag))
 }
 
 // flagsz 取得旗標值代表的字串

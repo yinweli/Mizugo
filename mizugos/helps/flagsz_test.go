@@ -105,6 +105,6 @@ func (this *SuiteFlagsz) TestFlagszNone() {
 
 func (this *SuiteFlagsz) TestFlagszCount() {
 	target := FlagszSet("", 1, true)
-	this.Equal(int32(1), FlagszCount(target, true))
-	this.Equal(int32(1), FlagszCount(target, false))
+	this.Equal(1, FlagszCount(target, true))
+	this.Equal(1, FlagszCount(target, false))
 }
