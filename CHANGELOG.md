@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.9] - 2025-12-01
+### Changed
+- FlagszInit, FlagszSet, FlagszGet, FlagszCount: 參數與回傳值型態由 `int32` 調整為 `int`
+- FlagszAND, FlagszOR, FlagszXOR: 內部邏輯優化, 移除對於 `int32` 的強制轉型, 統一使用 `int` 以符合 Go 標準庫規範
+
 ## [2.0.8] - 2025-11-28
 ### Fixed
 - 修正 `ZapStream.Caller` 在處理指標接收器時的函式名稱格式化錯誤

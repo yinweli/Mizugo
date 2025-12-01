@@ -56,15 +56,15 @@ type Optszf func(option string) string
 
 // On 開啟選項
 func (this Optsz) On(option string) string {
-	return FlagszSet(option, int32(this), true)
+	return FlagszSet(option, int(this), true)
 }
 
 // Off 關閉選項
 func (this Optsz) Off(option string) string {
-	return FlagszSet(option, int32(this), false)
+	return FlagszSet(option, int(this), false)
 }
 
 // Get 取得選項是否開啟
 func (this Optsz) Get(option string) bool {
-	return FlagszGet(option, int32(this))
+	return FlagszGet(option, int(this))
 }
