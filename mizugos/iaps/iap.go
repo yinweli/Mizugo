@@ -4,6 +4,12 @@ import (
 	"time"
 )
 
+// IAPResult IAP 驗證結果資料
+type IAPResult struct {
+	Err  error     // 驗證結果, 若為 nil 表示驗證成功, 否則失敗
+	Time time.Time // 購買時間
+}
+
 const (
 	capacity   = 10000                                         // 驗證通道容量
 	retry      = 3                                             // 驗證重試次數

@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.10] - 2025-12-29
+### Changed
+- IAPApple, IAPGoogle, IAPOneStore: 統一驗證結果資料結構, 移除各自獨立的 `Result` 定義, 全面改用共用的 `IAPResult` 作為 `Verify` 函式的回傳型態
+
 ## [2.0.9] - 2025-12-01
 ### Changed
 - FlagszInit, FlagszSet, FlagszGet, FlagszCount: 參數與回傳值型態由 `int32` 調整為 `int`

@@ -61,7 +61,7 @@ type testIAPGoogleClient struct {
 func (this *testIAPGoogleClient) VerifyProduct(context.Context, string, string, string) (*androidpublisher.ProductPurchase, error) {
 	if this.verify {
 		return &androidpublisher.ProductPurchase{}, nil
-	} else {
-		return nil, fmt.Errorf("fail")
 	} // if
+
+	return nil, fmt.Errorf("fail")
 }

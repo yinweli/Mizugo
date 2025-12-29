@@ -33,12 +33,6 @@ type IAPGoogleConfig struct {
 	Bundle string `yaml:"bundle"` // App 的套件名稱(PackageName)
 }
 
-// IAPGoogleResult Google IAP 驗證結果資料
-type IAPGoogleResult struct {
-	Err  error     // 驗證結果, 若為nil表示驗證成功, 否則失敗
-	Time time.Time // 購買時間
-}
-
 // IAPGoogleClient Google IAP 驗證客戶端介面
 type IAPGoogleClient interface {
 	VerifyProduct(context.Context, string, string, string) (*androidpublisher.ProductPurchase, error)
@@ -46,9 +40,9 @@ type IAPGoogleClient interface {
 
 // iapGoogle Google IAP 驗證資料
 type iapGoogle struct {
-	productID string               // 產品編號
-	receipt   string               // 購買憑證(PurchaseToken)
-	result    chan IAPGoogleResult // 驗證結果通道
+	productID string         // 產品編號
+	receipt   string         // 購買憑證(PurchaseToken)
+	result    chan IAPResult // 驗證結果通道
 }
 
 // Initialize 初始化處理
@@ -81,7 +75,7 @@ func (this *IAPGoogle) Finalize() {
 // Verify 驗證憑證
 //   - productID: Google 內的產品編號
 //   - receipt: 購買憑證
-func (this *IAPGoogle) Verify(productID, receipt string) IAPGoogleResult {
+func (this *IAPGoogle) Verify(productID, receipt string) IAPResult {
 	if this.verify == nil {
 		return this.fail(fmt.Errorf("iapGoogle verify: close"))
 	} // if
@@ -89,7 +83,7 @@ func (this *IAPGoogle) Verify(productID, receipt string) IAPGoogleResult {
 	result := &iapGoogle{
 		productID: productID,
 		receipt:   receipt,
-		result:    make(chan IAPGoogleResult, 1),
+		result:    make(chan IAPResult, 1),
 	}
 
 	// 嘗試送出驗證請求, 若通道塞滿則等待直到逾時
@@ -126,7 +120,7 @@ func (this *IAPGoogle) execute(verify chan *iapGoogle) {
 			time.Sleep(interval) // 由於驗證 API 有速率限制, 所以需要等待後才能繼續下一個驗證
 			ctx, cancel := context.WithTimeout(context.Background(), timeout)
 			result, err := this.client.VerifyProduct(ctx, this.config.Bundle, itor.productID, itor.receipt)
-			cancel() // 避免cancel洩漏
+			cancel() // 避免 cancel 洩漏
 
 			if err != nil {
 				channelTry(itor.result, this.fail(fmt.Errorf("iapGoogle execute: %w", err)))
@@ -139,8 +133,8 @@ func (this *IAPGoogle) execute(verify chan *iapGoogle) {
 }
 
 // succ 建立成功的驗證結果
-func (this *IAPGoogle) succ(millisecond int64) IAPGoogleResult {
-	return IAPGoogleResult{
+func (this *IAPGoogle) succ(millisecond int64) IAPResult {
+	return IAPResult{
 		Time: time.Unix(
 			millisecond/1000, //nolint:mnd
 			(millisecond%1000)*int64(time.Millisecond),
@@ -149,8 +143,8 @@ func (this *IAPGoogle) succ(millisecond int64) IAPGoogleResult {
 }
 
 // fail 建立失敗的驗證結果
-func (this *IAPGoogle) fail(err error) IAPGoogleResult {
-	return IAPGoogleResult{
+func (this *IAPGoogle) fail(err error) IAPResult {
+	return IAPResult{
 		Err: err,
 	}
 }

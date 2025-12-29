@@ -35,12 +35,6 @@ type IAPAppleConfig struct {
 	Sandbox bool   `yaml:"sandbox"` // 是否使用沙盒環境
 }
 
-// IAPAppleResult Apple IAP 驗證結果資料
-type IAPAppleResult struct {
-	Err  error     // 驗證結果, 若為 nil 表示驗證成功, 否則失敗
-	Time time.Time // 購買時間
-}
-
 // IAPAppleClient Apple IAP 驗證客戶端介面
 type IAPAppleClient interface {
 	GetTransactionInfo(context.Context, string) (*api.TransactionInfoResponse, error)
@@ -49,11 +43,11 @@ type IAPAppleClient interface {
 
 // iapApple Apple IAP 驗證資料
 type iapApple struct {
-	productID string              // 產品編號
-	receipt   string              // 購買憑證(對應 Apple TransactionID)
-	retry     int                 // 重試次數
-	retryErr  error               // 重試錯誤
-	result    chan IAPAppleResult // 驗證結果通道
+	productID string         // 產品編號
+	receipt   string         // 購買憑證(對應 Apple TransactionID)
+	retry     int            // 重試次數
+	retryErr  error          // 重試錯誤
+	result    chan IAPResult // 驗證結果通道
 }
 
 // Initialize 初始化處理
@@ -90,7 +84,7 @@ func (this *IAPApple) Finalize() {
 // Verify 驗證憑證
 //   - productID: Apple 內的產品編號
 //   - receipt: 購買憑證(TransactionID)
-func (this *IAPApple) Verify(productID, receipt string) IAPAppleResult {
+func (this *IAPApple) Verify(productID, receipt string) IAPResult {
 	if this.verify == nil {
 		return this.fail(fmt.Errorf("iapApple verify: close"))
 	} // if
@@ -98,7 +92,7 @@ func (this *IAPApple) Verify(productID, receipt string) IAPAppleResult {
 	result := &iapApple{
 		productID: productID,
 		receipt:   receipt,
-		result:    make(chan IAPAppleResult, 1),
+		result:    make(chan IAPResult, 1),
 	}
 
 	// 嘗試送出驗證請求, 若通道塞滿則等待直到逾時
@@ -135,7 +129,7 @@ func (this *IAPApple) execute(verify chan *iapApple) {
 			time.Sleep(interval) // 由於驗證 API 有速率限制, 所以需要等待後才能繼續下一個驗證
 			ctx, cancel := context.WithTimeout(this.ctx, timeout)
 			respond, err := this.client.GetTransactionInfo(ctx, itor.receipt)
-			cancel() // 避免cancel洩漏
+			cancel() // 避免 cancel 洩漏
 
 			// 驗證 API 有時會不明原因錯誤, 這裡採用重試策略
 			if err != nil {
@@ -181,8 +175,8 @@ func (this *IAPApple) execute(verify chan *iapApple) {
 }
 
 // succ 建立成功的驗證結果
-func (this *IAPApple) succ(millisecond int64) IAPAppleResult {
-	return IAPAppleResult{
+func (this *IAPApple) succ(millisecond int64) IAPResult {
+	return IAPResult{
 		Time: time.Unix(
 			millisecond/1000, //nolint:mnd
 			(millisecond%1000)*int64(time.Millisecond),
@@ -191,8 +185,8 @@ func (this *IAPApple) succ(millisecond int64) IAPAppleResult {
 }
 
 // fail 建立失敗的驗證結果
-func (this *IAPApple) fail(err error) IAPAppleResult {
-	return IAPAppleResult{
+func (this *IAPApple) fail(err error) IAPResult {
+	return IAPResult{
 		Err: err,
 	}
 }
