@@ -10,7 +10,7 @@ namespace Mizugo
         /// <summary>
         /// 睡眠時間
         /// </summary>
-        public readonly static TimeSpan sleeptime = TimeSpan.FromSeconds(0.2);
+        public static readonly TimeSpan sleeptime = TimeSpan.FromSeconds(0.2);
 
         /// <summary>
         /// 記錄訊息

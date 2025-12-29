@@ -86,14 +86,14 @@ func (this *testIAPOneStoreClient) Do(req *http.Request) (*http.Response, error)
 				Body:       io.NopCloser(body),
 				Header:     make(http.Header),
 			}, nil
-		} else {
-			_, _ = fmt.Fprintf(body, `{"error":{"code":"401","message":"invalid client"}}`)
-			return &http.Response{
-				StatusCode: http.StatusUnauthorized,
-				Body:       io.NopCloser(body),
-				Header:     make(http.Header),
-			}, nil
 		} // if
+
+		_, _ = fmt.Fprintf(body, `{"error":{"code":"401","message":"invalid client"}}`)
+		return &http.Response{
+			StatusCode: http.StatusUnauthorized,
+			Body:       io.NopCloser(body),
+			Header:     make(http.Header),
+		}, nil
 	} // if
 
 	if strings.Contains(req.URL.Path, "/purchases/inapp") {
@@ -104,14 +104,14 @@ func (this *testIAPOneStoreClient) Do(req *http.Request) (*http.Response, error)
 				Body:       io.NopCloser(body),
 				Header:     make(http.Header),
 			}, nil
-		} else {
-			_, _ = fmt.Fprintf(body, `{"error":{"code":"404","message":"not found"}}`)
-			return &http.Response{
-				StatusCode: http.StatusNotFound,
-				Body:       io.NopCloser(body),
-				Header:     make(http.Header),
-			}, nil
 		} // if
+
+		_, _ = fmt.Fprintf(body, `{"error":{"code":"404","message":"not found"}}`)
+		return &http.Response{
+			StatusCode: http.StatusNotFound,
+			Body:       io.NopCloser(body),
+			Header:     make(http.Header),
+		}, nil
 	} // if
 
 	return nil, fmt.Errorf("unexpected request: %v", req.URL.Path)

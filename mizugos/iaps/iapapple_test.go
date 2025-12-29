@@ -103,9 +103,9 @@ type testIAPAppleClient struct {
 func (this *testIAPAppleClient) GetTransactionInfo(context.Context, string) (*api.TransactionInfoResponse, error) {
 	if this.info {
 		return &api.TransactionInfoResponse{}, nil
-	} else {
-		return nil, fmt.Errorf("fail")
 	} // if
+
+	return nil, fmt.Errorf("fail")
 }
 
 func (this *testIAPAppleClient) ParseSignedTransaction(string) (*api.JWSTransaction, error) {
@@ -114,7 +114,7 @@ func (this *testIAPAppleClient) ParseSignedTransaction(string) (*api.JWSTransact
 			ProductID:     this.productID,
 			TransactionID: this.transactionID,
 		}, nil
-	} else {
-		return nil, fmt.Errorf("fail")
 	} // if
+
+	return nil, fmt.Errorf("fail")
 }

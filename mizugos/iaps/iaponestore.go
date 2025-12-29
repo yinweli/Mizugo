@@ -41,12 +41,6 @@ type IAPOneStoreConfig struct {
 	Sandbox      bool   `yaml:"sandbox"`      // 是否使用沙盒環境
 }
 
-// IAPOneStoreResult OneStore IAP 驗證結果資料
-type IAPOneStoreResult struct {
-	Err  error     // 驗證結果, 若為nil表示驗證成功, 否則失敗
-	Time time.Time // 購買時間
-}
-
 // IAPOneStoreClient OneStore IAP 驗證客戶端介面
 type IAPOneStoreClient interface {
 	Do(*http.Request) (*http.Response, error)
@@ -54,11 +48,11 @@ type IAPOneStoreClient interface {
 
 // iapOneStore OneStore IAP 驗證資料
 type iapOneStore struct {
-	productID string                 // 產品編號
-	receipt   string                 // 購買憑證
-	retry     int                    // 重試次數
-	retryErr  error                  // 重試錯誤
-	result    chan IAPOneStoreResult // 驗證結果通道
+	productID string         // 產品編號
+	receipt   string         // 購買憑證
+	retry     int            // 重試次數
+	retryErr  error          // 重試錯誤
+	result    chan IAPResult // 驗證結果通道
 }
 
 // iapOneStoreToken OneStore IAP 獲取權杖資料
@@ -116,7 +110,7 @@ func (this *IAPOneStore) Finalize() {
 // Verify 驗證憑證
 //   - productID: OneStore 內的產品編號
 //   - receipt: 購買憑證
-func (this *IAPOneStore) Verify(productID, receipt string) IAPOneStoreResult {
+func (this *IAPOneStore) Verify(productID, receipt string) IAPResult {
 	if this.verify == nil {
 		return this.fail(fmt.Errorf("iapOneStore verify: close"))
 	} // if
@@ -124,7 +118,7 @@ func (this *IAPOneStore) Verify(productID, receipt string) IAPOneStoreResult {
 	result := &iapOneStore{
 		productID: productID,
 		receipt:   receipt,
-		result:    make(chan IAPOneStoreResult, 1),
+		result:    make(chan IAPResult, 1),
 	}
 
 	// 嘗試送出驗證請求, 若通道塞滿則等待直到逾時
@@ -161,7 +155,7 @@ func (this *IAPOneStore) execute(verify chan *iapOneStore) {
 			time.Sleep(interval) // 由於驗證 API 有速率限制, 所以需要等待後才能繼續下一個驗證
 			ctx, cancel := context.WithTimeout(this.ctx, timeout)
 			err := this.doToken(ctx)
-			cancel() // 避免cancel洩漏
+			cancel() // 避免 cancel 洩漏
 
 			if err != nil {
 				itor.retry++
@@ -185,7 +179,7 @@ func (this *IAPOneStore) execute(verify chan *iapOneStore) {
 
 			ctx, cancel = context.WithTimeout(this.ctx, timeout)
 			result := this.doPurchase(ctx, itor.productID, itor.receipt)
-			cancel() // 避免cancel洩漏
+			cancel() // 避免 cancel 洩漏
 			channelTry(itor.result, result)
 		} // select
 	} // for
@@ -228,17 +222,7 @@ func (this *IAPOneStore) doToken(ctx context.Context) error {
 		return fmt.Errorf("iapOneStore token: %w", err)
 	} // if
 
-	if respond.StatusCode == http.StatusOK {
-		result := &iapOneStoreToken{}
-
-		if err = json.Unmarshal(body, result); err != nil {
-			return fmt.Errorf("iapOneStore token: %w", err)
-		} // if
-
-		this.token = result.Token
-		this.tokenExpire = this.getExpire(now, result.Expire)
-		return nil
-	} else {
+	if respond.StatusCode != http.StatusOK {
 		result := &iapOneStoreError{}
 
 		if err = json.Unmarshal(body, result); err != nil {
@@ -249,10 +233,20 @@ func (this *IAPOneStore) doToken(ctx context.Context) error {
 		this.tokenExpire = now
 		return fmt.Errorf("iapOneStore token: [%v] %v", result.Error.Code, result.Error.Message)
 	} // if
+
+	result := &iapOneStoreToken{}
+
+	if err = json.Unmarshal(body, result); err != nil {
+		return fmt.Errorf("iapOneStore token: %w", err)
+	} // if
+
+	this.token = result.Token
+	this.tokenExpire = this.getExpire(now, result.Expire)
+	return nil
 }
 
 // doPurchase 執行驗證查詢
-func (this *IAPOneStore) doPurchase(ctx context.Context, productID, receipt string) IAPOneStoreResult {
+func (this *IAPOneStore) doPurchase(ctx context.Context, productID, receipt string) IAPResult {
 	api := this.getAPI(this.config.Sandbox) + fmt.Sprintf("/v7/apps/%v/purchases/inapp/products/%v/%v", this.config.ClientID, productID, receipt)
 	request, err := http.NewRequestWithContext(ctx, "GET", api, http.NoBody)
 
@@ -306,18 +300,18 @@ func (this *IAPOneStore) doPurchase(ctx context.Context, productID, receipt stri
 func (this *IAPOneStore) getAPI(sandbox bool) string {
 	if sandbox {
 		return "https://sbpp.onestore.co.kr" // 開發環境
-	} else {
-		return "https://iap-apis.onestore.net" // 正式環境
 	} // if
+
+	return "https://iap-apis.onestore.net" // 正式環境
 }
 
 // getMKT 取得市場分類代碼
 func (this *IAPOneStore) getMKT(global bool) string {
 	if global {
 		return "MKT_GLB" // 全球市場, 伺服器API回應提供的時間標準為 UTC+0
-	} else {
-		return "MKT_ONE" // 韓國市場, 伺服器API回應提供的時間標準為 UTC+9
 	} // if
+
+	return "MKT_ONE" // 韓國市場, 伺服器API回應提供的時間標準為 UTC+9
 }
 
 // getExpire 取得權杖逾期時間
@@ -327,8 +321,8 @@ func (this *IAPOneStore) getExpire(now time.Time, expire int) time.Time {
 }
 
 // succ 建立成功的驗證結果
-func (this *IAPOneStore) succ(millisecond int64) IAPOneStoreResult {
-	return IAPOneStoreResult{
+func (this *IAPOneStore) succ(millisecond int64) IAPResult {
+	return IAPResult{
 		Time: time.Unix(
 			millisecond/1000, //nolint:mnd
 			(millisecond%1000)*int64(time.Millisecond),
@@ -337,8 +331,8 @@ func (this *IAPOneStore) succ(millisecond int64) IAPOneStoreResult {
 }
 
 // fail 建立失敗的驗證結果
-func (this *IAPOneStore) fail(err error) IAPOneStoreResult {
-	return IAPOneStoreResult{
+func (this *IAPOneStore) fail(err error) IAPResult {
+	return IAPResult{
 		Err: err,
 	}
 }
