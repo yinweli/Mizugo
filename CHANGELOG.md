@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.12] - 2026-01-06
+### Added
+- Min, Max: 用於安全地取得切片中的最小/最大值, 支援空切片時回傳 fallback 以避免 Panic
+
 ## [2.0.11] - 2025-12-29
 ### Changed
 - 更新第三方函式庫
