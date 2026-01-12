@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.13] - 2026-01-12
+### Changed
+- 隨機數生成邏輯升級為 `math/rand/v2` 標準庫, 移除全域鎖機制, 改用 v2 的全域函數以提升並發效能與安全性
+- StrNumberAlpha: 組合順序調整為 `數字` + `大寫` + `小寫`, 以符合 ASCII 排序規則
+### Removed
+- RandSeed, RandSeedTime: 移除
+
 ## [2.0.12] - 2026-01-06
 ### Added
 - Min, Max: 用於安全地取得切片中的最小/最大值, 支援空切片時回傳 fallback 以避免 Panic
