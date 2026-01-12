@@ -26,11 +26,6 @@ func (this *SuiteRand) TearDownSuite() {
 	trials.Restore(this.Catalog)
 }
 
-func (this *SuiteRand) TestRandSeed() {
-	RandSeed(0)
-	RandSeedTime()
-}
-
 func (this *SuiteRand) TestRandInt() {
 	target := RandInt()
 	this.Positive(target)
@@ -73,8 +68,10 @@ func (this *SuiteRand) TestRandString() {
 	for _, itor := range target {
 		this.Contains(StrNumberAlpha, string(itor))
 	} // for
+}
 
-	target = RandStringDefault()
+func (this *SuiteRand) TestRandStringDefault() {
+	target := RandStringDefault()
 	this.Len(target, 10)
 
 	for _, itor := range target {

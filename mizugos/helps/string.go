@@ -11,10 +11,10 @@ import (
 )
 
 const (
-	StrAlphaLower  = "abcdefghijklmnopqrstuvwxyz"              // 小寫英文字母列表
-	StrAlphaUpper  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"              // 大寫英文字母列表
 	StrNumber      = "0123456789"                              // 數字列表
-	StrNumberAlpha = StrAlphaLower + StrAlphaUpper + StrNumber // 小寫英文字母 + 大寫英文字母 + 數字列表
+	StrAlphaUpper  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"              // 大寫英文字母列表
+	StrAlphaLower  = "abcdefghijklmnopqrstuvwxyz"              // 小寫英文字母列表
+	StrNumberAlpha = StrNumber + StrAlphaUpper + StrAlphaLower // 數字列表 + 大寫英文字母列表 + 小寫英文字母列表
 )
 
 // StringDisplayLength 計算字串的顯示長度
