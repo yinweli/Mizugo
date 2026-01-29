@@ -34,8 +34,10 @@ func (this *SuiteIAPApple) TestIAPApple() {
 	target := NewIAPApple(&IAPAppleConfig{})
 	this.NotNil(target)
 	this.Nil(target.Initialize())
+	this.NotNil(target.Client())
 	target.Finalize()
 	this.Nil(target.Initialize(&testIAPAppleClient{}))
+	this.NotNil(target.Client())
 	target.Finalize()
 }
 

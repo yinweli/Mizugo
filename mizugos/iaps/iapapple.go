@@ -78,6 +78,7 @@ func (this *IAPApple) Finalize() {
 	} // if
 
 	this.signal.Wait()
+	this.client = nil
 	this.verify = nil
 }
 
@@ -114,6 +115,11 @@ func (this *IAPApple) Verify(productID, receipt string) IAPResult {
 	case r := <-result.result:
 		return r
 	} // select
+}
+
+// Client 取得驗證客戶端
+func (this *IAPApple) Client() IAPAppleClient {
+	return this.client
 }
 
 // execute 執行驗證
