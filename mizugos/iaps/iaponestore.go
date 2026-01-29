@@ -142,6 +142,11 @@ func (this *IAPOneStore) Verify(productID, receipt string) IAPResult {
 	} // select
 }
 
+// Client 取得驗證客戶端
+func (this *IAPOneStore) Client() IAPOneStoreClient {
+	return this.client
+}
+
 // execute 執行驗證
 func (this *IAPOneStore) execute(verify chan *iapOneStore) {
 	defer this.signal.Done()

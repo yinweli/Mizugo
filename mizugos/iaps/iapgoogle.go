@@ -69,6 +69,7 @@ func (this *IAPGoogle) Finalize() {
 	} // if
 
 	this.signal.Wait()
+	this.client = nil
 	this.verify = nil
 }
 
@@ -105,6 +106,11 @@ func (this *IAPGoogle) Verify(productID, receipt string) IAPResult {
 	case r := <-result.result:
 		return r
 	} // select
+}
+
+// Client 取得驗證客戶端
+func (this *IAPGoogle) Client() IAPGoogleClient {
+	return this.client
 }
 
 // execute 執行驗證

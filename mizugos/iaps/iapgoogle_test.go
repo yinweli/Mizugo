@@ -33,6 +33,7 @@ func (this *SuiteIAPGoogle) TestIAPGoogle() {
 	target := NewIAPGoogle(&IAPGoogleConfig{})
 	this.NotNil(target)
 	this.Nil(target.Initialize(&testIAPGoogleClient{}))
+	this.NotNil(target.Client())
 	target.Finalize()
 }
 

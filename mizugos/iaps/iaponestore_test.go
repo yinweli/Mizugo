@@ -35,8 +35,10 @@ func (this *SuiteIAPOneStore) TestIAPOneStore() {
 	target := NewIAPOneStore(&IAPOneStoreConfig{})
 	this.NotNil(target)
 	this.Nil(target.Initialize())
+	this.NotNil(target.Client())
 	target.Finalize()
 	this.Nil(target.Initialize(&testIAPOneStoreClient{}))
+	this.NotNil(target.Client())
 	target.Finalize()
 }
 
