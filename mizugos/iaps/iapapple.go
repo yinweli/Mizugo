@@ -29,7 +29,7 @@ type IAPApple struct {
 // IAPAppleConfig Apple IAP 驗證設定資料
 type IAPAppleConfig struct {
 	Key     string `yaml:"key"`     // 密鑰字串
-	KeyID   string `yaml:"keyID"`   // 密鑰ID
+	KeyID   string `yaml:"keyID"`   // 密鑰 ID
 	Bundle  string `yaml:"bundle"`  // 軟體包名稱(BundleID)
 	Issuer  string `yaml:"issuer"`  // 發行人名稱
 	Sandbox bool   `yaml:"sandbox"` // 是否使用沙盒環境
