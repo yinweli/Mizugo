@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
+	"time"
 
 	"github.com/otiai10/copy"
 )
@@ -90,15 +91,28 @@ func Prepare(work string, from ...string) Catalog {
 //
 // 執行順序
 //   - 切換回原始路徑
-//   - 刪除工作目錄及其所有內容
+//   - 刪除工作目錄及其所有內容(若刪除失敗會重試最多10次)
 func Restore(catalog Catalog) {
+	const retry = 10
+	const sleep = 100 * time.Millisecond
+
 	if err := os.Chdir(catalog.root); err != nil {
 		panic(err)
 	} // if
 
-	if err := os.RemoveAll(catalog.work); err != nil {
-		panic(err)
-	} // if
+	for i := 0; ; i++ {
+		err := os.RemoveAll(catalog.work)
+
+		if err == nil {
+			return
+		} // if
+
+		if i > retry {
+			panic(err)
+		} // if
+
+		time.Sleep(sleep)
+	} // for
 }
 
 // Root 取得呼叫端檔案所在的目錄路徑; 若無法取得呼叫端資訊，會觸發 panic
