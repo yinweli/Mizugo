@@ -17,6 +17,11 @@ func (this *Save) SetSave() {
 	this.save = true
 }
 
+// ClrSave 清除儲存旗標
+func (this *Save) ClrSave() {
+	this.save = false
+}
+
 // GetSave 取得儲存旗標
 func (this *Save) GetSave() bool {
 	return this.save

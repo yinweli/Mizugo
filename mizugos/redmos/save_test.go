@@ -31,4 +31,6 @@ func (this *SuiteSave) TestSave() {
 	this.NotNil(target)
 	target.SetSave()
 	this.True(target.GetSave())
+	target.ClrSave()
+	this.False(target.GetSave())
 }
