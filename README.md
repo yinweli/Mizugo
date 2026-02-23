@@ -4,9 +4,11 @@
 [![codecov](https://codecov.io/gh/yinweli/Mizugo/branch/main/graph/badge.svg?token=LK5HL58LSN)](https://codecov.io/gh/yinweli/Mizugo)
 
 # Mizugo
+
 [Mizugo] 是一款使用 [Go] 語言開發的遊戲伺服器框架, 包括 TCP 網路, 通訊協議, 資料庫組件等
 
 # 分支列表
+
 伺服器專案中的主要 Git 分支說明如下
 
 | 分支                | 說明                                                         |
@@ -17,27 +19,36 @@
 | proto-unity         | protobuf組件分支, 提供給 [Unity] 的 [Package Manager] 安裝用 |
 
 # 系統需求
+
 - [Go] 1.24+
 - [Proto] v3
 
 # 如何安裝
+
 - 確保在您的系統上安裝了 [Go] 語言
 - 確保在您的系統上安裝了 [Protoc]
 - 安裝 [Protoc-Go], 請在終端機執行以下命令
+
   ```sh
   go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
   ```
+
 - 在終端機中執行以下命令以安裝最新版本
+
   ```sh
   go get github.com/yinweli/Mizugo/v2
   ```
+
 - 如果需要安裝 v1 的 [Mizugo], 可以使用以下命令安裝
+
   ```sh
   go get github.com/yinweli/Mizugo
   ```
 
 # 伺服器組件
+
 下面是一個簡化的伺服器程式範例, 如果需要更詳細的範例, 請造訪 `support/test-server/` 目錄
+
 ```go
 func main() {
     defer func() {
@@ -63,11 +74,13 @@ func main() {
 ```
 
 # 客戶端組件
+
 請參閱 [客戶端組件說明](support/client-unity/Packages/com.fouridstudio.mizugo-client-unity/README.md)
 
 請參閱 [Proto組件說明](support/client-unity/Packages/com.fouridstudio.mizugo-proto-unity/README.md)
 
 # 管理器
+
 [Mizugo] 擁有多種功能, 這些功能透過不同的管理器提供, 使用者可以根據自己的需求選擇使用這些管理器
 
 以下提供了各管理器的基本資訊, 包括它們的軟體包與類別名稱, 以及所在的位置
@@ -82,6 +95,7 @@ func main() {
 | 執行緒池管理器 | pools.Poolmgr       | mizugos.Pool   |
 
 # 訊息處理器
+
 [Mizugo] 提供多種訊息處理器, 使用者可以根據自己的需求選擇使用這些訊息處理器
 
 以下提供了各訊息處理器的基本資訊, 包括它們的軟體包與類別名稱
@@ -93,6 +107,7 @@ func main() {
 | Raven 訊息處理器 | procs.Raven      |
 
 # 專案目錄說明
+
 | 目錄                   | 說明                 |
 |:-----------------------|:---------------------|
 | mizugos                | Mizugo 程式碼        |
@@ -119,6 +134,7 @@ func main() {
 | testdata               | 測試資料             |
 
 # 軟體包階層
+
 | 階層名稱 | 軟體包名稱      |
 |:---------|:----------------|
 | 測試層   | testdata        |
@@ -143,6 +159,7 @@ func main() {
 相同階層的不能互相引用
 
 # Task命令說明
+
 輸入 `task 命令名稱` 來執行命令, 如果無法使用, 表示還沒有安裝 [Task] (安裝方式請見其官方文件)
 
 | 命令名稱       | 命令說明         |
@@ -157,6 +174,7 @@ func main() {
 | install        | 安裝工具         |
 
 # JetBrains 感謝與授權標示
+
 [Mizugo] 使用了 JetBrains 的 Goland 的免費開發許可, 在此表示感謝
 
 <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo (Main) logo." style="width:200px;">
