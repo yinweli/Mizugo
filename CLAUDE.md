@@ -11,13 +11,11 @@ Mizugo is a game server framework in Go (module: `github.com/yinweli/Mizugo/v2`)
 ### Task runner (preferred)
 
 ```bash
-task lint    # Format code (gofmt, goimports) and run golangci-lint
-task test    # Run all unit tests with coverage
-task bench   # Run benchmark tests
+task lint    # Format Go (gofmt, goimports), markdown, YAML, and C# code; run golangci-lint
 task db      # Start Redis and MongoDB via Docker (required for integration tests)
-task stop    # Stop Docker containers
 task proto   # Generate protobuf code
-task install # Install dev tools (golangci-lint, buf, goimports, etc.)
+task subtree # Update git subtree branches (proto-unity, client-unity, client-unity-sample)
+task install # Install dev tools (golangci-lint, buf, goimports, csharpier, prettier)
 ```
 
 ### Direct Go commands
@@ -124,7 +122,7 @@ trials.ProtoBuild(...)           // compile proto files during tests
 
 ## Linter configuration
 
-`.golangci.yml` enables 25+ linters. Notable limits: line length 200, function length 200 lines / 150 statements, cyclomatic complexity 50, duplication threshold 400 LOC. Test files are exempt from MND and dupl checks.
+`.golangci.yml` enables 25+ linters. Notable limits: line length 300, function length 200 lines / 150 statements, cyclomatic complexity 50, duplication threshold 400 LOC. Test files are exempt from MND and dupl checks.
 
 ## Code Style Requirements
 
