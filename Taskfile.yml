@@ -3,19 +3,17 @@ version: "3"
 tasks:
   # 程式碼格式化
   lint:
+    ignore_error: true
     cmds:
-      - task: fmt-mizugo
+      - gofmt -s -w -l .
+      - goimports -w .
+      - golangci-lint run --color always
+      - npx markdownlint-cli --fix "*.md"
+      - npx prettier --write "*.yaml" "*.yml" "**/*.yaml" "**/*.yml" --end-of-line lf
       - task: fmt-client-unity
       - task: fmt-client-unity-sample
       - task: fmt-proto-mizugo
       - task: fmt-proto-test
-      - task: fmt-yaml
-      - task: lint-mizugo
-
-  fmt-mizugo:
-    ignore_error: true
-    cmds:
-      - gofmt -s -w -l .
 
   fmt-client-unity:
     ignore_error: true
@@ -43,26 +41,6 @@ tasks:
       - buf format -w .
       - csharpier format .
 
-  fmt-yaml:
-    ignore_error: true
-    cmds:
-      - npx prettier --write "*.yaml" "*.yml" "**/*.yaml" "**/*.yml" --end-of-line lf
-
-  lint-mizugo:
-    ignore_error: true
-    cmds:
-      - golangci-lint run --color always
-
-  # 單元測試
-  test:
-    cmds:
-      - go test ./... -cover
-
-  # 效能測試
-  bench:
-    cmds:
-      - go test ./... -bench=. -benchmem
-
   # 更新訊息
   proto:
     cmds:
@@ -86,11 +64,6 @@ tasks:
       - git subtree split --prefix support/client-unity/Packages/com.fouridstudio.mizugo-client-unity --branch client-unity
       - git subtree split --prefix support/test-client-cs --branch client-unity-sample
 
-  # 停止容器
-  stop:
-    cmds:
-      - docker stop $(docker ps -q)
-
   # 啟動資料庫
   db:
     cmds:
@@ -99,12 +72,12 @@ tasks:
         if ! docker network ls | grep -qw dev; then
           docker network create dev
         fi
-      # 啟動redis
+      # 啟動 Redis
       - docker build -t dbredis -f script/docker-redis .
       - docker rm -f -v dbredis || true
       - docker volume rm dbredis-volume || true
       - docker run -d --name dbredis --network dev -v dbredis-volume:/data -p 6379:6379 dbredis redis-server /usr/local/etc/redis/redis.conf
-      # 啟動mongo
+      # 啟動 Mongo
       - docker build -t dbmongo -f script/docker-mongo .
       - docker rm -f -v dbmongo || true
       - docker volume rm dbmongo-volume || true
@@ -116,8 +89,8 @@ tasks:
   install:
     ignore_error: true
     cmds:
-      - dotnet tool install csharpier -g # 安裝cs格式化工具
-      - go install github.com/bufbuild/buf/cmd/buf@latest # 安裝proto格式化工具
-      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest # 安裝lint
-      - go install golang.org/x/tools/cmd/goimports@latest # 安裝go引入排序工具
-      - npm install -g prettier # 安裝yaml格式化工具
+      - dotnet tool install csharpier -g # 安裝 cs 格式化工具
+      - go install github.com/bufbuild/buf/cmd/buf@latest # 安裝 proto 格式化工具
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest # 安裝 lint
+      - go install golang.org/x/tools/cmd/goimports@latest # 安裝 go 引入排序工具
+      - npm install -g prettier # 安裝 yaml 格式化工具

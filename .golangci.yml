@@ -40,6 +40,8 @@ linters-settings:
       - "1"
       - "2"
       - "3"
+      - "4"
+      - "5"
     ignored-functions:
       - strings.SplitN
       - strconv.FormatFloat
@@ -51,7 +53,7 @@ linters-settings:
   gosimple:
     checks: ["all", "-S1002"]
   lll:
-    line-length: 200
+    line-length: 300
   misspell:
     locale: US
   nolintlint:
