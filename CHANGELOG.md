@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.18] - 2026-02-26
+
+### Added
+
+- redmos: 新增 Sample 組件, 使用 MongoDB $sample 聚合管道在次要資料庫中隨機取樣指定數量的資料
+
 ## [2.0.17] - 2026-02-06
 
 ### Added
