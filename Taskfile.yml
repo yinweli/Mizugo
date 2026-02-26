@@ -93,4 +93,5 @@ tasks:
       - go install github.com/bufbuild/buf/cmd/buf@latest # 安裝 proto 格式化工具
       - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest # 安裝 lint
       - go install golang.org/x/tools/cmd/goimports@latest # 安裝 go 引入排序工具
+      - npm install -g markdownlint-cli # 安裝 markdown 格式化工具
       - npm install -g prettier # 安裝 yaml 格式化工具
