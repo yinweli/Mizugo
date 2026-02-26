@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(ls:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(cd D:/Project-Other/Mizugo && go build ./mizugos/redmos/ 2>&1)",
+      "Bash(cd D:/Project-Other/Mizugo && go vet ./mizugos/redmos/ 2>&1)"
     ]
   }
 }

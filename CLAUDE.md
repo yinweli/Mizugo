@@ -117,7 +117,7 @@ Tests in `redmos` and `trials` require live Redis 6+ and MongoDB 6.0+ instances.
 
 Packages are organized into strict layers. **Lower layers must never import upper layers. Same-layer packages must not import each other.**
 
-```
+```text
 Layer 4 – Components:  configs, entitys, loggers, redmos
 Layer 3 – General:     cryptos, iaps, nets, pools, procs
 Layer 2 – Tools:       ctxs, helps, msgs
@@ -181,7 +181,7 @@ trials.ProtoBuild(...)           // compile proto files during tests
 ## Key dependencies
 
 | Library | Purpose |
-|---|---|
+| --- | --- |
 | `go.uber.org/zap` | Logging |
 | `github.com/spf13/viper` | Configuration |
 | `github.com/panjf2000/ants/v2` | Goroutine pool |
