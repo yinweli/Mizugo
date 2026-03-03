@@ -57,6 +57,8 @@ func Shell(m *testing.M, initialize, finalize func(), work string, from ...strin
 //
 // 回傳的 Catalog 將用於 Restore
 func Prepare(work string, from ...string) Catalog {
+	const dirPerm = 0750 // 目錄權限
+
 	if filepath.IsAbs(work) == false {
 		panic("shell: work must be absolute")
 	} // if
@@ -67,7 +69,7 @@ func Prepare(work string, from ...string) Catalog {
 		panic(err)
 	} // if
 
-	if err = os.MkdirAll(work, os.ModePerm); err != nil {
+	if err = os.MkdirAll(work, dirPerm); err != nil {
 		panic(err)
 	} // if
 

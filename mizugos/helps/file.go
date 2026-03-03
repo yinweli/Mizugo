@@ -22,7 +22,9 @@ func FileCompare(path string, expected []byte) bool {
 
 // FileWrite 寫入檔案, 如果有需要會建立目錄
 func FileWrite(path string, data []byte) error {
-	if err := os.MkdirAll(filepath.Dir(path), os.ModePerm); err != nil {
+	const dirPerm = 0750 // 目錄權限
+
+	if err := os.MkdirAll(filepath.Dir(path), dirPerm); err != nil {
 		return fmt.Errorf("writeFile: %w", err)
 	} // if
 

@@ -43,7 +43,7 @@ func (this *TCPConnect) Connect(bind Bind, unbind Unbind, wrong Wrong) {
 	pools.DefaultPool.Submit(func() {
 		// 由於連接完成/失敗後就直接結束, 所以不需要用context方式監控終止方式
 
-		conn, err := net.DialTimeout("tcp", this.address, this.timeout)
+		conn, err := net.DialTimeout("tcp", this.address, this.timeout) //nolint:noctx
 
 		if err != nil {
 			wrong.Do(fmt.Errorf("tcp connect: %v: %w", this.address, err))

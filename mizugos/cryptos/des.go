@@ -78,7 +78,7 @@ func zeroPad(source []byte, blockSize int) (result []byte, err error) {
 	} // if
 
 	size := blockSize - len(source)%blockSize
-	text := bytes.Repeat([]byte{0}, size)
+	text := make([]byte, size)
 	source = append(source, text...)
 	return source, nil
 }
