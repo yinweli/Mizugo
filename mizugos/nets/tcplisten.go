@@ -40,7 +40,7 @@ type TCPListen struct {
 //   - unbind: 解綁回呼, 用於釋放資源
 //   - wrong: 錯誤回呼, 用於集中處理接聽錯誤; 若為 nil 則錯誤會被忽略
 func (this *TCPListen) Listen(bind Bind, unbind Unbind, wrong Wrong) {
-	listen, err := net.Listen("tcp", this.address)
+	listen, err := net.Listen("tcp", this.address) //nolint:noctx
 
 	if err != nil {
 		wrong.Do(fmt.Errorf("tcp listen: %v: %w", this.address, err))

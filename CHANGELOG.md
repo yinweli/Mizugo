@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.20] - 2026-03-03
+
+### Changed
+
+- 升級 golangci-lint 配置至 v2 格式, 重構 `.golangci.yml` 結構與設定
+- 更新 Taskfile lint 任務, 改用 `golangci-lint fmt` 取代獨立的 `gofmt` 與 `goimports` 指令
+- 修正 `cryptos`, `helps`, `nets`, `trials`, `entitys` 各套件中的 lint 警告
+- 更新第三方函式庫
+
 ## [2.0.19] - 2026-02-26
 
 ### Changed

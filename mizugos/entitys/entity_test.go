@@ -129,7 +129,7 @@ func (this *SuiteEntity) TestProcess() {
 
 func (this *SuiteEntity) TestSession() {
 	target := NewEntity(EntityID(1))
-	conn, _ := net.Dial("tcp", net.JoinHostPort("google.com", "80"))
+	conn, _ := net.Dial("tcp", net.JoinHostPort("google.com", "80")) //nolint:noctx
 	session := nets.NewTCPSession(conn)
 	this.Nil(target.SetSession(session))
 	this.Nil(target.Initialize(nil))
