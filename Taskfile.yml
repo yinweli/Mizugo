@@ -5,11 +5,10 @@ tasks:
   lint:
     ignore_error: true
     cmds:
-      - gofmt -s -w -l .
-      - goimports -w .
+      - golangci-lint fmt # 執行 gofmt + goimports
       - golangci-lint run --color always
       - npx markdownlint-cli --fix "*.md"
-      - npx prettier --write "*.yaml" "*.yml" "**/*.yaml" "**/*.yml" --end-of-line lf
+      - npx prettier --write --end-of-line lf '*.yml' '*.yaml' '**/*.yml' '**/*.yaml' || true
       - task: fmt-client-unity
       - task: fmt-client-unity-sample
       - task: fmt-proto-mizugo
@@ -91,7 +90,7 @@ tasks:
     cmds:
       - dotnet tool install csharpier -g # 安裝 cs 格式化工具
       - go install github.com/bufbuild/buf/cmd/buf@latest # 安裝 proto 格式化工具
-      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest # 安裝 lint
+      - go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest # 安裝 lint
       - go install golang.org/x/tools/cmd/goimports@latest # 安裝 go 引入排序工具
       - npm install -g markdownlint-cli # 安裝 markdown 格式化工具
       - npm install -g prettier # 安裝 yaml 格式化工具
