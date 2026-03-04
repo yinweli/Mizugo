@@ -17,7 +17,11 @@
       "Bash(go list:*)",
       "Bash(grep:*)",
       "Bash(wc:*)",
-      "Bash(npx markdownlint-cli:*)"
+      "Bash(npx markdownlint-cli:*)",
+      "Bash(go build:*)",
+      "Bash(go vet:*)",
+      "Bash(gofmt:*)",
+      "Bash(go test:*)"
     ]
   }
 }
