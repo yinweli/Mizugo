@@ -180,7 +180,7 @@ func (this *Eventmap) PubFixed(name string, param any, interval time.Duration) {
 
 // Process 處理函式類型
 //
-// 實作處理函式時務必避免長時間阻塞，否則會影響同名事件的整體處理延遲
+// 實作處理函式時務必避免長時間阻塞, 否則會影響同名事件的整體處理延遲
 type Process func(param any)
 
 // Do 執行處理

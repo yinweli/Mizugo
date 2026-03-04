@@ -39,29 +39,29 @@ func (this *SuiteCmdIndex) TestIndex() {
 	majorSubmit := this.major.Submit()
 	minorSubmit := this.minor.Submit()
 
-	target := &Index{Name: "index", Table: "cmdindex", Field: "field", Order: 1}
+	target := &Index{Name: "index", Table: "cmdindex", Sort: SortField{Field: "field", Order: 1}}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	this.Nil(target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
 	this.Nil(target.Complete())
 	_ = minorSubmit.Exec(context.Background())
 
-	target = &Index{Name: "index", Table: "cmdindex", Field: "field", Order: 1}
+	target = &Index{Name: "index", Table: "cmdindex", Sort: SortField{Field: "field", Order: 1}}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)
 	this.Nil(target.Prepare())
 	_, _ = majorSubmit.Exec(context.Background())
 	this.Nil(target.Complete())
 	_ = minorSubmit.Exec(context.Background())
 
-	target = &Index{Name: "", Table: "cmdindex", Field: "field", Order: 1}
+	target = &Index{Name: "", Table: "cmdindex", Sort: SortField{Field: "field", Order: 1}}
 	this.NotNil(target.Prepare())
 
-	target = &Index{Name: "index", Table: "", Field: "field", Order: 1}
+	target = &Index{Name: "index", Table: "", Sort: SortField{Field: "field", Order: 1}}
 	this.NotNil(target.Prepare())
 
-	target = &Index{Name: "index", Table: "cmdindex", Field: "", Order: 1}
+	target = &Index{Name: "index", Table: "cmdindex", Sort: SortField{Field: "", Order: 1}}
 	this.NotNil(target.Prepare())
 
-	target = &Index{Name: "index", Table: "cmdindex", Field: "field", Order: 0}
+	target = &Index{Name: "index", Table: "cmdindex", Sort: SortField{Field: "field", Order: 0}}
 	this.NotNil(target.Prepare())
 }

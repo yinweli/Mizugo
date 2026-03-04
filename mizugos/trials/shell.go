@@ -117,7 +117,7 @@ func Restore(catalog Catalog) {
 	} // for
 }
 
-// Root 取得呼叫端檔案所在的目錄路徑; 若無法取得呼叫端資訊，會觸發 panic
+// Root 取得呼叫端檔案所在的目錄路徑; 若無法取得呼叫端資訊, 會觸發 panic
 func Root() string {
 	_, file, _, ok := runtime.Caller(1)
 

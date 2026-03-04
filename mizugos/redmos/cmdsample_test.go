@@ -57,8 +57,8 @@ func (this *SuiteCmdSample) TestSample() {
 	_, _ = majorSubmit.Exec(context.Background())
 	this.Nil(set.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	this.True(trials.MongoEqual[testDataSample](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey("key1"), data1))
-	this.True(trials.MongoEqual[testDataSample](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey("key2"), data2))
+	this.True(trials.MongoEqual[testDataSample](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data1.K), data1))
+	this.True(trials.MongoEqual[testDataSample](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data2.K), data2))
 
 	target := &Sample[testDataSample]{Meta: &this.meta, Count: 1}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)

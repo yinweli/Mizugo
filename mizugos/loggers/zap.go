@@ -32,7 +32,7 @@ type ZapLogger struct {
 	Json       bool   `yaml:"json"`       // 是否輸出為 JSON 格式(建議正式環境開啟)
 	Console    bool   `yaml:"console"`    // 是否輸出到控制台
 	File       bool   `yaml:"file"`       // 是否輸出到檔案
-	Level      string `yaml:"level"`      // 日誌等級，僅記錄 >= 此等級的訊息; 可選 LevelDebug, LevelInfo, LevelWarn, LevelError
+	Level      string `yaml:"level"`      // 日誌等級, 僅記錄 >= 此等級的訊息; 可選 LevelDebug, LevelInfo, LevelWarn, LevelError
 	TimeLayout string `yaml:"timeLayout"` // 時間格式(例如: 2006-01-02 15:04:05 或 ISO8601 / RFC3339 標準)
 	TimeZone   string `yaml:"timeZone"`   // 時區字串(與 time.LoadLocation 相同, 預設 time.UTC)
 	MaxSize    int    `yaml:"maxSize"`    // 日誌檔案最大容量(MB), 超過時會切割新檔案(預設 100MB)

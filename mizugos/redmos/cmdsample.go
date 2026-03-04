@@ -9,7 +9,7 @@ import (
 
 // Sample 取樣行為
 //
-// 使用 MongoDB $sample 聚合管道, 在次要資料庫中隨機取得 Count 筆資料並回傳(Data)
+// 在次要資料庫中查詢, 使用 $sample 聚合管道, 在次要資料庫中隨機取得 Count 筆資料並回傳(Data)
 //
 // 事前準備:
 //   - 設定 Meta: 需為符合 Metaer 介面的元資料物件(至少需提供 MinorTable)

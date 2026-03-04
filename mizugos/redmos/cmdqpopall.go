@@ -20,7 +20,7 @@ import (
 //
 // 事前準備:
 //   - (可選)設定 MinorEnable: true 表示完成時會將「彈出後的佇列快照」寫入次要資料庫
-//   - 設定 Meta: 需為符合 Metaer 介面的元資料物件(至少需提供 MajorKey；若啟用備份，還需提供 MinorKey 與 MinorTable)
+//   - 設定 Meta: 需為符合 Metaer 介面的元資料物件(至少需提供 MajorKey; 若啟用備份, 還需提供 MinorKey 與 MinorTable)
 //   - 設定 Key: 不可為空字串
 //   - (可選)設定 Done: 完成時的回呼函式, 參數為資料列表
 //
