@@ -176,12 +176,12 @@ type Sessioner interface {
 type Codec interface {
 	// Encode 編碼處理:
 	//   - 將上層訊息逐步轉換為 []byte
-	//   - 若串接多個 Codec，會按 Sessioner.SetCodec 的傳入順序由前到後執行
+	//   - 若串接多個 Codec, 會按 Sessioner.SetCodec 的傳入順序由前到後執行
 	Encode(input any) (output any, err error)
 
 	// Decode 解碼處理:
 	//   - 將 []byte 逐步還原為上層訊息
-	//   - 若串接多個 Codec，會按 Sessioner.SetCodec 的傳入順序由後到前執行
+	//   - 若串接多個 Codec, 會按 Sessioner.SetCodec 的傳入順序由後到前執行
 	Decode(input any) (output any, err error)
 }
 

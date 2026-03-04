@@ -57,8 +57,8 @@ func (this *SuiteCmdFind) TestFind() {
 	_, _ = majorSubmit.Exec(context.Background())
 	this.Nil(set.Complete())
 	_ = minorSubmit.Exec(context.Background())
-	this.True(trials.MongoEqual[testDataFind](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey("key1"), data1))
-	this.True(trials.MongoEqual[testDataFind](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey("key2"), data2))
+	this.True(trials.MongoEqual[testDataFind](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data1.K), data1))
+	this.True(trials.MongoEqual[testDataFind](this.minor.Database(), this.meta.MinorTable(), MongoKey, this.meta.MinorKey(data2.K), data2))
 
 	target := &Find{Meta: &this.meta, Pattern: "^key"}
 	target.Initialize(context.Background(), majorSubmit, minorSubmit)

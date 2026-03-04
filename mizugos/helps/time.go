@@ -373,7 +373,7 @@ func MonthlyPrev(now time.Time, mday, hour int) time.Time {
 	hour = clampHour(hour)
 	prev := time.Date(now.Year(), now.Month(), mday, hour, 0, 0, 0, now.Location())
 
-	if now.Before(prev) { // 如果尚未到達時間，就設定為上個月
+	if now.Before(prev) { // 如果尚未到達時間, 就設定為上個月
 		prev = prev.AddDate(0, -1, 0)
 	} // if
 
@@ -418,7 +418,7 @@ func YearlyPrev(now time.Time, month, mday, hour int) time.Time {
 	hour = clampHour(hour)
 	prev := time.Date(now.Year(), time.Month(month), mday, hour, 0, 0, 0, now.Location())
 
-	if now.Before(prev) { // 如果尚未到達時間，就設定為去年
+	if now.Before(prev) { // 如果尚未到達時間, 就設定為去年
 		prev = prev.AddDate(-1, 0, 0)
 	} // if
 
