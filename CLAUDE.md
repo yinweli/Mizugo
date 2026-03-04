@@ -2,194 +2,97 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Language Conventions
+## Common guildlines
 
-- **Documentation & Comments**: Traditional Chinese
-- **Code Naming (variables, functions)**: English
-- **Implementation Plans**: Chinese description + English technical terms
+@CLAUDE-common guildlines.md
 
-## Code Style Requirements
+## Project Overview
 
-### Boolean Checks - **Strict Rule**
+Mizugo is a game server framework written in Go (module: `github.com/yinweli/Mizugo/v2`). It provides TCP networking, message processing, dual-layer database (Redis + MongoDB), entity/module systems, and configuration management. Documentation and comments are in Traditional Chinese.
 
-**MUST** use explicit `false` checks, while `true` checks use standard form.
+## Common Commands
 
-```go
-if x == false { ... }  // Required: explicit false check
-if x { ... }           // Standard: check for true
-// Forbidden: if !x
-```
-
-### Block Ending Comments - **Strict Rule**
-
-Reserve ending comments for control flow only (`if`, `for`, `switch`). **NEVER** add ending comments for functions/methods.
-
-```go
-if condition {
-    // logic
-} // if
-
-for i := range items {
-    // logic
-} // for
-
-switch x {
-case 1:
-    // logic
-} // switch
-
-// NEVER add ending comments for functions/methods
-```
-
-### Iterator Naming
-
-```go
-for itor := range items {
-    // logic
-} // for
-
-for k, v := range someMap {
-    // logic
-} // for
-```
-
-- `itor`: Default iterator variable name
-- `k, v`: Use when iterating over Maps
-
-### Variable Naming - **Strict Rule**
-
-**MUST NOT** use plural forms for variable names. Use singular forms consistently.
-
-```go
-// Correct: singular form
-item := []Item{...}
-hero := []Hero{...}
-data := []Data{...}
-
-// Forbidden: plural forms
-items := []Item{...}
-heroes := []Hero{...}
-datas := []Data{...}
-```
-
-## Overview
-
-Mizugo is a game server framework in Go (module: `github.com/yinweli/Mizugo/v2`). It provides TCP networking, message processing protocols, dual-layer database abstraction (Redis/MongoDB), entity-component systems, and utility packages. Code comments and documentation are in Traditional Chinese.
-
-## Commands
-
-### Task runner (preferred)
+All commands use [Task](https://taskfile.dev/) (install via its official docs).
 
 ```bash
-task lint    # Format Go (gofmt, goimports), markdown, YAML, and C# code; run golangci-lint
-task db      # Start Redis and MongoDB via Docker (required for integration tests)
-task proto   # Generate protobuf code
-task subtree # Update git subtree branches (proto-unity, client-unity, client-unity-sample)
-task install # Install dev tools (golangci-lint, buf, goimports, csharpier, prettier)
+task lint                # Format and lint (golangci-lint fmt + run, markdownlint, prettier)
+task test                # Run tests (not defined in Taskfile; use go test directly)
+task bench               # Performance benchmarks
+task proto               # Regenerate protobuf files
+task db                  # Start Redis + MongoDB via Docker
+task install             # Install all dev tools (golangci-lint, buf, csharpier, etc.)
 ```
 
-### Direct Go commands
+### Running tests directly
 
 ```bash
-# Run all tests
-go test ./... -cover
+# All tests (excludes support/ directory)
+go test $(go list ./... | grep -v "support")
 
-# Run tests for a specific package
-go test ./mizugos/configs -v
+# Single package
+go test ./mizugos/entitys/...
 
-# Run a single test
-go test ./mizugos/configs -run TestConfigmgr
+# Single test
+go test ./mizugos/entitys/... -run TestEntityName
 
-# Run with race detection
-go test -race ./mizugos/configs
-
-# Run linter manually
-golangci-lint run --color always
+# With coverage
+go test -coverprofile=coverage.txt -covermode=atomic $(go list ./... | grep -v "support")
 ```
 
-### Integration test requirement
+Tests for `redmos`, `trials`, and integration tests require running Redis and MongoDB (use `task db` to start them).
 
-Tests in `redmos` and `trials` require live Redis 6+ and MongoDB 6.0+ instances. Use `task db` to start them before running those tests.
+### Linting
+
+Uses golangci-lint v2 with 47+ linters. Local import prefix for goimports: `github.com/yinweli/Mizugo/v2`.
 
 ## Architecture
 
-### Dependency layer rules
+### Manager-based Design
 
-Packages are organized into strict layers. **Lower layers must never import upper layers. Same-layer packages must not import each other.**
+The framework is accessed through six singleton managers via the `mizugos` package:
+
+| Manager | Package | Access | Purpose |
+| ------- | ------- | ------ | ------- |
+| Config | `configs.Configmgr` | `mizugos.Config` | Viper-based configuration |
+| Logger | `loggers.Logmgr` | `mizugos.Log` | Logging (Zap-based) |
+| Network | `nets.Netmgr` | `mizugos.Net` | TCP networking & sessions |
+| Database | `redmos.Redmomgr` | `mizugos.Redmo` | Redis (cache) + MongoDB (persistence) |
+| Entity | `entitys.Entitymgr` | `mizugos.Entity` | Game objects with module/event systems |
+| Pool | `pools.Poolmgr` | `mizugos.Pool` | Goroutine pool (ants) |
+
+Server lifecycle: `mizugos.Start()` → run loop → `mizugos.Stop()`.
+
+### Package Layer Hierarchy
+
+Layers enforce a strict dependency rule: lower layers may reference upper layers, but **not** vice versa. Same-layer packages cannot reference each other.
 
 ```text
-Layer 4 – Components:  configs, entitys, loggers, redmos
-Layer 3 – General:     cryptos, iaps, nets, pools, procs
-Layer 2 – Tools:       ctxs, helps, msgs
-Layer 1 – Test:        testdata, trials
+Test Layer:     testdata, mizugos/trials
+Tool Layer:     mizugos/ctxs, mizugos/helps, mizugos/msgs
+Common Layer:   mizugos/cryptos, mizugos/iaps, mizugos/nets, mizugos/pools, mizugos/procs
+Component Layer: mizugos/configs, mizugos/entitys, mizugos/loggers, mizugos/redmos
 ```
 
-All core packages live under `mizugos/`. The `support/` directory contains standalone programs (test servers, test clients, proto definitions) that are not part of the framework itself.
+### Message Processing
 
-### Framework entry point (`mizugos/mizugo.go`)
+Three processor types (`procs` package): JSON, Proto (protobuf), and Raven (custom binary). Each handles encode/decode with a configurable codec chain. Messages require an `int32 messageID` field.
 
-`mizugos.Start()` / `mizugos.Stop()` initialise and tear down all managers. Global manager singletons:
+### Database (redmos)
 
-- `mizugos.Config` – Configmgr (Viper-based, supports files/strings/env)
-- `mizugos.Logger` – Logmgr (named loggers, ZapLogger or EmptyLogger)
-- `mizugos.Network` – Netmgr (TCP listener/connecter)
-- `mizugos.Redmo` – Redmomgr (Redis + MongoDB dual-layer)
-- `mizugos.Entity` – Entitymgr (entity/module/event system)
-- `mizugos.Pool` – Poolmgr (goroutine pool via `ants`)
+Dual-layer architecture: Redis as cache ("Major"), MongoDB as persistence ("Minor"), with "Mixed" operations spanning both. The package has 60+ command types for get/set, queues, locks, aggregation, etc.
 
-### Networking (`nets`)
+### Entity System
 
-- **Listener** – accepts TCP connections; **Connecter** – initiates TCP connections.
-- **Sessioner** – per-connection session with lifecycle: `Start → EventStart → recv/send loops → EventStop → Finalize`.
-- **Codec chain** – encoding pipeline; encode runs forward, decode runs reverse. Each codec can be stacked.
-- Default limits: HeaderSize = 4 bytes, PacketSize = 65535 bytes, ChannelSize = 1000.
-- Session callbacks: `Bind` (init), `Unbind` (cleanup), `Publish` (event dispatch), `Wrong` (error handler).
+Entities support modular composition via `Module` interface (Awake/Start lifecycle), an event system (single-shot, delayed, periodic), and message handler registration. Sessions bind network connections to entities.
 
-### Message processors (`procs`)
+## Key Paths
 
-Implement the `Processor` interface (`Encode`/`Decode`/`Process`/`Add`/`Del`/`Get`). Built-in processors:
+- Framework source: `mizugos/`
+- Protobuf definitions: `support/proto-mizugo/`, `support/proto-test/`
+- Test server example: `support/test-server/`
+- Unity client: `support/client-unity/`
+- Test data: `testdata/`
 
-- **Json** – JSON serialization
-- **Proto** – Protocol Buffers serialization
-- **Raven** – custom protocol serialization
+## Go Version
 
-### Entity system (`entitys`)
-
-- **Entity** holds an ID, a set of **Modules**, and **Events**.
-- Module lifecycle: `Awaker.Awake()` then `Starter.Start()`.
-- Built-in events: `EventDispose`, `EventShutdown`, `EventRecv`, `EventSend`.
-- Events can be single-shot, delayed, or recurring.
-
-### Database (`redmos`)
-
-- **Major** – Redis layer for caching and fast queries.
-- **Minor** – MongoDB layer for persistence and complex queries.
-- **Mixed** – combines both layers. Operations are composed via `Submittor` interface.
-
-### Error handling (`helps`)
-
-Use `helps.Err` for structured errors with numeric codes. Format: `<FunctionName>: <message> (<error_code>)`. Predefined codes: `Success (0)`, `ErrUnknown (1)`, `ErrUnwrap (2)`.
-
-### Test utilities (`trials`)
-
-```go
-trials.SetupRedis(uri)           // connect to test Redis
-trials.SetupMongo(uri, dbName)   // connect to test MongoDB
-trials.ProtoBuild(...)           // compile proto files during tests
-```
-
-## Key dependencies
-
-| Library | Purpose |
-| --- | --- |
-| `go.uber.org/zap` | Logging |
-| `github.com/spf13/viper` | Configuration |
-| `github.com/panjf2000/ants/v2` | Goroutine pool |
-| `github.com/redis/go-redis/v9` | Redis client |
-| `go.mongodb.org/mongo-driver` | MongoDB client |
-| `google.golang.org/protobuf` | Protocol Buffers |
-| `github.com/stretchr/testify` | Test assertions |
-
-## Linter configuration
-
-`.golangci.yml` enables 25+ linters. Notable limits: line length 300, function length 200 lines / 150 statements, cyclomatic complexity 50, duplication threshold 400 LOC. Test files are exempt from MND and dupl checks.
+Requires Go 1.25.0+ and Protocol Buffers v3.
