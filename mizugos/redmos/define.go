@@ -280,3 +280,10 @@ type Saver interface {
 	// GetSave 取得儲存旗標
 	GetSave() bool
 }
+
+// SortField 排序欄位, 用於指定 Index, IndexComplex 與 RankList 的排序規則
+// Order 使用 1(遞增)或 -1(遞減)
+type SortField struct {
+	Field string // 欄位名稱
+	Order int    // 排序方向, 1 表示順序, -1 表示逆序
+}

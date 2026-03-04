@@ -16,13 +16,12 @@ import (
 // 事前準備:
 //   - 設定 Name: 索引名稱(不可為空)
 //   - 設定 Table: 目標表格名稱(不可為空)
-//   - 設定 Field: 目標欄位名稱(不可為空)
-//   - 設定 Order: 排序方向; 1 代表遞增, -1 代表遞減(僅允許 1 或 -1)
+//   - 設定 Sort: 排序欄位(Field 不可為空, Order 僅允許 1 或 -1)
 //   - 設定 Unique: 是否唯一索引(true 則同一欄位值不可重複)
 //
 // 注意:
 //   - 本行為僅使用次要資料庫, 主要資料庫不參與
-//   - 僅建立「單欄位索引」; 複合索引(多欄位)不在本行為範圍
+//   - 僅建立「單欄位索引」; 複合索引(多欄位)請改用 IndexComplex
 //   - 若欄位已存在同名索引, 將直接結束而不重建(以 Name 索引名稱做判斷)
 //   - Unique=true 時, 若現有資料違反唯一性, Mongo 將拒絕建立索引並回傳錯誤
 //   - 索引能顯著改善查詢效率, 但也會增加寫入成本與存儲空間; 請評估實際讀寫比例再建立
@@ -30,17 +29,15 @@ import (
 //
 // 工具函式 MinorIndex 建立專門用於次要資料庫的索引
 //   - 自動以 Metaer.MinorTable 作為表格名稱
-//   - 以 MongoKey 為索引欄位
-//   - 排序固定為遞增(Order=1)
+//   - 以 MongoKey 為索引欄位, 排序固定為遞增(Order=1)
 //   - 強制設為唯一索引(Unique=true)
 //   - 索引名稱自動產生格式: "<MinorTable>_minor_index"
 type Index struct {
-	Behave        // 行為物件
-	Name   string // 索引名稱
-	Table  string // 表格名稱
-	Field  string // 欄位名稱
-	Order  int    // 排序方向, 1表示順序, -1表示逆序
-	Unique bool   // 是否唯一索引, 唯一索引的情況下, 索引值不允許重複
+	Behave           // 行為物件
+	Name   string    // 索引名稱
+	Table  string    // 表格名稱
+	Sort   SortField // 排序欄位
+	Unique bool      // 是否唯一索引, 唯一索引的情況下, 索引值不允許重複
 }
 
 // Prepare 前置處理
@@ -53,11 +50,11 @@ func (this *Index) Prepare() error {
 		return fmt.Errorf("index prepare: table empty")
 	} // if
 
-	if this.Field == "" {
+	if this.Sort.Field == "" {
 		return fmt.Errorf("index prepare: field empty")
 	} // if
 
-	if this.Order != 1 && this.Order != -1 {
+	if this.Sort.Order != 1 && this.Sort.Order != -1 {
 		return fmt.Errorf("index prepare: order invalid")
 	} // if
 
@@ -70,10 +67,12 @@ func (this *Index) Complete() error {
 	result, err := collection.Indexes().List(this.Ctx())
 
 	if err != nil {
-		return fmt.Errorf("index complete: %w: %v(%v)", err, this.Table, this.Field)
+		return fmt.Errorf("index complete: %w: %v(%v)", err, this.Table, this.Sort.Field)
 	} // if
 
-	defer func() { _ = result.Close(this.Ctx()) }()
+	defer func() {
+		_ = result.Close(this.Ctx())
+	}()
 
 	for result.Next(this.Ctx()) {
 		r := bson.M{}
@@ -94,14 +93,14 @@ func (this *Index) Complete() error {
 	} // for
 
 	if err = result.Err(); err != nil {
-		return fmt.Errorf("index complete: %w: %v(%v)", err, this.Table, this.Field)
+		return fmt.Errorf("index complete: %w: %v(%v)", err, this.Table, this.Sort.Field)
 	} // if
 
 	if _, err = collection.Indexes().CreateOne(this.Ctx(), mongo.IndexModel{
-		Keys:    bson.M{this.Field: this.Order},
+		Keys:    bson.M{this.Sort.Field: this.Sort.Order},
 		Options: options.Index().SetName(this.Name).SetUnique(this.Unique),
 	}); err != nil {
-		return fmt.Errorf("index complete: %w: %v(%v)", err, this.Table, this.Field)
+		return fmt.Errorf("index complete: %w: %v(%v)", err, this.Table, this.Sort.Field)
 	} // if
 
 	return nil

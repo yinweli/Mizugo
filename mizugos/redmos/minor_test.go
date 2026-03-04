@@ -85,5 +85,5 @@ func (this *SuiteMinor) TestMinorIndex() {
 	this.NotNil(target)
 	this.NotEmpty(target.Name)
 	this.NotEmpty(target.Table)
-	this.NotEmpty(target.Field)
+	this.NotEmpty(target.Sort.Field)
 }

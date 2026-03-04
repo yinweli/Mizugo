@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.21] - 2026-03-04
+
+### Added
+
+- redmos: 新增 `RankGet` 組件, 在次要資料庫中查詢指定索引在排行榜中的名次, 支援自訂排序條件函式 `Ahead`
+- redmos: 新增 `RankList` 組件, 在次要資料庫中依指定排序規則取得前 N 筆排行榜資料
+- redmos: 新增 `IndexComplex` 組件, 在次要資料庫針對多個欄位建立複合索引, 支援唯一索引與冪等操作
+- redmos: 新增 `SortField` 結構, 統一 `Index`、`IndexComplex` 與 `RankList` 的排序欄位定義
+
+### Changed
+
+- redmos: 重構 `Index` 組件, 將 `Field` 與 `Order` 兩個欄位合併為 `Sort SortField` 結構
+- redmos: `MinorIndex` 工具函式配合 `Index` 重構更新初始化方式
+- 修正各套件中的程式碼風格問題
+
 ## [2.0.20] - 2026-03-03
 
 ### Changed

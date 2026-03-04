@@ -124,7 +124,7 @@ func (this *MinorSubmit) Exec(ctx context.Context) error {
 	return nil
 }
 
-// MinorData 泛型資料殼，用於在次要資料庫存取時維持固定索引欄位
+// MinorData 泛型資料殼, 用於在次要資料庫存取時維持固定索引欄位
 type MinorData[T any] struct {
 	K string `bson:"_KEY_"`   // 索引欄位, bson名稱必須與 MongoKey 一致
 	D *T     `bson:",inline"` // 資料欄位, 此欄位利用inline達成內嵌效果(會將 T 的欄位展平成與 K 同層)
@@ -137,8 +137,7 @@ func MinorIndex(meta Metaer) *Index {
 	return &Index{
 		Name:   fmt.Sprintf("%v_minor_index", meta.MinorTable()),
 		Table:  meta.MinorTable(),
-		Field:  MongoKey,
-		Order:  1,
+		Sort:   SortField{Field: MongoKey, Order: 1},
 		Unique: true,
 	}
 }
