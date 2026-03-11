@@ -138,7 +138,7 @@ func RankBaseN(model string) *[256]int {
 	result := [256]int{}
 
 	for i := range result {
-		result[i] = -1 //nolint:gosec
+		result[i] = -1
 	} // for
 
 	for i := 0; i < len(model); i++ {

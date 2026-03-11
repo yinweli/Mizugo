@@ -1,6 +1,7 @@
 package trials
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -23,6 +24,27 @@ func (this *SuiteTime) TestWaitTimeout() {
 	now = time.Now()
 	WaitTimeout(time.Second)
 	this.GreaterOrEqual(time.Since(now), time.Second)
+}
+
+func (this *SuiteTime) TestWaitTimeoutCancel() {
+	now := time.Now()
+	WaitTimeoutCancel(context.Background())
+	this.GreaterOrEqual(time.Since(now), Timeout)
+
+	now = time.Now()
+	WaitTimeoutCancel(context.Background(), time.Second)
+	this.GreaterOrEqual(time.Since(now), time.Second)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	now = time.Now()
+
+	go func() {
+		time.Sleep(time.Millisecond * 50)
+		cancel()
+	}()
+
+	WaitTimeoutCancel(ctx, time.Second)
+	this.Less(time.Since(now), time.Second)
 }
 
 func (this *SuiteTime) TestWaitFor() {
