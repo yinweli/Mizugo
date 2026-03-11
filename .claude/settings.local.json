@@ -21,7 +21,8 @@
       "Bash(go build:*)",
       "Bash(go vet:*)",
       "Bash(gofmt:*)",
-      "Bash(go test:*)"
+      "Bash(go test:*)",
+      "Bash(golangci-lint version:*)"
     ]
   }
 }

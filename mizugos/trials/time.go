@@ -1,6 +1,7 @@
 package trials
 
 import (
+	"context"
 	"time"
 )
 
@@ -15,6 +16,22 @@ func WaitTimeout(timeout ...time.Duration) {
 	} else {
 		time.Sleep(Timeout)
 	} // if
+}
+
+// WaitTimeoutCancel 進行等待時間, 可透過 ctx 取消等待
+//   - 若有傳入參數, 則使用第一個參數作為等待時間
+//   - 若無參數 則使用預設的 Timeout
+func WaitTimeoutCancel(ctx context.Context, timeout ...time.Duration) {
+	wait := Timeout
+
+	if len(timeout) > 0 {
+		wait = timeout[0]
+	} // if
+
+	select {
+	case <-ctx.Done():
+	case <-time.After(wait):
+	} // select
 }
 
 // WaitFor 進行等待條件, 或是直到逾時
