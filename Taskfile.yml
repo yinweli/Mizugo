@@ -8,7 +8,7 @@ tasks:
       - golangci-lint fmt # 執行 gofmt + goimports
       - golangci-lint run --color always
       - npx markdownlint-cli --fix "*.md"
-      - npx prettier --write --end-of-line lf '*.yml' '*.yaml' '**/*.yml' '**/*.yaml' || true
+      - npx prettier --write --log-level warn --end-of-line lf '*.yml' '*.yaml' '**/*.yml' '**/*.yaml' || true
       - task: fmt-client-unity
       - task: fmt-client-unity-sample
       - task: fmt-proto-mizugo
