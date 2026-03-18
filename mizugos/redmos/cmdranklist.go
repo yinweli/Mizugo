@@ -14,8 +14,8 @@ import (
 // 事前準備:
 //   - 設定 Meta: 需為符合 Metaer 介面的元資料物件(至少需提供 MinorTable)
 //   - 設定 Limit: 取得筆數, 必須大於零
-//   - 設定 Sort: 排序規則(Field 不可為空, Order 僅允許 1 或 -1)
 //   - 設定 Filter: 篩選條件, 可為 nil(表示不篩選)
+//   - 設定 Sort: 排序規則(Field 不可為空, Order 僅允許 1 或 -1)
 //
 // 注意:
 //   - 本行為僅使用次要資料庫, 主要資料庫不參與
@@ -25,8 +25,8 @@ type RankList[T any] struct {
 	Behave             // 行為物件
 	Meta   Metaer      // 元資料
 	Limit  int64       // 取得筆數, 必須大於零
-	Sort   []SortField // 排序規則, 由外部指定, 不可為空
 	Filter bson.D      // 篩選條件, 可為 nil(表示不篩選)
+	Sort   []SortField // 排序規則, 由外部指定, 不可為空
 	Data   []*T        // 資料物件
 }
 
