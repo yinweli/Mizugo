@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
+	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/yinweli/Mizugo/v2/mizugos/trials"
 	"github.com/yinweli/Mizugo/v2/testdata"
@@ -96,6 +97,22 @@ func (this *SuiteCmdRankList) TestRankList() {
 
 	target = &RankList[testDataRankList]{Meta: &this.meta, Limit: 3, Sort: []SortField{{Field: "k1", Order: 0}}}
 	this.NotNil(target.Prepare())
+
+	this.meta.table = true
+	target = &RankList[testDataRankList]{Meta: &this.meta, Limit: 3, Sort: []SortField{{Field: "k1", Order: -1}}, Filter: bson.D{{Key: "k2", Value: "2"}}}
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
+	this.Nil(target.Prepare())
+	_, _ = majorSubmit.Exec(context.Background())
+	this.Nil(target.Complete())
+	this.Len(target.Data, 1)
+	this.Equal(int64(200), target.Data[0].K1)
+
+	target = &RankList[testDataRankList]{Meta: &this.meta, Limit: 3, Sort: []SortField{{Field: "k1", Order: -1}}, Filter: bson.D{}}
+	target.Initialize(context.Background(), majorSubmit, minorSubmit)
+	this.Nil(target.Prepare())
+	_, _ = majorSubmit.Exec(context.Background())
+	this.Nil(target.Complete())
+	this.Len(target.Data, 3)
 
 	this.meta.table = false
 	target = &RankList[testDataRankList]{Meta: &this.meta, Limit: 3, Sort: []SortField{{Field: "k1", Order: -1}}}
