@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.23] - 2026-03-18
+
+### Changed
+
+- redmos: `RankList` 組件新增 `Filter` 欄位(`bson.D`), 支援在次要資料庫查詢時加入篩選條件, 預設為 nil(不篩選), 完全向後相容
+- 更新第三方函式庫
+
 ## [2.0.22] - 2026-03-11
 
 ### Added
