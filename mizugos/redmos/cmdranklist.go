@@ -25,7 +25,7 @@ type RankList[T any] struct {
 	Behave             // 行為物件
 	Meta   Metaer      // 元資料
 	Limit  int64       // 取得筆數, 必須大於零
-	Filter bson.D      // 篩選條件, 可為 nil(表示不篩選)
+	Filter bson.M      // 篩選條件, 可為 nil(表示不篩選)
 	Sort   []SortField // 排序規則, 由外部指定, 不可為空
 	Data   []*T        // 資料物件
 }
@@ -73,7 +73,7 @@ func (this *RankList[T]) Complete() error {
 	filter := this.Filter
 
 	if filter == nil {
-		filter = bson.D{}
+		filter = bson.M{}
 	} // if
 
 	option := options.Find().SetSort(sort).SetLimit(this.Limit)

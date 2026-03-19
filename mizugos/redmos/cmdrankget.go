@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// RankGet 排行榜名次行為
+// RankGet 排行榜取得名次行為
 //
 // 在次要資料庫中查詢, 取得指定索引在排行榜中的名次(Rank)
 //
@@ -53,11 +53,11 @@ func (this *RankGet[T]) Prepare() error {
 
 // Complete 完成處理
 func (this *RankGet[T]) Complete() error {
-	table := this.Meta.MinorTable()
 	key := this.Meta.MinorKey(this.Key)
-	player := new(T)
+	table := this.Meta.MinorTable()
+	data := new(T)
 
-	if err := this.Minor().Collection(table).FindOne(this.Ctx(), bson.M{MongoKey: key}).Decode(&MinorData[T]{D: player}); err != nil {
+	if err := this.Minor().Collection(table).FindOne(this.Ctx(), bson.M{MongoKey: key}).Decode(&MinorData[T]{D: data}); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			this.Rank = 0
 			return nil
@@ -66,7 +66,7 @@ func (this *RankGet[T]) Complete() error {
 		return fmt.Errorf("rankget complete: %w", err)
 	} // if
 
-	count, err := this.Minor().Collection(table).CountDocuments(this.Ctx(), this.Ahead(player))
+	count, err := this.Minor().Collection(table).CountDocuments(this.Ctx(), this.Ahead(data))
 
 	if err != nil {
 		return fmt.Errorf("rankget complete: %w", err)

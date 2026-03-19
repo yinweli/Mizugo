@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.24] - 2026-03-19
+
+### Added
+
+- redmos: 新增 `RankSet` 組件, 在次要資料庫中以條件式寫入排行榜資料, 文件不存在時插入, 存在且符合 `Filter` 條件時才替換
+
+### Changed
+
+- redmos: `RankList` 的 `Filter` 欄位型別從 `bson.D` 改為 `bson.M`, 與其他 cmd 組件風格一致
+
 ## [2.0.23] - 2026-03-18
 
 ### Changed
