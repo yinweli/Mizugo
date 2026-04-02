@@ -103,12 +103,16 @@ func Date(year int, month time.Month, day int, value ...int) time.Time {
 	return time.Date(year, month, day, hour, minute, sec, nsec, GetTimeZone())
 }
 
-// Before 檢查 u 是否在 t 之前
+// Before 檢查 u 是否在 t 之前, 當 u 為零時間時回傳 false
 func Before(u, t time.Time) bool {
+	if u.IsZero() {
+		return false
+	} // if
+
 	return u.Before(t)
 }
 
-// Beforef 檢查依 layout 解析後的時間 u 是否在 t 之前
+// Beforef 檢查依 layout 解析後的時間 u 是否在 t 之前, 當 u 為空字串時視為零時間, 此時回傳 false
 func Beforef(layout, u string, t time.Time) bool {
 	uf, err := Timef(layout, u)
 
@@ -116,10 +120,10 @@ func Beforef(layout, u string, t time.Time) bool {
 		return false
 	} // if
 
-	return uf.Before(t)
+	return Before(uf, t)
 }
 
-// Beforefx 檢查依 layout 解析後的時間 u 是否在 t 之前
+// Beforefx 檢查依 layout 解析後的時間 u 是否在 t 之前, 當 u 為空字串時視為零時間, 此時回傳 false
 func Beforefx(layout, u, t string) bool {
 	uf, err := Timef(layout, u)
 
@@ -133,15 +137,19 @@ func Beforefx(layout, u, t string) bool {
 		return false
 	} // if
 
-	return uf.Before(tf)
+	return Before(uf, tf)
 }
 
-// After 檢查 u 是否在 t 之後
+// After 檢查 u 是否在 t 之後, 當 u 為零時間時回傳 false
 func After(u, t time.Time) bool {
+	if u.IsZero() {
+		return false
+	} // if
+
 	return u.After(t)
 }
 
-// Afterf 檢查依 layout 解析後的時間 u 是否在 t 之後
+// Afterf 檢查依 layout 解析後的時間 u 是否在 t 之後, 當 u 為空字串時視為零時間, 此時回傳 false
 func Afterf(layout, u string, t time.Time) bool {
 	uf, err := Timef(layout, u)
 
@@ -149,10 +157,10 @@ func Afterf(layout, u string, t time.Time) bool {
 		return false
 	} // if
 
-	return uf.After(t)
+	return After(uf, t)
 }
 
-// Afterfx 檢查依 layout 解析後的時間 u 是否在 t 之後
+// Afterfx 檢查依 layout 解析後的時間 u 是否在 t 之後, 當 u 為空字串時視為零時間, 此時回傳 false
 func Afterfx(layout, u, t string) bool {
 	uf, err := Timef(layout, u)
 
@@ -166,16 +174,12 @@ func Afterfx(layout, u, t string) bool {
 		return false
 	} // if
 
-	return uf.After(tf)
+	return After(uf, tf)
 }
 
-// Between 檢查 u 是否在 start 與 end 之間, 當 start 與 end 為空時, 回傳 zero 或是預設 true
-func Between(start, end, u time.Time, zero ...bool) bool {
+// Between 檢查 u 是否在 start 與 end 之間, 零時間代表開放邊界, 當 start 與 end 皆為零時間時回傳 true
+func Between(start, end, u time.Time) bool {
 	if start.IsZero() && end.IsZero() {
-		if len(zero) > 0 {
-			return zero[0]
-		} // if
-
 		return true
 	} // if
 
@@ -190,8 +194,8 @@ func Between(start, end, u time.Time, zero ...bool) bool {
 	return u.After(start) && u.Before(end)
 }
 
-// Betweenf 檢查依 layout 解析後的時間 u 是否在 start 與 end 之間, 當 start 與 end 為空時, 回傳 zero 或是預設 true
-func Betweenf(layout, start, end string, u time.Time, zero ...bool) bool {
+// Betweenf 檢查依 layout 解析後的時間 u 是否在 start 與 end 之間, 空字串視為零時間, 零時間代表開放邊界, 當 start 與 end 皆為空字串時回傳 true
+func Betweenf(layout, start, end string, u time.Time) bool {
 	startf, err := Timef(layout, start)
 
 	if err != nil {
@@ -204,11 +208,11 @@ func Betweenf(layout, start, end string, u time.Time, zero ...bool) bool {
 		return false
 	} // if
 
-	return Between(startf, endf, u, zero...)
+	return Between(startf, endf, u)
 }
 
-// Betweenfx 檢查依 layout 解析後的時間 u 是否在 start 與 end 之間, 當 start 與 end 為空時, 回傳 zero 或是預設 true
-func Betweenfx(layout, start, end, u string, zero ...bool) bool {
+// Betweenfx 檢查依 layout 解析後的時間 u 是否在 start 與 end 之間, 空字串視為零時間, 零時間代表開放邊界, 當 start 與 end 皆為空字串時回傳 true
+func Betweenfx(layout, start, end, u string) bool {
 	startf, err := Timef(layout, start)
 
 	if err != nil {
@@ -227,15 +231,23 @@ func Betweenfx(layout, start, end, u string, zero ...bool) bool {
 		return false
 	} // if
 
-	return Between(startf, endf, uf, zero...)
+	return Between(startf, endf, uf)
 }
 
-// Overlap 檢查兩個時間段是否有重疊
+// Overlap 檢查兩個時間段是否有重疊, 零時間代表開放邊界
 func Overlap(start1, end1, start2, end2 time.Time) bool {
-	return end1.After(start2) && end2.After(start1)
+	bound := func(start, end time.Time) bool {
+		if start.IsZero() || end.IsZero() {
+			return true
+		} // if
+
+		return start.Before(end)
+	}
+
+	return bound(start1, end2) && bound(start2, end1)
 }
 
-// Overlapf 檢查依 layout 解析後的兩個時間段是否有重疊
+// Overlapf 檢查依 layout 解析後的兩個時間段是否有重疊, 空字串視為零時間, 零時間代表開放邊界
 func Overlapf(layout, start1, end1 string, start2, end2 time.Time) bool {
 	start1f, err := Timef(layout, start1)
 
@@ -252,7 +264,7 @@ func Overlapf(layout, start1, end1 string, start2, end2 time.Time) bool {
 	return Overlap(start1f, end1f, start2, end2)
 }
 
-// Overlapfx 檢查依 layout 解析後的兩個時間段是否有重疊
+// Overlapfx 檢查依 layout 解析後的兩個時間段是否有重疊, 空字串視為零時間, 零時間代表開放邊界
 func Overlapfx(layout, start1, end1, start2, end2 string) bool {
 	start1f, err := Timef(layout, start1)
 
