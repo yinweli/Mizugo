@@ -87,13 +87,18 @@ func (this *SuiteTime) TestDate() {
 func (this *SuiteTime) TestBefore() {
 	this.True(Before(Date(2023, 2, 1), Date(2023, 2, 5)))
 	this.False(Before(Date(2023, 2, 10), Date(2023, 2, 5)))
+	this.False(Before(time.Time{}, Date(2023, 2, 5)))
+	this.False(Before(Date(2023, 2, 1), time.Time{}))
 
 	this.True(Beforef(LayoutDay, "2023-02-01", Date(2023, 2, 5)))
 	this.False(Beforef(LayoutDay, "2023-02-10", Date(2023, 2, 5)))
+	this.False(Beforef(LayoutDay, "", Date(2023, 2, 5)))
 	this.False(Beforef(LayoutDay, testdata.Unknown, Date(2023, 2, 5)))
 
 	this.True(Beforefx(LayoutDay, "2023-02-01", "2023-02-05"))
 	this.False(Beforefx(LayoutDay, "2023-02-10", "2023-02-05"))
+	this.False(Beforefx(LayoutDay, "2023-02-01", ""))
+	this.False(Beforefx(LayoutDay, "", "2023-02-05"))
 	this.False(Beforefx(LayoutDay, testdata.Unknown, "2023-02-05"))
 	this.False(Beforefx(LayoutDay, "2023-02-10", testdata.Unknown))
 }
@@ -101,13 +106,18 @@ func (this *SuiteTime) TestBefore() {
 func (this *SuiteTime) TestAfter() {
 	this.True(After(Date(2023, 2, 10), Date(2023, 2, 5)))
 	this.False(After(Date(2023, 2, 1), Date(2023, 2, 5)))
+	this.False(After(time.Time{}, Date(2023, 2, 5)))
+	this.True(After(Date(2023, 2, 10), time.Time{}))
 
 	this.True(Afterf(LayoutDay, "2023-02-10", Date(2023, 2, 5)))
 	this.False(Afterf(LayoutDay, "2023-02-1", Date(2023, 2, 5)))
+	this.False(Afterf(LayoutDay, "", Date(2023, 2, 5)))
 	this.False(Afterf(LayoutDay, testdata.Unknown, Date(2023, 2, 5)))
 
 	this.True(Afterfx(LayoutDay, "2023-02-10", "2023-02-05"))
 	this.False(Afterfx(LayoutDay, "2023-02-01", "2023-02-05"))
+	this.True(Afterfx(LayoutDay, "2023-02-10", ""))
+	this.False(Afterfx(LayoutDay, "", "2023-02-05"))
 	this.False(Afterfx(LayoutDay, testdata.Unknown, "2023-02-05"))
 	this.False(Afterfx(LayoutDay, "2023-02-10", testdata.Unknown))
 }
@@ -116,7 +126,6 @@ func (this *SuiteTime) TestBetween() {
 	this.True(Between(Date(2023, 2, 5), Date(2023, 2, 15), Date(2023, 2, 10)))
 	this.False(Between(Date(2023, 2, 5), Date(2023, 2, 15), Date(2023, 2, 20)))
 	this.True(Between(time.Time{}, time.Time{}, Date(2023, 2, 10)))
-	this.False(Between(time.Time{}, time.Time{}, Date(2023, 2, 10), false))
 	this.True(Between(time.Time{}, Date(2023, 2, 15), Date(2023, 2, 10)))
 	this.False(Between(time.Time{}, Date(2023, 2, 15), Date(2023, 2, 20)))
 	this.True(Between(Date(2023, 2, 5), time.Time{}, Date(2023, 2, 10)))
@@ -127,7 +136,6 @@ func (this *SuiteTime) TestBetween() {
 	this.False(Betweenf(LayoutDay, testdata.Unknown, "2023-02-15", Date(2023, 2, 10)))
 	this.False(Betweenf(LayoutDay, "2023-02-05", testdata.Unknown, Date(2023, 2, 10)))
 	this.True(Betweenf(LayoutDay, "", "", Date(2023, 2, 10)))
-	this.False(Betweenf(LayoutDay, "", "", Date(2023, 2, 10), false))
 	this.True(Betweenf(LayoutDay, "", "2023-02-15", Date(2023, 2, 10)))
 	this.False(Betweenf(LayoutDay, "", "2023-02-15", Date(2023, 2, 20)))
 	this.True(Betweenf(LayoutDay, "2023-02-05", "", Date(2023, 2, 10)))
@@ -139,7 +147,6 @@ func (this *SuiteTime) TestBetween() {
 	this.False(Betweenfx(LayoutDay, "2023-02-05", testdata.Unknown, "2023-02-10"))
 	this.False(Betweenfx(LayoutDay, "2023-02-05", "2023-02-15", testdata.Unknown))
 	this.True(Betweenfx(LayoutDay, "", "", "2023-02-10"))
-	this.False(Betweenfx(LayoutDay, "", "", "2023-02-10", false))
 	this.True(Betweenfx(LayoutDay, "", "2023-02-15", "2023-02-10"))
 	this.False(Betweenfx(LayoutDay, "", "2023-02-15", "2023-02-20"))
 	this.True(Betweenfx(LayoutDay, "2023-02-05", "", "2023-02-10"))
@@ -154,6 +161,18 @@ func (this *SuiteTime) TestOverlap() {
 	this.False(Overlap(
 		Date(2023, 2, 1), Date(2023, 2, 10),
 		Date(2023, 2, 15), Date(2023, 2, 20),
+	))
+	this.True(Overlap(
+		time.Time{}, time.Time{},
+		Date(2023, 2, 15), Date(2023, 2, 20),
+	))
+	this.True(Overlap(
+		time.Time{}, Date(2023, 2, 10),
+		Date(2023, 2, 5), time.Time{},
+	))
+	this.False(Overlap(
+		Date(2023, 2, 10), time.Time{},
+		time.Time{}, Date(2023, 2, 5),
 	))
 
 	this.True(Overlapf(LayoutDay,
@@ -171,6 +190,14 @@ func (this *SuiteTime) TestOverlap() {
 	this.False(Overlapf(LayoutDay,
 		"2023-02-01", testdata.Unknown,
 		Date(2023, 2, 15), Date(2023, 2, 20),
+	))
+	this.True(Overlapf(LayoutDay,
+		"", "",
+		Date(2023, 2, 15), Date(2023, 2, 20),
+	))
+	this.True(Overlapf(LayoutDay,
+		"", "2023-02-10",
+		Date(2023, 2, 5), time.Time{},
 	))
 
 	this.True(Overlapfx(LayoutDay,
@@ -196,6 +223,18 @@ func (this *SuiteTime) TestOverlap() {
 	this.False(Overlapfx(LayoutDay,
 		"2023-02-01", "2023-02-10",
 		"2023-02-15", testdata.Unknown,
+	))
+	this.True(Overlapfx(LayoutDay,
+		"", "",
+		"2023-02-15", "2023-02-20",
+	))
+	this.True(Overlapfx(LayoutDay,
+		"", "2023-02-10",
+		"2023-02-05", "",
+	))
+	this.False(Overlapfx(LayoutDay,
+		"2023-02-10", "",
+		"", "2023-02-05",
 	))
 }
 
