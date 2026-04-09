@@ -46,6 +46,21 @@ This file provides guidance for AI CLIs (such as Claude Code or ChatGPT Codex) w
   - Use `itor` for general iteration
   - Use `k, v` for map iteration
 
+## Commit Message Convention
+
+Format: `Type | Description`
+
+| Type      | Usage                          |
+| :-------- | :----------------------------- |
+| `Feature` | New feature or update          |
+| `Fix`     | Bug fix                        |
+| `Sheet`   | Update sheet data              |
+| `Message` | Update proto messages          |
+| `Doc`     | Update documentation           |
+
+- Description must be in Traditional Chinese.
+- Do not invent new type names (e.g. `Bugfix`, `Update`, `Refactor` are all forbidden).
+
 ## Project Overview
 
 Mizugo is a game server framework written in Go (module: `github.com/yinweli/Mizugo/v2`). It provides TCP networking, message processing, a two-tier database layer (Redis + MongoDB), an entity/module system, and configuration management. Documentation and comments are in Traditional Chinese.
