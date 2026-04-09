@@ -6,28 +6,29 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     strategy:
       matrix:
-        os: [ubuntu-latest] # 由於要使用到 Docker 來執行 Redis 跟 Mongo, 所以只能測試 Linux了
-        go: [1.25.x]
-        proto: [3.x]
-        redis: [6]
-        mongo: ["6.0"]
-    name: ${{ matrix.os }} | go ${{ matrix.go }} | proto ${{ matrix.proto }} | redis ${{ matrix.redis }} | mongo ${{ matrix.mongo }}
-    runs-on: ${{ matrix.os }}
+        redis: [7]
+        mongo: ["7.0"]
+    name: test | redis ${{ matrix.redis }} | mongo ${{ matrix.mongo }}
+    runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v6
-      - name: setup go ${{ matrix.go }}
+      - name: setup go
         uses: actions/setup-go@v6
         with:
-          go-version: ${{ matrix.go }}
+          go-version-file: go.mod
       - name: setup protoc
-        uses: arduino/setup-protoc@v1
+        uses: arduino/setup-protoc@v3
         with:
-          version: ${{ matrix.proto }}
+          version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: setup protoc-go
         run: go install google.golang.org/protobuf/cmd/protoc-gen-go@latest

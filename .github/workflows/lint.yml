@@ -6,21 +6,21 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        go: [1.25.x]
-    name: ${{ matrix.os }} | go ${{ matrix.go }}
-    runs-on: ${{ matrix.os }}
+    name: lint
+    runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v6
-      - name: setup go ${{ matrix.go }}
+      - name: setup go
         uses: actions/setup-go@v6
         with:
-          go-version: ${{ matrix.go }}
+          go-version-file: go.mod
       - name: lint
         uses: golangci/golangci-lint-action@v9
         with:
