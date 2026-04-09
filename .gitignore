@@ -16,3 +16,6 @@
 
 # 自訂忽略列表
 bin/
+
+# Claude Code 本地設定
+.claude/settings.local.json
