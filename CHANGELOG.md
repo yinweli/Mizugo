@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.28] - 2026-04-13
+
+### Added
+
+- helps: 新增 `DaySecond`、`DayHour`、`WeekDay` 時間相關常數, 方便統一使用每日與每週的基礎單位
+
 ## [2.0.27] - 2026-04-09
 
 ### Changed

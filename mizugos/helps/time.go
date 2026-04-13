@@ -10,12 +10,13 @@ const (
 	TimeSecond      = time.Second           // 1 秒時間單位
 	TimeMinute      = time.Minute           // 1 分鐘時間單位
 	TimeHour        = time.Hour             // 1 小時時間單位
-	TimeDay         = TimeHour * DayHourMax // 1 日時間單位
-	TimeWeek        = TimeDay * WeekdayMax  // 1 週時間單位
+	TimeDay         = TimeHour * DayHour    // 1 日時間單位
+	TimeWeek        = TimeDay * WeekDay     // 1 週時間單位
 	TimeMonth       = TimeWeek * 4          // 1 月時間單位(4 週)
 	TimeYear        = TimeDay * 365         // 1 年時間單位(365 天)
-	DayHourMax      = 24                    // 1 天有幾小時
-	WeekdayMax      = 7                     // 1 週有幾天
+	DaySecond       = 86400                 // 1 天有幾秒
+	DayHour         = 24                    // 1 天有幾小時
+	WeekDay         = 7                     // 1 週有幾天
 	LayoutSecond    = "2006-01-02 15:04:05" // 時間格式 YYYY-MM-DD HH:mm:SS
 	LayoutMinute    = "2006-01-02 15:04"    // 時間格式 YYYY-MM-DD HH:mm
 	LayoutDay       = "2006-01-02"          // 時間格式 YYYY-MM-DD
@@ -517,7 +518,7 @@ func CalculateDays(t1, t2 time.Time) int {
 
 	t1x := Date(t1.Year(), t1.Month(), t1.Day())
 	t2x := Date(t2.Year(), t2.Month(), t2.Day())
-	return int(t2x.Sub(t1x).Hours() / DayHourMax)
+	return int(t2x.Sub(t1x).Hours() / DayHour)
 }
 
 // CalculateDaysWithBaseline 計算兩個時間相差幾天, 但以 base 指定的時間為日界
