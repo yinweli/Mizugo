@@ -109,7 +109,7 @@ func BenchmarkProtoEncode(b *testing.B) {
 	})
 	target := NewProto()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Encode(marshal)
 	} // for
 }
@@ -121,7 +121,7 @@ func BenchmarkProtoDecode(b *testing.B) {
 	target := NewProto()
 	encode, _ := target.Encode(marshal)
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Decode(encode)
 	} // for
 }
@@ -131,7 +131,7 @@ func BenchmarkProtoMarshal(b *testing.B) {
 		Data: testdata.Unknown,
 	}
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = ProtoMarshal(1, message)
 	} // for
 }
@@ -141,7 +141,7 @@ func BenchmarkProtoUnmarshal(b *testing.B) {
 		Data: testdata.Unknown,
 	})
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _, _ = ProtoUnmarshal[*msgs.ProtoTest](marshal)
 	} // for
 }

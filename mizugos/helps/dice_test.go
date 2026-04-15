@@ -66,7 +66,7 @@ func (this *SuiteDice) TestRand() {
 	_ = target.Fill([]any{"a", "b"}, []int64{10000, 0})
 	tester := newDiceTester()
 
-	for i := 0; i < testdata.TestCount; i++ {
+	for range testdata.TestCount {
 		tester.Add(target.Rand(), 1)
 	} // for
 
@@ -77,7 +77,7 @@ func (this *SuiteDice) TestRand() {
 	_ = target.Fill([]any{"a", "b"}, []int64{0, 10000})
 	tester = newDiceTester()
 
-	for i := 0; i < testdata.TestCount; i++ {
+	for range testdata.TestCount {
 		tester.Add(target.Rand(), 1)
 	} // for
 
@@ -89,7 +89,7 @@ func (this *SuiteDice) TestRand() {
 	_ = target.Complete("f", 10000)
 	tester = newDiceTester()
 
-	for i := 0; i < testdata.TestCount; i++ {
+	for range testdata.TestCount {
 		tester.Add(target.Rand(), 1)
 	} // for
 

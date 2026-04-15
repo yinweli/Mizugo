@@ -80,43 +80,43 @@ func (this *SuiteRand) TestRandStringDefault() {
 }
 
 func BenchmarkRandInt32(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		RandInt32()
 	} // for
 }
 
 func BenchmarkRandInt32n(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		RandInt32n(0, 10000)
 	} // for
 }
 
 func BenchmarkRandInt64(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		RandInt64()
 	} // for
 }
 
 func BenchmarkRandInt64n(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		RandInt64n(0, 10000)
 	} // for
 }
 
 func BenchmarkRandReal64(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		RandReal64()
 	} // for
 }
 
 func BenchmarkRandReal64n(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		RandReal64n(0, 10000)
 	} // for
 }
 
 func BenchmarkRandStringDefault(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_ = RandStringDefault()
 	} // for
 }

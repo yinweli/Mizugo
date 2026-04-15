@@ -108,7 +108,7 @@ func BenchmarkJsonEncode(b *testing.B) {
 	})
 	target := NewJson()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Encode(marshal)
 	} // for
 }
@@ -120,7 +120,7 @@ func BenchmarkJsonDecode(b *testing.B) {
 	target := NewJson()
 	encode, _ := target.Encode(marshal)
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Decode(encode)
 	} // for
 }
@@ -130,7 +130,7 @@ func BenchmarkJsonMarshal(b *testing.B) {
 		Data: testdata.Unknown,
 	}
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = JsonMarshal(1, message)
 	} // for
 }
@@ -140,7 +140,7 @@ func BenchmarkJsonUnmarshal(b *testing.B) {
 		Data: testdata.Unknown,
 	})
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _, _ = JsonUnmarshal[msgs.JsonTest](marshal)
 	} // for
 }

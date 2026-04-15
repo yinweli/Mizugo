@@ -38,7 +38,7 @@ func (this *SuiteMD5) TestMD5String() {
 func BenchmarkMD5String1024(b *testing.B) {
 	input := []byte(helps.RandString(1024, helps.StrNumberAlpha))
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_ = MD5String(input)
 	} // for
 }
@@ -46,7 +46,7 @@ func BenchmarkMD5String1024(b *testing.B) {
 func BenchmarkMD5String2048(b *testing.B) {
 	input := []byte(helps.RandString(2048, helps.StrNumberAlpha))
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_ = MD5String(input)
 	} // for
 }
@@ -54,7 +54,7 @@ func BenchmarkMD5String2048(b *testing.B) {
 func BenchmarkMD5String4096(b *testing.B) {
 	input := []byte(helps.RandString(4096, helps.StrNumberAlpha))
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_ = MD5String(input)
 	} // for
 }

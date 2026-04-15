@@ -241,7 +241,7 @@ func BenchmarkRavenEncode(b *testing.B) {
 	builder, _ := RavenCBuilder(1, 1, message, message, message)
 	target := NewRaven()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Encode(builder)
 	} // for
 }
@@ -253,7 +253,7 @@ func BenchmarkRavenDecode(b *testing.B) {
 	builder, _ := RavenSBuilder(1, message, message)
 	target := NewRaven()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Decode(builder)
 	} // for
 }
@@ -265,7 +265,7 @@ func BenchmarkRavenClientEncode(b *testing.B) {
 	builder, _ := RavenSBuilder(1, message, message)
 	target := NewRavenClient()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Encode(builder)
 	} // for
 }
@@ -277,7 +277,7 @@ func BenchmarkRavenClientDecode(b *testing.B) {
 	builder, _ := RavenCBuilder(1, 1, message, message, message)
 	target := NewRavenClient()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Decode(builder)
 	} // for
 }
@@ -287,7 +287,7 @@ func BenchmarkRavenSBuilder(b *testing.B) {
 		Data: testdata.Unknown,
 	}
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = RavenSBuilder(1, message, message)
 	} // for
 }
@@ -298,7 +298,7 @@ func BenchmarkRavenSParser(b *testing.B) {
 	}
 	builder, _ := RavenSBuilder(1, message, message)
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = RavenSParser[*msgs.RavenTest, *msgs.RavenTest](builder)
 	} // for
 }
@@ -308,7 +308,7 @@ func BenchmarkRavenCBuilder(b *testing.B) {
 		Data: testdata.Unknown,
 	}
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = RavenCBuilder(1, 1, message, message, message)
 	} // for
 }
@@ -319,7 +319,7 @@ func BenchmarkRavenCParser(b *testing.B) {
 	}
 	builder, _ := RavenCBuilder(1, 1, message, message, message)
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = RavenCParser[*msgs.RavenTest, *msgs.RavenTest](builder)
 	} // for
 }

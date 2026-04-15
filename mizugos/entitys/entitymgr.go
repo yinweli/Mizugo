@@ -1,7 +1,9 @@
 package entitys
 
 import (
-	"sort"
+	"cmp"
+	"maps"
+	"slices"
 	"sync"
 )
 
@@ -59,15 +61,10 @@ func (this *Entitymgr) Get(entityID EntityID) *Entity {
 // All 取得實體列表
 func (this *Entitymgr) All() []*Entity {
 	this.lock.RLock()
-	result := []*Entity{}
-
-	for _, itor := range this.data {
-		result = append(result, itor)
-	} // for
-
+	result := slices.Collect(maps.Values(this.data))
 	this.lock.RUnlock()
-	sort.Slice(result, func(l, r int) bool {
-		return result[l].EntityID() < result[r].EntityID()
+	slices.SortFunc(result, func(l, r *Entity) int {
+		return cmp.Compare(l.EntityID(), r.EntityID())
 	})
 	return result
 }
