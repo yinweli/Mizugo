@@ -57,7 +57,7 @@ func BenchmarkBase64Encode1024(b *testing.B) {
 	input := []byte(helps.RandString(1024, helps.StrNumberAlpha))
 	target := NewBase64()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Encode(input)
 	} // for
 }
@@ -66,7 +66,7 @@ func BenchmarkBase64Encode2048(b *testing.B) {
 	input := []byte(helps.RandString(2048, helps.StrNumberAlpha))
 	target := NewBase64()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Encode(input)
 	} // for
 }
@@ -75,7 +75,7 @@ func BenchmarkBase64Encode4096(b *testing.B) {
 	input := []byte(helps.RandString(4096, helps.StrNumberAlpha))
 	target := NewBase64()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Encode(input)
 	} // for
 }
@@ -84,7 +84,7 @@ func BenchmarkBase64Decode1024(b *testing.B) {
 	input := []byte(helps.RandString(1024, helps.StrNumberAlpha))
 	target := NewBase64()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Decode(input)
 	} // for
 }
@@ -93,7 +93,7 @@ func BenchmarkBase64Decode2048(b *testing.B) {
 	input := []byte(helps.RandString(2048, helps.StrNumberAlpha))
 	target := NewBase64()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Decode(input)
 	} // for
 }
@@ -102,7 +102,7 @@ func BenchmarkBase64Decode4096(b *testing.B) {
 	input := []byte(helps.RandString(4096, helps.StrNumberAlpha))
 	target := NewBase64()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Decode(input)
 	} // for
 }

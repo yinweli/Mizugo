@@ -1,8 +1,10 @@
 package entitys
 
 import (
+	"cmp"
 	"fmt"
-	"sort"
+	"maps"
+	"slices"
 	"sync"
 )
 
@@ -56,15 +58,10 @@ func (this *Modulemap) Get(moduleID ModuleID) Moduler {
 // All 取得模組列表
 func (this *Modulemap) All() []Moduler {
 	this.lock.RLock()
-	defer this.lock.RUnlock()
-	result := []Moduler{}
-
-	for _, itor := range this.data {
-		result = append(result, itor)
-	} // for
-
-	sort.Slice(result, func(l, r int) bool {
-		return result[l].ModuleID() < result[r].ModuleID()
+	result := slices.Collect(maps.Values(this.data))
+	this.lock.RUnlock()
+	slices.SortFunc(result, func(l, r Moduler) int {
+		return cmp.Compare(l.ModuleID(), r.ModuleID())
 	})
 	return result
 }

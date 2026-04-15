@@ -75,11 +75,9 @@ func (this *SuiteCmdIncr) TestDuplicate() {
 	count := 4
 	total := atomic.Int64{}
 	waitGroup := &sync.WaitGroup{}
-	waitGroup.Add(count)
 
 	for i := 0; i < count; i++ {
-		go func() {
-			defer waitGroup.Done()
+		waitGroup.Go(func() {
 			trials.WaitTimeout()
 
 			for i := 0; i < 100; i++ {
@@ -92,7 +90,7 @@ func (this *SuiteCmdIncr) TestDuplicate() {
 				_ = incr.Complete()
 				total.Add(incr.Data)
 			} // for
-		}()
+		})
 	} // for
 
 	waitGroup.Wait()

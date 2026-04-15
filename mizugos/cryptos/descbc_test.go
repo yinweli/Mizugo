@@ -78,7 +78,7 @@ func BenchmarkDesCBCEncode1024(b *testing.B) {
 	input := []byte(helps.RandString(1024, helps.StrNumberAlpha))
 	target := NewDesCBC(PaddingPKCS7, RandDesKeyString(), RandDesKeyString())
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Encode(input)
 	} // for
 }
@@ -87,7 +87,7 @@ func BenchmarkDesCBCEncode2048(b *testing.B) {
 	input := []byte(helps.RandString(2048, helps.StrNumberAlpha))
 	target := NewDesCBC(PaddingPKCS7, RandDesKeyString(), RandDesKeyString())
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Encode(input)
 	} // for
 }
@@ -96,7 +96,7 @@ func BenchmarkDesCBCEncode4096(b *testing.B) {
 	input := []byte(helps.RandString(4096, helps.StrNumberAlpha))
 	target := NewDesCBC(PaddingPKCS7, RandDesKeyString(), RandDesKeyString())
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Encode(input)
 	} // for
 }
@@ -105,7 +105,7 @@ func BenchmarkDesCBCDecode1024(b *testing.B) {
 	input := []byte(helps.RandString(1024, helps.StrNumberAlpha))
 	target := NewDesCBC(PaddingPKCS7, RandDesKeyString(), RandDesKeyString())
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Decode(input)
 	} // for
 }
@@ -114,7 +114,7 @@ func BenchmarkDesCBCDecode2048(b *testing.B) {
 	input := []byte(helps.RandString(2048, helps.StrNumberAlpha))
 	target := NewDesCBC(PaddingPKCS7, RandDesKeyString(), RandDesKeyString())
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Decode(input)
 	} // for
 }
@@ -123,7 +123,7 @@ func BenchmarkDesCBCDecode4096(b *testing.B) {
 	input := []byte(helps.RandString(4096, helps.StrNumberAlpha))
 	target := NewDesCBC(PaddingPKCS7, RandDesKeyString(), RandDesKeyString())
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = target.Decode(input)
 	} // for
 }

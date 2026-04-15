@@ -63,7 +63,7 @@ func RandString(length int, letter string) string {
 	builder := bytes.Buffer{}
 	lettern := len(letter)
 
-	for i := 0; i < length; i++ {
+	for range length {
 		index := rand.N(lettern) //nolint:gosec
 		builder.WriteByte(letter[index])
 	} // for
