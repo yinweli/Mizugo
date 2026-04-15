@@ -1,0 +1,44 @@
+name: build
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v6
+      - name: extract changelog
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          python3 <<'PYEOF' > release_notes.md
+          import os
+          import re
+          import sys
+
+          version = os.environ['VERSION'].removeprefix('v')
+          with open('CHANGELOG.md', encoding='utf-8') as f:
+              content = f.read()
+
+          pattern = r'^## \[' + re.escape(version) + r'\][^\n]*\n(.*?)(?=^## \[|\Z)'
+          match = re.search(pattern, content, re.MULTILINE | re.DOTALL)
+          if not match:
+              sys.stderr.write(f'version {version} not found in CHANGELOG.md\n')
+              sys.exit(1)
+          print(match.group(1).strip())
+          PYEOF
+      - name: create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file release_notes.md
