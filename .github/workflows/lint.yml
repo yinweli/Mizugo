@@ -3,8 +3,16 @@ name: lint
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - ".github/**"
+      - ".idea/**"
+      - "script/**"
   pull_request:
     branches: [main]
+    paths-ignore:
+      - ".github/**"
+      - ".idea/**"
+      - "script/**"
 
 jobs:
   lint:

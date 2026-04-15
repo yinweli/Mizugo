@@ -17,5 +17,12 @@
 # 自訂忽略列表
 bin/
 
-# Claude Code 本地設定
-.claude/settings.local.json
+# JetBrains IDE 設定: 只保留團隊共用的部分
+.idea/*
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+!.idea/runConfigurations/
+!.idea/vcs.xml
+
+# Claude Code
+.claude
