@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.29] - 2026-04-15
+
+### Changed
+
+- cryptos, helps, procs: benchmark 測試改用 `testing.B.Loop` 取代 `for i := 0; i < b.N; i++`, 自動處理 timer 重置並保留參數生命週期
+- helps: `RandString` 計數迴圈改用 `for range N` 語法精簡
+- entitys: `Entitymgr.All` 與 `Modulemap.All` 改用 `slices.Collect` + `maps.Values` + `slices.SortFunc` 取代 `sort.Slice` 與手動 for-append
+- 改用 `sync.WaitGroup.Go` 簡化 goroutine 啟動流程
+- 更新第三方函式庫
+
 ## [2.0.28] - 2026-04-13
 
 ### Added
