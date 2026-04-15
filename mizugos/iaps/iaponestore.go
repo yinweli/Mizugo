@@ -89,9 +89,8 @@ func (this *IAPOneStore) Initialize(client ...IAPOneStoreClient) error {
 	} // if
 
 	this.verify = make(chan *iapOneStore, capacity)
-	this.signal.Add(1)
 	this.ctx, this.cancel = context.WithCancel(context.Background())
-	go this.execute(this.verify)
+	this.signal.Go(func() { this.execute(this.verify) })
 	return nil
 }
 
@@ -149,8 +148,6 @@ func (this *IAPOneStore) Client() IAPOneStoreClient {
 
 // execute 執行驗證
 func (this *IAPOneStore) execute(verify chan *iapOneStore) {
-	defer this.signal.Done()
-
 	for {
 		select {
 		case <-this.ctx.Done():

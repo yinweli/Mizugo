@@ -77,10 +77,8 @@ func (this *SuiteCmdLock) TestDuplicate() {
 	count := 4
 	total := atomic.Int64{}
 	waitGroup := &sync.WaitGroup{}
-	waitGroup.Add(count + 1)
 
-	go func() {
-		defer waitGroup.Done()
+	waitGroup.Go(func() {
 		token := time.Now().Format("20060102150405.000000000")
 		majorSubmit := this.major.Submit()
 		lock := &Lock{Key: key, Token: token, ttl: testdata.RedisTimeout}
@@ -99,11 +97,10 @@ func (this *SuiteCmdLock) TestDuplicate() {
 		_ = unlock.Prepare()
 		_, _ = majorSubmit.Exec(context.Background())
 		_ = unlock.Complete()
-	}()
+	})
 
 	for i := 0; i < count; i++ {
-		go func() {
-			defer waitGroup.Done()
+		waitGroup.Go(func() {
 			trials.WaitTimeout()
 
 			for i := 0; i < 100; i++ {
@@ -127,7 +124,7 @@ func (this *SuiteCmdLock) TestDuplicate() {
 				_, _ = majorSubmit.Exec(context.Background())
 				_ = unlock.Complete()
 			} // for
-		}()
+		})
 	} // for
 
 	waitGroup.Wait()

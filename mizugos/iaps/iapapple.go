@@ -65,9 +65,8 @@ func (this *IAPApple) Initialize(client ...IAPAppleClient) (err error) {
 	} // if
 
 	this.verify = make(chan *iapApple, capacity)
-	this.signal.Add(1)
 	this.ctx, this.cancel = context.WithCancel(context.Background())
-	go this.execute(this.verify)
+	this.signal.Go(func() { this.execute(this.verify) })
 	return nil
 }
 
@@ -124,8 +123,6 @@ func (this *IAPApple) Client() IAPAppleClient {
 
 // execute 執行驗證
 func (this *IAPApple) execute(verify chan *iapApple) {
-	defer this.signal.Done()
-
 	for {
 		select {
 		case <-this.ctx.Done():

@@ -56,9 +56,8 @@ func (this *IAPGoogle) Initialize(client ...IAPGoogleClient) (err error) {
 	} // if
 
 	this.verify = make(chan *iapGoogle, capacity)
-	this.signal.Add(1)
 	this.ctx, this.cancel = context.WithCancel(context.Background())
-	go this.execute(this.verify)
+	this.signal.Go(func() { this.execute(this.verify) })
 	return nil
 }
 
@@ -115,8 +114,6 @@ func (this *IAPGoogle) Client() IAPGoogleClient {
 
 // execute 執行驗證
 func (this *IAPGoogle) execute(verify chan *iapGoogle) {
-	defer this.signal.Done()
-
 	for {
 		select {
 		case <-this.ctx.Done():
