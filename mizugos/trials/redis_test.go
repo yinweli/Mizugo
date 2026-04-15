@@ -47,8 +47,8 @@ func (this *SuiteRedis) TestRedisListEqual() {
 		{Value: 1},
 		{Value: 2},
 	}))
-	this.False(RedisListEqual[testRedis](client, "redis compare list@", []*testRedis{}))
-	this.False(RedisListEqual[testRedis](client, "redis compare list?", []*testRedis{}))
+	this.False(RedisListEqual[testRedis](client, "redis compare list@", []*testRedis{{Value: 1}}))
+	this.False(RedisListEqual[testRedis](client, "redis compare list?", []*testRedis{{Value: 1}}))
 	this.False(RedisListEqual[testRedis](client, "redis compare list", []*testRedis{
 		{Value: 2},
 		{Value: 1},
