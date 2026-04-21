@@ -418,10 +418,28 @@ func (this *RavenCData[H, Q]) Detail() string {
 	return builder.String()
 }
 
+// RavenMessageID 從 *msgs.RavenC 解析 messageID
+func RavenMessageID(input any) int32 {
+	if message, ok := input.(*msgs.RavenC); ok && message != nil {
+		return message.MessageID
+	} // if
+
+	return 0
+}
+
 // RavenIsMessageID 檢查 *msgs.RavenC 的 messageID 是否為期望值
 func RavenIsMessageID(input any, expected int32) bool {
 	message, ok := input.(*msgs.RavenC)
 	return ok && message != nil && message.MessageID == expected
+}
+
+// RavenErrID 從 *msgs.RavenC 解析 errID
+func RavenErrID(input any) int32 {
+	if message, ok := input.(*msgs.RavenC); ok && message != nil {
+		return message.ErrID
+	} // if
+
+	return 0
 }
 
 // RavenIsErrID 檢查 *msgs.RavenC 的 errID 是否為期望值
