@@ -393,4 +393,94 @@ namespace Mizugo
             Assert.IsTrue(validMessage);
         }
     }
+
+    internal class TestTCPClientRaven
+    {
+        /// <summary>
+        /// 這項測試需要啟動測試伺服器才能執行
+        /// </summary>
+        [Test]
+        [TestCase("127.0.0.1", 9003, "key-####", "test-token")]
+        public void Test(string host, int port, string key, string token)
+        {
+            var target = new TCPClient();
+            var eventmgr = new Eventmgr();
+            var process = new ProcRaven();
+
+            target.SetEvent(eventmgr);
+            target.SetProc(process);
+            target.SetCodec(process, new DesCBC(PaddingMode.PKCS7, key, key), new Base64());
+
+            var stopwatch = new Stopwatch();
+            var validConnect = false;
+            var validDisconnect = false;
+            var validRecv = false;
+            var validSend = false;
+            var validMessage = false;
+
+            target.AddEvent(
+                EventID.Connect,
+                (object _) =>
+                {
+                    validConnect = true;
+                }
+            );
+            target.AddEvent(
+                EventID.Disconnect,
+                (object _) =>
+                {
+                    validDisconnect = true;
+                }
+            );
+            target.AddEvent(
+                EventID.Recv,
+                (object _) =>
+                {
+                    validRecv = true;
+                    target.Disconnect();
+                }
+            );
+            target.AddEvent(
+                EventID.Send,
+                (object _) =>
+                {
+                    validSend = true;
+                }
+            );
+            target.AddEvent(
+                EventID.Error,
+                (object param) =>
+                {
+                    validDisconnect = true;
+                    TestUtil.Log(param);
+                }
+            );
+            target.AddProcess(
+                (int)MsgID.RavenA,
+                (object param) =>
+                {
+                    ProcRaven.Unmarshal<HRaven, MRavenQ>(param, out var message);
+                    var respond = message.GetRespond<MRavenA>();
+                    TestUtil.Log("duration: " + (stopwatch.ElapsedMilliseconds - message.request.Time));
+                    TestUtil.Log("count: " + respond.Count);
+                    validMessage = true;
+                }
+            );
+
+            stopwatch.Start();
+            target.Connect(host, port);
+            TestUtil.Sleep();
+            target.Send(ProcRaven.Marshal((int)MsgID.RavenQ, new HRaven { Token = token }, new MRavenQ { Time = stopwatch.ElapsedMilliseconds }));
+            TestUtil.Sleep();
+
+            while (target.IsUpdate)
+                target.Update();
+
+            Assert.IsTrue(validConnect);
+            Assert.IsTrue(validDisconnect);
+            Assert.IsTrue(validRecv);
+            Assert.IsTrue(validSend);
+            Assert.IsTrue(validMessage);
+        }
+    }
 }
