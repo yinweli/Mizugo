@@ -91,9 +91,6 @@ namespace Mizugo
 
         public void Update()
         {
-            if (queue == null)
-                return;
-
             if (queue.Dequeue(out var data) == false)
                 return;
 
@@ -106,7 +103,7 @@ namespace Mizugo
             } // try
             catch (Exception e)
             {
-                queue?.Enqueue(EventID.Error, e);
+                queue.Enqueue(EventID.Error, e);
             } // catch
         }
 
