@@ -24,7 +24,7 @@ namespace Mizugo
             if (input is not byte[] temp)
                 throw new ArgumentException("input");
 
-            using var provider = new DESCryptoServiceProvider();
+            using var provider = DES.Create();
 
             provider.Key = key;
             provider.Mode = CipherMode.ECB;
@@ -46,7 +46,7 @@ namespace Mizugo
             if (input is not byte[] temp)
                 throw new ArgumentException("input");
 
-            using var provider = new DESCryptoServiceProvider();
+            using var provider = DES.Create();
 
             provider.Key = key;
             provider.Mode = CipherMode.ECB;
