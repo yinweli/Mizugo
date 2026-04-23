@@ -88,6 +88,44 @@ namespace Mizugo
                 respond = temp.Respond.ToArray(),
             };
         }
+
+        /// <summary>
+        /// 從 RavenC 解析 messageID, 若 input 非 RavenC 則回傳 0
+        /// </summary>
+        public static int MessageID(object input)
+        {
+            if (input is RavenC message)
+                return message.MessageID;
+
+            return 0;
+        }
+
+        /// <summary>
+        /// 檢查 RavenC 的 messageID 是否為期望值
+        /// </summary>
+        public static bool IsMessageID(object input, int expected)
+        {
+            return input is RavenC message && message.MessageID == expected;
+        }
+
+        /// <summary>
+        /// 從 RavenC 解析 errID, 若 input 非 RavenC 則回傳 0
+        /// </summary>
+        public static int ErrID(object input)
+        {
+            if (input is RavenC message)
+                return message.ErrID;
+
+            return 0;
+        }
+
+        /// <summary>
+        /// 檢查 RavenC 的 errID 是否為期望值
+        /// </summary>
+        public static bool IsErrID(object input, int expected)
+        {
+            return input is RavenC message && message.ErrID == expected;
+        }
     }
 
     public class RavenData<H, Q>

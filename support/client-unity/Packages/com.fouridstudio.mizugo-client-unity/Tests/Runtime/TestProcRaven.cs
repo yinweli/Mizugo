@@ -149,6 +149,40 @@ namespace Mizugo
             });
         }
 
+        [Test]
+        public void MessageID()
+        {
+            Assert.AreEqual(5, ProcRaven.MessageID(new RavenC { MessageID = 5 }));
+            Assert.AreEqual(0, ProcRaven.MessageID(null));
+            Assert.AreEqual(0, ProcRaven.MessageID(new object()));
+        }
+
+        [Test]
+        public void IsMessageID()
+        {
+            Assert.IsTrue(ProcRaven.IsMessageID(new RavenC { MessageID = 5 }, 5));
+            Assert.IsFalse(ProcRaven.IsMessageID(new RavenC { MessageID = 5 }, 6));
+            Assert.IsFalse(ProcRaven.IsMessageID(null, 0));
+            Assert.IsFalse(ProcRaven.IsMessageID(new object(), 0));
+        }
+
+        [Test]
+        public void ErrID()
+        {
+            Assert.AreEqual(7, ProcRaven.ErrID(new RavenC { ErrID = 7 }));
+            Assert.AreEqual(0, ProcRaven.ErrID(null));
+            Assert.AreEqual(0, ProcRaven.ErrID(new object()));
+        }
+
+        [Test]
+        public void IsErrID()
+        {
+            Assert.IsTrue(ProcRaven.IsErrID(new RavenC { ErrID = 7 }, 7));
+            Assert.IsFalse(ProcRaven.IsErrID(new RavenC { ErrID = 7 }, 8));
+            Assert.IsFalse(ProcRaven.IsErrID(null, 0));
+            Assert.IsFalse(ProcRaven.IsErrID(new object(), 0));
+        }
+
         public static IEnumerable EncodeCases
         {
             get
