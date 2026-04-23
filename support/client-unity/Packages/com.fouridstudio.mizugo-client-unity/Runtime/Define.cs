@@ -10,7 +10,7 @@ namespace Mizugo
         /// <summary>
         /// 無效事件
         /// </summary>
-        Unknow = 0,
+        Unknown = 0,
 
         /// <summary>
         /// 連線事件, 參數是null
