@@ -133,6 +133,7 @@ namespace Mizugo
             Assert.Null(result.GetRespond<ProtoTest>());
             Assert.Null(result.GetRespondAt<ProtoTest>(0));
             Assert.Null(result.GetRespondAt<RavenTest>(3));
+            Assert.Null(result.GetRespondAt<RavenTest>(-1));
         }
 
         [Test]

@@ -115,7 +115,7 @@ namespace Mizugo
         public T GetRespondAt<T>(int index)
             where T : IMessage, new()
         {
-            if (index < respond.Length)
+            if (index >= 0 && index < respond.Length)
             {
                 if (respond[index].TryUnpack<T>(out var result))
                     return result;
