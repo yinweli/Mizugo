@@ -17,7 +17,7 @@ const (
 	DaySecond       = 86400                 // 1 天有幾秒
 	DayHour         = 24                    // 1 天有幾小時
 	WeekDay         = 7                     // 1 週有幾天
-	LayoutISO8601   = "2006-01-02 15:04:05" // 時間格式 ISO 8601
+	LayoutISO8601   = "2006-01-02T15:04:05" // 時間格式 ISO 8601
 	LayoutSecond    = "2006-01-02 15:04:05" // 時間格式 YYYY-MM-DD HH:mm:SS
 	LayoutMinute    = "2006-01-02 15:04"    // 時間格式 YYYY-MM-DD HH:mm
 	LayoutDay       = "2006-01-02"          // 時間格式 YYYY-MM-DD
