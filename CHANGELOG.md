@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.31] - 2026-04-30
+
+### Added
+
+- helps: 新增 `LayoutISO8601` 時間格式常數 (`2006-01-02 15:04:05`), 對應 ISO 8601 標準
+- helps: 新增 `LayoutMonth` 時間格式常數 (`2006-01`), 對應 YYYY-MM 月份格式
+
+### Changed
+
+- 更新第三方函式庫
+
 ## [2.0.30] - 2026-04-21
 
 ### Added
