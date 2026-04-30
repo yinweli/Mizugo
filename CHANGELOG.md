@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.32] - 2026-04-30
+
+### Fixed
+
+- helps: 修正 `LayoutISO8601` 時間格式常數, 由 `2006-01-02 15:04:05` 改為 `2006-01-02T15:04:05`, 以符合 ISO 8601 標準的 `T` 分隔符規範
+
 ## [2.0.31] - 2026-04-30
 
 ### Added
